@@ -32,9 +32,10 @@ public class BDDVirtualCalls extends AbsVirtualCalls
     BDDVirtualCalls( Rvar_obj pt,
             Rlocal_srcm_stmt_signature_kind receivers,
             Rlocal_srcm_stmt_tgtm specials,
-            Qctxt_local_obj_srcm_stmt_kind_tgtm out
+            Qctxt_local_obj_srcm_stmt_kind_tgtm out,
+            Qsrcc_srcm_stmt_kind_tgtc_tgtm statics
         ) {
-        super( pt, receivers, specials, out );
+        super( pt, receivers, specials, out, statics );
         for( Iterator clIt = Scene.v().getClasses().iterator(); clIt.hasNext(); ) {
             final SootClass cl = (SootClass) clIt.next();
             for( Iterator mIt = cl.getMethods().iterator(); mIt.hasNext(); ) {

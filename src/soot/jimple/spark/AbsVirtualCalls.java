@@ -30,16 +30,19 @@ public abstract class AbsVirtualCalls
     protected Rlocal_srcm_stmt_signature_kind receivers;
     protected Rlocal_srcm_stmt_tgtm specials;
     protected Qctxt_local_obj_srcm_stmt_kind_tgtm out;
+    protected Qsrcc_srcm_stmt_kind_tgtc_tgtm statics;
 
     AbsVirtualCalls( Rvar_obj pt,
             Rlocal_srcm_stmt_signature_kind receivers,
             Rlocal_srcm_stmt_tgtm specials,
-            Qctxt_local_obj_srcm_stmt_kind_tgtm out
+            Qctxt_local_obj_srcm_stmt_kind_tgtm out,
+            Qsrcc_srcm_stmt_kind_tgtc_tgtm statics
         ) {
         this.pt = pt;
         this.receivers = receivers;
         this.specials = specials;
         this.out = out;
+        this.statics = statics;
     }
     public abstract void update();
 }

@@ -163,7 +163,7 @@ public class SparkScene
         prop = new PropBDD( pagsimple.reader(), pagload.reader(),
                 pagstore.reader(), pagalloc.reader(), paout, pag );
 
-        vcr = new BDDVirtualCalls( paout.reader(), receivers.reader(), specials.reader(), vcrout );
+        vcr = new BDDVirtualCalls( paout.reader(), receivers.reader(), specials.reader(), vcrout, cscgbout );
         vcm = new BDDInsensitiveVirtualContextManager( vcrout.reader(), vcmout );
         cs = new BDDContextStripper( vcmout.reader(), cicgout );
 
@@ -248,7 +248,7 @@ public class SparkScene
         prop = new PropWorklist( pagsimple.reader(), pagload.reader(),
                 pagstore.reader(), pagalloc.reader(), paout, pag );
 
-        vcr = new TradVirtualCalls( paout.reader(), receivers.reader(), specials.reader(), vcrout );
+        vcr = new TradVirtualCalls( paout.reader(), receivers.reader(), specials.reader(), vcrout, cscgbout );
         vcm = new TradInsensitiveVirtualContextManager( vcrout.reader(), vcmout );
         cs = new TradContextStripper( vcmout.reader(), cicgout );
 

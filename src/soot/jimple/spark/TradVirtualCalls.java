@@ -19,6 +19,7 @@
 
 package soot.jimple.spark;
 import soot.*;
+import soot.util.*;
 import soot.jimple.spark.queue.*;
 import soot.jimple.toolkits.callgraph.*;
 import java.util.*;
@@ -33,9 +34,10 @@ public class TradVirtualCalls extends AbsVirtualCalls
     TradVirtualCalls( Rvar_obj pt,
             Rlocal_srcm_stmt_signature_kind receivers,
             Rlocal_srcm_stmt_tgtm specials,
-            Qctxt_local_obj_srcm_stmt_kind_tgtm out
+            Qctxt_local_obj_srcm_stmt_kind_tgtm out,
+            Qsrcc_srcm_stmt_kind_tgtc_tgtm statics
         ) {
-        super( pt, receivers, specials, out );
+        super( pt, receivers, specials, out, statics );
     }
 
     private Map receiverMap = new HashMap();
@@ -76,8 +78,9 @@ public class TradVirtualCalls extends AbsVirtualCalls
             if( sites != null ) {
                 for( Iterator siteIt = sites.iterator(); siteIt.hasNext(); ) {
                     final Rlocal_srcm_stmt_signature_kind.Tuple site = (Rlocal_srcm_stmt_signature_kind.Tuple) siteIt.next();
-                    if( site.kind() == Kind.NEWINSTANCE ) {
-                        // TODO: handle stringconstant stuff
+                    if( site.kind() == Kind.CLINIT ) {
+                        handleStringConstants( ptpair, site );
+                        continue;
                     }
 
                     Type type = ptpair.obj().getType();
@@ -86,11 +89,6 @@ public class TradVirtualCalls extends AbsVirtualCalls
                     && !fh.canStoreType( type, clRunnable ) )
                         continue;
 
-                    //VirtualCalls.v().resolve( type, null, site.signature(), site.srcm(), targetsQueue );
-                    /*VirtualCalls.v().resolve( type, 
-                            ((InstanceInvokeExpr) ((Stmt) site.stmt()).getInvokeExpr()).getBase().getType(),
-                            site.signature(), site.srcm(), targetsQueue );
-                            */
                     VirtualCalls.v().resolve( type, site.local().getType(), site.signature(), site.srcm(), targetsQueue );
                     while( targets.hasNext() ) {
                         SootMethod target = (SootMethod) targets.next();
@@ -119,7 +117,53 @@ public class TradVirtualCalls extends AbsVirtualCalls
             }
         }
     }
+
+    private void handleStringConstants( Rvar_obj.Tuple ptpair,
+            Rlocal_srcm_stmt_signature_kind.Tuple site ) {
+        AllocNode obj = ptpair.obj();
+        if( !( obj instanceof StringConstantNode ) ) {
+            if( SparkScene.v().options().verbose() ) {
+                G.v().out.println( "Warning: Method "+site.srcm()+
+                    " is reachable, and calls Class.forName on a"+
+                    " non-constant String; graph will be incomplete!"+
+                    " Use safe-forname option for a conservative result." );
+            }
+        } else {
+            StringConstantNode scn = (StringConstantNode) obj;
+            String constant = scn.getString();
+            if( constant.charAt(0) == '[' ) {
+                if( constant.length() > 1 && constant.charAt(1) == 'L' 
+                    && constant.charAt(constant.length()-1) == ';' ) {
+                        constant = constant.substring(2,constant.length()-1);
+                } else return;
+            }
+            if( !Scene.v().containsClass( constant ) ) {
+                if( SparkScene.v().options().verbose() ) {
+                    G.v().out.println( "Warning: Class "+constant+" is"+
+                        " a dynamic class, and you did not specify"+
+                        " it as such; graph will be incomplete!" );
+                }
+            } else {
+                SootClass sootcls = Scene.v().getSootClass( constant );
+                if( !sootcls.isApplicationClass() ) {
+                    sootcls.setLibraryClass();
+                }
+                if( sootcls.declaresMethod( sigClinit ) ) {
+                    statics.add(ptpair.var().context(),
+                                site.srcm(),
+                                site.stmt(),
+                                Kind.CLINIT,
+                                null,
+                                sootcls.getMethod(sigClinit) );
+                }
+            }
+        }
+    }
+
     protected final RefType clRunnable = RefType.v("java.lang.Runnable");
+    private final NumberedString sigClinit = Scene.v().getSubSigNumberer().
+        findOrAdd( "void <clinit>()" );
+
 }
 
 
