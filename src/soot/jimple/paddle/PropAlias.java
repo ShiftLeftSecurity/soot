@@ -39,8 +39,11 @@ public final class PropAlias extends AbsPropagator {
     private AbsP2Sets p2sets;
     /** Actually does the propagation. */
     public final void update() {
+        boolean ret = false;
+
         p2sets = PaddleScene.v().p2sets;
         new TopoSorter( pag, false ).sort();
+        varNodeWorkList.heapify();
         for( Iterator frIt = pag.loadSources(); frIt.hasNext(); ) {
             final ContextFieldRefNode fr = (ContextFieldRefNode) frIt.next();
             fieldToBase.put( fr.field(), fr.base() );
@@ -54,17 +57,18 @@ public final class PropAlias extends AbsPropagator {
 	}
 
         boolean verbose = PaddleScene.v().options().verbose();
-	do {
+        do {
             if( verbose ) {
                 G.v().out.println( "Worklist has "+varNodeWorkList.size()+
                         " nodes." );
             }
             aliasWorkList = new HashSet();
             while( !varNodeWorkList.isEmpty() ) {
-                ContextVarNode src = (ContextVarNode) varNodeWorkList.iterator().next();
-                varNodeWorkList.remove( src );
+                ContextVarNode src = (ContextVarNode) varNodeWorkList.removeMin();
                 addToAliasWorkList( src );
-                handleContextVarNode( src );
+                if( handleContextVarNode( src ) ) {
+                    ret = true;
+                }
             }
             if( verbose ) {
                 G.v().out.println( "Now handling field references" );
@@ -80,6 +84,7 @@ public final class PropAlias extends AbsPropagator {
                         final ContextVarNode dst = (ContextVarNode) dstIt.next();
                         if( p2setsGet(src).hasNonEmptyIntersection(
                                     p2setsGet(dst) ) ) {
+                            ret = true;
                             ContextFieldRefNode dstFr = dst.dot( field );
                             aliasEdges.put( srcFr, dstFr );
                             aliasEdges.put( dstFr, srcFr );
@@ -117,6 +122,7 @@ public final class PropAlias extends AbsPropagator {
                     final ContextVarNode target = (ContextVarNode) targetIt.next();
                     if( p2setsMake(target).addAll( set, null ) ) {
                         addToVarNodeWorkList( target );
+                        ret = true;
                     }
                 }
             }
@@ -223,7 +229,12 @@ public final class PropAlias extends AbsPropagator {
         return outSets.get(cfrn);
     }
     protected P2SetMap outSets;
-    protected final Set varNodeWorkList = new TreeSet();
+    protected final Heap varNodeWorkList = new Heap(new Heap.Keys() {
+        public int key(Object o) {
+            ContextVarNode cvn = (ContextVarNode) o;
+            return cvn.finishingNumber();
+        }
+    });
     private boolean addToVarNodeWorkList( ContextVarNode cvn ) {
         return varNodeWorkList.add(cvn); 
     }

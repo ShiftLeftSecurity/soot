@@ -21,6 +21,7 @@ package soot.jimple.paddle;
 import soot.jimple.paddle.queue.*;
 import soot.*;
 import java.util.*;
+import soot.util.*;
 import soot.options.PaddleOptions;
 
 /** Propagates points-to sets along pointer assignment graph using a worklist.
@@ -28,7 +29,12 @@ import soot.options.PaddleOptions;
  */
 
 public final class PropWorklist extends AbsPropagator {
-    protected final Set varNodeWorkList = new TreeSet();
+    protected Heap varNodeWorkList = new Heap(new Heap.Keys() {
+        public int key(Object o) {
+            ContextVarNode cvn = (ContextVarNode) o;
+            return cvn.finishingNumber();
+        }
+    });
     private NodeManager nm = PaddleScene.v().nodeManager();
 
     public PropWorklist( Rsrcc_src_dstc_dst simple,
@@ -55,8 +61,7 @@ public final class PropWorklist extends AbsPropagator {
                         " nodes." );
             }
             while( !varNodeWorkList.isEmpty() ) {
-                ContextVarNode src = (ContextVarNode) varNodeWorkList.iterator().next();
-                varNodeWorkList.remove( src );
+                ContextVarNode src = (ContextVarNode) varNodeWorkList.removeMin();
                 handleContextVarNode( src );
             }
             if( verbose ) {

@@ -150,6 +150,7 @@ public class PaddleScene
         }
 
         makeSetFactories();
+
     }
     private void makeSetFactories() {
         switch( options.set_impl() ) {
