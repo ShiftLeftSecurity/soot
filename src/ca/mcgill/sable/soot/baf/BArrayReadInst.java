@@ -79,26 +79,21 @@
 package ca.mcgill.sable.soot.baf;
 
 import ca.mcgill.sable.soot.*;
+import ca.mcgill.sable.soot.jimple.*;
 import ca.mcgill.sable.util.*;
 import java.util.*;
 
-public abstract class AbstractOpTypeInst extends AbstractInst
+public class BArrayReadInst extends AbstractOpTypeInst implements ArrayReadInst
 {
-    Type opType;
+    BArrayReadInst(Type opType)
+    {
+        super(opType);
+    }
 
-    protected AbstractOpTypeInst(Type opType)
-    {
-        this.opType = opType;
-    }
+    final String getName() { return "arrayread"; }
     
-    public Type getOpType()
+    public void apply(Switch sw)
     {
-        return opType;
-    }
-    
-    public void setOpType(Type t)
-    {
-        opType = t;
-    }
+        ((InstSwitch) sw).caseArrayReadInst(this);
+    }   
 }
-
