@@ -11,7 +11,7 @@ import java.util.*;
 */
 class ExtendedHashMutableDirectedGraph extends HashMutableDirectedGraph
 {  
-    public void ExtendedHashMutableDirectedGraph() {}
+    public ExtendedHashMutableDirectedGraph() {}
     
     /**
        If nodes are not in the graph, add them into graph first.
