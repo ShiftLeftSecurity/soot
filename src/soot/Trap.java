@@ -38,7 +38,8 @@ public interface Trap extends UnitBoxOwner
     /** Returns the first trapped unit. */
     public Unit getBeginUnit();
 
-    /** Returns the last trapped unit. */
+    /** Returns the successor of the last trapped unit, or <tt>null</tt> 
+	if the last trapped unit is the last unit in the method. */
     public Unit getEndUnit();
 
     /** Returns the unit handling the exception being trapped. */

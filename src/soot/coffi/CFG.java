@@ -1587,16 +1587,9 @@ public class CFG {
 		    Stmt firstStmt = (Stmt)instructionToFirstStmt.get(startIns);
 		    Stmt afterEndStmt;
 		    if (endIns == null) {
-			// A kludge which isn't really correct, but
-			// gets us closer to correctness (until we
-			// clean up the rest of Soot to properly
-			// represent Traps which extend to the end 
-			// of a method): if the protected code extends
-			// to the end of the method, use the last Stmt
-			// as the endUnit of the Trap, even though
-			// that will leave the last unit outside
-			// the protected area.
-			afterEndStmt = (Stmt) units.getLast();
+			// Leave null as the afterEndStmt, to signal that
+			// this trap extends to the end of the method.
+			afterEndStmt = null;
 		    } else {
 			afterEndStmt = (Stmt) instructionToLastStmt.get(endIns);
 			IdentityStmt catchStart = 
