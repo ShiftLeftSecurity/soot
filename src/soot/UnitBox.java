@@ -1,4 +1,4 @@
-2/* Soot - a J*va Optimization Framework
+/* Soot - a J*va Optimization Framework
  * Copyright (C) 1997-1999 Raja Vallee-Rai
  *
  * This library is free software; you can redistribute it and/or
