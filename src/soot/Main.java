@@ -456,6 +456,8 @@ public class Main implements Runnable
 
     public static void setAppMode(boolean val)
     {
+        if( !isApplication)
+              initApp();
         isApplication = val;
     }
 
@@ -837,7 +839,6 @@ public class Main implements Runnable
 				// handle --app option first
 	while (cl.contains("app")) {
 	    setAppMode(true);
-              initApp();
 	}
 				
 				// Handle all the options
