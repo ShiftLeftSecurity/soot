@@ -40,8 +40,8 @@ public final class Rlocal_srcm_stmt_signature_kindMerge extends Rlocal_srcm_stmt
     }
     
     public jedd.internal.RelationContainer get() {
-        return new jedd.internal.RelationContainer(new Attribute[] { srcm.v(), local.v(), stmt.v(), signature.v(), kind.v() },
-                                                   new PhysicalDomain[] { T1.v(), V1.v(), ST.v(), H2.v(), FD.v() },
+        return new jedd.internal.RelationContainer(new Attribute[] { stmt.v(), local.v(), signature.v(), srcm.v(), kind.v() },
+                                                   new PhysicalDomain[] { ST.v(), V1.v(), H2.v(), T1.v(), FD.v() },
                                                    ("return jedd.internal.Jedd.v().union(jedd.internal.Jedd.v().r" +
                                                     "ead(in1.get()), in2.get()); at /home/olhotak/soot-2-jedd/src" +
                                                     "/soot/jimple/spark/queue/Rlocal_srcm_stmt_signature_kindMerg" +

@@ -45,8 +45,8 @@ public class BDDPAG extends AbsPAG {
                                                "ak/soot-2-jedd/src/soot/jimple/spark/BDDPAG.jedd:48,19-27"),
                                               jedd.internal.Jedd.v().minus(jedd.internal.Jedd.v().read(alloc.get()),
                                                                            allocBDD));
-        allocout.add(new jedd.internal.RelationContainer(new Attribute[] { obj.v(), var.v() },
-                                                         new PhysicalDomain[] { H1.v(), V1.v() },
+        allocout.add(new jedd.internal.RelationContainer(new Attribute[] { var.v(), obj.v() },
+                                                         new PhysicalDomain[] { V1.v(), H1.v() },
                                                          ("allocout.add(newAlloc) at /home/olhotak/soot-2-jedd/src/soot" +
                                                           "/jimple/spark/BDDPAG.jedd:49,8-16"),
                                                          newAlloc));
@@ -315,8 +315,8 @@ public class BDDPAG extends AbsPAG {
     }
     
     public Robj_var allAlloc() {
-        return new Robj_varBDD(new jedd.internal.RelationContainer(new Attribute[] { obj.v(), var.v() },
-                                                                   new PhysicalDomain[] { H1.v(), V1.v() },
+        return new Robj_varBDD(new jedd.internal.RelationContainer(new Attribute[] { var.v(), obj.v() },
+                                                                   new PhysicalDomain[] { V1.v(), H1.v() },
                                                                    ("new soot.jimple.spark.queue.Robj_varBDD(...) at /home/olhota" +
                                                                     "k/soot-2-jedd/src/soot/jimple/spark/BDDPAG.jedd:118,40-43"),
                                                                    allocBDD));
@@ -326,8 +326,8 @@ public class BDDPAG extends AbsPAG {
         FieldRefIterator(final jedd.internal.RelationContainer bdd) {
             super();
             this.it =
-              new jedd.internal.RelationContainer(new Attribute[] { fld.v(), var.v() },
-                                                  new PhysicalDomain[] { FD.v(), V1.v() },
+              new jedd.internal.RelationContainer(new Attribute[] { var.v(), fld.v() },
+                                                  new PhysicalDomain[] { V1.v(), FD.v() },
                                                   ("bdd.iterator(new jedd.Attribute[...]) at /home/olhotak/soot-" +
                                                    "2-jedd/src/soot/jimple/spark/BDDPAG.jedd:122,22-25"),
                                                   bdd).iterator(new Attribute[] { var.v(), fld.v() });

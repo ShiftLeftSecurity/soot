@@ -55,11 +55,9 @@ public final class BDDVirtualCalls {
             toResolve.eqMinus(jedd.internal.Jedd.v().project(resolved, new jedd.PhysicalDomain[] { V2.v() }));
             answer.eqUnion(jedd.internal.Jedd.v().project(resolved, new jedd.PhysicalDomain[] { T2.v() }));
             toResolve.eq(jedd.internal.Jedd.v().replace(jedd.internal.Jedd.v().compose(jedd.internal.Jedd.v().read(toResolve),
-                                                                                       jedd.internal.Jedd.v().replace(jedd.internal.Jedd.v().replace(hier.extend(),
-                                                                                                                                                     new jedd.PhysicalDomain[] { T2.v() },
-                                                                                                                                                     new jedd.PhysicalDomain[] { T3.v() }),
-                                                                                                                      new jedd.PhysicalDomain[] { T1.v() },
-                                                                                                                      new jedd.PhysicalDomain[] { T2.v() }),
+                                                                                       jedd.internal.Jedd.v().replace(hier.extend(),
+                                                                                                                      new jedd.PhysicalDomain[] { T1.v(), T2.v() },
+                                                                                                                      new jedd.PhysicalDomain[] { T2.v(), T3.v() }),
                                                                                        new jedd.PhysicalDomain[] { T2.v() }),
                                                         new jedd.PhysicalDomain[] { T3.v() },
                                                         new jedd.PhysicalDomain[] { T2.v() }));
@@ -68,8 +66,8 @@ public final class BDDVirtualCalls {
     }
     
     public jedd.internal.RelationContainer answer() {
-        return new jedd.internal.RelationContainer(new jedd.Attribute[] { signature.v(), method.v(), type.v() },
-                                                   new jedd.PhysicalDomain[] { H1.v(), V2.v(), T1.v() },
+        return new jedd.internal.RelationContainer(new jedd.Attribute[] { type.v(), signature.v(), method.v() },
+                                                   new jedd.PhysicalDomain[] { T1.v(), H1.v(), V2.v() },
                                                    ("return answer; at /home/olhotak/soot-2-jedd/src/soot/jimple/" +
                                                     "toolkits/callgraph/BDDVirtualCalls.jedd:73,8-14"),
                                                    answer);

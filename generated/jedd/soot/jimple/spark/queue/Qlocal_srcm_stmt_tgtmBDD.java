@@ -27,8 +27,8 @@ public final class Qlocal_srcm_stmt_tgtmBDD extends Qlocal_srcm_stmt_tgtm {
     public void add(final jedd.internal.RelationContainer in) {
         for (Iterator it = readers.iterator(); it.hasNext(); ) {
             Rlocal_srcm_stmt_tgtmBDD reader = (Rlocal_srcm_stmt_tgtmBDD) it.next();
-            reader.add(new jedd.internal.RelationContainer(new Attribute[] { srcm.v(), local.v(), tgtm.v(), stmt.v() },
-                                                           new PhysicalDomain[] { T1.v(), V1.v(), T2.v(), ST.v() },
+            reader.add(new jedd.internal.RelationContainer(new Attribute[] { stmt.v(), local.v(), srcm.v(), tgtm.v() },
+                                                           new PhysicalDomain[] { ST.v(), V1.v(), T1.v(), T2.v() },
                                                            ("reader.add(in) at /home/olhotak/soot-2-jedd/src/soot/jimple/" +
                                                             "spark/queue/Qlocal_srcm_stmt_tgtmBDD.jedd:38,12-18"),
                                                            in));

@@ -142,8 +142,8 @@ public class TradTypeManager extends AbsTypeManager {
                                                                 varNodes,
                                                                 new PhysicalDomain[] { T1.v() }));
             cachedVarNodes.eqUnion(varNodes);
-            return new jedd.internal.RelationContainer(new Attribute[] { obj.v(), var.v() },
-                                                       new PhysicalDomain[] { H1.v(), V1.v() },
+            return new jedd.internal.RelationContainer(new Attribute[] { var.v(), obj.v() },
+                                                       new PhysicalDomain[] { V1.v(), H1.v() },
                                                        ("return cachedVarObj; at /home/olhotak/soot-2-jedd/src/soot/j" +
                                                         "imple/spark/TradTypeManager.jedd:112,12-18"),
                                                        cachedVarObj);

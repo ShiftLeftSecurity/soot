@@ -30,8 +30,8 @@ public class BDDContextCallGraphBuilder extends AbsContextCallGraphBuilder {
                                                                                                                                              new jedd.Attribute[] { ctxt.v() },
                                                                                                                                              new jedd.PhysicalDomain[] { V1.v() }),
                                                                                                               new jedd.PhysicalDomain[] {  }))));
-        out.add(new jedd.internal.RelationContainer(new jedd.Attribute[] { srcm.v(), tgtm.v(), tgtc.v(), stmt.v(), kind.v(), srcc.v() },
-                                                    new jedd.PhysicalDomain[] { T1.v(), T2.v(), V2.v(), ST.v(), FD.v(), V1.v() },
+        out.add(new jedd.internal.RelationContainer(new jedd.Attribute[] { tgtc.v(), stmt.v(), srcm.v(), tgtm.v(), kind.v(), srcc.v() },
+                                                    new jedd.PhysicalDomain[] { V2.v(), ST.v(), T1.v(), T2.v(), FD.v(), V1.v() },
                                                     ("out.add(jedd.internal.Jedd.v().join(jedd.internal.Jedd.v().r" +
                                                      "ead(jedd.internal.Jedd.v().project(edges.get(), new jedd.Phy" +
                                                      "sicalDomain[...])), methods, new jedd.PhysicalDomain[...])) " +
