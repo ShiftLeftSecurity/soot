@@ -4,7 +4,8 @@
  * All rights reserved.                                              *
  *                                                                   *
  * Modifications by Etienne Gagnon (gagnon@sable.mcgill.ca) are      *
- * Copyright (C) 1998 Etienne Gagnon.  All rights reserved.          *
+ * Copyright (C) 1998 Etienne Gagnon (gagnon@sable.mcgill.ca).  All  *
+ * rights reserved.                                                  *
  *                                                                   *
  * This work was done as a project of the Sable Research Group,      *
  * School of Computer Science, McGill University, Canada             *
@@ -564,10 +565,14 @@ public class JasminClass
 
                 if(subroutineToReturnAddressSlot.containsKey(s))
                 {
-                    AssignStmt assignStmt = (AssignStmt) s;
-                    
-                    emit("astore " + localToSlot.get(assignStmt.getLeftOp()));
+                    // AssignStmt assignStmt = (AssignStmt) s;
+
+                    // emit("astore " + localToSlot.get(assignStmt.getLeftOp()));
+
+                    emit("astore " + ( ( Integer ) subroutineToReturnAddressSlot.get( s ) ).intValue() );
+
                 }   
+<<<<<<< 1.beta.3.dev.1(w)/src/ca/mcgill/sable/soot/jimple/JasminClass.java Thu, 04 Feb 1999 10:11:02 -0500 unknown (soot/b/15_JasminClas 1.16.1.1 600)
                 else 
                 {
                     // Determine dying set.
@@ -604,6 +609,12 @@ public class JasminClass
                     
                     emitStmt(s);
                 }                
+=======
+
+//               else 
+
+                   emitStmt(s);                
+>>>>>>> 1.beta.3.patrick.1/src/ca/mcgill/sable/soot/jimple/JasminClass.java Thu, 04 Feb 1999 15:57:16 -0500 unknown (soot/b/15_JasminClas 1.17 600)
             }
 
             isEmittingMethodCode = false;
@@ -778,6 +789,15 @@ public class JasminClass
                     {
                         isNextGotoAJsr = true;
                         returnAddressSlot = slot;
+
+/*
+                        if ( slot >= 0 && slot <= 3)
+                             emit("astore_" + slot );
+                        else
+                             emit("astore " + slot );
+
+*/
+                         
                     }
 
                     public void caseNullType(NullType t)

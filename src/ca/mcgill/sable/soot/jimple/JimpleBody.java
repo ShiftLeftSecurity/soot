@@ -3,9 +3,15 @@
  * Copyright (C) 1997, 1998 Raja Vallee-Rai (kor@sable.mcgill.ca)    *
  * All rights reserved.                                              *
  *                                                                   *
+ * Modifications by Patrick Lam (plam@sable.mcgill.ca) are           *
+ * Copyright (C) 1999 Patrick Lam.  All rights reserved.             *
+ *                                                                   *
  * Modifications by Etienne Gagnon (gagnon@sable.mcgill.ca) are      *
  * Copyright (C) 1998 Etienne Gagnon (gagnon@sable.mcgill.ca).  All  *
  * rights reserved.                                                  *
+ *                                                                   *
+ * Modifications by Patrick Lam (plam@sable.mcgill.ca) are           *
+ * Copyright (C) 1999 Patrick Lam.  All rights reserved.             *
  *                                                                   *
  * This work was done as a project of the Sable Research Group,      *
  * School of Computer Science, McGill University, Canada             *
@@ -65,6 +71,10 @@
 
  B) Changes:
 
+ - Modified on February 3, 1999 by Patrick Lam (plam@sable.mcgill.ca) (*)
+   Added changes in support of the Grimp intermediate
+   representation (with aggregated-expressions).
+
  - Modified on November 21, 1998 by Raja Vallee-Rai (kor@sable.mcgill.ca) (*)
    Added a constructor and handling of debug option.
    
@@ -99,7 +109,7 @@ import ca.mcgill.sable.util.*;
 import ca.mcgill.sable.soot.baf.*;
 import java.io.*;
 
-public class JimpleBody implements Body
+public class JimpleBody implements StmtBody
 {
     List locals = new ArrayList();
     SootMethod method;
@@ -122,7 +132,7 @@ public class JimpleBody implements Body
         Constructs a JimpleBody from the given Body.
      */
 
-    JimpleBody(SootMethod m, Body body, int buildOptions)
+    public JimpleBody(SootMethod m, Body body, int buildOptions)
     {
         ClassFileBody fileBody;
 
@@ -173,11 +183,8 @@ public class JimpleBody implements Body
                     "]      Producing naive Jimple...");
 
             coffiMethod.cfg.jimplify(coffiClass.constant_pool,
-                coffiClass.this_class, this);
+                coffiClass.this_class, this, Jimple.v());
 
-            coffiMethod.cfg.reconstructInstructions();
-            coffiMethod.cfg = null;
- 
             if(Main.isProfilingOptimization)
             {
                 Main.conversionTimer.end();
@@ -208,10 +215,20 @@ public class JimpleBody implements Body
                 Main.cleanup1StmtCount += stmtList.size();
             }
         }
+<<<<<<< 1.beta.3.dev.1(w)/src/ca/mcgill/sable/soot/jimple/JimpleBody.java Wed, 03 Feb 1999 17:50:51 -0500 unknown (soot/j/5_JimpleBody 1.12.1.1 600)
         
         //this.print_debug(new PrintWriter(System.out, true));
         
 
+=======
+
+	if(!BuildJimpleBodyOption.noAggregating(buildOptions))
+	{
+	  Transformations.aggregate(this);
+	  Transformations.removeUnusedLocals(this);
+	}
+
+>>>>>>> 1.beta.3.patrick.1/src/ca/mcgill/sable/soot/jimple/JimpleBody.java Thu, 04 Feb 1999 15:57:16 -0500 unknown (soot/j/5_JimpleBody 1.13 600)
         if(!BuildJimpleBodyOption.noSplitting(buildOptions))
         {
             if(Main.isProfilingOptimization)
@@ -245,8 +262,7 @@ public class JimpleBody implements Body
                         if(l.getType().equals(UnknownType.v()) ||
                             l.getType().equals(ErroneousType.v()))
                         {
-                            if(!Main.isInDebugMode)
-                                throw new RuntimeException("type inference failed!");
+			  throw new RuntimeException("type inference failed!");
                         }
                     }
                 }
@@ -307,7 +323,7 @@ public class JimpleBody implements Body
         return stmtList;
     }
 
-    void redirectJumps(Stmt oldLocation, Stmt newLocation)
+    public void redirectJumps(Stmt oldLocation, Stmt newLocation)
     {
         List boxesPointing = oldLocation.getBoxesPointingToThis();
 
@@ -326,7 +342,7 @@ public class JimpleBody implements Body
 
     }
 
-    void eliminateBackPointersTo(Stmt oldLocation)
+    public void eliminateBackPointersTo(Stmt oldLocation)
     {
         Iterator boxIt = oldLocation.getUnitBoxes().iterator();
 
