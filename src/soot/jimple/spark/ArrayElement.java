@@ -26,10 +26,14 @@ import java.util.*;
  * @author Ondrej Lhotak
  */
 public class ArrayElement implements SparkField {
-    public ArrayElement( Singletons.Global g ) {}
+    public ArrayElement( Singletons.Global g ) {
+        Scene.v().getFieldNumberer().add(this);
+    }
     public static ArrayElement v() { return G.v().ArrayElement(); }
 
-    public ArrayElement() {
+    private int number;
+
+    private ArrayElement() {
         Scene.v().getFieldNumberer().add(this);
     }
 
@@ -37,7 +41,7 @@ public class ArrayElement implements SparkField {
         return number;
     }
     public final void setNumber(int number) {
+        if( number == 0 ) throw new RuntimeException();
         this.number = number;
     }
-    private int number = 0;
 }

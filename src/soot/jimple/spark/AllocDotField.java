@@ -41,7 +41,7 @@ public class AllocDotField extends Node {
 	this.base = base;
 	this.field = field;
 	base.addField( this, field );
-        SparkNumberers.v().allocDotFieldNodeNumberer().add( this );
+        SparkNumberers.v().allocDotFieldNumberer().add( this );
     }
 
     /* End of package methods. */

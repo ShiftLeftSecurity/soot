@@ -16,8 +16,24 @@ public abstract class Robj {
     
     public abstract boolean hasNext();
     
-    public abstract class Tuple {
-        public abstract AllocNode obj();
+    public static class Tuple {
+        private AllocNode _obj;
+        
+        public AllocNode obj() { return _obj; }
+        
+        public Tuple(AllocNode _obj) {
+            super();
+            this._obj = _obj;
+        }
+        
+        public int hashCode() { return 0; }
+        
+        public boolean equals(Object other) {
+            if (!(other instanceof Tuple)) return false;
+            Tuple o = (Tuple) other;
+            if (o._obj != _obj) return false;
+            return true;
+        }
         
         public String toString() {
             StringBuffer ret = new StringBuffer();
@@ -25,8 +41,6 @@ public abstract class Robj {
             ret.append(", ");
             return ret.toString();
         }
-        
-        public Tuple() { super(); }
     }
     
     

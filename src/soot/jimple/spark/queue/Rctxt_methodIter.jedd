@@ -30,9 +30,12 @@ import java.util.*;
 public class Rctxt_methodIter extends Rctxt_method{
     protected Iterator r;
     public Rctxt_methodIter( Iterator r ) { this.r = r; }
-    public Iterator iterator() {;
+    public Iterator iterator() {
         return new Iterator() {
-            public boolean hasNext() { return r.hasNext(); }
+            public boolean hasNext() {
+                boolean ret = r.hasNext();
+                return ret;
+            }
             public Object next() {
                 return new Tuple( (Context) r.next(), (SootMethod) r.next() );
             }
@@ -47,14 +50,4 @@ public class Rctxt_methodIter extends Rctxt_method{
         return ret;
     }
     public boolean hasNext() { return r.hasNext(); }
-    private final class Tuple extends Rctxt_method.Tuple {
-        private Context _ctxt;
-        public Context ctxt() { return _ctxt; }
-        private SootMethod _method;
-        public SootMethod method() { return _method; }
-        public Tuple( Context _ctxt, SootMethod _method ) {
-            this._ctxt = _ctxt;
-            this._method = _method;
-        }
-    }
 }

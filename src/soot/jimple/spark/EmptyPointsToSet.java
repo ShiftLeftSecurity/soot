@@ -24,7 +24,7 @@ import java.util.*;
 /** Implementation of an empty, immutable points-to set.
  * @author Ondrej Lhotak
  */
-public class EmptyPointsToSet extends PointsToSetInternal {
+public class EmptyPointsToSet extends PointsToSetReadOnly {
     public EmptyPointsToSet( Singletons.Global g ) { super(null); }
     public static EmptyPointsToSet v() { return G.v().EmptyPointsToSet(); }
 
@@ -36,19 +36,9 @@ public class EmptyPointsToSet extends PointsToSetInternal {
     }
     /** Set of all possible run-time types of objects in the set. */
     public Set possibleTypes() { return Collections.EMPTY_SET; }
-    /** Adds contents of other into this set, returns true if this set 
-     * changed. */
-    public boolean addAll( PointsToSetInternal other,
-            PointsToSetInternal exclude ) {
-        throw new RuntimeException( "can't add into empty immutable set" );
-    }
     /** Calls v's visit method on all nodes in this set. */
     public boolean forall( P2SetVisitor v ) {
         return false;
-    }
-    /** Adds n to this set, returns true if n was not already in this set. */
-    public boolean add( Node n ) {
-        throw new RuntimeException( "can't add into empty immutable set" );
     }
     /** Returns true iff the set contains n. */
     public boolean contains( Node n ) {

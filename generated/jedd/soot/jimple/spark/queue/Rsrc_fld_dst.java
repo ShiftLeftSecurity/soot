@@ -16,12 +16,36 @@ public abstract class Rsrc_fld_dst {
     
     public abstract boolean hasNext();
     
-    public abstract class Tuple {
-        public abstract VarNode src();
+    public static class Tuple {
+        private VarNode _src;
         
-        public abstract SparkField fld();
+        public VarNode src() { return _src; }
         
-        public abstract VarNode dst();
+        private SparkField _fld;
+        
+        public SparkField fld() { return _fld; }
+        
+        private VarNode _dst;
+        
+        public VarNode dst() { return _dst; }
+        
+        public Tuple(VarNode _src, SparkField _fld, VarNode _dst) {
+            super();
+            this._src = _src;
+            this._fld = _fld;
+            this._dst = _dst;
+        }
+        
+        public int hashCode() { return 0; }
+        
+        public boolean equals(Object other) {
+            if (!(other instanceof Tuple)) return false;
+            Tuple o = (Tuple) other;
+            if (o._src != _src) return false;
+            if (o._fld != _fld) return false;
+            if (o._dst != _dst) return false;
+            return true;
+        }
         
         public String toString() {
             StringBuffer ret = new StringBuffer();
@@ -33,8 +57,6 @@ public abstract class Rsrc_fld_dst {
             ret.append(", ");
             return ret.toString();
         }
-        
-        public Tuple() { super(); }
     }
     
     

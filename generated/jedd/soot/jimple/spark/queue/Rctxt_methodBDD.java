@@ -15,34 +15,51 @@ public final class Rctxt_methodBDD extends Rctxt_method {
                                           new PhysicalDomain[] { V1.v(), T1.v() },
                                           ("private <soot.jimple.spark.bdddomains.ctxt:soot.jimple.spark" +
                                            ".bdddomains.V1, soot.jimple.spark.bdddomains.method:soot.jim" +
-                                           "ple.spark.bdddomains.T1> bdd = jedd.internal.Jedd.v().falseB" +
-                                           "DD() at /home/olhotak/soot-2-jedd/src/soot/jimple/spark/queu" +
-                                           "e/Rctxt_methodBDD.jedd:31,12"),
-                                          jedd.internal.Jedd.v().falseBDD());
+                                           "ple.spark.bdddomains.T1> bdd at /home/olhotak/soot-2-jedd/sr" +
+                                           "c/soot/jimple/spark/queue/Rctxt_methodBDD.jedd:31,12-32"));
     
     void add(final jedd.internal.RelationContainer tuple) { bdd.eqUnion(tuple); }
     
     public Rctxt_methodBDD(final jedd.internal.RelationContainer bdd) {
-        super();
-        this.bdd.eq(bdd);
+        this();
+        this.add(new jedd.internal.RelationContainer(new Attribute[] { ctxt.v(), method.v() },
+                                                     new PhysicalDomain[] { V1.v(), T1.v() },
+                                                     ("this.add(bdd) at /home/olhotak/soot-2-jedd/src/soot/jimple/s" +
+                                                      "park/queue/Rctxt_methodBDD.jedd:33,65-68"),
+                                                     bdd));
     }
     
-    Rctxt_methodBDD() { super(); }
+    Rctxt_methodBDD() {
+        super();
+        bdd.eq(jedd.internal.Jedd.v().falseBDD());
+    }
     
     public Iterator iterator() {
         ;
-        final Iterator it =
-          new jedd.internal.RelationContainer(new Attribute[] { ctxt.v(), method.v() },
-                                              new PhysicalDomain[] { V1.v(), T1.v() },
-                                              ("bdd.iterator(new jedd.Attribute[...]) at /home/olhotak/soot-" +
-                                               "2-jedd/src/soot/jimple/spark/queue/Rctxt_methodBDD.jedd:36,2" +
-                                               "8"),
-                                              bdd).iterator(new Attribute[] { ctxt.v(), method.v() });
-        bdd.eq(jedd.internal.Jedd.v().falseBDD());
         return new Iterator() {
-            public boolean hasNext() { return it.hasNext(); }
+            private Iterator it;
             
-            public Object next() { return Rctxt_methodBDD.this.new Tuple((Object[]) it.next()); }
+            public boolean hasNext() {
+                if (it != null && it.hasNext()) return true;
+                if (!jedd.internal.Jedd.v().equals(jedd.internal.Jedd.v().read(bdd), jedd.internal.Jedd.v().falseBDD()))
+                    return true;
+                return false;
+            }
+            
+            public Object next() {
+                if (it == null || !it.hasNext()) {
+                    it =
+                      new jedd.internal.RelationContainer(new Attribute[] { ctxt.v(), method.v() },
+                                                          new PhysicalDomain[] { V1.v(), T1.v() },
+                                                          ("bdd.iterator(new jedd.Attribute[...]) at /home/olhotak/soot-" +
+                                                           "2-jedd/src/soot/jimple/spark/queue/Rctxt_methodBDD.jedd:45,2" +
+                                                           "5-28"),
+                                                          bdd).iterator(new Attribute[] { ctxt.v(), method.v() });
+                    bdd.eq(jedd.internal.Jedd.v().falseBDD());
+                }
+                Object[] components = (Object[]) it.next();
+                return new Tuple((Context) components[0], (SootMethod) components[1]);
+            }
             
             public void remove() { throw new UnsupportedOperationException(); }
         };
@@ -55,31 +72,17 @@ public final class Rctxt_methodBDD extends Rctxt_method {
                                               ("<soot.jimple.spark.bdddomains.ctxt:soot.jimple.spark.bdddoma" +
                                                "ins.V1, soot.jimple.spark.bdddomains.method:soot.jimple.spar" +
                                                "k.bdddomains.T1> ret = bdd; at /home/olhotak/soot-2-jedd/src" +
-                                               "/soot/jimple/spark/queue/Rctxt_methodBDD.jedd:47,8"),
+                                               "/soot/jimple/spark/queue/Rctxt_methodBDD.jedd:55,29-32"),
                                               bdd);
         bdd.eq(jedd.internal.Jedd.v().falseBDD());
         return new jedd.internal.RelationContainer(new Attribute[] { ctxt.v(), method.v() },
                                                    new PhysicalDomain[] { V1.v(), T1.v() },
                                                    ("return ret; at /home/olhotak/soot-2-jedd/src/soot/jimple/spa" +
-                                                    "rk/queue/Rctxt_methodBDD.jedd:49,8"),
+                                                    "rk/queue/Rctxt_methodBDD.jedd:57,8-14"),
                                                    ret);
     }
     
     public boolean hasNext() {
         return !jedd.internal.Jedd.v().equals(jedd.internal.Jedd.v().read(bdd), jedd.internal.Jedd.v().falseBDD());
     }
-    
-    private final class Tuple extends soot.jimple.spark.queue.Rctxt_method.Tuple {
-        private Object[] tuple;
-        
-        public Tuple(Object[] tuple) {
-            super();
-            this.tuple = tuple;
-        }
-        
-        public Context ctxt() { return (Context) tuple[0]; }
-        
-        public SootMethod method() { return (SootMethod) tuple[1]; }
-    }
-    
 }

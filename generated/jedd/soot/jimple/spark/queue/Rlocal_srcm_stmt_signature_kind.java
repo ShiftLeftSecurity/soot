@@ -16,16 +16,48 @@ public abstract class Rlocal_srcm_stmt_signature_kind {
     
     public abstract boolean hasNext();
     
-    public abstract class Tuple {
-        public abstract Local local();
+    public static class Tuple {
+        private Local _local;
         
-        public abstract SootMethod srcm();
+        public Local local() { return _local; }
         
-        public abstract Unit stmt();
+        private SootMethod _srcm;
         
-        public abstract NumberedString signature();
+        public SootMethod srcm() { return _srcm; }
         
-        public abstract Kind kind();
+        private Unit _stmt;
+        
+        public Unit stmt() { return _stmt; }
+        
+        private NumberedString _signature;
+        
+        public NumberedString signature() { return _signature; }
+        
+        private Kind _kind;
+        
+        public Kind kind() { return _kind; }
+        
+        public Tuple(Local _local, SootMethod _srcm, Unit _stmt, NumberedString _signature, Kind _kind) {
+            super();
+            this._local = _local;
+            this._srcm = _srcm;
+            this._stmt = _stmt;
+            this._signature = _signature;
+            this._kind = _kind;
+        }
+        
+        public int hashCode() { return 0; }
+        
+        public boolean equals(Object other) {
+            if (!(other instanceof Tuple)) return false;
+            Tuple o = (Tuple) other;
+            if (o._local != _local) return false;
+            if (o._srcm != _srcm) return false;
+            if (o._stmt != _stmt) return false;
+            if (o._signature != _signature) return false;
+            if (o._kind != _kind) return false;
+            return true;
+        }
         
         public String toString() {
             StringBuffer ret = new StringBuffer();
@@ -41,8 +73,6 @@ public abstract class Rlocal_srcm_stmt_signature_kind {
             ret.append(", ");
             return ret.toString();
         }
-        
-        public Tuple() { super(); }
     }
     
     

@@ -31,10 +31,27 @@ public abstract class Rsrc_fld_dst {
     public abstract Iterator iterator();
     public abstract <src:V1, fld:FD, dst:V2> get();
     public abstract boolean hasNext();
-    public abstract class Tuple {
-        public abstract VarNode src();
-        public abstract SparkField fld();
-        public abstract VarNode dst();
+    public static class Tuple {
+        private VarNode _src;
+        public VarNode src() { return _src; }
+        private SparkField _fld;
+        public SparkField fld() { return _fld; }
+        private VarNode _dst;
+        public VarNode dst() { return _dst; }
+        public Tuple( VarNode _src, SparkField _fld, VarNode _dst ) {
+            this._src = _src;
+            this._fld = _fld;
+            this._dst = _dst;
+        }
+        public int hashCode() { return 0; }
+        public boolean equals(Object other) {
+            if(!(other instanceof Tuple)) return false;
+            Tuple o = (Tuple) other;
+            if(o._src != _src) return false;
+            if(o._fld != _fld) return false;
+            if(o._dst != _dst) return false;
+            return true;
+        }
         public String toString() {
             StringBuffer ret = new StringBuffer();
             ret.append( src() ); ret.append( ", " );

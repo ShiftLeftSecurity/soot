@@ -16,10 +16,30 @@ public abstract class Rctxt_method {
     
     public abstract boolean hasNext();
     
-    public abstract class Tuple {
-        public abstract Context ctxt();
+    public static class Tuple {
+        private Context _ctxt;
         
-        public abstract SootMethod method();
+        public Context ctxt() { return _ctxt; }
+        
+        private SootMethod _method;
+        
+        public SootMethod method() { return _method; }
+        
+        public Tuple(Context _ctxt, SootMethod _method) {
+            super();
+            this._ctxt = _ctxt;
+            this._method = _method;
+        }
+        
+        public int hashCode() { return 0; }
+        
+        public boolean equals(Object other) {
+            if (!(other instanceof Tuple)) return false;
+            Tuple o = (Tuple) other;
+            if (o._ctxt != _ctxt) return false;
+            if (o._method != _method) return false;
+            return true;
+        }
         
         public String toString() {
             StringBuffer ret = new StringBuffer();
@@ -29,8 +49,6 @@ public abstract class Rctxt_method {
             ret.append(", ");
             return ret.toString();
         }
-        
-        public Tuple() { super(); }
     }
     
     

@@ -18,7 +18,7 @@ public final class Qobj_varBDD extends Qobj_var {
                                                      ("this.add(jedd.internal.Jedd.v().literal(new java.lang.Object" +
                                                       "[...], new jedd.Attribute[...], new jedd.PhysicalDomain[...]" +
                                                       ")) at /home/olhotak/soot-2-jedd/src/soot/jimple/spark/queue/" +
-                                                      "Qobj_varBDD.jedd:33,8"),
+                                                      "Qobj_varBDD.jedd:33,8-11"),
                                                      jedd.internal.Jedd.v().literal(new Object[] { _obj, _var },
                                                                                     new Attribute[] { obj.v(), var.v() },
                                                                                     new PhysicalDomain[] { H1.v(), V1.v() })));
@@ -30,7 +30,7 @@ public final class Qobj_varBDD extends Qobj_var {
             reader.add(new jedd.internal.RelationContainer(new Attribute[] { obj.v(), var.v() },
                                                            new PhysicalDomain[] { H1.v(), V1.v() },
                                                            ("reader.add(in) at /home/olhotak/soot-2-jedd/src/soot/jimple/" +
-                                                            "spark/queue/Qobj_varBDD.jedd:38,12"),
+                                                            "spark/queue/Qobj_varBDD.jedd:38,12-18"),
                                                            in));
         }
     }

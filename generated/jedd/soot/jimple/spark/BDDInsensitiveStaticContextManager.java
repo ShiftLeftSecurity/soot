@@ -12,7 +12,7 @@ public class BDDInsensitiveStaticContextManager extends AbsStaticContextManager 
         out.add(new jedd.internal.RelationContainer(new jedd.Attribute[] { srcc.v(), srcm.v(), stmt.v(), kind.v(), tgtc.v(), tgtm.v() },
                                                     new jedd.PhysicalDomain[] { V1.v(), T1.v(), ST.v(), FD.v(), V2.v(), T2.v() },
                                                     ("out.add(in.get()) at /home/olhotak/soot-2-jedd/src/soot/jimp" +
-                                                     "le/spark/BDDInsensitiveStaticContextManager.jedd:34,8"),
+                                                     "le/spark/BDDInsensitiveStaticContextManager.jedd:34,8-11"),
                                                     in.get()));
     }
 }

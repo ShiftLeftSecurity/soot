@@ -24,6 +24,7 @@ import java.util.*;
 import soot.options.SparkOptions;
 import soot.jimple.spark.bdddomains.*;
 import soot.jimple.spark.queue.*;
+import jedd.*;
 
 /** Propagates points-to sets along pointer assignment graph using BDDs.
  * @author Ondrej Lhotak
@@ -34,18 +35,21 @@ public final class PropBDD extends AbsPropagator {
             Robj_var alloc, Qvar_obj propout, AbsPAG pag ) {
         super( simple, load, store, alloc, propout, pag );
     }
+
+    <var:V1, obj:H1> pointsTo = 0B;
+    <base:H1, fld:FD, obj:H2> fieldPt = 0B;
+
     /** Actually does the propagation. */
+    /*
     public final void update() {
         <var:V1, obj:H1> oldPointsTo = 0B;
         <var:V1, obj:H1> newPointsTo = 0B;
         <var:V1, obj:H1> tmpPointsTo = 0B;
-        <var:V1, obj:H1> pointsTo = 0B;
 
         <obj:H2, var:V1, fld:FD> objectsBeingStored;
         <obj:H2, var:V1, fld:FD> oldStorePt = 0B;
         <obj:H2, var:V1, fld:FD> newStorePt = 0B;
 
-        <base:H1, fld:FD, obj:H2> fieldPt = 0B;
         <base:H1, fld:FD, obj:H2> newFieldPt = 0B;
         <base:H1, fld:FD, obj:H2> tmpFieldPt = 0B;
 
@@ -78,10 +82,14 @@ public final class PropBDD extends AbsPropagator {
             } while( newPointsTo != 0B );
 
             newPointsTo = pointsTo - oldPointsTo;
+
+            if( SparkScene.v().options().verbose() ) {
+                G.v().out.println( "newPointsTo contains "+
+                    ((obj=>)newPointsTo).size()+" nodes" );
+            }
             
             ptout.add( newPointsTo );
             SparkScene.v().updateCallGraph();
-            // TODO: deal with new edges
 
             // apply rule (2)
             objectsBeingStored = (dst => var) pag.allStore().get() {src} <> newPointsTo {var};
@@ -96,6 +104,7 @@ public final class PropBDD extends AbsPropagator {
                                   
             newFieldPt -= fieldPt;
             fieldPt |= newFieldPt;
+
 
             // apply rule (3)
             loadsFromHeap = pag.allLoad().get() {src} <> (obj => base) newPointsTo {var};
@@ -120,7 +129,6 @@ public final class PropBDD extends AbsPropagator {
             
             ptout.add( newPointsTo );
             SparkScene.v().updateCallGraph();
-            // TODO: deal with new edges
 
             pointsTo |= newPointsTo;
 
@@ -132,6 +140,67 @@ public final class PropBDD extends AbsPropagator {
                         ((obj=>)newPointsTo).size()+" changed p2sets" );
             }
         } while(newPointsTo != 0B);
+    }
+    */
+
+    public final void update() {
+        <var:V1, obj:H1> oldPointsTo = 0B;
+        <var:V1, obj:H1> veryOldPointsTo = 0B;
+        <var:V1, obj:H1> outputtedPointsTo = 0B;
+
+        <obj:H2, var:V1, fld:FD> objectsBeingStored;
+        <obj:H2, var:V1, fld:FD> oldStorePt = 0B;
+
+        // The objects pointed to by base.fld are being loaded into dst
+        <base:H1, fld:FD, dst:V2> loadsFromHeap = 0B;
+
+        final AbsTypeManager typeManager = SparkScene.v().tm;
+
+        // start solving 
+        do {
+
+            veryOldPointsTo = pointsTo;
+
+            pointsTo |= newAlloc.get() & typeManager.get();
+
+            // repeat rule (1) in the inner loop
+            do {
+                oldPointsTo = pointsTo;
+                pointsTo |= typeManager.get() & (
+                (dst => var) pag.allSimple().get() {src} <> pointsTo {var} );
+
+                if( SparkScene.v().options().verbose() ) {
+                    G.v().out.println( "Minor iteration: " );
+                }
+
+            } while( pointsTo != oldPointsTo );
+
+
+            ptout.add( pointsTo - outputtedPointsTo );
+            outputtedPointsTo = pointsTo;
+            SparkScene.v().updateCallGraph();
+
+            // apply rule (2)
+            objectsBeingStored = (dst => var) pag.allStore().get() {src} <> pointsTo {var};
+                                          
+            fieldPt |= objectsBeingStored {var} <> (obj=>base) pointsTo {var};
+
+            // apply rule (3)
+            loadsFromHeap = pag.allLoad().get() {src} <> (obj => base) pointsTo {var};
+
+            pointsTo |= (dst => var) loadsFromHeap {base,fld} <> fieldPt {base,fld};
+
+            // apply typeFilter
+            pointsTo &= typeManager.get();
+            
+            ptout.add( pointsTo - outputtedPointsTo );
+            outputtedPointsTo = pointsTo;
+            SparkScene.v().updateCallGraph();
+
+            if( SparkScene.v().options().verbose() ) {
+                    G.v().out.println( "Major iteration: " );
+            }
+        } while(pointsTo != veryOldPointsTo);
     }
 
     /* End of public methods. */

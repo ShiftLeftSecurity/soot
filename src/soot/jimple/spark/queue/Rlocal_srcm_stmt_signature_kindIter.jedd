@@ -30,9 +30,12 @@ import java.util.*;
 public class Rlocal_srcm_stmt_signature_kindIter extends Rlocal_srcm_stmt_signature_kind{
     protected Iterator r;
     public Rlocal_srcm_stmt_signature_kindIter( Iterator r ) { this.r = r; }
-    public Iterator iterator() {;
+    public Iterator iterator() {
         return new Iterator() {
-            public boolean hasNext() { return r.hasNext(); }
+            public boolean hasNext() {
+                boolean ret = r.hasNext();
+                return ret;
+            }
             public Object next() {
                 return new Tuple( (Local) r.next(), (SootMethod) r.next(), (Unit) r.next(), (NumberedString) r.next(), (Kind) r.next() );
             }
@@ -47,23 +50,4 @@ public class Rlocal_srcm_stmt_signature_kindIter extends Rlocal_srcm_stmt_signat
         return ret;
     }
     public boolean hasNext() { return r.hasNext(); }
-    private final class Tuple extends Rlocal_srcm_stmt_signature_kind.Tuple {
-        private Local _local;
-        public Local local() { return _local; }
-        private SootMethod _srcm;
-        public SootMethod srcm() { return _srcm; }
-        private Unit _stmt;
-        public Unit stmt() { return _stmt; }
-        private NumberedString _signature;
-        public NumberedString signature() { return _signature; }
-        private Kind _kind;
-        public Kind kind() { return _kind; }
-        public Tuple( Local _local, SootMethod _srcm, Unit _stmt, NumberedString _signature, Kind _kind ) {
-            this._local = _local;
-            this._srcm = _srcm;
-            this._stmt = _stmt;
-            this._signature = _signature;
-            this._kind = _kind;
-        }
-    }
 }

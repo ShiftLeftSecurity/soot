@@ -30,9 +30,12 @@ import java.util.*;
 public class Rsrc_fld_dstIter extends Rsrc_fld_dst{
     protected Iterator r;
     public Rsrc_fld_dstIter( Iterator r ) { this.r = r; }
-    public Iterator iterator() {;
+    public Iterator iterator() {
         return new Iterator() {
-            public boolean hasNext() { return r.hasNext(); }
+            public boolean hasNext() {
+                boolean ret = r.hasNext();
+                return ret;
+            }
             public Object next() {
                 return new Tuple( (VarNode) r.next(), (SparkField) r.next(), (VarNode) r.next() );
             }
@@ -47,17 +50,4 @@ public class Rsrc_fld_dstIter extends Rsrc_fld_dst{
         return ret;
     }
     public boolean hasNext() { return r.hasNext(); }
-    private final class Tuple extends Rsrc_fld_dst.Tuple {
-        private VarNode _src;
-        public VarNode src() { return _src; }
-        private SparkField _fld;
-        public SparkField fld() { return _fld; }
-        private VarNode _dst;
-        public VarNode dst() { return _dst; }
-        public Tuple( VarNode _src, SparkField _fld, VarNode _dst ) {
-            this._src = _src;
-            this._fld = _fld;
-            this._dst = _dst;
-        }
-    }
 }

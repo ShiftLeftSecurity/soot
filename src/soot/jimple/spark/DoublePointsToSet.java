@@ -46,8 +46,8 @@ public class DoublePointsToSet extends PointsToSetInternal {
     }
     /** Adds contents of other into this set, returns true if this set 
      * changed. */
-    public boolean addAll( PointsToSetInternal other,
-            PointsToSetInternal exclude ) {
+    public boolean addAll( PointsToSetReadOnly other,
+            PointsToSetReadOnly exclude ) {
         if( exclude != null ) {
             throw new RuntimeException( "NYI" );
         }
@@ -65,9 +65,9 @@ public class DoublePointsToSet extends PointsToSetInternal {
         return newSet.add( n );
     }
     /** Returns set of nodes already present before last call to flushNew. */
-    public PointsToSetInternal getOldSet() { return oldSet; }
+    public PointsToSetReadOnly getOldSet() { return oldSet; }
     /** Returns set of newly-added nodes since last call to flushNew. */
-    public PointsToSetInternal getNewSet() { return newSet; }
+    public PointsToSetReadOnly getNewSet() { return newSet; }
     /** Sets all newly-added nodes to old nodes. */
     public void flushNew() {
         oldSet.addAll( newSet, null );

@@ -30,9 +30,12 @@ import java.util.*;
 public class RobjIter extends Robj{
     protected Iterator r;
     public RobjIter( Iterator r ) { this.r = r; }
-    public Iterator iterator() {;
+    public Iterator iterator() {
         return new Iterator() {
-            public boolean hasNext() { return r.hasNext(); }
+            public boolean hasNext() {
+                boolean ret = r.hasNext();
+                return ret;
+            }
             public Object next() {
                 return new Tuple( (AllocNode) r.next() );
             }
@@ -47,11 +50,4 @@ public class RobjIter extends Robj{
         return ret;
     }
     public boolean hasNext() { return r.hasNext(); }
-    private final class Tuple extends Robj.Tuple {
-        private AllocNode _obj;
-        public AllocNode obj() { return _obj; }
-        public Tuple( AllocNode _obj ) {
-            this._obj = _obj;
-        }
-    }
 }

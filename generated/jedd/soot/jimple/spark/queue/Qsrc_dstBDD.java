@@ -18,7 +18,7 @@ public final class Qsrc_dstBDD extends Qsrc_dst {
                                                      ("this.add(jedd.internal.Jedd.v().literal(new java.lang.Object" +
                                                       "[...], new jedd.Attribute[...], new jedd.PhysicalDomain[...]" +
                                                       ")) at /home/olhotak/soot-2-jedd/src/soot/jimple/spark/queue/" +
-                                                      "Qsrc_dstBDD.jedd:33,8"),
+                                                      "Qsrc_dstBDD.jedd:33,8-11"),
                                                      jedd.internal.Jedd.v().literal(new Object[] { _src, _dst },
                                                                                     new Attribute[] { src.v(), dst.v() },
                                                                                     new PhysicalDomain[] { V1.v(), V2.v() })));
@@ -30,7 +30,7 @@ public final class Qsrc_dstBDD extends Qsrc_dst {
             reader.add(new jedd.internal.RelationContainer(new Attribute[] { dst.v(), src.v() },
                                                            new PhysicalDomain[] { V2.v(), V1.v() },
                                                            ("reader.add(in) at /home/olhotak/soot-2-jedd/src/soot/jimple/" +
-                                                            "spark/queue/Qsrc_dstBDD.jedd:38,12"),
+                                                            "spark/queue/Qsrc_dstBDD.jedd:38,12-18"),
                                                            in));
         }
     }

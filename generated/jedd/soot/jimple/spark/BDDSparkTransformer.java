@@ -15,7 +15,7 @@ import jedd.*;
 import soot.jimple.spark.bdddomains.*;
 
 public class BDDSparkTransformer extends AbstractSparkTransformer {
-    public BDDSparkTransformer(soot.Singletons.Global g) { super(); }
+    public BDDSparkTransformer(Singletons.Global g) { super(); }
     
     public static BDDSparkTransformer v() { return G.v().BDDSparkTransformer(); }
     

@@ -24,7 +24,7 @@ public final class Qctxt_local_obj_srcm_stmt_kind_tgtmBDD extends Qctxt_local_ob
                                                      ("this.add(jedd.internal.Jedd.v().literal(new java.lang.Object" +
                                                       "[...], new jedd.Attribute[...], new jedd.PhysicalDomain[...]" +
                                                       ")) at /home/olhotak/soot-2-jedd/src/soot/jimple/spark/queue/" +
-                                                      "Qctxt_local_obj_srcm_stmt_kind_tgtmBDD.jedd:33,8"),
+                                                      "Qctxt_local_obj_srcm_stmt_kind_tgtmBDD.jedd:33,8-11"),
                                                      jedd.internal.Jedd.v().literal(new Object[] { _ctxt, _local, _obj, _srcm, _stmt, _kind, _tgtm },
                                                                                     new Attribute[] { ctxt.v(), local.v(), obj.v(), srcm.v(), stmt.v(), kind.v(), tgtm.v() },
                                                                                     new PhysicalDomain[] { V2.v(), V1.v(), H1.v(), T1.v(), ST.v(), FD.v(), T2.v() })));
@@ -33,11 +33,11 @@ public final class Qctxt_local_obj_srcm_stmt_kind_tgtmBDD extends Qctxt_local_ob
     public void add(final jedd.internal.RelationContainer in) {
         for (Iterator it = readers.iterator(); it.hasNext(); ) {
             Rctxt_local_obj_srcm_stmt_kind_tgtmBDD reader = (Rctxt_local_obj_srcm_stmt_kind_tgtmBDD) it.next();
-            reader.add(new jedd.internal.RelationContainer(new Attribute[] { obj.v(), ctxt.v(), tgtm.v(), local.v(), kind.v(), stmt.v(), srcm.v() },
-                                                           new PhysicalDomain[] { H1.v(), V2.v(), T2.v(), V1.v(), FD.v(), ST.v(), T1.v() },
+            reader.add(new jedd.internal.RelationContainer(new Attribute[] { srcm.v(), local.v(), ctxt.v(), tgtm.v(), stmt.v(), obj.v(), kind.v() },
+                                                           new PhysicalDomain[] { T1.v(), V1.v(), V2.v(), T2.v(), ST.v(), H1.v(), FD.v() },
                                                            ("reader.add(in) at /home/olhotak/soot-2-jedd/src/soot/jimple/" +
                                                             "spark/queue/Qctxt_local_obj_srcm_stmt_kind_tgtmBDD.jedd:38,1" +
-                                                            "2"),
+                                                            "2-18"),
                                                            in));
         }
     }

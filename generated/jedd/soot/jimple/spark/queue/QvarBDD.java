@@ -18,7 +18,7 @@ public final class QvarBDD extends Qvar {
                                                      ("this.add(jedd.internal.Jedd.v().literal(new java.lang.Object" +
                                                       "[...], new jedd.Attribute[...], new jedd.PhysicalDomain[...]" +
                                                       ")) at /home/olhotak/soot-2-jedd/src/soot/jimple/spark/queue/" +
-                                                      "QvarBDD.jedd:33,8"),
+                                                      "QvarBDD.jedd:33,8-11"),
                                                      jedd.internal.Jedd.v().literal(new Object[] { _var },
                                                                                     new Attribute[] { var.v() },
                                                                                     new PhysicalDomain[] { V1.v() })));
@@ -30,7 +30,7 @@ public final class QvarBDD extends Qvar {
             reader.add(new jedd.internal.RelationContainer(new Attribute[] { var.v() },
                                                            new PhysicalDomain[] { V1.v() },
                                                            ("reader.add(in) at /home/olhotak/soot-2-jedd/src/soot/jimple/" +
-                                                            "spark/queue/QvarBDD.jedd:38,12"),
+                                                            "spark/queue/QvarBDD.jedd:38,12-18"),
                                                            in));
         }
     }

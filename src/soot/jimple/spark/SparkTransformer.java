@@ -63,6 +63,8 @@ public class SparkTransformer extends SceneTransformer
             reportTime( "Propagation", startSolve, endSolve );
         }
 
+        if( opts.set_mass() ) findSetMass();
+
         /*
         for( Iterator tIt = reachableMethods.iterator(); tIt.hasNext(); ) {
             final Rctxt_method.Tuple t = (Rctxt_method.Tuple) tIt.next();
@@ -240,7 +242,8 @@ public class SparkTransformer extends SceneTransformer
                             v = nm.findGlobalVarNode( ((FieldRef) lhs).getField() );
                         }
                         if( v != null ) {
-                            PointsToSetInternal p2set = v.getP2Set();
+                            PointsToSetReadOnly p2set = 
+                                SparkScene.v().p2sets.get(v);
                             p2set.forall( new P2SetVisitor() {
                             public final void visit( Node n ) {
                                 addTag( s, n, nodeToTag );
@@ -286,6 +289,36 @@ public class SparkTransformer extends SceneTransformer
     private static void reportTime( String desc, Date start, Date end ) {
         long time = end.getTime()-start.getTime();
         G.v().out.println( "[Spark] "+desc+" in "+time/1000+"."+(time/100)%10+" seconds." );
+    }
+    protected void findSetMass() {
+        int mass = 0;
+        int varMass = 0;
+        int adfs = 0;
+        int scalars = 0;
+
+        for( Iterator vIt = SparkNumberers.v().varNodeNumberer().iterator(); vIt.hasNext(); ) {
+
+            final VarNode v = (VarNode) vIt.next();
+            scalars++;
+            PointsToSetReadOnly set = SparkScene.v().p2sets.get(v);
+            if( set != null ) mass += set.size();
+            if( set != null ) varMass += set.size();
+        }
+        for( Iterator anIt = SparkScene.v().pag.allocSources(); anIt.hasNext(); ) {
+            final AllocNode an = (AllocNode) anIt.next();
+            for( Iterator adfIt = an.getFields().iterator(); adfIt.hasNext(); ) {
+                final AllocDotField adf = (AllocDotField) adfIt.next();
+                PointsToSetReadOnly set = SparkScene.v().p2sets.get(adf);
+                if( set != null ) mass += set.size();
+                if( set != null && set.size() > 0 ) {
+                    adfs++;
+                }
+            }
+        }
+        G.v().out.println( "Set mass: " + mass );
+        G.v().out.println( "Variable mass: " + varMass );
+        G.v().out.println( "Scalars: "+scalars );
+        G.v().out.println( "adfs: "+adfs );
     }
 }
 

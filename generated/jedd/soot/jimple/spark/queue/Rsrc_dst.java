@@ -16,10 +16,30 @@ public abstract class Rsrc_dst {
     
     public abstract boolean hasNext();
     
-    public abstract class Tuple {
-        public abstract VarNode src();
+    public static class Tuple {
+        private VarNode _src;
         
-        public abstract VarNode dst();
+        public VarNode src() { return _src; }
+        
+        private VarNode _dst;
+        
+        public VarNode dst() { return _dst; }
+        
+        public Tuple(VarNode _src, VarNode _dst) {
+            super();
+            this._src = _src;
+            this._dst = _dst;
+        }
+        
+        public int hashCode() { return 0; }
+        
+        public boolean equals(Object other) {
+            if (!(other instanceof Tuple)) return false;
+            Tuple o = (Tuple) other;
+            if (o._src != _src) return false;
+            if (o._dst != _dst) return false;
+            return true;
+        }
         
         public String toString() {
             StringBuffer ret = new StringBuffer();
@@ -29,8 +49,6 @@ public abstract class Rsrc_dst {
             ret.append(", ");
             return ret.toString();
         }
-        
-        public Tuple() { super(); }
     }
     
     

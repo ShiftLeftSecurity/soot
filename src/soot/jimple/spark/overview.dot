@@ -11,6 +11,7 @@ digraph overview {
     CICG -> RM [style=dotted];
     RC -> CSCGB [label="rcout:MxC"];
     CSCGB -> SCM [label="cscgbout:Ec"];
+    VCR -> SCM [label="cscgbout:Ec"];
     SCM -> CG [label="cmout:Ec"];
     CG -> RC [label="cgout:Ec"];
     VCM -> CS [label="vcmout:Ec"];
@@ -27,7 +28,6 @@ digraph overview {
     SCGB -> VC [label="specials:LxMxStxM"];
     CS -> A2 [label="E"];
     A2 -> RM [label="E"];
-    SCGB -> VCR [label="LxS"];
     CICG -> CSCGB [style=dotted];
     VC -> VCR [style=dotted];
     PAG -> PROP [style=dotted];

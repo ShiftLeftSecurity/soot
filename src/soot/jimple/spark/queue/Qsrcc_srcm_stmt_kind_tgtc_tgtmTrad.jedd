@@ -42,7 +42,7 @@ public class Qsrcc_srcm_stmt_kind_tgtc_tgtmTrad extends Qsrcc_srcm_stmt_kind_tgt
         while( it.hasNext() ) {
             Object[] tuple = (Object[]) it.next();
             for( int i = 0; i < 6; i++ ) {
-                q.add( tuple[i] );
+                add( (Context) tuple[0], (SootMethod) tuple[1], (Unit) tuple[2], (Kind) tuple[3], (Context) tuple[4], (SootMethod) tuple[5] );
             }
         }
     }

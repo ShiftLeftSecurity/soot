@@ -37,7 +37,7 @@ public class QobjTrad extends Qobj {
         while( it.hasNext() ) {
             Object[] tuple = (Object[]) it.next();
             for( int i = 0; i < 1; i++ ) {
-                q.add( tuple[i] );
+                add( (AllocNode) tuple[0] );
             }
         }
     }

@@ -53,6 +53,63 @@ public class SparkOptions extends AbstractSparkOptions
         return soot.PhaseOptions.getBoolean( options, "verbose" );
     }
     
+    /** Use BDDs --
+    
+     * Use BDD version of Spark.
+    
+     * Causes 
+     * Spark to use BDD versions of its components 
+     */
+    public boolean bdd() {
+        return soot.PhaseOptions.getBoolean( options, "bdd" );
+    }
+    
+    /** Profile --
+    
+     * Profile BDDs using JeddProfiler.
+    
+     * Turns on JeddProfiler for profiling BDD operations. 
+     */
+    public boolean profile() {
+        return soot.PhaseOptions.getBoolean( options, "profile" );
+    }
+    
+    /** BDD Queues --
+    
+     * Force BDD versions of queues.
+    
+     * Force 
+     * Spark to use BDD versions of the queues for communicating 
+     * between its components 
+     */
+    public boolean bddq() {
+        return soot.PhaseOptions.getBoolean( options, "bddq" );
+    }
+    
+    /** Debug Queues --
+    
+     * Force debug versions of queues.
+    
+     * Force 
+     * Spark to use debugging versions of the queues for communicating 
+     * between its components 
+     */
+    public boolean debugq() {
+        return soot.PhaseOptions.getBoolean( options, "debugq" );
+    }
+    
+    /** Trace --
+    
+     * Trace Spark queues for debugging..
+    
+     * Print 
+     * the contents of all internal Spark queues for debugging. 
+     * 
+     */
+    public boolean trace() {
+        return soot.PhaseOptions.getBoolean( options, "trace" );
+    }
+    
     /** Ignore Types Entirely --
     
      * Make Spark completely ignore declared types of variables.
@@ -364,12 +421,46 @@ public class SparkOptions extends AbstractSparkOptions
         return soot.PhaseOptions.getBoolean( options, "set-mass" );
     }
     
+    public static final int backend_buddy = 1;
+    public static final int backend_cudd = 2;
+    public static final int backend_sable = 3;
+    public static final int backend_javabdd = 4;
+    public static final int backend_none = 5;
+    /** Backend --
+    
+     * Select BDD backend.
+    
+     * This option tells Spark which implementation of BDDs to use. 
+     * 
+     */
+    public int backend() {
+        String s = soot.PhaseOptions.getString( options, "backend" );
+        
+        if( s.equalsIgnoreCase( "buddy" ) )
+            return backend_buddy;
+        
+        if( s.equalsIgnoreCase( "cudd" ) )
+            return backend_cudd;
+        
+        if( s.equalsIgnoreCase( "sable" ) )
+            return backend_sable;
+        
+        if( s.equalsIgnoreCase( "javabdd" ) )
+            return backend_javabdd;
+        
+        if( s.equalsIgnoreCase( "none" ) )
+            return backend_none;
+        
+        throw new RuntimeException( "Invalid value "+s+" of phase option backend" );
+    }
+    
     public static final int propagator_iter = 1;
     public static final int propagator_worklist = 2;
     public static final int propagator_cycle = 3;
     public static final int propagator_merge = 4;
     public static final int propagator_alias = 5;
-    public static final int propagator_none = 6;
+    public static final int propagator_bdd = 6;
+    public static final int propagator_none = 7;
     /** Propagator --
     
      * Select propagation algorithm.
@@ -394,6 +485,9 @@ public class SparkOptions extends AbstractSparkOptions
         
         if( s.equalsIgnoreCase( "alias" ) )
             return propagator_alias;
+        
+        if( s.equalsIgnoreCase( "bdd" ) )
+            return propagator_bdd;
         
         if( s.equalsIgnoreCase( "none" ) )
             return propagator_none;

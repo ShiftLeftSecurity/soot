@@ -28,17 +28,25 @@ import jedd.*;
 import java.util.*;
 
 public final class Rlocal_srcm_stmt_signature_kindBDD extends Rlocal_srcm_stmt_signature_kind {
-    private <local:V1, srcm:T1, stmt:ST, signature:H2, kind:FD> bdd = 0B;
+    private <local:V1, srcm:T1, stmt:ST, signature:H2, kind:FD> bdd;
     void add( <local:V1, srcm:T1, stmt:ST, signature:H2, kind:FD> tuple ) { bdd |= tuple; }
-    public Rlocal_srcm_stmt_signature_kindBDD( <local:V1, srcm:T1, stmt:ST, signature:H2, kind:FD> bdd ) { this.bdd = bdd; }
-    Rlocal_srcm_stmt_signature_kindBDD() {}
+    public Rlocal_srcm_stmt_signature_kindBDD( <local:V1, srcm:T1, stmt:ST, signature:H2, kind:FD> bdd ) { this(); add(bdd); }
+    Rlocal_srcm_stmt_signature_kindBDD() { bdd = 0B; }
     public Iterator iterator() {;
-        final Iterator it = bdd.iterator( new Attribute[] { local.v(), srcm.v(), stmt.v(), signature.v(), kind.v() } );
-        bdd = 0B;
         return new Iterator() {
-            public boolean hasNext() { return it.hasNext(); }
+            private Iterator it;
+            public boolean hasNext() {
+                if( it != null && it.hasNext() ) return true;
+                if( bdd != 0B ) return true;
+                return false;
+            }
             public Object next() {
-                return new Tuple( (Object[]) it.next() );
+                if( it == null || !it.hasNext() ) {
+                    it = bdd.iterator( new Attribute[] { local.v(), srcm.v(), stmt.v(), signature.v(), kind.v() } );
+                    bdd = 0B;
+                }
+                Object[] components = (Object[]) it.next();
+                return new Tuple( (Local) components[0], (SootMethod) components[1], (Unit) components[2], (NumberedString) components[3], (Kind) components[4] );
             }
             public void remove() { throw new UnsupportedOperationException(); }
         };
@@ -49,13 +57,4 @@ public final class Rlocal_srcm_stmt_signature_kindBDD extends Rlocal_srcm_stmt_s
         return ret;
     }
     public boolean hasNext() { return bdd != 0B; }
-    private final class Tuple extends Rlocal_srcm_stmt_signature_kind.Tuple {
-        private Object[] tuple;
-        public Tuple( Object[] tuple ) { this.tuple = tuple; }
-        public Local local() { return (Local) tuple[0]; }
-        public SootMethod srcm() { return (SootMethod) tuple[1]; }
-        public Unit stmt() { return (Unit) tuple[2]; }
-        public NumberedString signature() { return (NumberedString) tuple[3]; }
-        public Kind kind() { return (Kind) tuple[4]; }
-    }
 }

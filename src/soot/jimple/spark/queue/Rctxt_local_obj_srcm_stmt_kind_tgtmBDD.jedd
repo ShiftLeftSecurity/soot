@@ -28,17 +28,25 @@ import jedd.*;
 import java.util.*;
 
 public final class Rctxt_local_obj_srcm_stmt_kind_tgtmBDD extends Rctxt_local_obj_srcm_stmt_kind_tgtm {
-    private <ctxt:V2, local:V1, obj:H1, srcm:T1, stmt:ST, kind:FD, tgtm:T2> bdd = 0B;
+    private <ctxt:V2, local:V1, obj:H1, srcm:T1, stmt:ST, kind:FD, tgtm:T2> bdd;
     void add( <ctxt:V2, local:V1, obj:H1, srcm:T1, stmt:ST, kind:FD, tgtm:T2> tuple ) { bdd |= tuple; }
-    public Rctxt_local_obj_srcm_stmt_kind_tgtmBDD( <ctxt:V2, local:V1, obj:H1, srcm:T1, stmt:ST, kind:FD, tgtm:T2> bdd ) { this.bdd = bdd; }
-    Rctxt_local_obj_srcm_stmt_kind_tgtmBDD() {}
+    public Rctxt_local_obj_srcm_stmt_kind_tgtmBDD( <ctxt:V2, local:V1, obj:H1, srcm:T1, stmt:ST, kind:FD, tgtm:T2> bdd ) { this(); add(bdd); }
+    Rctxt_local_obj_srcm_stmt_kind_tgtmBDD() { bdd = 0B; }
     public Iterator iterator() {;
-        final Iterator it = bdd.iterator( new Attribute[] { ctxt.v(), local.v(), obj.v(), srcm.v(), stmt.v(), kind.v(), tgtm.v() } );
-        bdd = 0B;
         return new Iterator() {
-            public boolean hasNext() { return it.hasNext(); }
+            private Iterator it;
+            public boolean hasNext() {
+                if( it != null && it.hasNext() ) return true;
+                if( bdd != 0B ) return true;
+                return false;
+            }
             public Object next() {
-                return new Tuple( (Object[]) it.next() );
+                if( it == null || !it.hasNext() ) {
+                    it = bdd.iterator( new Attribute[] { ctxt.v(), local.v(), obj.v(), srcm.v(), stmt.v(), kind.v(), tgtm.v() } );
+                    bdd = 0B;
+                }
+                Object[] components = (Object[]) it.next();
+                return new Tuple( (Context) components[0], (Local) components[1], (AllocNode) components[2], (SootMethod) components[3], (Unit) components[4], (Kind) components[5], (SootMethod) components[6] );
             }
             public void remove() { throw new UnsupportedOperationException(); }
         };
@@ -49,15 +57,4 @@ public final class Rctxt_local_obj_srcm_stmt_kind_tgtmBDD extends Rctxt_local_ob
         return ret;
     }
     public boolean hasNext() { return bdd != 0B; }
-    private final class Tuple extends Rctxt_local_obj_srcm_stmt_kind_tgtm.Tuple {
-        private Object[] tuple;
-        public Tuple( Object[] tuple ) { this.tuple = tuple; }
-        public Context ctxt() { return (Context) tuple[0]; }
-        public Local local() { return (Local) tuple[1]; }
-        public AllocNode obj() { return (AllocNode) tuple[2]; }
-        public SootMethod srcm() { return (SootMethod) tuple[3]; }
-        public Unit stmt() { return (Unit) tuple[4]; }
-        public Kind kind() { return (Kind) tuple[5]; }
-        public SootMethod tgtm() { return (SootMethod) tuple[6]; }
-    }
 }

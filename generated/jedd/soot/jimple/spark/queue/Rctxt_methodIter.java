@@ -18,11 +18,13 @@ public class Rctxt_methodIter extends Rctxt_method {
     }
     
     public Iterator iterator() {
-        ;
         return new Iterator() {
-            public boolean hasNext() { return r.hasNext(); }
+            public boolean hasNext() {
+                boolean ret = r.hasNext();
+                return ret;
+            }
             
-            public Object next() { return Rctxt_methodIter.this.new Tuple((Context) r.next(), (SootMethod) r.next()); }
+            public Object next() { return new Tuple((Context) r.next(), (SootMethod) r.next()); }
             
             public void remove() { throw new UnsupportedOperationException(); }
         };
@@ -36,7 +38,7 @@ public class Rctxt_methodIter extends Rctxt_method {
                                                "ins.V1, soot.jimple.spark.bdddomains.method:soot.jimple.spar" +
                                                "k.bdddomains.T1> ret = jedd.internal.Jedd.v().falseBDD(); at" +
                                                " /home/olhotak/soot-2-jedd/src/soot/jimple/spark/queue/Rctxt" +
-                                               "_methodIter.jedd:43,8"),
+                                               "_methodIter.jedd:46,29-32"),
                                               jedd.internal.Jedd.v().falseBDD());
         while (r.hasNext()) {
             ret.eqUnion(jedd.internal.Jedd.v().literal(new Object[] { r.next(), r.next() },
@@ -46,26 +48,9 @@ public class Rctxt_methodIter extends Rctxt_method {
         return new jedd.internal.RelationContainer(new Attribute[] { ctxt.v(), method.v() },
                                                    new PhysicalDomain[] { V1.v(), T1.v() },
                                                    ("return ret; at /home/olhotak/soot-2-jedd/src/soot/jimple/spa" +
-                                                    "rk/queue/Rctxt_methodIter.jedd:47,8"),
+                                                    "rk/queue/Rctxt_methodIter.jedd:50,8-14"),
                                                    ret);
     }
     
     public boolean hasNext() { return r.hasNext(); }
-    
-    private final class Tuple extends soot.jimple.spark.queue.Rctxt_method.Tuple {
-        private Context _ctxt;
-        
-        public Context ctxt() { return _ctxt; }
-        
-        private SootMethod _method;
-        
-        public SootMethod method() { return _method; }
-        
-        public Tuple(Context _ctxt, SootMethod _method) {
-            super();
-            this._ctxt = _ctxt;
-            this._method = _method;
-        }
-    }
-    
 }

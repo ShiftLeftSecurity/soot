@@ -28,17 +28,25 @@ import jedd.*;
 import java.util.*;
 
 public final class Robj_varBDD extends Robj_var {
-    private <obj:H1, var:V1> bdd = 0B;
+    private <obj:H1, var:V1> bdd;
     void add( <obj:H1, var:V1> tuple ) { bdd |= tuple; }
-    public Robj_varBDD( <obj:H1, var:V1> bdd ) { this.bdd = bdd; }
-    Robj_varBDD() {}
+    public Robj_varBDD( <obj:H1, var:V1> bdd ) { this(); add(bdd); }
+    Robj_varBDD() { bdd = 0B; }
     public Iterator iterator() {;
-        final Iterator it = bdd.iterator( new Attribute[] { obj.v(), var.v() } );
-        bdd = 0B;
         return new Iterator() {
-            public boolean hasNext() { return it.hasNext(); }
+            private Iterator it;
+            public boolean hasNext() {
+                if( it != null && it.hasNext() ) return true;
+                if( bdd != 0B ) return true;
+                return false;
+            }
             public Object next() {
-                return new Tuple( (Object[]) it.next() );
+                if( it == null || !it.hasNext() ) {
+                    it = bdd.iterator( new Attribute[] { obj.v(), var.v() } );
+                    bdd = 0B;
+                }
+                Object[] components = (Object[]) it.next();
+                return new Tuple( (AllocNode) components[0], (VarNode) components[1] );
             }
             public void remove() { throw new UnsupportedOperationException(); }
         };
@@ -49,10 +57,4 @@ public final class Robj_varBDD extends Robj_var {
         return ret;
     }
     public boolean hasNext() { return bdd != 0B; }
-    private final class Tuple extends Robj_var.Tuple {
-        private Object[] tuple;
-        public Tuple( Object[] tuple ) { this.tuple = tuple; }
-        public AllocNode obj() { return (AllocNode) tuple[0]; }
-        public VarNode var() { return (VarNode) tuple[1]; }
-    }
 }

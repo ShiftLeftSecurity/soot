@@ -37,20 +37,6 @@ public class Node implements ReferenceVariable, Numberable {
     public Type getType() { return type; }
     /** Sets the declared type of this node, null for unknown. */
     public void setType( Type type ) { this.type = type; }
-    /** Returns the points-to set for this node. */
-    public PointsToSetInternal getP2Set() {
-	if( p2set == null ) {
-            return EmptyPointsToSet.v();
-        }
-        return p2set;
-    }
-    /** Returns the points-to set for this node, makes it if necessary. */
-    public PointsToSetInternal makeP2Set() {
-	if( p2set == null ) {
-            p2set = SparkScene.v().setFactory.newSet( type );
-        }
-        return p2set;
-    }
 
     /* End of public methods. */
 
@@ -67,5 +53,4 @@ public class Node implements ReferenceVariable, Numberable {
     private int number = 0;
 
     protected Type type;
-    protected PointsToSetInternal p2set;
 }

@@ -59,6 +59,8 @@ public class TradStaticCallBuilder extends AbsStaticCallBuilder
 
                 // Deal with virtual and THREAD calls
                 if (ie instanceof InstanceInvokeExpr) {
+                    Scene.v().getUnitNumberer().add(s);
+
                     InstanceInvokeExpr iie = (InstanceInvokeExpr) ie;
                     Local receiver = (Local) iie.getBase();
                     if( ie instanceof SpecialInvokeExpr ) {
@@ -170,6 +172,7 @@ public class TradStaticCallBuilder extends AbsStaticCallBuilder
     }
 
     protected void addEdge( SootMethod src, Stmt stmt, SootMethod tgt, Kind kind ) {
+        Scene.v().getUnitNumberer().add(stmt);
         out.add( null, src, stmt, kind, null, tgt );
     }
 

@@ -34,8 +34,8 @@ public final class HashPointsToSet extends PointsToSetInternal {
     }
     /** Adds contents of other into this set, returns true if this set 
      * changed. */
-    public final boolean addAll( final PointsToSetInternal other,
-            final PointsToSetInternal exclude ) {
+    public final boolean addAll( final PointsToSetReadOnly other,
+            final PointsToSetReadOnly exclude ) {
         if( other instanceof HashPointsToSet
         && exclude == null
         && ( SparkScene.v().tm == null ||

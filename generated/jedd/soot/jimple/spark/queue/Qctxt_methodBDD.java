@@ -18,7 +18,7 @@ public final class Qctxt_methodBDD extends Qctxt_method {
                                                      ("this.add(jedd.internal.Jedd.v().literal(new java.lang.Object" +
                                                       "[...], new jedd.Attribute[...], new jedd.PhysicalDomain[...]" +
                                                       ")) at /home/olhotak/soot-2-jedd/src/soot/jimple/spark/queue/" +
-                                                      "Qctxt_methodBDD.jedd:33,8"),
+                                                      "Qctxt_methodBDD.jedd:33,8-11"),
                                                      jedd.internal.Jedd.v().literal(new Object[] { _ctxt, _method },
                                                                                     new Attribute[] { ctxt.v(), method.v() },
                                                                                     new PhysicalDomain[] { V1.v(), T1.v() })));
@@ -30,7 +30,7 @@ public final class Qctxt_methodBDD extends Qctxt_method {
             reader.add(new jedd.internal.RelationContainer(new Attribute[] { ctxt.v(), method.v() },
                                                            new PhysicalDomain[] { V1.v(), T1.v() },
                                                            ("reader.add(in) at /home/olhotak/soot-2-jedd/src/soot/jimple/" +
-                                                            "spark/queue/Qctxt_methodBDD.jedd:38,12"),
+                                                            "spark/queue/Qctxt_methodBDD.jedd:38,12-18"),
                                                            in));
         }
     }

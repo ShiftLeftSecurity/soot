@@ -35,7 +35,7 @@ public class SparkNumberers {
     public ArrayNumberer varNodeNumberer() { return varNodeNumberer; }
     private ArrayNumberer fieldRefNodeNumberer = new ArrayNumberer();
     public ArrayNumberer fieldRefNodeNumberer() { return fieldRefNodeNumberer; }
-    private ArrayNumberer allocDotFieldNodeNumberer = new ArrayNumberer();
-    public ArrayNumberer allocDotFieldNodeNumberer() { return allocDotFieldNodeNumberer; }
+    private ArrayNumberer allocDotFieldNumberer = new ArrayNumberer();
+    public ArrayNumberer allocDotFieldNumberer() { return allocDotFieldNumberer; }
 }
 

@@ -19,6 +19,7 @@
 
 package soot.jimple.spark;
 import soot.*;
+import soot.util.*;
 import soot.jimple.spark.queue.*;
 import soot.jimple.spark.bdddomains.*;
 import soot.jimple.toolkits.callgraph.*;
@@ -51,58 +52,140 @@ public class BDDVirtualCalls extends AbsVirtualCalls
 
     private int lastVarNode = 1;
     private int lastAllocNode = 1;
-    private <ctxt, local, var> varNodes;
+    private <ctxt:V3, local:V2, var:V1, type> varNodes;
     private <obj, type> allocNodes;
-    private <local, srcm, stmt, signature, kind> rcv;
     private <kind> virtual = new {Kind.VIRTUAL=>kind} | new {Kind.INTERFACE=>kind};
+    private <type> threads = 0B;
     private void updateNodes() {
         // update varnodes
-        for( ; lastVarNode < SparkNumberers.v().varNodeNumberer().size();
+        for( ; lastVarNode <= SparkNumberers.v().varNodeNumberer().size();
             lastVarNode++ ) {
             VarNode vn = (VarNode) SparkNumberers.v().varNodeNumberer().get(lastVarNode);
             if( vn.getVariable() instanceof Local ) {
                 varNodes |= 
-                    new { vn.context()=>ctxt, vn.getVariable()=>local, vn=>var };
+                    new { vn.context()=>ctxt,
+                          vn.getVariable()=>local,
+                          vn=>var,
+                          vn.getType()=>type };
             }
         }
 
-        for( ; lastAllocNode < SparkNumberers.v().allocNodeNumberer().size();
+        for( ; lastAllocNode <= SparkNumberers.v().allocNodeNumberer().size();
             lastAllocNode++ ) {
-            AllocNode an = (AllocNode) SparkNumberers.v().allocNodeNumberer().get(lastVarNode);
+            AllocNode an = (AllocNode) SparkNumberers.v().allocNodeNumberer().get(lastAllocNode);
             allocNodes |= new { an=>obj, an.getType()=>type };
+
+            if( an instanceof StringConstantNode ) {
+                StringConstantNode scn = (StringConstantNode) an;
+                String constant = scn.getString();
+                if( constant.charAt(0) == '[' ) {
+                    if( constant.length() > 1 && constant.charAt(1) == 'L' 
+                        && constant.charAt(constant.length()-1) == ';' ) {
+                            constant = constant.substring(2,constant.length()-1);
+                    } else constant = null;
+                }
+                if( constant != null && Scene.v().containsClass(constant)) {
+                    SootClass cls = Scene.v().getSootClass(constant);
+                    if( cls.declaresMethod(sigClinit) ) {
+                        SootMethod method = cls.getMethod(sigClinit);
+                        stringConstants |= new { an=>obj, method=>tgtm };
+                    }
+                }
+            } else {
+                nonStringConstants |= new {an=>obj};
+            }
         }
+        threads = (subt=>type)
+            hier.subtypeRelation(){supt} <> new {clRunnable=>type}{type};
     }
+    protected final RefType clRunnable = RefType.v("java.lang.Runnable");
+        
+    private <obj, tgtm> stringConstants = 0B;
+    private <obj:H1> nonStringConstants = 0B;
+    private final NumberedString sigClinit = Scene.v().getSubSigNumberer().
+        findOrAdd( "void <clinit>()" );
     
     private <type, signature, method> targets = 0B;
     private <type, signature, method:T3> declaresMethod = 0B;
     private BDDHierarchy hier = new BDDHierarchy();
+
+    private <var, obj> newPt = 0B;
+    private <var, obj> allPt = 0B;
+    private <local, srcm, stmt, signature, kind> newRcv = 0B;
+    private <local, srcm, stmt, signature, kind> allRcv = 0B;
+    private <local, srcm, stmt, tgtm> newSpc = 0B;
+    private <local, srcm, stmt, tgtm> allSpc = 0B;
+
     public void update() {
         updateNodes();
 
+        newPt = pt.get();
+        allPt |= newPt;
+
+        newRcv = receivers.get();
+        allRcv |= newRcv;
+
+        newSpc = specials.get();
+        allSpc |= newSpc;
+
         // update receivers
-        <local, srcm, stmt, signature, kind> newRcv = receivers.get();
-        rcv |= newRcv{kind} >< virtual{kind};
+        updateClinits();
+        updateVirtuals();
+
+        updateSpecials();
+    }
+
+    private void updateClinits() {
+        <local, srcm, stmt, kind> clinits = (signature=>)
+            allRcv{kind} >< new {Kind.CLINIT=>kind}{kind};
+
+        <srcc, local, obj> ctxtLocalPt = newPt{var} <> (ctxt=>srcc, type=>) varNodes{var};
+
+        <srcc, local, tgtm> tgtMethods = ctxtLocalPt{obj} <> stringConstants{obj};
+
+        statics.add( tgtMethods{local} <> clinits{local}
+            {} >< new {null=>tgtc}{} );
+    }
+    private <ctxt, local, obj, srcm, stmt, tgtm> resolvedSpecials = 0B;
+    private void updateSpecials() {
+
+        <ctxt, local, obj> ctxtLocalPt = newPt{var} <> (type=>)varNodes{var};
+        <ctxt, local, obj, srcm, stmt, tgtm> newSpecials =
+            ctxtLocalPt{local} >< allSpc{local};
+
+        newSpecials -= resolvedSpecials;
+        resolvedSpecials |= newSpecials;
+
+        out.add( newSpecials{} >< new {Kind.SPECIAL=>kind}{} );
+    }
+
+    private void updateVirtuals() {
+        <local, srcm, stmt, signature, kind> rcv =
+            allRcv{kind} >< virtual{kind};
+        
+        <local, srcm, stmt, signature, kind> threadRcv =
+            allRcv{kind} >< new{Kind.THREAD=>kind}{kind};
 
         // resolve new points-to sets
-        <var, obj> newPt = pt.get();
-        <type, signature> newTypes =
-               (   (allocNodes{obj} <> newPt{obj}){var}
-                <> (ctxt=>)varNodes{var}){local} 
-            <> (stmt=>,srcm=>,kind=>)rcv{local};
+        <local, type> ptTypes = (allocNodes{obj} <> newPt{obj}) {var}
+                                    <> (ctxt=>, type=>)varNodes {var};
+
+        <type, signature> newTypes = ptTypes{local} 
+                <> (stmt=>,srcm=>,kind=>)rcv{local};
+
+        newTypes |= (ptTypes{type} >< threads{type}) {local}
+                  <> (stmt=>,srcm=>,kind=>)threadRcv {local};
+
+        // close under AnySubType; that is, if the receiver is AnySubType(t),
+        // replace it with all subtypes of t
+        hier.update();
+        newTypes |= newTypes{type} <> hier.anySub(){anyst};
 
         // if we've resolved them already, don't resolve them again
         newTypes -= (method=>) targets;
 
         // for each tuple [t, s], make it [t, s, t].
-        <subt, signature, supt:T2> toResolve = (type=>subt, type=>supt) newTypes;
-
-        hier.update();
-
-        // close under AnySubType; that is, if the receiver is AnySubType(t),
-        // replace it with all subtypes of t
-        toResolve |=
-            toResolve{subt} <> (type=>subt)(type=>T3) hier.anySub(){anyst};
-
+        <subt, signature, supt> toResolve = (type=>subt, type=>supt) newTypes;
 
         do {
             // figure out which receivers are already resolved (if the
@@ -120,12 +203,26 @@ public class BDDVirtualCalls extends AbsVirtualCalls
             toResolve = toResolve {supt} <> (supt=>T3) hier.extend() {subt};
         } while( toResolve != 0B );
 
+        <var, obj, type> typedPt = allocNodes{obj}><newPt{obj};
+
+
+        // close typedPt under AnySubType
+        typedPt |= typedPt{type} <> (hier.anySub()){anyst};
+
+        <ctxt, local, supt, obj, type> localCtxtPt =
+            typedPt{var} <> (type=>supt) varNodes{var};
+
+        // Weed out types coming from AnySubType that are not compatible
+        // with the declared type of the variable.
+        localCtxtPt =     localCtxtPt{type, supt} 
+            >< hier.subtypeRelation(){subt, supt};
+
+        <local, srcm, stmt, type, kind, tgtm> callSiteTargets =
+            (rcv|threadRcv){signature} <> (method=>tgtm) targets{signature};
+
         out.add( (type=>) (
-                   allocNodes     {obj} 
-                >< (var=>V3)newPt {obj}{var}
-                <> varNodes            {var}            {type, local}
-                >< (rcv                     {signature}
-                   <> (method=>tgtm)targets {signature}){type, local}));
+                   (supt=>) localCtxtPt{type, local}
+                    >< callSiteTargets {type, local} ) );
     }
 }
      

@@ -1392,6 +1392,99 @@ When this option is set to true, Spark prints detailed information about its exe
         </long_desc>
 						</boolopt>
 						<boolopt>
+							<name>Use BDDs</name>
+							<alias>bdd</alias>
+							<default>false</default>
+                                                        <short_desc>Use BDD version of Spark</short_desc>
+							<long_desc>
+                                                        Causes Spark to use BDD versions of its components
+        </long_desc>
+						</boolopt>
+						<boolopt>
+							<name>Profile</name>
+							<alias>profile</alias>
+							<default>false</default>
+                                                        <short_desc>Profile BDDs using JeddProfiler</short_desc>
+							<long_desc>
+Turns on JeddProfiler for profiling BDD operations.
+        </long_desc>
+						</boolopt>
+						<boolopt>
+							<name>BDD Queues</name>
+							<alias>bddq</alias>
+							<default>false</default>
+                                                        <short_desc>Force BDD versions of queues</short_desc>
+							<long_desc>
+                                                        Force Spark to use BDD versions of the queues for communicating between its components
+        </long_desc>
+						</boolopt>
+						<boolopt>
+							<name>Debug Queues</name>
+							<alias>debugq</alias>
+							<default>false</default>
+                                                        <short_desc>Force debug versions of queues</short_desc>
+							<long_desc>
+                                                        Force Spark to use debugging versions of the queues for communicating between its components
+        </long_desc>
+						</boolopt>
+						<boolopt>
+							<name>Trace</name>
+							<alias>trace</alias>
+							<default>false</default>
+                                                        <short_desc>Trace Spark queues for debugging.</short_desc>
+							<long_desc>
+                                                        Print the contents of all internal Spark queues for debugging.
+        </long_desc>
+						</boolopt>
+						<multiopt>
+							<name>Backend</name>
+							<alias>backend</alias>
+							<value>
+								<name>BuDDy</name>
+								<alias>buddy</alias>
+								<default/>
+<short_desc>BuDDy backend</short_desc>
+<long_desc>
+Use BuDDy implementation of BDDs.
+</long_desc>
+							</value>
+							<value>
+								<name>CUDD</name>
+								<alias>cudd</alias>
+<short_desc>CUDD backend</short_desc>
+<long_desc>
+Use CUDD implementation of BDDs.
+</long_desc>
+
+							</value>
+							<value>
+								<name>SableJBDD</name>
+								<alias>sable</alias>
+                                                                <short_desc>SableJBDD backend</short_desc>
+                                                                <long_desc>Use SableJBDD implementation of BDDs.</long_desc>
+							</value>
+							<value>
+								<name>JavaBDD</name>
+								<alias>javabdd</alias>
+<short_desc>JavaBDD backend</short_desc>
+<long_desc>
+Use JavaBDD implementation of BDDs.
+</long_desc>
+							</value>
+							<value>
+								<name>None</name>
+								<alias>none</alias>
+                                                                <short_desc>No BDDs</short_desc>
+<long_desc>
+Don't use any BDD backend. Any attempted use of BDDs will cause Spark to crash.
+</long_desc>
+							</value>
+                                                        <short_desc>Select BDD backend</short_desc>
+							<long_desc>
+This option tells Spark which implementation of BDDs to use.
+        </long_desc>
+						</multiopt>
+						<boolopt>
 							<name>Ignore Types Entirely</name>
 							<alias>ignore-types</alias>
 							<default>false</default>
@@ -1622,6 +1715,14 @@ the least memory for very large problems, because it does not represent
 explicitly points-to sets of fields of heap objects.
 </long_desc>
 
+							</value>
+							<value>
+								<name>BDD</name>
+								<alias>bdd</alias>
+                                                                <short_desc>BDD-based propagator</short_desc>
+<long_desc>
+BDD is a propagator that stores points-to sets in binary decision diagrams.
+</long_desc>
 							</value>
 							<value>
 								<name>None</name>

@@ -41,7 +41,7 @@ public class Qlocal_srcm_stmt_signature_kindTrad extends Qlocal_srcm_stmt_signat
         while( it.hasNext() ) {
             Object[] tuple = (Object[]) it.next();
             for( int i = 0; i < 5; i++ ) {
-                q.add( tuple[i] );
+                add( (Local) tuple[0], (SootMethod) tuple[1], (Unit) tuple[2], (NumberedString) tuple[3], (Kind) tuple[4] );
             }
         }
     }

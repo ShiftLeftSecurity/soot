@@ -16,8 +16,24 @@ public abstract class Rvar {
     
     public abstract boolean hasNext();
     
-    public abstract class Tuple {
-        public abstract VarNode var();
+    public static class Tuple {
+        private VarNode _var;
+        
+        public VarNode var() { return _var; }
+        
+        public Tuple(VarNode _var) {
+            super();
+            this._var = _var;
+        }
+        
+        public int hashCode() { return 0; }
+        
+        public boolean equals(Object other) {
+            if (!(other instanceof Tuple)) return false;
+            Tuple o = (Tuple) other;
+            if (o._var != _var) return false;
+            return true;
+        }
         
         public String toString() {
             StringBuffer ret = new StringBuffer();
@@ -25,8 +41,6 @@ public abstract class Rvar {
             ret.append(", ");
             return ret.toString();
         }
-        
-        public Tuple() { super(); }
     }
     
     

@@ -14,33 +14,50 @@ public final class RvarBDD extends Rvar {
       new jedd.internal.RelationContainer(new Attribute[] { var.v() },
                                           new PhysicalDomain[] { V1.v() },
                                           ("private <soot.jimple.spark.bdddomains.var:soot.jimple.spark." +
-                                           "bdddomains.V1> bdd = jedd.internal.Jedd.v().falseBDD() at /h" +
-                                           "ome/olhotak/soot-2-jedd/src/soot/jimple/spark/queue/RvarBDD." +
-                                           "jedd:31,12"),
-                                          jedd.internal.Jedd.v().falseBDD());
+                                           "bdddomains.V1> bdd at /home/olhotak/soot-2-jedd/src/soot/jim" +
+                                           "ple/spark/queue/RvarBDD.jedd:31,12-20"));
     
     void add(final jedd.internal.RelationContainer tuple) { bdd.eqUnion(tuple); }
     
     public RvarBDD(final jedd.internal.RelationContainer bdd) {
-        super();
-        this.bdd.eq(bdd);
+        this();
+        this.add(new jedd.internal.RelationContainer(new Attribute[] { var.v() },
+                                                     new PhysicalDomain[] { V1.v() },
+                                                     ("this.add(bdd) at /home/olhotak/soot-2-jedd/src/soot/jimple/s" +
+                                                      "park/queue/RvarBDD.jedd:33,45-48"),
+                                                     bdd));
     }
     
-    RvarBDD() { super(); }
+    RvarBDD() {
+        super();
+        bdd.eq(jedd.internal.Jedd.v().falseBDD());
+    }
     
     public Iterator iterator() {
         ;
-        final Iterator it =
-          new jedd.internal.RelationContainer(new Attribute[] { var.v() },
-                                              new PhysicalDomain[] { V1.v() },
-                                              ("bdd.iterator(new jedd.Attribute[...]) at /home/olhotak/soot-" +
-                                               "2-jedd/src/soot/jimple/spark/queue/RvarBDD.jedd:36,28"),
-                                              bdd).iterator(new Attribute[] { var.v() });
-        bdd.eq(jedd.internal.Jedd.v().falseBDD());
         return new Iterator() {
-            public boolean hasNext() { return it.hasNext(); }
+            private Iterator it;
             
-            public Object next() { return RvarBDD.this.new Tuple((Object[]) it.next()); }
+            public boolean hasNext() {
+                if (it != null && it.hasNext()) return true;
+                if (!jedd.internal.Jedd.v().equals(jedd.internal.Jedd.v().read(bdd), jedd.internal.Jedd.v().falseBDD()))
+                    return true;
+                return false;
+            }
+            
+            public Object next() {
+                if (it == null || !it.hasNext()) {
+                    it =
+                      new jedd.internal.RelationContainer(new Attribute[] { var.v() },
+                                                          new PhysicalDomain[] { V1.v() },
+                                                          ("bdd.iterator(new jedd.Attribute[...]) at /home/olhotak/soot-" +
+                                                           "2-jedd/src/soot/jimple/spark/queue/RvarBDD.jedd:45,25-28"),
+                                                          bdd).iterator(new Attribute[] { var.v() });
+                    bdd.eq(jedd.internal.Jedd.v().falseBDD());
+                }
+                Object[] components = (Object[]) it.next();
+                return new Tuple((VarNode) components[0]);
+            }
             
             public void remove() { throw new UnsupportedOperationException(); }
         };
@@ -52,29 +69,17 @@ public final class RvarBDD extends Rvar {
                                               new PhysicalDomain[] { V1.v() },
                                               ("<soot.jimple.spark.bdddomains.var:soot.jimple.spark.bdddomai" +
                                                "ns.V1> ret = bdd; at /home/olhotak/soot-2-jedd/src/soot/jimp" +
-                                               "le/spark/queue/RvarBDD.jedd:47,8"),
+                                               "le/spark/queue/RvarBDD.jedd:55,17-20"),
                                               bdd);
         bdd.eq(jedd.internal.Jedd.v().falseBDD());
         return new jedd.internal.RelationContainer(new Attribute[] { var.v() },
                                                    new PhysicalDomain[] { V1.v() },
                                                    ("return ret; at /home/olhotak/soot-2-jedd/src/soot/jimple/spa" +
-                                                    "rk/queue/RvarBDD.jedd:49,8"),
+                                                    "rk/queue/RvarBDD.jedd:57,8-14"),
                                                    ret);
     }
     
     public boolean hasNext() {
         return !jedd.internal.Jedd.v().equals(jedd.internal.Jedd.v().read(bdd), jedd.internal.Jedd.v().falseBDD());
     }
-    
-    private final class Tuple extends soot.jimple.spark.queue.Rvar.Tuple {
-        private Object[] tuple;
-        
-        public Tuple(Object[] tuple) {
-            super();
-            this.tuple = tuple;
-        }
-        
-        public VarNode var() { return (VarNode) tuple[0]; }
-    }
-    
 }

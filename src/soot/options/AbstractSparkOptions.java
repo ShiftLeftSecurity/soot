@@ -29,6 +29,9 @@ public class AbstractSparkOptions
     public boolean verbose() {
         throw new RuntimeException( "This variation of Spark doesn't have that option" );
     }
+    public boolean trace() {
+        throw new RuntimeException( "This variation of Spark doesn't have that option" );
+    }
     public boolean ignore_types() {
         throw new RuntimeException( "This variation of Spark doesn't have that option" );
     }

@@ -43,7 +43,7 @@ public class Qctxt_local_obj_srcm_stmt_kind_tgtmTrad extends Qctxt_local_obj_src
         while( it.hasNext() ) {
             Object[] tuple = (Object[]) it.next();
             for( int i = 0; i < 7; i++ ) {
-                q.add( tuple[i] );
+                add( (Context) tuple[0], (Local) tuple[1], (AllocNode) tuple[2], (SootMethod) tuple[3], (Unit) tuple[4], (Kind) tuple[5], (SootMethod) tuple[6] );
             }
         }
     }

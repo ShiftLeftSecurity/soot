@@ -35,7 +35,7 @@ public final class SharedPointsToSet extends PointsToSetInternal {
         return empty;
     }
 
-    private final boolean superAddAll( PointsToSetInternal other, PointsToSetInternal exclude ) {
+    private final boolean superAddAll( PointsToSetReadOnly other, PointsToSetReadOnly exclude ) {
         boolean ret = super.addAll( other, exclude );
         if( ret ) empty = false;
         return ret;
@@ -129,8 +129,8 @@ public final class SharedPointsToSet extends PointsToSetInternal {
  
     /** Adds contents of other into this set, returns true if this set 
      * changed. */
-    public final boolean addAll( final PointsToSetInternal other,
-            final PointsToSetInternal exclude ) {
+    public final boolean addAll( final PointsToSetReadOnly other,
+            final PointsToSetReadOnly exclude ) {
         if( other != null && !(other instanceof SharedPointsToSet) )
             return superAddAll( other, exclude );
         if( exclude != null && !(exclude instanceof SharedPointsToSet) )

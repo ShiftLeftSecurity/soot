@@ -20,8 +20,12 @@
 package soot.jimple.spark;
 import soot.*;
 import soot.jimple.spark.queue.*;
+import soot.jimple.spark.bdddomains.*;
 import soot.options.*;
 import java.util.*;
+import java.util.zip.*;
+import jedd.*;
+import java.io.*;
 
 /** This class puts all of the pieces of Spark together and connects them
  * with queues.
@@ -46,6 +50,7 @@ public class SparkScene
 
     public AbsPAG pag;
     public AbsPropagator prop;
+    public AbsP2Sets p2sets;
 
     public AbsVirtualCalls vcr;
     public AbsVirtualContextManager vcm;
@@ -81,7 +86,7 @@ public class SparkScene
 
     private NodeFactory nodeFactory;
     private NodeManager nodeManager = new NodeManager();
-    private AbstractSparkOptions options;
+    private SparkOptions options;
     public P2SetFactory setFactory;
     public P2SetFactory newSetFactory;
     public P2SetFactory oldSetFactory;
@@ -90,13 +95,41 @@ public class SparkScene
     public NodeManager nodeManager() { return nodeManager; }
     public AbstractSparkOptions options() { return options; }
 
-    public void setup( AbstractSparkOptions opts ) {
+    public void setup( SparkOptions opts ) {
         options = opts;
-        if( options instanceof BDDSparkOptions ) {
+        switch( options.backend() ) {
+            case SparkOptions.backend_buddy:
+                Jedd.v().setBackend("buddy"); 
+                break;
+            case SparkOptions.backend_cudd:
+                Jedd.v().setBackend("cudd"); 
+                break;
+            case SparkOptions.backend_sable:
+                Jedd.v().setBackend("sablejbdd"); 
+                break;
+            case SparkOptions.backend_javabdd:
+                Jedd.v().setBackend("javabdd"); 
+                break;
+            case SparkOptions.backend_none:
+                break;
+            default:
+                throw new RuntimeException( "Unhandled option: "+options.backend() );
+        }
+        if( options.backend() != SparkOptions.backend_none ) {
+            PhysicalDomain[] vs = { V1.v(), V2.v(), V3.v() };
+            PhysicalDomain[] ts = { T1.v(), T2.v(), T3.v() };
+            Object[] order = { ts, FD.v(), vs, H1.v(), H2.v(), ST.v() };
+            Jedd.v().setOrder( order, true );
+        }
+        if( options.profile() ) {
+            Jedd.v().enableProfiling();
+        }
+        if( options.bdd() ) {
             buildBDD();
         } else {
             buildTrad();
         }
+
         newSetFactory = HybridPointsToSet.getFactory();
         oldSetFactory = HybridPointsToSet.getFactory();
         setFactory = DoublePointsToSet.getFactory( newSetFactory, oldSetFactory );
@@ -110,6 +143,41 @@ public class SparkScene
         }
         updateFrontEnd();
         prop.update();
+        if( options.profile() ) {
+            try {
+                Jedd.v().outputProfile( new PrintStream( new GZIPOutputStream(
+                    new FileOutputStream( new File( "profile.sql.gz")))));
+            } catch( IOException e ) {
+                throw new RuntimeException( "Couldn't output Jedd profile "+e );
+            }
+        }
+    }
+
+    private void buildQueuesSet() {
+        rmout = new Qctxt_methodSet();
+        scgbout = new Qsrcc_srcm_stmt_kind_tgtc_tgtmSet();
+        receivers = new Qlocal_srcm_stmt_signature_kindSet();
+        specials = new Qlocal_srcm_stmt_tgtmSet();
+        cicgout = new Qsrcc_srcm_stmt_kind_tgtc_tgtmSet();
+        cscgbout = new Qsrcc_srcm_stmt_kind_tgtc_tgtmSet();
+        cmout = new Qsrcc_srcm_stmt_kind_tgtc_tgtmSet();
+        cgout = new Qsrcc_srcm_stmt_kind_tgtc_tgtmSet();
+        rcout = new Qctxt_methodSet();
+
+        simple = new Qsrc_dstSet();
+        load = new Qsrc_fld_dstSet();
+        store = new Qsrc_fld_dstSet();
+        alloc = new Qobj_varSet();
+
+        pagsimple = new Qsrc_dstSet();
+        pagload = new Qsrc_fld_dstSet();
+        pagstore = new Qsrc_fld_dstSet();
+        pagalloc = new Qobj_varSet();
+
+        paout = new Qvar_objSet();
+
+        vcrout = new Qctxt_local_obj_srcm_stmt_kind_tgtmSet();
+        vcmout = new Qsrcc_srcm_stmt_kind_tgtc_tgtmSet();
     }
 
     private void buildQueuesBDD() {
@@ -140,7 +208,7 @@ public class SparkScene
     }
 
     private void buildBDD() {
-        buildQueuesBDD();
+        buildQueues();
         nodeFactory = new NodeFactory( simple, load, store, alloc );
 
         cicg = new BDDCallGraph( scgbout.reader(), cicgout );
@@ -160,13 +228,16 @@ public class SparkScene
 
         pag = new BDDPAG( simple.reader(), load.reader(), store.reader(),
                 alloc.reader(), pagsimple, pagload, pagstore, pagalloc );
-        prop = new PropBDD( pagsimple.reader(), pagload.reader(),
-                pagstore.reader(), pagalloc.reader(), paout, pag );
+        makePropagator();
 
         vcr = new BDDVirtualCalls( paout.reader(), receivers.reader(), specials.reader(), vcrout, cscgbout );
         vcm = new BDDInsensitiveVirtualContextManager( vcrout.reader(), vcmout );
         cs = new BDDContextStripper( vcmout.reader(), cicgout );
 
+        tm = new BDDTypeManager( 
+                new RvarIter( SparkNumberers.v().varNodeNumberer().iterator() ),
+                new RobjIter( SparkNumberers.v().allocNodeNumberer().iterator() ), 
+                options.ignore_types() ? null : new BDDHierarchy() );
     }
 
     private void buildQueuesTrad() {
@@ -196,6 +267,35 @@ public class SparkScene
         vcmout = new Qsrcc_srcm_stmt_kind_tgtc_tgtmTrad();
     }
 
+    private void buildQueuesDebug() {
+        rmout = new Qctxt_methodBDD();
+        scgbout = new Qsrcc_srcm_stmt_kind_tgtc_tgtmBDD();
+
+        receivers = new Qlocal_srcm_stmt_signature_kindBDD();
+        specials = new Qlocal_srcm_stmt_tgtmBDD();
+
+        cicgout = new Qsrcc_srcm_stmt_kind_tgtc_tgtmBDD();
+        cscgbout = new Qsrcc_srcm_stmt_kind_tgtc_tgtmBDD();
+        cmout = new Qsrcc_srcm_stmt_kind_tgtc_tgtmBDD();
+        cgout = new Qsrcc_srcm_stmt_kind_tgtc_tgtmBDD();
+        rcout = new Qctxt_methodBDD();
+
+        simple = new Qsrc_dstBDD();
+        load = new Qsrc_fld_dstBDD();
+        store = new Qsrc_fld_dstBDD();
+        alloc = new Qobj_varBDD();
+
+        pagsimple = new Qsrc_dstBDD();
+        pagload = new Qsrc_fld_dstBDD();
+        pagstore = new Qsrc_fld_dstBDD();
+        pagalloc = new Qobj_varBDD();
+
+        paout = new Qvar_objBDD();
+
+        vcrout = new Qctxt_local_obj_srcm_stmt_kind_tgtmBDD();
+        vcmout = new Qsrcc_srcm_stmt_kind_tgtc_tgtmBDD();
+    }
+
     private void buildQueuesTrace() {
         rmout = new Qctxt_methodTrace("rmout");
         scgbout = new Qsrcc_srcm_stmt_kind_tgtc_tgtmTrace("scgbout");
@@ -223,9 +323,15 @@ public class SparkScene
         vcmout = new Qsrcc_srcm_stmt_kind_tgtc_tgtmTrace("vcmout");
     }
 
+    private void buildQueues() {
+        if( options.debugq() ) buildQueuesDebug();
+        else if( options.bddq() ) buildQueuesBDD();
+        else if( options.trace() ) buildQueuesTrace();
+        else buildQueuesTrad();
+    }
     private void buildTrad() {
-        //buildQueuesTrace();
-        buildQueuesTrad();
+        buildQueues();
+
         nodeFactory = new NodeFactory( simple, load, store, alloc );
 
         cicg = new TradCallGraph( scgbout.reader(), cicgout );
@@ -245,8 +351,7 @@ public class SparkScene
 
         pag = new TradPAG( simple.reader(), load.reader(), store.reader(),
                 alloc.reader(), pagsimple, pagload, pagstore, pagalloc );
-        prop = new PropWorklist( pagsimple.reader(), pagload.reader(),
-                pagstore.reader(), pagalloc.reader(), paout, pag );
+        makePropagator();
 
         vcr = new TradVirtualCalls( paout.reader(), receivers.reader(), specials.reader(), vcrout, cscgbout );
         vcm = new TradInsensitiveVirtualContextManager( vcrout.reader(), vcmout );
@@ -255,7 +360,34 @@ public class SparkScene
         tm = new TradTypeManager( 
                 new RvarIter( SparkNumberers.v().varNodeNumberer().iterator() ),
                 new RobjIter( SparkNumberers.v().allocNodeNumberer().iterator() ), 
-                Scene.v().getOrMakeFastHierarchy() );
+                options.ignore_types() ? null : Scene.v().getOrMakeFastHierarchy() );
+    }
+
+    private void makePropagator() {
+        switch( options.propagator() ) {
+            case SparkOptions.propagator_worklist:
+                prop = new PropWorklist( pagsimple.reader(), pagload.reader(),
+                    pagstore.reader(), pagalloc.reader(), paout, pag );
+                p2sets = new TradP2Sets();
+                break;
+            case SparkOptions.propagator_iter:
+                prop = new PropIter( pagsimple.reader(), pagload.reader(),
+                    pagstore.reader(), pagalloc.reader(), paout, pag );
+                p2sets = new TradP2Sets();
+                break;
+            case SparkOptions.propagator_alias:
+                prop = new PropAlias( pagsimple.reader(), pagload.reader(),
+                    pagstore.reader(), pagalloc.reader(), paout, pag );
+                p2sets = new TradP2Sets();
+                break;
+            case SparkOptions.propagator_bdd:
+                prop = new PropBDD( pagsimple.reader(), pagload.reader(),
+                    pagstore.reader(), pagalloc.reader(), paout, pag );
+                p2sets = new BDDP2Sets( (PropBDD) prop );
+                break;
+            default:
+                throw new RuntimeException( "Unimplemented propagator specified" );
+        }
     }
 
     private void updateFrontEnd() {

@@ -23,6 +23,7 @@ import soot.util.*;
 import soot.jimple.spark.queue.*;
 import soot.jimple.spark.bdddomains.*;
 import java.util.*;
+import jedd.*;
 
 /** Keeps track of subtype relationships between PAG nodes.
  * @author Ondrej Lhotak
@@ -45,6 +46,7 @@ public class TradTypeManager extends AbsTypeManager
                 final AllocNode an = (AllocNode) anIt.next();
                 if( castNeverFails( an.getType(), type ) ) {
                     bv.set( an.getNumber() );
+                    change = true;
                 }
             }
         }
@@ -60,6 +62,7 @@ public class TradTypeManager extends AbsTypeManager
                 if( bv == null ) continue;
                 if( castNeverFails( an.getType(), type ) ) {
                     bv.set( an.getNumber() );
+                    change = true;
                 }
             }
         }
@@ -70,6 +73,44 @@ public class TradTypeManager extends AbsTypeManager
         BitVector ret = (BitVector) typeMask.get( type );
         if( ret == null && fh != null ) throw new RuntimeException( "oops"+type );
         return ret;
+    }
+    private BDDGetter bddGetter;
+    public <var, obj> get() {
+        if( fh == null ) return 1B;
+        if( bddGetter == null ) bddGetter = new BDDGetter();
+        return bddGetter.get();
+    }
+    class BDDGetter {
+        private <type:T1, obj> cachedTypeMasks = 0B;
+        private <var, type> cachedVarNodes = 0B;
+        private <var, obj> cachedVarObj = 0B;
+        public <var:V1, obj:H1> get() {
+            update();
+            if( change ) {
+                for( Iterator tIt = Scene.v().getTypeNumberer().iterator(); tIt.hasNext(); ) {
+                    final Type t = (Type) tIt.next();
+                    BitVector mask = (BitVector) typeMask.get(t);
+                    if( mask == null ) continue;
+                    BitSetIterator bsi = mask.iterator();
+                    Numberer objNumberer = SparkNumberers.v().allocNodeNumberer();
+                    while( bsi.hasNext() ) {
+                        int objNum = bsi.next();
+                        cachedTypeMasks |= new { t=>type, objNumberer.get(objNum)=>obj };
+                    }
+                }
+                cachedVarObj = cachedTypeMasks{type} <> cachedVarNodes{type}; 
+                change = false;
+            }
+
+            <var, type> varNodes = 0B;
+            while( newVarNodes.hasNext() ) {
+                VarNode vn = (VarNode) newVarNodes.next();
+                varNodes |= new { vn=>var, vn.getType()=>type };
+            }
+            cachedVarObj |= cachedTypeMasks{type} <> varNodes{type};
+            cachedVarNodes |= varNodes;
+            return cachedVarObj;
+        }
     }
     public boolean castNeverFails( Type from, Type to ) {
         if( fh == null ) return true;
@@ -83,13 +124,12 @@ public class TradTypeManager extends AbsTypeManager
         if( to instanceof AnySubType ) throw new RuntimeException( "oops from="+from+" to="+to );
         return fh.canStoreType( from, to );
     }
-    public <var, obj> get() {
-        throw new RuntimeException( "NYI" );
-    }
 
     private LargeNumberedMap typeMask = new LargeNumberedMap( Scene.v().getTypeNumberer() );
     private NumberedSet allocNodes = new NumberedSet( SparkNumberers.v().allocNodeNumberer() );
+    private Iterator newVarNodes = SparkNumberers.v().varNodeNumberer().iterator();
     private FastHierarchy fh;
+    private boolean change = false;
 }
 
 

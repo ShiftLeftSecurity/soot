@@ -16,14 +16,42 @@ public abstract class Rlocal_srcm_stmt_tgtm {
     
     public abstract boolean hasNext();
     
-    public abstract class Tuple {
-        public abstract Local local();
+    public static class Tuple {
+        private Local _local;
         
-        public abstract SootMethod srcm();
+        public Local local() { return _local; }
         
-        public abstract Unit stmt();
+        private SootMethod _srcm;
         
-        public abstract SootMethod tgtm();
+        public SootMethod srcm() { return _srcm; }
+        
+        private Unit _stmt;
+        
+        public Unit stmt() { return _stmt; }
+        
+        private SootMethod _tgtm;
+        
+        public SootMethod tgtm() { return _tgtm; }
+        
+        public Tuple(Local _local, SootMethod _srcm, Unit _stmt, SootMethod _tgtm) {
+            super();
+            this._local = _local;
+            this._srcm = _srcm;
+            this._stmt = _stmt;
+            this._tgtm = _tgtm;
+        }
+        
+        public int hashCode() { return 0; }
+        
+        public boolean equals(Object other) {
+            if (!(other instanceof Tuple)) return false;
+            Tuple o = (Tuple) other;
+            if (o._local != _local) return false;
+            if (o._srcm != _srcm) return false;
+            if (o._stmt != _stmt) return false;
+            if (o._tgtm != _tgtm) return false;
+            return true;
+        }
         
         public String toString() {
             StringBuffer ret = new StringBuffer();
@@ -37,8 +65,6 @@ public abstract class Rlocal_srcm_stmt_tgtm {
             ret.append(", ");
             return ret.toString();
         }
-        
-        public Tuple() { super(); }
     }
     
     

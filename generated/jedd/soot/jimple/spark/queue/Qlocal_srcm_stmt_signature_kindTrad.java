@@ -22,15 +22,21 @@ public class Qlocal_srcm_stmt_signature_kindTrad extends Qlocal_srcm_stmt_signat
     
     public void add(final jedd.internal.RelationContainer in) {
         Iterator it =
-          new jedd.internal.RelationContainer(new Attribute[] { signature.v(), local.v(), kind.v(), stmt.v(), srcm.v() },
-                                              new PhysicalDomain[] { H2.v(), V1.v(), FD.v(), ST.v(), T1.v() },
+          new jedd.internal.RelationContainer(new Attribute[] { srcm.v(), local.v(), stmt.v(), signature.v(), kind.v() },
+                                              new PhysicalDomain[] { T1.v(), V1.v(), ST.v(), H2.v(), FD.v() },
                                               ("in.iterator(new jedd.Attribute[...]) at /home/olhotak/soot-2" +
                                                "-jedd/src/soot/jimple/spark/queue/Qlocal_srcm_stmt_signature" +
-                                               "_kindTrad.jedd:40,22"),
+                                               "_kindTrad.jedd:40,22-24"),
                                               in).iterator(new Attribute[] { local.v(), srcm.v(), stmt.v(), signature.v(), kind.v() });
         while (it.hasNext()) {
             Object[] tuple = (Object[]) it.next();
-            for (int i = 0; i < 5; i++) { q.add(tuple[i]); }
+            for (int i = 0; i < 5; i++) {
+                this.add((Local) tuple[0],
+                         (SootMethod) tuple[1],
+                         (Unit) tuple[2],
+                         (NumberedString) tuple[3],
+                         (Kind) tuple[4]);
+            }
         }
     }
     

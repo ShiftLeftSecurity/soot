@@ -30,9 +30,12 @@ import java.util.*;
 public class Robj_varIter extends Robj_var{
     protected Iterator r;
     public Robj_varIter( Iterator r ) { this.r = r; }
-    public Iterator iterator() {;
+    public Iterator iterator() {
         return new Iterator() {
-            public boolean hasNext() { return r.hasNext(); }
+            public boolean hasNext() {
+                boolean ret = r.hasNext();
+                return ret;
+            }
             public Object next() {
                 return new Tuple( (AllocNode) r.next(), (VarNode) r.next() );
             }
@@ -47,14 +50,4 @@ public class Robj_varIter extends Robj_var{
         return ret;
     }
     public boolean hasNext() { return r.hasNext(); }
-    private final class Tuple extends Robj_var.Tuple {
-        private AllocNode _obj;
-        public AllocNode obj() { return _obj; }
-        private VarNode _var;
-        public VarNode var() { return _var; }
-        public Tuple( AllocNode _obj, VarNode _var ) {
-            this._obj = _obj;
-            this._var = _var;
-        }
-    }
 }

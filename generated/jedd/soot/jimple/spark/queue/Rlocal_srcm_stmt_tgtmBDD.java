@@ -17,34 +17,55 @@ public final class Rlocal_srcm_stmt_tgtmBDD extends Rlocal_srcm_stmt_tgtm {
                                            "k.bdddomains.V1, soot.jimple.spark.bdddomains.srcm:soot.jimp" +
                                            "le.spark.bdddomains.T1, soot.jimple.spark.bdddomains.stmt:so" +
                                            "ot.jimple.spark.bdddomains.ST, soot.jimple.spark.bdddomains." +
-                                           "tgtm:soot.jimple.spark.bdddomains.T2> bdd = jedd.internal.Je" +
-                                           "dd.v().falseBDD() at /home/olhotak/soot-2-jedd/src/soot/jimp" +
-                                           "le/spark/queue/Rlocal_srcm_stmt_tgtmBDD.jedd:31,12"),
-                                          jedd.internal.Jedd.v().falseBDD());
+                                           "tgtm:soot.jimple.spark.bdddomains.T2> bdd at /home/olhotak/s" +
+                                           "oot-2-jedd/src/soot/jimple/spark/queue/Rlocal_srcm_stmt_tgtm" +
+                                           "BDD.jedd:31,12-49"));
     
     void add(final jedd.internal.RelationContainer tuple) { bdd.eqUnion(tuple); }
     
     public Rlocal_srcm_stmt_tgtmBDD(final jedd.internal.RelationContainer bdd) {
-        super();
-        this.bdd.eq(bdd);
+        this();
+        this.add(new jedd.internal.RelationContainer(new Attribute[] { srcm.v(), local.v(), tgtm.v(), stmt.v() },
+                                                     new PhysicalDomain[] { T1.v(), V1.v(), T2.v(), ST.v() },
+                                                     ("this.add(bdd) at /home/olhotak/soot-2-jedd/src/soot/jimple/s" +
+                                                      "park/queue/Rlocal_srcm_stmt_tgtmBDD.jedd:33,91-94"),
+                                                     bdd));
     }
     
-    Rlocal_srcm_stmt_tgtmBDD() { super(); }
+    Rlocal_srcm_stmt_tgtmBDD() {
+        super();
+        bdd.eq(jedd.internal.Jedd.v().falseBDD());
+    }
     
     public Iterator iterator() {
         ;
-        final Iterator it =
-          new jedd.internal.RelationContainer(new Attribute[] { tgtm.v(), local.v(), stmt.v(), srcm.v() },
-                                              new PhysicalDomain[] { T2.v(), V1.v(), ST.v(), T1.v() },
-                                              ("bdd.iterator(new jedd.Attribute[...]) at /home/olhotak/soot-" +
-                                               "2-jedd/src/soot/jimple/spark/queue/Rlocal_srcm_stmt_tgtmBDD." +
-                                               "jedd:36,28"),
-                                              bdd).iterator(new Attribute[] { local.v(), srcm.v(), stmt.v(), tgtm.v() });
-        bdd.eq(jedd.internal.Jedd.v().falseBDD());
         return new Iterator() {
-            public boolean hasNext() { return it.hasNext(); }
+            private Iterator it;
             
-            public Object next() { return Rlocal_srcm_stmt_tgtmBDD.this.new Tuple((Object[]) it.next()); }
+            public boolean hasNext() {
+                if (it != null && it.hasNext()) return true;
+                if (!jedd.internal.Jedd.v().equals(jedd.internal.Jedd.v().read(bdd), jedd.internal.Jedd.v().falseBDD()))
+                    return true;
+                return false;
+            }
+            
+            public Object next() {
+                if (it == null || !it.hasNext()) {
+                    it =
+                      new jedd.internal.RelationContainer(new Attribute[] { srcm.v(), local.v(), tgtm.v(), stmt.v() },
+                                                          new PhysicalDomain[] { T1.v(), V1.v(), T2.v(), ST.v() },
+                                                          ("bdd.iterator(new jedd.Attribute[...]) at /home/olhotak/soot-" +
+                                                           "2-jedd/src/soot/jimple/spark/queue/Rlocal_srcm_stmt_tgtmBDD." +
+                                                           "jedd:45,25-28"),
+                                                          bdd).iterator(new Attribute[] { local.v(), srcm.v(), stmt.v(), tgtm.v() });
+                    bdd.eq(jedd.internal.Jedd.v().falseBDD());
+                }
+                Object[] components = (Object[]) it.next();
+                return new Tuple((Local) components[0],
+                                 (SootMethod) components[1],
+                                 (Unit) components[2],
+                                 (SootMethod) components[3]);
+            }
             
             public void remove() { throw new UnsupportedOperationException(); }
         };
@@ -60,35 +81,17 @@ public final class Rlocal_srcm_stmt_tgtmBDD extends Rlocal_srcm_stmt_tgtm {
                                                "e.spark.bdddomains.ST, soot.jimple.spark.bdddomains.tgtm:soo" +
                                                "t.jimple.spark.bdddomains.T2> ret = bdd; at /home/olhotak/so" +
                                                "ot-2-jedd/src/soot/jimple/spark/queue/Rlocal_srcm_stmt_tgtmB" +
-                                               "DD.jedd:47,8"),
+                                               "DD.jedd:55,46-49"),
                                               bdd);
         bdd.eq(jedd.internal.Jedd.v().falseBDD());
-        return new jedd.internal.RelationContainer(new Attribute[] { tgtm.v(), local.v(), stmt.v(), srcm.v() },
-                                                   new PhysicalDomain[] { T2.v(), V1.v(), ST.v(), T1.v() },
+        return new jedd.internal.RelationContainer(new Attribute[] { srcm.v(), local.v(), tgtm.v(), stmt.v() },
+                                                   new PhysicalDomain[] { T1.v(), V1.v(), T2.v(), ST.v() },
                                                    ("return ret; at /home/olhotak/soot-2-jedd/src/soot/jimple/spa" +
-                                                    "rk/queue/Rlocal_srcm_stmt_tgtmBDD.jedd:49,8"),
+                                                    "rk/queue/Rlocal_srcm_stmt_tgtmBDD.jedd:57,8-14"),
                                                    ret);
     }
     
     public boolean hasNext() {
         return !jedd.internal.Jedd.v().equals(jedd.internal.Jedd.v().read(bdd), jedd.internal.Jedd.v().falseBDD());
     }
-    
-    private final class Tuple extends soot.jimple.spark.queue.Rlocal_srcm_stmt_tgtm.Tuple {
-        private Object[] tuple;
-        
-        public Tuple(Object[] tuple) {
-            super();
-            this.tuple = tuple;
-        }
-        
-        public Local local() { return (Local) tuple[0]; }
-        
-        public SootMethod srcm() { return (SootMethod) tuple[1]; }
-        
-        public Unit stmt() { return (Unit) tuple[2]; }
-        
-        public SootMethod tgtm() { return (SootMethod) tuple[3]; }
-    }
-    
 }

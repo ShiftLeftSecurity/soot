@@ -37,6 +37,7 @@ public class TradMethodPAGBuilder extends AbsMethodPAGBuilder
         super(in, simple, load, store, alloc);
     }
     private Map mpags = new HashMap();
+    protected NodeManager nm = SparkScene.v().nodeManager();
     public MethodPAG v( SootMethod m ) {
         MethodPAG mpag = (MethodPAG) mpags.get( m );
         if( mpag == null ) {
@@ -57,15 +58,20 @@ public class TradMethodPAGBuilder extends AbsMethodPAGBuilder
             }
             for( Iterator eIt = mpag.load().iterator(); eIt.hasNext(); ) {
                 final Rsrc_fld_dst.Tuple e = (Rsrc_fld_dst.Tuple) eIt.next();
-                load.add( parm( e.src(), t.ctxt() ),
+                if( e.fld() == null ) throw new RuntimeException( ""+e );
+                VarNode base = parm( e.src(), t.ctxt() );
+                nm.makeFieldRefNode( base, e.fld() );
+                load.add( base,
                           e.fld(),
                           parm( e.dst(), t.ctxt() ) );
             }
             for( Iterator eIt = mpag.store().iterator(); eIt.hasNext(); ) {
                 final Rsrc_fld_dst.Tuple e = (Rsrc_fld_dst.Tuple) eIt.next();
+                VarNode base = parm( e.dst(), t.ctxt() );
+                nm.makeFieldRefNode( base, e.fld() );
                 store.add( parm( e.src(), t.ctxt() ),
                           e.fld(),
-                          parm( e.dst(), t.ctxt() ) );
+                          base );
             }
             for( Iterator eIt = mpag.alloc().iterator(); eIt.hasNext(); ) {
                 final Robj_var.Tuple e = (Robj_var.Tuple) eIt.next();

@@ -18,16 +18,18 @@ public class Rlocal_srcm_stmt_signature_kindIter extends Rlocal_srcm_stmt_signat
     }
     
     public Iterator iterator() {
-        ;
         return new Iterator() {
-            public boolean hasNext() { return r.hasNext(); }
+            public boolean hasNext() {
+                boolean ret = r.hasNext();
+                return ret;
+            }
             
             public Object next() {
-                return Rlocal_srcm_stmt_signature_kindIter.this.new Tuple((Local) r.next(),
-                                                                          (SootMethod) r.next(),
-                                                                          (Unit) r.next(),
-                                                                          (NumberedString) r.next(),
-                                                                          (Kind) r.next());
+                return new Tuple((Local) r.next(),
+                                 (SootMethod) r.next(),
+                                 (Unit) r.next(),
+                                 (NumberedString) r.next(),
+                                 (Kind) r.next());
             }
             
             public void remove() { throw new UnsupportedOperationException(); }
@@ -46,51 +48,19 @@ public class Rlocal_srcm_stmt_signature_kindIter extends Rlocal_srcm_stmt_signat
                                                "ins.kind:soot.jimple.spark.bdddomains.FD> ret = jedd.interna" +
                                                "l.Jedd.v().falseBDD(); at /home/olhotak/soot-2-jedd/src/soot" +
                                                "/jimple/spark/queue/Rlocal_srcm_stmt_signature_kindIter.jedd" +
-                                               ":43,8"),
+                                               ":46,60-63"),
                                               jedd.internal.Jedd.v().falseBDD());
         while (r.hasNext()) {
             ret.eqUnion(jedd.internal.Jedd.v().literal(new Object[] { r.next(), r.next(), r.next(), r.next(), r.next() },
                                                        new Attribute[] { local.v(), srcm.v(), stmt.v(), signature.v(), kind.v() },
                                                        new PhysicalDomain[] { V1.v(), T1.v(), ST.v(), H2.v(), FD.v() }));
         }
-        return new jedd.internal.RelationContainer(new Attribute[] { signature.v(), local.v(), kind.v(), stmt.v(), srcm.v() },
-                                                   new PhysicalDomain[] { H2.v(), V1.v(), FD.v(), ST.v(), T1.v() },
+        return new jedd.internal.RelationContainer(new Attribute[] { srcm.v(), local.v(), stmt.v(), signature.v(), kind.v() },
+                                                   new PhysicalDomain[] { T1.v(), V1.v(), ST.v(), H2.v(), FD.v() },
                                                    ("return ret; at /home/olhotak/soot-2-jedd/src/soot/jimple/spa" +
-                                                    "rk/queue/Rlocal_srcm_stmt_signature_kindIter.jedd:47,8"),
+                                                    "rk/queue/Rlocal_srcm_stmt_signature_kindIter.jedd:50,8-14"),
                                                    ret);
     }
     
     public boolean hasNext() { return r.hasNext(); }
-    
-    private final class Tuple extends soot.jimple.spark.queue.Rlocal_srcm_stmt_signature_kind.Tuple {
-        private Local _local;
-        
-        public Local local() { return _local; }
-        
-        private SootMethod _srcm;
-        
-        public SootMethod srcm() { return _srcm; }
-        
-        private Unit _stmt;
-        
-        public Unit stmt() { return _stmt; }
-        
-        private NumberedString _signature;
-        
-        public NumberedString signature() { return _signature; }
-        
-        private Kind _kind;
-        
-        public Kind kind() { return _kind; }
-        
-        public Tuple(Local _local, SootMethod _srcm, Unit _stmt, NumberedString _signature, Kind _kind) {
-            super();
-            this._local = _local;
-            this._srcm = _srcm;
-            this._stmt = _stmt;
-            this._signature = _signature;
-            this._kind = _kind;
-        }
-    }
-    
 }

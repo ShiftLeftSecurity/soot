@@ -23,11 +23,11 @@ public class Qctxt_methodTrad extends Qctxt_method {
                                               new PhysicalDomain[] { V1.v(), T1.v() },
                                               ("in.iterator(new jedd.Attribute[...]) at /home/olhotak/soot-2" +
                                                "-jedd/src/soot/jimple/spark/queue/Qctxt_methodTrad.jedd:37,2" +
-                                               "2"),
+                                               "2-24"),
                                               in).iterator(new Attribute[] { ctxt.v(), method.v() });
         while (it.hasNext()) {
             Object[] tuple = (Object[]) it.next();
-            for (int i = 0; i < 2; i++) { q.add(tuple[i]); }
+            for (int i = 0; i < 2; i++) { this.add((Context) tuple[0], (SootMethod) tuple[1]); }
         }
     }
     

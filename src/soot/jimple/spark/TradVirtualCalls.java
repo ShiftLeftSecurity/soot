@@ -48,23 +48,23 @@ public class TradVirtualCalls extends AbsVirtualCalls
         for( Iterator receiverIt = receivers.iterator(); receiverIt.hasNext(); ) {
 
             final Rlocal_srcm_stmt_signature_kind.Tuple receiver = (Rlocal_srcm_stmt_signature_kind.Tuple) receiverIt.next();
-            ArrayList l = (ArrayList) receiverMap.get( receiver.local() );
+            LinkedList l = (LinkedList) receiverMap.get( receiver.local() );
             if( l == null ) {
-                l = new ArrayList();
+                l = new LinkedList();
                 receiverMap.put( receiver.local(), l );
             }
-            l.add( receiver );
+            l.addFirst( receiver );
         }
 
         for( Iterator specialIt = specials.iterator(); specialIt.hasNext(); ) {
 
             final Rlocal_srcm_stmt_tgtm.Tuple special = (Rlocal_srcm_stmt_tgtm.Tuple) specialIt.next();
-            ArrayList l = (ArrayList) specialMap.get( special.local() );
+            LinkedList l = (LinkedList) specialMap.get( special.local() );
             if( l == null ) {
-                l = new ArrayList();
+                l = new LinkedList();
                 specialMap.put( special.local(), l );
             }
-            l.add( special );
+            l.addFirst( special );
         }
 
         ChunkedQueue targetsQueue = new ChunkedQueue();

@@ -18,17 +18,19 @@ public class Rsrcc_srcm_stmt_kind_tgtc_tgtmIter extends Rsrcc_srcm_stmt_kind_tgt
     }
     
     public Iterator iterator() {
-        ;
         return new Iterator() {
-            public boolean hasNext() { return r.hasNext(); }
+            public boolean hasNext() {
+                boolean ret = r.hasNext();
+                return ret;
+            }
             
             public Object next() {
-                return Rsrcc_srcm_stmt_kind_tgtc_tgtmIter.this.new Tuple((Context) r.next(),
-                                                                         (SootMethod) r.next(),
-                                                                         (Unit) r.next(),
-                                                                         (Kind) r.next(),
-                                                                         (Context) r.next(),
-                                                                         (SootMethod) r.next());
+                return new Tuple((Context) r.next(),
+                                 (SootMethod) r.next(),
+                                 (Unit) r.next(),
+                                 (Kind) r.next(),
+                                 (Context) r.next(),
+                                 (SootMethod) r.next());
             }
             
             public void remove() { throw new UnsupportedOperationException(); }
@@ -48,56 +50,19 @@ public class Rsrcc_srcm_stmt_kind_tgtc_tgtmIter extends Rsrcc_srcm_stmt_kind_tgt
                                                "ains.tgtm:soot.jimple.spark.bdddomains.T2> ret = jedd.intern" +
                                                "al.Jedd.v().falseBDD(); at /home/olhotak/soot-2-jedd/src/soo" +
                                                "t/jimple/spark/queue/Rsrcc_srcm_stmt_kind_tgtc_tgtmIter.jedd" +
-                                               ":43,8"),
+                                               ":46,63-66"),
                                               jedd.internal.Jedd.v().falseBDD());
         while (r.hasNext()) {
             ret.eqUnion(jedd.internal.Jedd.v().literal(new Object[] { r.next(), r.next(), r.next(), r.next(), r.next(), r.next() },
                                                        new Attribute[] { srcc.v(), srcm.v(), stmt.v(), kind.v(), tgtc.v(), tgtm.v() },
                                                        new PhysicalDomain[] { V1.v(), T1.v(), ST.v(), FD.v(), V2.v(), T2.v() }));
         }
-        return new jedd.internal.RelationContainer(new Attribute[] { srcc.v(), tgtc.v(), tgtm.v(), kind.v(), stmt.v(), srcm.v() },
-                                                   new PhysicalDomain[] { V1.v(), V2.v(), T2.v(), FD.v(), ST.v(), T1.v() },
+        return new jedd.internal.RelationContainer(new Attribute[] { srcc.v(), srcm.v(), tgtm.v(), tgtc.v(), stmt.v(), kind.v() },
+                                                   new PhysicalDomain[] { V1.v(), T1.v(), T2.v(), V2.v(), ST.v(), FD.v() },
                                                    ("return ret; at /home/olhotak/soot-2-jedd/src/soot/jimple/spa" +
-                                                    "rk/queue/Rsrcc_srcm_stmt_kind_tgtc_tgtmIter.jedd:47,8"),
+                                                    "rk/queue/Rsrcc_srcm_stmt_kind_tgtc_tgtmIter.jedd:50,8-14"),
                                                    ret);
     }
     
     public boolean hasNext() { return r.hasNext(); }
-    
-    private final class Tuple extends soot.jimple.spark.queue.Rsrcc_srcm_stmt_kind_tgtc_tgtm.Tuple {
-        private Context _srcc;
-        
-        public Context srcc() { return _srcc; }
-        
-        private SootMethod _srcm;
-        
-        public SootMethod srcm() { return _srcm; }
-        
-        private Unit _stmt;
-        
-        public Unit stmt() { return _stmt; }
-        
-        private Kind _kind;
-        
-        public Kind kind() { return _kind; }
-        
-        private Context _tgtc;
-        
-        public Context tgtc() { return _tgtc; }
-        
-        private SootMethod _tgtm;
-        
-        public SootMethod tgtm() { return _tgtm; }
-        
-        public Tuple(Context _srcc, SootMethod _srcm, Unit _stmt, Kind _kind, Context _tgtc, SootMethod _tgtm) {
-            super();
-            this._srcc = _srcc;
-            this._srcm = _srcm;
-            this._stmt = _stmt;
-            this._kind = _kind;
-            this._tgtc = _tgtc;
-            this._tgtm = _tgtm;
-        }
-    }
-    
 }

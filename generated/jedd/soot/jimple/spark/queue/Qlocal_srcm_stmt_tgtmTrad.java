@@ -21,15 +21,17 @@ public class Qlocal_srcm_stmt_tgtmTrad extends Qlocal_srcm_stmt_tgtm {
     
     public void add(final jedd.internal.RelationContainer in) {
         Iterator it =
-          new jedd.internal.RelationContainer(new Attribute[] { tgtm.v(), local.v(), stmt.v(), srcm.v() },
-                                              new PhysicalDomain[] { T2.v(), V1.v(), ST.v(), T1.v() },
+          new jedd.internal.RelationContainer(new Attribute[] { srcm.v(), local.v(), tgtm.v(), stmt.v() },
+                                              new PhysicalDomain[] { T1.v(), V1.v(), T2.v(), ST.v() },
                                               ("in.iterator(new jedd.Attribute[...]) at /home/olhotak/soot-2" +
                                                "-jedd/src/soot/jimple/spark/queue/Qlocal_srcm_stmt_tgtmTrad." +
-                                               "jedd:39,22"),
+                                               "jedd:39,22-24"),
                                               in).iterator(new Attribute[] { local.v(), srcm.v(), stmt.v(), tgtm.v() });
         while (it.hasNext()) {
             Object[] tuple = (Object[]) it.next();
-            for (int i = 0; i < 4; i++) { q.add(tuple[i]); }
+            for (int i = 0; i < 4; i++) {
+                this.add((Local) tuple[0], (SootMethod) tuple[1], (Unit) tuple[2], (SootMethod) tuple[3]);
+            }
         }
     }
     

@@ -43,7 +43,7 @@ public final class Rvar_objMerge extends Rvar_obj {
                                                    new PhysicalDomain[] { H1.v(), V1.v() },
                                                    ("return jedd.internal.Jedd.v().union(jedd.internal.Jedd.v().r" +
                                                     "ead(in1.get()), in2.get()); at /home/olhotak/soot-2-jedd/src" +
-                                                    "/soot/jimple/spark/queue/Rvar_objMerge.jedd:51,8"),
+                                                    "/soot/jimple/spark/queue/Rvar_objMerge.jedd:51,8-14"),
                                                    jedd.internal.Jedd.v().union(jedd.internal.Jedd.v().read(in1.get()),
                                                                                 in2.get()));
     }

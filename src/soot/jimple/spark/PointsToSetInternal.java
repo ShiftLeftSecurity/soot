@@ -24,11 +24,11 @@ import java.util.*;
 /** Abstract base class for implementations of points-to sets.
  * @author Ondrej Lhotak
  */
-public abstract class PointsToSetInternal implements PointsToSet {
+public abstract class PointsToSetInternal extends PointsToSetReadOnly {
     /** Adds contents of other minus the contents of exclude into this set;
      * returns true if this set changed. */
-    public boolean addAll( PointsToSetInternal other,
-            final PointsToSetInternal exclude ) {
+    public boolean addAll( PointsToSetReadOnly other,
+            final PointsToSetReadOnly exclude ) {
         if( other instanceof DoublePointsToSet ) {
             return addAll( other.getNewSet(), exclude )
                 | addAll( other.getOldSet(), exclude );
@@ -56,14 +56,8 @@ public abstract class PointsToSetInternal implements PointsToSet {
             }
         } );
     }
-    /** Calls v's visit method on all nodes in this set. */
-    public abstract boolean forall( P2SetVisitor v );
     /** Adds n to this set, returns true if n was not already in this set. */
     public abstract boolean add( Node n );
-    /** Returns set of newly-added nodes since last call to flushNew. */
-    public PointsToSetInternal getNewSet() { return this; }
-    /** Returns set of nodes already present before last call to flushNew. */
-    public PointsToSetInternal getOldSet() { return EmptyPointsToSet.v(); }
     /** Sets all newly-added nodes to old nodes. */
     public void flushNew() {}
     /** Sets all nodes to newly-added nodes. */
@@ -71,75 +65,10 @@ public abstract class PointsToSetInternal implements PointsToSet {
     /** Merges other into this set. */
     public void mergeWith( PointsToSetInternal other ) 
     { addAll( other, null ); }
-    /** Returns true iff the set contains n. */
-    public abstract boolean contains( Node n );
 
-    public PointsToSetInternal( Type type ) { this.type = type; }
-
-    public boolean hasNonEmptyIntersection( PointsToSet other ) {
-        final PointsToSetInternal o = (PointsToSetInternal) other;
-        return forall( new P2SetVisitor() {
-            public void visit( Node n ) {
-                if( o.contains( n ) ) returnValue = true;
-            }
-        } );
-    }
-    public Set possibleTypes() {
-        final HashSet ret = new HashSet();
-        forall( new P2SetVisitor() {
-            public void visit( Node n ) {
-                Type t = n.getType();
-                if( t instanceof RefType ) {
-                    RefType rt = (RefType) t;
-                    if( rt.getSootClass().isAbstract() ) return;
-                }
-                ret.add( t );
-            }
-        } );
-        return ret;
-    }
-    public Type getType() {
-        return type;
-    }
-    public void setType( Type type ) {
-        this.type = type;
-    }
-    public int size() {
-        final int[] ret = new int[1];
-        forall( new P2SetVisitor() {
-            public void visit( Node n ) {
-                ret[0]++;
-            }
-        } );
-        return ret[0];
-    }
-    public String toString() {
-        final StringBuffer ret = new StringBuffer();
-        this.forall( new P2SetVisitor() {
-        public final void visit( Node n ) {
-            ret.append( ""+n+"," );
-        }} );
-        return ret.toString();
-    }
-
-    public Set possibleStringConstants() { 
-        final HashSet ret = new HashSet();
-        return this.forall( new P2SetVisitor() {
-        public final void visit( Node n ) {
-            if( n instanceof StringConstantNode ) {
-                ret.add( ((StringConstantNode)n).getString() );
-            } else {
-                returnValue = true;
-            }
-        }} ) ? null : ret;
-    }
-    public Set possibleClassConstants() {
-    	return Collections.EMPTY_SET;
-    }
+    public PointsToSetInternal( Type type ) { super(type); }
 
     /* End of public methods. */
     /* End of package methods. */
-
-    protected Type type;
 }
 

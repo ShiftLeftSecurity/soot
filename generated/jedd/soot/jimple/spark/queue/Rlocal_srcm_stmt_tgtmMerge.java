@@ -39,12 +39,12 @@ public final class Rlocal_srcm_stmt_tgtmMerge extends Rlocal_srcm_stmt_tgtm {
     }
     
     public jedd.internal.RelationContainer get() {
-        return new jedd.internal.RelationContainer(new Attribute[] { tgtm.v(), local.v(), stmt.v(), srcm.v() },
-                                                   new PhysicalDomain[] { T2.v(), V1.v(), ST.v(), T1.v() },
+        return new jedd.internal.RelationContainer(new Attribute[] { srcm.v(), local.v(), tgtm.v(), stmt.v() },
+                                                   new PhysicalDomain[] { T1.v(), V1.v(), T2.v(), ST.v() },
                                                    ("return jedd.internal.Jedd.v().union(jedd.internal.Jedd.v().r" +
                                                     "ead(in1.get()), in2.get()); at /home/olhotak/soot-2-jedd/src" +
                                                     "/soot/jimple/spark/queue/Rlocal_srcm_stmt_tgtmMerge.jedd:51," +
-                                                    "8"),
+                                                    "8-14"),
                                                    jedd.internal.Jedd.v().union(jedd.internal.Jedd.v().read(in1.get()),
                                                                                 in2.get()));
     }

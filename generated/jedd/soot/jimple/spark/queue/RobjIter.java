@@ -18,11 +18,13 @@ public class RobjIter extends Robj {
     }
     
     public Iterator iterator() {
-        ;
         return new Iterator() {
-            public boolean hasNext() { return r.hasNext(); }
+            public boolean hasNext() {
+                boolean ret = r.hasNext();
+                return ret;
+            }
             
-            public Object next() { return RobjIter.this.new Tuple((AllocNode) r.next()); }
+            public Object next() { return new Tuple((AllocNode) r.next()); }
             
             public void remove() { throw new UnsupportedOperationException(); }
         };
@@ -35,7 +37,7 @@ public class RobjIter extends Robj {
                                               ("<soot.jimple.spark.bdddomains.obj:soot.jimple.spark.bdddomai" +
                                                "ns.H1> ret = jedd.internal.Jedd.v().falseBDD(); at /home/olh" +
                                                "otak/soot-2-jedd/src/soot/jimple/spark/queue/RobjIter.jedd:4" +
-                                               "3,8"),
+                                               "6,17-20"),
                                               jedd.internal.Jedd.v().falseBDD());
         while (r.hasNext()) {
             ret.eqUnion(jedd.internal.Jedd.v().literal(new Object[] { r.next() },
@@ -45,21 +47,9 @@ public class RobjIter extends Robj {
         return new jedd.internal.RelationContainer(new Attribute[] { obj.v() },
                                                    new PhysicalDomain[] { H1.v() },
                                                    ("return ret; at /home/olhotak/soot-2-jedd/src/soot/jimple/spa" +
-                                                    "rk/queue/RobjIter.jedd:47,8"),
+                                                    "rk/queue/RobjIter.jedd:50,8-14"),
                                                    ret);
     }
     
     public boolean hasNext() { return r.hasNext(); }
-    
-    private final class Tuple extends soot.jimple.spark.queue.Robj.Tuple {
-        private AllocNode _obj;
-        
-        public AllocNode obj() { return _obj; }
-        
-        public Tuple(AllocNode _obj) {
-            super();
-            this._obj = _obj;
-        }
-    }
-    
 }

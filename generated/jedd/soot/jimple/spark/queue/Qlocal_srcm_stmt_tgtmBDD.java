@@ -18,7 +18,7 @@ public final class Qlocal_srcm_stmt_tgtmBDD extends Qlocal_srcm_stmt_tgtm {
                                                      ("this.add(jedd.internal.Jedd.v().literal(new java.lang.Object" +
                                                       "[...], new jedd.Attribute[...], new jedd.PhysicalDomain[...]" +
                                                       ")) at /home/olhotak/soot-2-jedd/src/soot/jimple/spark/queue/" +
-                                                      "Qlocal_srcm_stmt_tgtmBDD.jedd:33,8"),
+                                                      "Qlocal_srcm_stmt_tgtmBDD.jedd:33,8-11"),
                                                      jedd.internal.Jedd.v().literal(new Object[] { _local, _srcm, _stmt, _tgtm },
                                                                                     new Attribute[] { local.v(), srcm.v(), stmt.v(), tgtm.v() },
                                                                                     new PhysicalDomain[] { V1.v(), T1.v(), ST.v(), T2.v() })));
@@ -27,10 +27,10 @@ public final class Qlocal_srcm_stmt_tgtmBDD extends Qlocal_srcm_stmt_tgtm {
     public void add(final jedd.internal.RelationContainer in) {
         for (Iterator it = readers.iterator(); it.hasNext(); ) {
             Rlocal_srcm_stmt_tgtmBDD reader = (Rlocal_srcm_stmt_tgtmBDD) it.next();
-            reader.add(new jedd.internal.RelationContainer(new Attribute[] { tgtm.v(), local.v(), stmt.v(), srcm.v() },
-                                                           new PhysicalDomain[] { T2.v(), V1.v(), ST.v(), T1.v() },
+            reader.add(new jedd.internal.RelationContainer(new Attribute[] { srcm.v(), local.v(), tgtm.v(), stmt.v() },
+                                                           new PhysicalDomain[] { T1.v(), V1.v(), T2.v(), ST.v() },
                                                            ("reader.add(in) at /home/olhotak/soot-2-jedd/src/soot/jimple/" +
-                                                            "spark/queue/Qlocal_srcm_stmt_tgtmBDD.jedd:38,12"),
+                                                            "spark/queue/Qlocal_srcm_stmt_tgtmBDD.jedd:38,12-18"),
                                                            in));
         }
     }

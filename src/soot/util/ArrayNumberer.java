@@ -46,11 +46,16 @@ public class ArrayNumberer implements Numberer {
     public int get( Object oo ) {
         if( oo == null ) return 0;
         Numberable o = (Numberable) oo;
-        return o.getNumber();
+        int ret = o.getNumber();
+        if( ret == 0 ) throw new RuntimeException( "unnumbered: "+o );
+        return ret;
     }
 
     public Object get( int number ) {
-        return numberToObj[number];
+        if( number == 0 ) return null;
+        Object ret = numberToObj[number];
+        if( ret == null ) throw new RuntimeException( "no object with number "+number );
+        return ret;
     }
 
     public int size() { return lastNumber; }

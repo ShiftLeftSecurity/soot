@@ -38,10 +38,7 @@ public class TradReachableMethods extends AbsReachableMethods
     }
     private void processEdge( Rsrcc_srcm_stmt_kind_tgtc_tgtm.Tuple t ) {
         if( !reachables.contains( MethodContext.v( t.srcm(), t.srcc() ) ) ) return;
-        MethodOrMethodContext momc = MethodContext.v( t.tgtm(), t.tgtc() );
-        if( reachables.add( momc ) ) {
-            out.add( t.tgtc(), t.tgtm() );
-        }
+        add( MethodContext.v( t.tgtm(), t.tgtc() ) );
     }
     void update() {
         for( Iterator tIt = in.iterator(); tIt.hasNext(); ) {

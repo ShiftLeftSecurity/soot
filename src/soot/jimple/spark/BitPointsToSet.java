@@ -34,7 +34,7 @@ public final class BitPointsToSet extends PointsToSetInternal {
         return empty;
     }
 
-    private final boolean superAddAll( PointsToSetInternal other, PointsToSetInternal exclude ) {
+    private final boolean superAddAll( PointsToSetReadOnly other, PointsToSetReadOnly exclude ) {
         boolean ret = super.addAll( other, exclude );
         if( ret ) empty = false;
         return ret;
@@ -55,8 +55,8 @@ public final class BitPointsToSet extends PointsToSetInternal {
 
     /** Adds contents of other into this set, returns true if this set 
      * changed. */
-    public final boolean addAll( PointsToSetInternal other,
-            PointsToSetInternal exclude ) {
+    public final boolean addAll( PointsToSetReadOnly other,
+            PointsToSetReadOnly exclude ) {
         if( other != null && !(other instanceof BitPointsToSet) )
             return superAddAll( other, exclude );
         if( exclude != null && !(exclude instanceof BitPointsToSet) )

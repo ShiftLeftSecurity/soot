@@ -30,9 +30,12 @@ import java.util.*;
 public class Rsrc_dstIter extends Rsrc_dst{
     protected Iterator r;
     public Rsrc_dstIter( Iterator r ) { this.r = r; }
-    public Iterator iterator() {;
+    public Iterator iterator() {
         return new Iterator() {
-            public boolean hasNext() { return r.hasNext(); }
+            public boolean hasNext() {
+                boolean ret = r.hasNext();
+                return ret;
+            }
             public Object next() {
                 return new Tuple( (VarNode) r.next(), (VarNode) r.next() );
             }
@@ -47,14 +50,4 @@ public class Rsrc_dstIter extends Rsrc_dst{
         return ret;
     }
     public boolean hasNext() { return r.hasNext(); }
-    private final class Tuple extends Rsrc_dst.Tuple {
-        private VarNode _src;
-        public VarNode src() { return _src; }
-        private VarNode _dst;
-        public VarNode dst() { return _dst; }
-        public Tuple( VarNode _src, VarNode _dst ) {
-            this._src = _src;
-            this._dst = _dst;
-        }
-    }
 }

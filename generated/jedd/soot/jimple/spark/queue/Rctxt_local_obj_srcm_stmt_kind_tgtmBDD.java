@@ -21,34 +21,58 @@ public final class Rctxt_local_obj_srcm_stmt_kind_tgtmBDD extends Rctxt_local_ob
                                            "mains.stmt:soot.jimple.spark.bdddomains.ST, soot.jimple.spar" +
                                            "k.bdddomains.kind:soot.jimple.spark.bdddomains.FD, soot.jimp" +
                                            "le.spark.bdddomains.tgtm:soot.jimple.spark.bdddomains.T2> bd" +
-                                           "d = jedd.internal.Jedd.v().falseBDD() at /home/olhotak/soot-" +
-                                           "2-jedd/src/soot/jimple/spark/queue/Rctxt_local_obj_srcm_stmt" +
-                                           "_kind_tgtmBDD.jedd:31,12"),
-                                          jedd.internal.Jedd.v().falseBDD());
+                                           "d at /home/olhotak/soot-2-jedd/src/soot/jimple/spark/queue/R" +
+                                           "ctxt_local_obj_srcm_stmt_kind_tgtmBDD.jedd:31,12-75"));
     
     void add(final jedd.internal.RelationContainer tuple) { bdd.eqUnion(tuple); }
     
     public Rctxt_local_obj_srcm_stmt_kind_tgtmBDD(final jedd.internal.RelationContainer bdd) {
-        super();
-        this.bdd.eq(bdd);
+        this();
+        this.add(new jedd.internal.RelationContainer(new Attribute[] { srcm.v(), local.v(), ctxt.v(), tgtm.v(), stmt.v(), obj.v(), kind.v() },
+                                                     new PhysicalDomain[] { T1.v(), V1.v(), V2.v(), T2.v(), ST.v(), H1.v(), FD.v() },
+                                                     ("this.add(bdd) at /home/olhotak/soot-2-jedd/src/soot/jimple/s" +
+                                                      "park/queue/Rctxt_local_obj_srcm_stmt_kind_tgtmBDD.jedd:33,13" +
+                                                      "1-134"),
+                                                     bdd));
     }
     
-    Rctxt_local_obj_srcm_stmt_kind_tgtmBDD() { super(); }
+    Rctxt_local_obj_srcm_stmt_kind_tgtmBDD() {
+        super();
+        bdd.eq(jedd.internal.Jedd.v().falseBDD());
+    }
     
     public Iterator iterator() {
         ;
-        final Iterator it =
-          new jedd.internal.RelationContainer(new Attribute[] { obj.v(), ctxt.v(), tgtm.v(), local.v(), kind.v(), stmt.v(), srcm.v() },
-                                              new PhysicalDomain[] { H1.v(), V2.v(), T2.v(), V1.v(), FD.v(), ST.v(), T1.v() },
-                                              ("bdd.iterator(new jedd.Attribute[...]) at /home/olhotak/soot-" +
-                                               "2-jedd/src/soot/jimple/spark/queue/Rctxt_local_obj_srcm_stmt" +
-                                               "_kind_tgtmBDD.jedd:36,28"),
-                                              bdd).iterator(new Attribute[] { ctxt.v(), local.v(), obj.v(), srcm.v(), stmt.v(), kind.v(), tgtm.v() });
-        bdd.eq(jedd.internal.Jedd.v().falseBDD());
         return new Iterator() {
-            public boolean hasNext() { return it.hasNext(); }
+            private Iterator it;
             
-            public Object next() { return Rctxt_local_obj_srcm_stmt_kind_tgtmBDD.this.new Tuple((Object[]) it.next()); }
+            public boolean hasNext() {
+                if (it != null && it.hasNext()) return true;
+                if (!jedd.internal.Jedd.v().equals(jedd.internal.Jedd.v().read(bdd), jedd.internal.Jedd.v().falseBDD()))
+                    return true;
+                return false;
+            }
+            
+            public Object next() {
+                if (it == null || !it.hasNext()) {
+                    it =
+                      new jedd.internal.RelationContainer(new Attribute[] { srcm.v(), local.v(), ctxt.v(), tgtm.v(), stmt.v(), obj.v(), kind.v() },
+                                                          new PhysicalDomain[] { T1.v(), V1.v(), V2.v(), T2.v(), ST.v(), H1.v(), FD.v() },
+                                                          ("bdd.iterator(new jedd.Attribute[...]) at /home/olhotak/soot-" +
+                                                           "2-jedd/src/soot/jimple/spark/queue/Rctxt_local_obj_srcm_stmt" +
+                                                           "_kind_tgtmBDD.jedd:45,25-28"),
+                                                          bdd).iterator(new Attribute[] { ctxt.v(), local.v(), obj.v(), srcm.v(), stmt.v(), kind.v(), tgtm.v() });
+                    bdd.eq(jedd.internal.Jedd.v().falseBDD());
+                }
+                Object[] components = (Object[]) it.next();
+                return new Tuple((Context) components[0],
+                                 (Local) components[1],
+                                 (AllocNode) components[2],
+                                 (SootMethod) components[3],
+                                 (Unit) components[4],
+                                 (Kind) components[5],
+                                 (SootMethod) components[6]);
+            }
             
             public void remove() { throw new UnsupportedOperationException(); }
         };
@@ -67,41 +91,17 @@ public final class Rctxt_local_obj_srcm_stmt_kind_tgtmBDD extends Rctxt_local_ob
                                                "ains.kind:soot.jimple.spark.bdddomains.FD, soot.jimple.spark" +
                                                ".bdddomains.tgtm:soot.jimple.spark.bdddomains.T2> ret = bdd;" +
                                                " at /home/olhotak/soot-2-jedd/src/soot/jimple/spark/queue/Rc" +
-                                               "txt_local_obj_srcm_stmt_kind_tgtmBDD.jedd:47,8"),
+                                               "txt_local_obj_srcm_stmt_kind_tgtmBDD.jedd:55,72-75"),
                                               bdd);
         bdd.eq(jedd.internal.Jedd.v().falseBDD());
-        return new jedd.internal.RelationContainer(new Attribute[] { obj.v(), ctxt.v(), tgtm.v(), local.v(), kind.v(), stmt.v(), srcm.v() },
-                                                   new PhysicalDomain[] { H1.v(), V2.v(), T2.v(), V1.v(), FD.v(), ST.v(), T1.v() },
+        return new jedd.internal.RelationContainer(new Attribute[] { srcm.v(), local.v(), ctxt.v(), tgtm.v(), stmt.v(), obj.v(), kind.v() },
+                                                   new PhysicalDomain[] { T1.v(), V1.v(), V2.v(), T2.v(), ST.v(), H1.v(), FD.v() },
                                                    ("return ret; at /home/olhotak/soot-2-jedd/src/soot/jimple/spa" +
-                                                    "rk/queue/Rctxt_local_obj_srcm_stmt_kind_tgtmBDD.jedd:49,8"),
+                                                    "rk/queue/Rctxt_local_obj_srcm_stmt_kind_tgtmBDD.jedd:57,8-14"),
                                                    ret);
     }
     
     public boolean hasNext() {
         return !jedd.internal.Jedd.v().equals(jedd.internal.Jedd.v().read(bdd), jedd.internal.Jedd.v().falseBDD());
     }
-    
-    private final class Tuple extends soot.jimple.spark.queue.Rctxt_local_obj_srcm_stmt_kind_tgtm.Tuple {
-        private Object[] tuple;
-        
-        public Tuple(Object[] tuple) {
-            super();
-            this.tuple = tuple;
-        }
-        
-        public Context ctxt() { return (Context) tuple[0]; }
-        
-        public Local local() { return (Local) tuple[1]; }
-        
-        public AllocNode obj() { return (AllocNode) tuple[2]; }
-        
-        public SootMethod srcm() { return (SootMethod) tuple[3]; }
-        
-        public Unit stmt() { return (Unit) tuple[4]; }
-        
-        public Kind kind() { return (Kind) tuple[5]; }
-        
-        public SootMethod tgtm() { return (SootMethod) tuple[6]; }
-    }
-    
 }

@@ -25,9 +25,10 @@ import soot.jimple.spark.bdddomains.*;
 /** Implementation of PointsToSet providing an interface to a BDD of AllocNodes.
  * @author Ondrej Lhotak
  */
-public class BDDPointsToSet implements PointsToSet {
+public class BDDPointsToSet extends PointsToSetReadOnly {
     final private <obj:H1> bdd;
     public BDDPointsToSet( <obj:H1> bdd ) {
+        super(null);
         this.bdd = bdd;
     }
     /** Returns true if this set contains no run-time objects. */
@@ -37,39 +38,19 @@ public class BDDPointsToSet implements PointsToSet {
         BDDPointsToSet o = (BDDPointsToSet) other;
         return (bdd & o.bdd) != 0B;
     }
-    /** Set of all possible run-time types of objects in the set. */
-    public Set possibleTypes() {
-        final HashSet ret = new HashSet();
+    /** Calls v's visit method on all nodes in this set. */
+    public boolean forall(P2SetVisitor v) {
         Iterator it = bdd.iterator();
         while( it.hasNext() ) {
             AllocNode an = (AllocNode) it.next();
-            ret.add( an.getType() );
+            v.visit(an);
         }
-        return ret;
+        return v.getReturnValue();
     }
 
-    /** If this points-to set consists entirely of string constants,
-     * returns a set of these constant strings.
-     * If this point-to set may contain something other than constant
-     * strings, returns null. */
-    public Set possibleStringConstants() {
-        final HashSet ret = new HashSet();
-        Iterator it = bdd.iterator();
-        while( it.hasNext() ) {
-            AllocNode an = (AllocNode) it.next();
-            if( !(an instanceof StringConstantNode) ) return null;
-            StringConstantNode scn = (StringConstantNode) an;
-            ret.add( scn.getString() );
-        }
-        return ret;
-    }
-
-    /** If this points-to set consists entirely of objects of
-     * type java.lang.Class of a known class,
-     * returns a set of strings that are the names of these classes.
-     * If this point-to set may contain something else, returns null. */
-    public Set possibleClassConstants() {
-        return Collections.EMPTY_SET;
+    /** Returns true iff the set contains n. */
+    public boolean contains( Node n ) {
+        return 0B != new {n=>obj}{obj} >< bdd{obj};
     }
 
     /* End of public methods. */

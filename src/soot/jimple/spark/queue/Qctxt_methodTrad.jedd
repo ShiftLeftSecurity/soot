@@ -38,7 +38,7 @@ public class Qctxt_methodTrad extends Qctxt_method {
         while( it.hasNext() ) {
             Object[] tuple = (Object[]) it.next();
             for( int i = 0; i < 2; i++ ) {
-                q.add( tuple[i] );
+                add( (Context) tuple[0], (SootMethod) tuple[1] );
             }
         }
     }

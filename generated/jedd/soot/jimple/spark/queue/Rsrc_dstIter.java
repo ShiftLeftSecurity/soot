@@ -18,11 +18,13 @@ public class Rsrc_dstIter extends Rsrc_dst {
     }
     
     public Iterator iterator() {
-        ;
         return new Iterator() {
-            public boolean hasNext() { return r.hasNext(); }
+            public boolean hasNext() {
+                boolean ret = r.hasNext();
+                return ret;
+            }
             
-            public Object next() { return Rsrc_dstIter.this.new Tuple((VarNode) r.next(), (VarNode) r.next()); }
+            public Object next() { return new Tuple((VarNode) r.next(), (VarNode) r.next()); }
             
             public void remove() { throw new UnsupportedOperationException(); }
         };
@@ -36,7 +38,7 @@ public class Rsrc_dstIter extends Rsrc_dst {
                                                "ns.V1, soot.jimple.spark.bdddomains.dst:soot.jimple.spark.bd" +
                                                "ddomains.V2> ret = jedd.internal.Jedd.v().falseBDD(); at /ho" +
                                                "me/olhotak/soot-2-jedd/src/soot/jimple/spark/queue/Rsrc_dstI" +
-                                               "ter.jedd:43,8"),
+                                               "ter.jedd:46,25-28"),
                                               jedd.internal.Jedd.v().falseBDD());
         while (r.hasNext()) {
             ret.eqUnion(jedd.internal.Jedd.v().literal(new Object[] { r.next(), r.next() },
@@ -46,26 +48,9 @@ public class Rsrc_dstIter extends Rsrc_dst {
         return new jedd.internal.RelationContainer(new Attribute[] { dst.v(), src.v() },
                                                    new PhysicalDomain[] { V2.v(), V1.v() },
                                                    ("return ret; at /home/olhotak/soot-2-jedd/src/soot/jimple/spa" +
-                                                    "rk/queue/Rsrc_dstIter.jedd:47,8"),
+                                                    "rk/queue/Rsrc_dstIter.jedd:50,8-14"),
                                                    ret);
     }
     
     public boolean hasNext() { return r.hasNext(); }
-    
-    private final class Tuple extends soot.jimple.spark.queue.Rsrc_dst.Tuple {
-        private VarNode _src;
-        
-        public VarNode src() { return _src; }
-        
-        private VarNode _dst;
-        
-        public VarNode dst() { return _dst; }
-        
-        public Tuple(VarNode _src, VarNode _dst) {
-            super();
-            this._src = _src;
-            this._dst = _dst;
-        }
-    }
-    
 }

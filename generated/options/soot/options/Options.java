@@ -1345,6 +1345,22 @@ public class Options extends OptionsBase {
                 +"\n\nRecognized options (with default values):\n"
                 +padOpt( "enabled (false)", "" )
                 +padOpt( "verbose (false)", "Print detailed information about the execution of Spark" )
+                +padOpt( "bdd (false)", "Use BDD version of Spark" )
+                +padOpt( "profile (false)", "Profile BDDs using JeddProfiler" )
+                +padOpt( "bddq (false)", "Force BDD versions of queues" )
+                +padOpt( "debugq (false)", "Force debug versions of queues" )
+                +padOpt( "trace (false)", "Trace Spark queues for debugging." )
+                +padOpt( "backend", "Select BDD backend" )
+                +padVal( "buddy (default)", "BuDDy backend" )
+                
+                +padVal( "cudd", "CUDD backend" )
+                
+                +padVal( "sable", "SableJBDD backend" )
+                
+                +padVal( "javabdd", "JavaBDD backend" )
+                
+                +padVal( "none", "No BDDs" )
+                
                 +padOpt( "ignore-types (false)", "Make Spark completely ignore declared types of variables" )
                 +padOpt( "force-gc (false)", "Force garbage collection for measuring memory usage" )
                 +padOpt( "pre-jimplify (false)", "Jimplify all methods before starting Spark" )
@@ -1370,6 +1386,8 @@ public class Options extends OptionsBase {
                 +padVal( "merge", "Unfinished field reference merging algorithms" )
                 
                 +padVal( "alias", "Alias-edge based algorithm" )
+                
+                +padVal( "bdd", "BDD-based propagator" )
                 
                 +padVal( "none", "Disable propagation" )
                 
@@ -2062,6 +2080,12 @@ public class Options extends OptionsBase {
             return ""
                 +"enabled "
                 +"verbose "
+                +"bdd "
+                +"profile "
+                +"bddq "
+                +"debugq "
+                +"trace "
+                +"backend "
                 +"ignore-types "
                 +"force-gc "
                 +"pre-jimplify "
@@ -2569,6 +2593,12 @@ public class Options extends OptionsBase {
             return ""
               +"enabled:false "
               +"verbose:false "
+              +"bdd:false "
+              +"profile:false "
+              +"bddq:false "
+              +"debugq:false "
+              +"trace:false "
+              +"backend:buddy "
               +"ignore-types:false "
               +"force-gc:false "
               +"pre-jimplify:false "

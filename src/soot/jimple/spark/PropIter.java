@@ -38,8 +38,10 @@ public final class PropIter extends AbsPropagator {
  ) {
         super( simple, load, store, alloc, propout, pag );
     }
+    private AbsP2Sets p2sets;
     /** Actually does the propagation. */
     public final void update() {
+        p2sets = SparkScene.v().p2sets;
         new TopoSorter( pag, false ).sort();
         for( Iterator it = pag.allocSources(); it.hasNext(); ) {
             handleAllocNode( (AllocNode) it.next() );
@@ -62,7 +64,7 @@ public final class PropIter extends AbsPropagator {
             for( Iterator srcIt = SparkNumberers.v().varNodeNumberer().iterator(); srcIt.hasNext(); ) {
             
                 final VarNode src = (VarNode) srcIt.next();
-                src.getP2Set().getNewSet().forall( new P2SetVisitor() {
+                p2sets.get(src).getNewSet().forall( new P2SetVisitor() {
                 public final void visit( Node n ) {
                     ptout.add( src, (AllocNode) n );
                 }} );
@@ -73,8 +75,10 @@ public final class PropIter extends AbsPropagator {
 
                 final Rsrc_dst.Tuple t = (Rsrc_dst.Tuple) tIt.next();
                 change = true;
-                PointsToSetInternal p2set = t.src().getP2Set();
-                if( p2set != null ) p2set.unFlushNew();
+                PointsToSetReadOnly p2set = p2sets.get(t.src());
+                if( p2set instanceof PointsToSetInternal ) {
+                    ((PointsToSetInternal)p2set).unFlushNew();
+                }
             }
             for( Iterator tIt = newLoad.iterator(); tIt.hasNext(); ) {
                 final Rsrc_fld_dst.Tuple t = (Rsrc_fld_dst.Tuple) tIt.next();
@@ -83,13 +87,15 @@ public final class PropIter extends AbsPropagator {
             for( Iterator tIt = newStore.iterator(); tIt.hasNext(); ) {
                 final Rsrc_fld_dst.Tuple t = (Rsrc_fld_dst.Tuple) tIt.next();
                 change = true;
-                PointsToSetInternal p2set = t.src().getP2Set();
-                if( p2set != null ) p2set.unFlushNew();
+                PointsToSetReadOnly p2set = p2sets.get(t.src());
+                if( p2set instanceof PointsToSetInternal ) {
+                    ((PointsToSetInternal)p2set).unFlushNew();
+                }
             }
             for( Iterator tIt = newAlloc.iterator(); tIt.hasNext(); ) {
                 final Robj_var.Tuple t = (Robj_var.Tuple) tIt.next();
                 change = true;
-                t.var().makeP2Set().add( t.obj() );
+                p2sets.make(t.var()).add( t.obj() );
             }
             if( change ) {
                 new TopoSorter( pag, false ).sort();
@@ -112,34 +118,34 @@ public final class PropIter extends AbsPropagator {
 	boolean ret = false;
         for( Iterator targetIt = pag.allocLookup(src); targetIt.hasNext(); ) {
             final VarNode target = (VarNode) targetIt.next();
-	    ret = target.makeP2Set().add( src ) | ret;
+	    ret = p2sets.make(target).add( src ) | ret;
 	}
 	return ret;
     }
 
     protected final boolean handleSimples( VarNode src ) {
 	boolean ret = false;
-	PointsToSetInternal srcSet = src.getP2Set();
+	PointsToSetReadOnly srcSet = p2sets.get(src);
 	if( srcSet.isEmpty() ) return false;
         for( Iterator simpleTargetIt = pag.simpleLookup(src); simpleTargetIt.hasNext(); ) {
             final VarNode simpleTarget = (VarNode) simpleTargetIt.next();
-	    ret = simpleTarget.makeP2Set().addAll( srcSet, null ) | ret;
+	    ret = p2sets.make(simpleTarget).addAll( srcSet, null ) | ret;
 	}
         return ret;
     }
 
     protected final boolean handleStores( VarNode src ) {
 	boolean ret = false;
-	final PointsToSetInternal srcSet = src.getP2Set();
+	final PointsToSetReadOnly srcSet = p2sets.get(src);
 	if( srcSet.isEmpty() ) return false;
         for( Iterator storeTargetIt = pag.storeLookup(src); storeTargetIt.hasNext(); ) {
             final FieldRefNode storeTarget = (FieldRefNode) storeTargetIt.next();
             final SparkField f = storeTarget.getField();
-            ret = storeTarget.getBase().getP2Set().forall( new P2SetVisitor() {
+            ret = p2sets.get(storeTarget.getBase()).forall( new P2SetVisitor() {
             public final void visit( Node n ) {
                     AllocDotField nDotF = SparkScene.v().nodeManager().makeAllocDotField( 
                         (AllocNode) n, f );
-                    if( nDotF.makeP2Set().addAll( srcSet, null ) ) {
+                    if( p2sets.make(nDotF).addAll( srcSet, null ) ) {
                         returnValue = true;
                     }
                 }
@@ -151,15 +157,15 @@ public final class PropIter extends AbsPropagator {
     protected final boolean handleLoads( final FieldRefNode src ) {
 	boolean ret = false;
         final SparkField f = src.getField();
-        ret = src.getBase().getP2Set().forall( new P2SetVisitor() {
+        ret = p2sets.get(src.getBase()).forall( new P2SetVisitor() {
         public final void visit( Node n ) {
                 AllocDotField nDotF = ((AllocNode)n).dot( f );
                 if( nDotF == null ) return;
-                PointsToSetInternal set = nDotF.getP2Set();
+                PointsToSetReadOnly set = p2sets.get(nDotF);
                 if( set.isEmpty() ) return;
                 for( Iterator loadTargetIt = pag.loadLookup(src); loadTargetIt.hasNext(); ) {
                     final VarNode loadTarget = (VarNode) loadTargetIt.next();
-                    if( loadTarget.makeP2Set().addAll( set, null ) ) {
+                    if( p2sets.make(loadTarget).addAll( set, null ) ) {
                         returnValue = true;
                     }
                 }

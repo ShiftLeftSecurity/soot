@@ -30,9 +30,12 @@ import java.util.*;
 public class Rvar_objIter extends Rvar_obj{
     protected Iterator r;
     public Rvar_objIter( Iterator r ) { this.r = r; }
-    public Iterator iterator() {;
+    public Iterator iterator() {
         return new Iterator() {
-            public boolean hasNext() { return r.hasNext(); }
+            public boolean hasNext() {
+                boolean ret = r.hasNext();
+                return ret;
+            }
             public Object next() {
                 return new Tuple( (VarNode) r.next(), (AllocNode) r.next() );
             }
@@ -47,14 +50,4 @@ public class Rvar_objIter extends Rvar_obj{
         return ret;
     }
     public boolean hasNext() { return r.hasNext(); }
-    private final class Tuple extends Rvar_obj.Tuple {
-        private VarNode _var;
-        public VarNode var() { return _var; }
-        private AllocNode _obj;
-        public AllocNode obj() { return _obj; }
-        public Tuple( VarNode _var, AllocNode _obj ) {
-            this._var = _var;
-            this._obj = _obj;
-        }
-    }
 }

@@ -30,9 +30,12 @@ import java.util.*;
 public class Rsrcc_srcm_stmt_kind_tgtc_tgtmIter extends Rsrcc_srcm_stmt_kind_tgtc_tgtm{
     protected Iterator r;
     public Rsrcc_srcm_stmt_kind_tgtc_tgtmIter( Iterator r ) { this.r = r; }
-    public Iterator iterator() {;
+    public Iterator iterator() {
         return new Iterator() {
-            public boolean hasNext() { return r.hasNext(); }
+            public boolean hasNext() {
+                boolean ret = r.hasNext();
+                return ret;
+            }
             public Object next() {
                 return new Tuple( (Context) r.next(), (SootMethod) r.next(), (Unit) r.next(), (Kind) r.next(), (Context) r.next(), (SootMethod) r.next() );
             }
@@ -47,26 +50,4 @@ public class Rsrcc_srcm_stmt_kind_tgtc_tgtmIter extends Rsrcc_srcm_stmt_kind_tgt
         return ret;
     }
     public boolean hasNext() { return r.hasNext(); }
-    private final class Tuple extends Rsrcc_srcm_stmt_kind_tgtc_tgtm.Tuple {
-        private Context _srcc;
-        public Context srcc() { return _srcc; }
-        private SootMethod _srcm;
-        public SootMethod srcm() { return _srcm; }
-        private Unit _stmt;
-        public Unit stmt() { return _stmt; }
-        private Kind _kind;
-        public Kind kind() { return _kind; }
-        private Context _tgtc;
-        public Context tgtc() { return _tgtc; }
-        private SootMethod _tgtm;
-        public SootMethod tgtm() { return _tgtm; }
-        public Tuple( Context _srcc, SootMethod _srcm, Unit _stmt, Kind _kind, Context _tgtc, SootMethod _tgtm ) {
-            this._srcc = _srcc;
-            this._srcm = _srcm;
-            this._stmt = _stmt;
-            this._kind = _kind;
-            this._tgtc = _tgtc;
-            this._tgtm = _tgtm;
-        }
-    }
 }
