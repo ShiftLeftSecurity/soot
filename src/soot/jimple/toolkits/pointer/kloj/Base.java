@@ -6,6 +6,7 @@ import soot.jimple.toolkits.pointer.*;
 import soot.jimple.toolkits.invoke.*;
 import java.util.*;
 import soot.util.*;
+import soot.jimple.spark.PointsToSet;
 
 class Base extends NodePPG implements PointerAnalysis
 {
@@ -185,7 +186,7 @@ class Base extends NodePPG implements PointerAnalysis
     public void nextIter() {
 	rasmap.nextIter();
     }
-    public ObjectSet reachingObjects( SootMethod method, Stmt stmt, Local l ) {
+    public PointsToSet reachingObjects( SootMethod method, Stmt stmt, Local l ) {
 	VarNode v = VarNode.v( l );
 	if( v == null ) {
 	    throw new RuntimeException( "Couldn't find varnode for local "+l+" in stmt "+stmt+" in method "+method );
@@ -194,7 +195,7 @@ class Base extends NodePPG implements PointerAnalysis
 	    VarNode vv = (VarNode) ebbMap.get( v );
 	    if( vv != null ) v = vv;
 	}
-	return (ObjectSet) rasmap.lookup( v );
+	return (PointsToSet) rasmap.lookup( v );
     }
 }
 

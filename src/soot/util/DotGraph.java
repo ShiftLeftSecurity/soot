@@ -1,8 +1,35 @@
+/* Soot - a J*va Optimization Framework
+ * Copyright (C) 2002 Sable Research Group
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the
+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ * Boston, MA 02111-1307, USA.
+ */
+
+/*
+ * Modified by the Sable Research Group and others 1997-1999.  
+ * See the 'credits' file distributed with Soot for the complete list of
+ * contributors.  (Soot is distributed at http://www.sable.mcgill.ca/soot)
+ */
+
+
 /**
- * DotPainter provide an interface to soot for generating DOT language
+ * DotGraph provides an interface to SOOT for generating DOT language
  * for graphviz from ATT research lab.
  *
  * Intended ussage: virtualize CFG, graphes, etc...
+ *
  * @author Feng Qian
  */
 
@@ -29,7 +56,7 @@ public class DotGraph implements Renderable{
   private List    attributes;
 
   /**
-   * creates a new graph for drawing.
+   * Creates a new graph for drawing.
    * @param graphname, the file name with dot format will be generated
    */
   public DotGraph(String graphname) {
@@ -41,7 +68,7 @@ public class DotGraph implements Renderable{
   }
   
   /**
-   * generates the drawing on canvas to the dot file.
+   * Generates the drawing on canvas to the dot file.
    */
   public void plot() {
     try {
@@ -58,7 +85,10 @@ public class DotGraph implements Renderable{
   }
 
   /**
-   * draws a directed edge
+   * Draws a directed edge
+   * @param from, the source node
+   * @param to, the end node
+   * @return a graph edge
    */
   public DotGraphEdge drawEdge(String from, String to) {
 
@@ -81,6 +111,10 @@ public class DotGraph implements Renderable{
     return edge;
   }
 
+  /**
+   * Gets the graph node by name.
+   * @param name, unique name of the node.
+   */
   public DotGraphNode getNode(String name){
     DotGraphNode node = (DotGraphNode)nodes.get(name);
     if (node == null) {
@@ -91,7 +125,8 @@ public class DotGraph implements Renderable{
   }
 
   /**
-   * sets all node shapes, see the list of node shapes in DotGraphConstants.
+   * Sets all node shapes, see the list of node shapes in DotGraphConstants.
+   * @param shape, the node shape
    */
   public void setNodeShape(String shape){
     StringBuffer command = new StringBuffer("node [shape=");
@@ -101,7 +136,8 @@ public class DotGraph implements Renderable{
   }
 
   /**
-   * sets all node styles
+   * Sets all node styles
+   * @param style, the node style
    */
   public void setNodeStyle(String style){
     StringBuffer command = new StringBuffer("node [style=");

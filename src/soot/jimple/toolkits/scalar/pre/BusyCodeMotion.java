@@ -26,26 +26,28 @@
 
 package soot.jimple.toolkits.scalar.pre;
 import soot.jimple.toolkits.graph.*;
+import soot.jimple.toolkits.scalar.*;
 import soot.*;
 import soot.toolkits.scalar.*;
 import soot.toolkits.graph.*;
 import soot.jimple.*;
 import java.util.*;
 import soot.util.*;
+import soot.jimple.toolkits.pointer.PASideEffectTester;
 
 /** 
- * performs a partial redundancy elimination (= code motion). This is done, by
- * moving <b>every</b>computation as high as possible (it is easy to show, that they are
- * computationally optimal), and then replacing the original computation by a
- * reference to this new high computation. This implies, that we introduce
- * <b>many</b> new helper-variables (that can easily be eliminated
- * afterwards).<br>
- * In order to catch every redundant expression, this transformation must be
- * done on a graph without critical edges. Therefore the first thing we do, is
- * removing them. A subsequent pass can then easily remove the synthetic nodes
- * we have introduced.<br>
- * The term "busy" refers to the fact, that we <b>always</b> move computations
- * as high as possible. Even, if this is not necessary.
+ * Performs a partial redundancy elimination (= code motion). This is
+ * done, by moving <b>every</b>computation as high as possible (it is
+ * easy to show, that they are computationally optimal), and then
+ * replacing the original computation by a reference to this new high
+ * computation. This implies, that we introduce <b>many</b> new
+ * helper-variables (that can easily be eliminated afterwards).<br> In
+ * order to catch every redundant expression, this transformation must
+ * be done on a graph without critical edges. Therefore the first
+ * thing we do, is removing them. A subsequent pass can then easily
+ * remove the synthetic nodes we have introduced.<br> The term "busy"
+ * refers to the fact, that we <b>always</b> move computations as high
+ * as possible. Even, if this is not necessary.
  *
  * @see soot.jimple.toolkits.graph.CriticalEdgeRemover
  */
@@ -57,7 +59,8 @@ public class BusyCodeMotion extends BodyTransformer {
 
   public static BusyCodeMotion v() { return instance; }
 
-  public String getDeclaredOptions() { return super.getDeclaredOptions(); }
+  public String getDeclaredOptions() { return super.getDeclaredOptions()+
+      " naive-side-effect "; }
 
   public String getDefaultOptions() { return ""; }
 
@@ -73,30 +76,46 @@ public class BusyCodeMotion extends BodyTransformer {
       System.out.println("[" + b.getMethod().getName() +
           "]     performing Busy Code Motion...");
 
-    CriticalEdgeRemover.removeCriticalEdges(b);
+    CriticalEdgeRemover.v().transform(b, phaseName + ".cer");
 
     UnitGraph graph = new BriefUnitGraph(b);
 
+    /* map each unit to its RHS. only take binary expressions */
     Map unitToEquivRhs = new UnitMap(b, graph.size() + 1, 0.7f) {
-      protected Object mapTo(Unit unit) {
-        Value tmp = SootFilter.noInvokeRhs(unit);
-        return SootFilter.equiVal(SootFilter.noLocal(tmp));
-      }
-    };
-      //new UnitEquivRHSMap(b, graph.size() + 1, 0.7f);
+	protected Object mapTo(Unit unit) {
+	  Value tmp = SootFilter.noInvokeRhs(unit);
+	  Value tmp2 = SootFilter.binop(tmp);
+	  if (tmp2 == null) tmp2 = SootFilter.concreteRef(tmp);
+	  return SootFilter.equiVal(tmp2);
+	}
+      };
 
+    /* same as before, but without exception-throwing expressions */
     Map unitToNoExceptionEquivRhs = new UnitMap(b, graph.size() + 1, 0.7f) {
-      protected Object mapTo(Unit unit) {
-        Value tmp = SootFilter.noExceptionThrowingRhs(unit);
-        return SootFilter.equiVal(SootFilter.noLocal(tmp));
-      }
-    };
+	protected Object mapTo(Unit unit) {
+	  Value tmp = SootFilter.binopRhs(unit);
+	  tmp = SootFilter.noExceptionThrowing(tmp);
+	  return SootFilter.equiVal(tmp);
+	}
+      };
 
-    UpSafetyAnalysis upSafe = new UpSafetyAnalysis(graph, unitToEquivRhs);
+    /* if a more precise sideeffect-tester comes out, please change it here! */
+    SideEffectTester sideEffect;
+    if( Scene.v().hasActiveInvokeGraph() 
+    && !Options.getBoolean( options, "naive-side-effect" ) ) {
+        sideEffect = new PASideEffectTester();
+    } else {
+        sideEffect = new NaiveSideEffectTester();
+    }
+    sideEffect.newMethod( b.getMethod() );
+    UpSafetyAnalysis upSafe = new UpSafetyAnalysis(graph, unitToEquivRhs,
+            sideEffect );
     DownSafetyAnalysis downSafe = new DownSafetyAnalysis(graph,
-        unitToNoExceptionEquivRhs);
+        unitToNoExceptionEquivRhs, sideEffect );
     EarliestnessComputation earliest = new EarliestnessComputation(graph,
-        upSafe, downSafe);
+        upSafe, downSafe, sideEffect );
+
+    LocalCreation localCreation = new LocalCreation(b.getLocals(), PREFIX);
 
     Iterator unitIt = unitChain.snapshotIterator();
 
@@ -104,22 +123,20 @@ public class BusyCodeMotion extends BodyTransformer {
       while (unitIt.hasNext()) {
         Unit currentUnit = (Unit)unitIt.next();
         Iterator earliestIt =
-          ((List)earliest.getEarliestBefore(currentUnit)).iterator();
+          ((FlowSet)earliest.getFlowBefore(currentUnit)).iterator();
         while (earliestIt.hasNext()) {
           EquivalentValue equiVal = (EquivalentValue)earliestIt.next();
           Value exp = equiVal.getValue();
           /* get the unic helper-name for this expression */
           Local helper = (Local)expToHelper.get(equiVal);
           if (helper == null) {
-            String helperName = PREFIX + counter++;
-            helper = Jimple.v().newLocal(helperName,
-                Type.toMachineType(exp.getType()));
-            b.getLocals().add(helper);
+            helper = localCreation.newLocal(equiVal.getType());
             expToHelper.put(equiVal, helper);
           }
 
           /* insert a new Assignment-stmt before the currentUnit */
-          Unit firstComp = Jimple.v().newAssignStmt(helper, equiVal.getValue());
+          Value insertValue = Jimple.cloneIfNecessary(equiVal.getValue());
+          Unit firstComp = Jimple.v().newAssignStmt(helper, insertValue);
           unitChain.insertBefore(firstComp, currentUnit);
         }
       }

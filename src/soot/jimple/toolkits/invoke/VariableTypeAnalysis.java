@@ -30,10 +30,11 @@ import soot.util.*;
 import soot.*;
 import soot.jimple.*;
 import soot.toolkits.graph.*;
+import soot.jimple.spark.*;
 
 /** An implementation of Variable Type Analysis (as defined in Vijay Sundaresan's thesis). */
 
-public class VariableTypeAnalysis
+public class VariableTypeAnalysis implements PointsToAnalysis
 {
 
   VTATypeGraph vtg;
@@ -332,9 +333,12 @@ public class VariableTypeAnalysis
         VTAFinish = new Date();
 
         long runtime = VTAFinish.getTime() - VTAStart.getTime();
-        System.out.println("[vta] VTA has run for "+(runtime/60000)+" min "+
-                           ((runtime%60000)/1000)+" sec.");
-        System.out.println();
+        
+	if (Main.isVerbose) {
+	    System.out.println("[vta] VTA has run for "+(runtime/60000)+" min. "+
+			       ((runtime%60000)/1000)+" sec.");
+	    System.out.println();
+	}
     }
 
     // You can also ask about the reaching types for any variable.
@@ -364,6 +368,18 @@ public class VariableTypeAnalysis
         }
         
         superNodesToReachingTypes = outTypes;
+    }
+    class VTAP2Set implements PointsToSet {
+        protected Set ts;
+        VTAP2Set( Set ts ) { this.ts = ts; }
+        public Set possibleTypes() { return ts; }
+        public boolean isEmpty() { throw new RuntimeException( "NYI" ); }
+        public boolean hasNonEmptyIntersection( PointsToSet other )
+        { throw new RuntimeException( "NYI" ); }
+    }
+    public PointsToSet reachingObjects( SootMethod m, Stmt stmt, Local l ) {
+        return new VTAP2Set(
+                new HashSet(getReachingTypesOf(VTATypeGraph.getVTALabel(m, l))));
     }
 }
 

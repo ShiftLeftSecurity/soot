@@ -1,7 +1,28 @@
-/* A utility class for generating dot graph file for a control flow graph
+/* Soot - a J*va Optimization Framework
+ * Copyright (C) 2002 Sable Research Group
  *
- * @author Feng Qian
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the
+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ * Boston, MA 02111-1307, USA.
  */
+
+/*
+ * Modified by the Sable Research Group and others 1997-1999.  
+ * See the 'credits' file distributed with Soot for the complete list of
+ * contributors.  (Soot is distributed at http://www.sable.mcgill.ca/soot)
+ */
+
 
 package soot.util;
 
@@ -10,13 +31,31 @@ import soot.toolkits.graph.*;
 import soot.util.*;
 import java.util.*;
 
-public class CFGViewer extends BodyTransformer{
+/**
+ * A utility class for generating dot graph file for a control flow graph
+ *
+ * @author Feng Qian
+ */
+public class CFGViewer {
 
-  private String clsname;
-  private String methname;
+  /* make all control fields public, allow other soot class dump 
+   * the graph in the middle */
+  
+  public final static int UNITGRAPH  = 0;
+  public final static int BLOCKGRAPH = 1;
+  public final static int ARRAYBLOCK = 2;
 
-  private static boolean useUnitGraph = true;
-  private static boolean isBrief      = false;
+  public static int graphtype = UNITGRAPH;
+
+  public static String clsname;
+  public static String methname;
+
+  public static boolean isBrief      = false;
+ 
+  private static int meth_count = 0;
+
+  /* in one page or several pages of 8.5x11 */
+  public static boolean onepage      = true;
 
   public static void main(String[] args) {
 
@@ -26,83 +65,99 @@ public class CFGViewer extends BodyTransformer{
       System.exit(0);
     }
 
-    /* add a phase to transformer pack by call Pack.add */
-    Pack jtp = Scene.v().getPack("jtp");
-    CFGViewer viewer = new CFGViewer();
-    jtp.add(new Transform("jtp.cfgviewer", 
-			  viewer));
-
     /* process options */
-    args = parseoptions(viewer, args);
-        
-    soot.Main.setTargetRep(soot.Main.NO_OUTPUT);
+    parse_options(args);
 
-    soot.Main.main(args);
+    /* load and support classes manually */
+    SootClass cls = Scene.v().loadClassAndSupport(clsname);
+    cls.setApplicationClass();
+    
+    /* iterate each method and call print_cfg */
+    Iterator methodIt = cls.getMethods().iterator();
+    while (methodIt.hasNext()) {
+      SootMethod meth = (SootMethod)methodIt.next();
+      
+      if ((methname == null) 
+	  || (methname.equals(meth.getName()))) {
+	if (meth.isConcrete()) {
+	  Body body = meth.retrieveActiveBody();
+	  print_cfg(body);
+	}
+      }
+    }
   }
 
   private static void usage(){
-      System.err.println("Usage: java soot.util.CFGViewer [--unit|--block] [--brief] class[:method]");
-      System.err.println("       --unit  : (default) uses the unit graph.");
-      System.err.println("       --block : uses the block graph.");
+      System.err.println("Usage:");
+      System.err.println("   java soot.util.CFGViewer [options] class[:method]");
+      System.err.println("   options:");
+      System.err.println("       --unit|block|array : produces the unit(default)/block graph.");
       System.err.println("       --brief : uses the unit/block index as the label.");
+      System.err.println("       --soot-classpath PATHs : specifies the soot class pathes.");
+      System.err.println("       --multipages : produces the dot file sets multi pages (8.5x11).");
+      System.err.println("                      By default, the graph is in one page.");
   }
 
 
-  private static String[] parseoptions(CFGViewer viewer, String[] args){
+  private static void parse_options(String[] args){
     for (int i=0, n=args.length; i<n; i++) {
       if (args[i].equals("--unit")) {
-	useUnitGraph = true;
+	graphtype = UNITGRAPH;
       } else if (args[i].equals("--block")) {
-	useUnitGraph = false;
+	graphtype = BLOCKGRAPH;
+      } else if (args[i].equals("--array")) {
+	graphtype = ARRAYBLOCK;
       } else if (args[i].equals("--brief")) {
 	isBrief = true;
+      } else if (args[i].equals("--soot-classpath")) {
+	Scene.v().setSootClassPath(args[++i]);
+      } else if (args[i].equals("--multipages")) {
+	onepage = false;
       } else {
 	int smpos = args[i].indexOf(':');
 	if (smpos == -1) {
-	  viewer.clsname = args[i]; 
+	  clsname = args[i]; 
 	} else {
-	  viewer.clsname  = args[i].substring(0, smpos);
-	  viewer.methname = args[i].substring(smpos+1);
+	  clsname  = args[i].substring(0, smpos);
+	  methname = args[i].substring(smpos+1);
 	}
-
-	args = new String[1];
-	args[0] = viewer.clsname;
       }
     }
-
-    return args;
   }
 
-  protected void internalTransform(Body body, String phase, Map options) {
+  protected static void print_cfg(Body body) {
     SootMethod method = body.getMethod();
     SootClass  sclass = method.getDeclaringClass();
 
-    if (!sclass.getName().equals(clsname)) {
-      return;
-    }
-
-    if (methname != null && !method.getName().equals(methname)) {
-      return;
-    }
-
     DirectedGraph graph = null;
-    
-    if (useUnitGraph) {
+
+    switch (graphtype) {
+    case UNITGRAPH:
       graph = new UnitGraph(body, false);
-    } else {
+      break;
+    case BLOCKGRAPH:
       graph = new BlockGraph(body, BlockGraph.BRIEF);
+      break;
+    case ARRAYBLOCK:
+      graph = new BlockGraph(body, BlockGraph.ARRAYREF);
+      break;
     }
 
-    String methodname = method.getName();
-    String graphname = sclass.getName()+"."+method.getName();
+    String methodname = method.getName()+"-"+meth_count++;
+    String graphname = sclass.getName()+":"+method.getName();
     toDotFile(methodname, graph, graphname); 
   }
 
 
   private static int nodecount = 0;
 
-  /* generating dot format for plotting */
-  private static void toDotFile(String methodname, 
+  /**
+   * Generates a dot format file for a DirectedGraph
+   * @param methodname, the name of generated dot file
+   * @param graph, a directed control flow graph (UnitGraph, BlockGraph ...)
+   * @param graphname, the title of the graph
+   */
+  public static void toDotFile(String methodname, 
 				DirectedGraph graph, 
 				String graphname) {
 
@@ -113,7 +168,9 @@ public class CFGViewer extends BodyTransformer{
     // file name is the method name + .dot
     DotGraph canvas = new DotGraph(methodname);
 
-    canvas.setPageSize(8.5, 11.0);
+    if (!onepage) {
+      canvas.setPageSize(8.5, 11.0);
+    }
 
     if (isBrief) {
       canvas.setNodeShape(DotGraphConstants.NODE_SHAPE_CIRCLE);

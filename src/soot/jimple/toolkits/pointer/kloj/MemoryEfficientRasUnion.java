@@ -1,6 +1,7 @@
 package soot.jimple.toolkits.pointer.kloj;
 import soot.jimple.toolkits.pointer.*;
 import java.util.*;
+import soot.jimple.spark.PointsToSet;
 
 public class MemoryEfficientRasUnion extends Union {
     HashSet subsets;
@@ -8,15 +9,15 @@ public class MemoryEfficientRasUnion extends Union {
     public boolean isEmpty() {
 	if( subsets == null ) return true;
 	for( Iterator it = subsets.iterator(); it.hasNext(); ) {
-	    ObjectSet subset = (ObjectSet) it.next();
+	    PointsToSet subset = (PointsToSet) it.next();
 	    if( !subset.isEmpty() ) return false;
 	}
 	return true;
     }
-    public boolean hasNonEmptyIntersection( ObjectSet other ) {
+    public boolean hasNonEmptyIntersection( PointsToSet other ) {
 	if( subsets == null ) return true;
 	for( Iterator it = subsets.iterator(); it.hasNext(); ) {
-	    ObjectSet subset = (ObjectSet) it.next();
+	    PointsToSet subset = (PointsToSet) it.next();
 	    if( other instanceof Union ) {
 		if( other.hasNonEmptyIntersection( subset ) ) return true;
 	    } else {
@@ -25,7 +26,7 @@ public class MemoryEfficientRasUnion extends Union {
 	}
 	return false;
     }
-    public boolean addAll( ObjectSet s ) {
+    public boolean addAll( PointsToSet s ) {
 	boolean ret = false;
 	if( subsets == null ) subsets = new HashSet();
 	if( s instanceof Union ) {
@@ -50,7 +51,7 @@ public class MemoryEfficientRasUnion extends Union {
 	}
 	HashSet ret = new HashSet();
 	for( Iterator it = subsets.iterator(); it.hasNext(); ) {
-	    ObjectSet subset = (ObjectSet) it.next();
+	    PointsToSet subset = (PointsToSet) it.next();
 	    ret.addAll( subset.possibleTypes() );
 	}
 	return ret;

@@ -3,6 +3,7 @@ package soot.jimple.toolkits.pointer;
 import soot.*;
 import soot.jimple.*;
 import java.util.*;
+import soot.jimple.spark.PointsToSet;
 
 //  ArrayRef, 
 //  CaughtExceptionRef, 
@@ -55,8 +56,8 @@ public class PASideEffectTester implements SideEffectTester
 	return ret;
     }
     
-    protected ObjectSet reachingObjects( Local l ) {
-	ObjectSet ret = (ObjectSet) localToReachingObjects.get( l );
+    protected PointsToSet reachingObjects( Local l ) {
+	PointsToSet ret = (PointsToSet) localToReachingObjects.get( l );
 	if( ret == null ) {
 	    localToReachingObjects.put( l, 
 		    ret = pa.reachingObjects( currentMethod, null, l ) );
@@ -80,6 +81,10 @@ public class PASideEffectTester implements SideEffectTester
 
     protected boolean valueTouchesRWSet(RWSet s, Value v, List boxes)
     {
+        for( Iterator it = v.getUseBoxes().iterator(); it.hasNext(); ) {
+            ValueBox use = (ValueBox) it.next();
+            if( valueTouchesRWSet( s, use.getValue(), boxes ) ) return true;
+        }
         // This doesn't really make any sense, but we need to return something.
         if (v instanceof Constant)
             return false;
@@ -100,9 +105,9 @@ public class PASideEffectTester implements SideEffectTester
 	if( v instanceof InstanceFieldRef ) {
 	    InstanceFieldRef ifr = (InstanceFieldRef) v;
 	    if( s == null ) return false;
-	    ObjectSet o1 = s.getBaseForField( ifr.getField() );
+	    PointsToSet o1 = s.getBaseForField( ifr.getField() );
 	    if( o1 == null ) return false;
-	    ObjectSet o2 = reachingObjects( (Local) ifr.getBase() );
+	    PointsToSet o2 = reachingObjects( (Local) ifr.getBase() );
 	    if( o2 == null ) return false;
 	    return o1.hasNonEmptyIntersection( o2 );
 	}
@@ -110,9 +115,9 @@ public class PASideEffectTester implements SideEffectTester
 	if( v instanceof ArrayRef ) {
 	    ArrayRef ar = (ArrayRef) v;
 	    if( s == null ) return false;
-	    ObjectSet o1 = s.getBaseForField( PointerAnalysis.ARRAY_ELEMENTS_NODE );
+	    PointsToSet o1 = s.getBaseForField( PointerAnalysis.ARRAY_ELEMENTS_NODE );
 	    if( o1 == null ) return false;
-	    ObjectSet o2 = reachingObjects( (Local) ar.getBase() );
+	    PointsToSet o2 = reachingObjects( (Local) ar.getBase() );
 	    if( o2 == null ) return false;
 	    return o1.hasNonEmptyIntersection( o2 );
 	}

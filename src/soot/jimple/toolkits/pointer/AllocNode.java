@@ -17,6 +17,13 @@ public class AllocNode extends Node
 	    if( !(t instanceof RefLikeType) ) throw new RuntimeException(
 		    "Attempt to create AllocNode of type "+t+" newe is "+newExpr+
 		    " and method is "+m );
+            if(t instanceof RefType) {
+                SootClass c = ((RefType) t).getSootClass();
+                if( c.isAbstract() ) {
+                    throw new RuntimeException( "alloc node "+newExpr+" in "+m+
+                            " creates abstract object "+t );
+                }
+            }
 	    nodeMap.put( newExpr, ret = new AllocNode( newExpr, t, m ) );
 	}
 	return ret;

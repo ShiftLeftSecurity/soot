@@ -35,16 +35,16 @@ import java.util.*;
 import soot.util.*;
 
 /** 
- * Performs an UpSafe-analysis on the given graph.<br>
+ * Performs an UpSafe-analysis on the given graph.
  * An expression is upsafe, if the computation already has been performed on
- * every path from START to the given program-point.<br>
+ * every path from START to the given program-point.
  */
 public class UpSafetyAnalysis extends ForwardFlowAnalysis {
   private SideEffectTester sideEffect;
 
   private Map unitToGenerateMap;
 
-  private FlowSet emptySet;
+  private BoundedFlowSet set;
 
   /**
    * this constructor should not be used, and will throw a runtime-exception!
@@ -59,6 +59,8 @@ public class UpSafetyAnalysis extends ForwardFlowAnalysis {
    * this constructor automaticly performs the UpSafety-analysis.<br>
    * the result of the analysis is as usual in FlowBefore (getFlowBefore())
    * and FlowAfter (getFlowAfter()).<br>
+<<<<<<< 1.2.2.pointer.10(w)/src/soot/jimple/toolkits/scalar/pre/UpSafetyAnalysis.java Sat, 27 Apr 2002 08:08:35 -0400 olhota (soot/l/c/34_UpSafetyAn 1.2 644)
+=======
    * the naive side-effect tester is used to perform kills.
    *
    * @param dg a CompleteUnitGraph
@@ -72,25 +74,43 @@ public class UpSafetyAnalysis extends ForwardFlowAnalysis {
    * this constructor automaticly performs the UpSafety-analysis.<br>
    * the result of the analysis is as usual in FlowBefore (getFlowBefore())
    * and FlowAfter (getFlowAfter()).<br>
+   * As default, BoundedArraySparseSets will be used.
+>>>>>>> 1.2.2.dev.67/src/soot/jimple/toolkits/scalar/pre/UpSafetyAnalysis.java Thu, 02 May 2002 17:44:20 -0400 olhota (soot/l/c/34_UpSafetyAn 1.1.1.2 644)
    *
    * @param dg a CompleteUnitGraph
    * @param unitToGen the EquivalentValue of each unit.
    * @param sideEffect the SideEffectTester that will be used to perform kills.
    */
   public UpSafetyAnalysis(DirectedGraph dg, Map unitToGen, SideEffectTester
-			  sideEffect) {
+                          sideEffect) {
+    this(dg, unitToGen, sideEffect, new
+      BoundedArraySparseSet(new CollectionFlowUniverse(unitToGen.values())));
+  }
+
+  /**
+   * this constructor automaticly performs the UpSafety-analysis.<br>
+   * the result of the analysis is as usual in FlowBefore (getFlowBefore())
+   * and FlowAfter (getFlowAfter()).<br>
+   * As usually flowset-operations are more efficient if shared, this allows to
+   * share sets over several analyses.
+   *
+   * @param dg a CompleteUnitGraph
+   * @param unitToGen the EquivalentValue of each unit.
+   * @param sideEffect the SideEffectTester that will be used to perform kills.
+   * @param set a bounded flow-set.
+   */
+  public UpSafetyAnalysis(DirectedGraph dg, Map unitToGen, SideEffectTester
+			  sideEffect, BoundedFlowSet set) {
     super(dg);
     this.sideEffect = sideEffect;
     UnitGraph g = (UnitGraph)dg;
-    emptySet = new ToppedSet(new ArraySparseSet());
+    this.set = set;
     unitToGenerateMap = unitToGen;
     doAnalysis();
   }
 
   protected Object newInitialFlow() {
-    Object newSet = emptySet.clone();
-    ((ToppedSet)newSet).setTop(true);
-    return newSet;
+    return set.topSet();
   }
 
   protected void customizeInitialFlowGraph() {
@@ -98,7 +118,7 @@ public class UpSafetyAnalysis extends ForwardFlowAnalysis {
     Iterator headIt = graph.getHeads().iterator();
     while (headIt.hasNext()) {
       Object newSet = unitToBeforeFlow.get(headIt.next());
-      ((ToppedSet)newSet).setTop(false);
+      ((BoundedFlowSet)newSet).complement();
     }
   }
 
@@ -106,26 +126,16 @@ public class UpSafetyAnalysis extends ForwardFlowAnalysis {
     FlowSet in = (FlowSet) inValue, out = (FlowSet) outValue;
 
     in.copy(out);
-    if (((ToppedSet)in).isTop())
-      return;
 
     // Perform generation
     Value add = (Value)unitToGenerateMap.get(unit);
     if (add != null)
       out.add(add, out);
 
-    /* should not be possible */
-    if (((ToppedSet)out).isTop()) {
-      throw new RuntimeException("trying to kill on topped set!");
-    }
-
     { /* Perform kill */
       Unit u = (Unit)unit;
 
-      /* simulate a snapshotIterator, as we modify the underlying set */
-      List outList = new LinkedList();
-      outList.addAll(((FlowSet)out).toList());
-      Iterator outIt = outList.iterator();
+      Iterator outIt = ((FlowSet)out).iterator();
 
       // iterate over things (avail) in out set.
       while (outIt.hasNext()) {
@@ -133,16 +143,17 @@ public class UpSafetyAnalysis extends ForwardFlowAnalysis {
         Value avail = equiVal.getValue();
         if (avail instanceof FieldRef) {
           if (sideEffect.unitCanWriteTo(u, avail))
-            out.remove(equiVal, out);
+            outIt.remove();
         } else {
           Iterator usesIt = avail.getUseBoxes().iterator();
 
           // iterate over uses in each avail.
           while (usesIt.hasNext()) {
             Value use = ((ValueBox)usesIt.next()).getValue();
-
-            if (sideEffect.unitCanWriteTo(u, use))
-              out.remove(equiVal, out);
+            if (sideEffect.unitCanWriteTo(u, use)) {
+              outIt.remove();
+              break;
+            }
           }
         }
       }

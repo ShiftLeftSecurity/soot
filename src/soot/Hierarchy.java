@@ -433,6 +433,21 @@ public class Hierarchy
 
     // Questions about method invocation.
 
+    /** Returns true if the method m is visible from code in the class from. */
+    private boolean isVisible( SootClass from, SootMethod m ) {
+        if( m.isPublic() ) return true;
+        if( m.isPrivate() ) {
+            return from.equals( m.getDeclaringClass() );
+        }
+        if( m.isProtected() ) {
+            return isClassSubclassOfIncluding( from, m.getDeclaringClass() );
+        }
+        // m is package
+        return from.getJavaPackageName().equals(
+                m.getDeclaringClass().getJavaPackageName() );
+            //|| isClassSubclassOfIncluding( from, m.getDeclaringClass() );
+    }
+
     /** Given an object of actual type C (o = new C()), returns the method which will be called
         on an o.f() invocation. */
     public SootMethod resolveConcreteDispatch(SootClass concreteType, SootMethod m)
@@ -448,8 +463,11 @@ public class Hierarchy
         while (it.hasNext())
         {
             SootClass c = (SootClass)it.next();
-            if (c.declaresMethod(methodSig))
+            if (c.declaresMethod(methodSig) 
+            && isVisible( c, m )
+            ) {
                 return c.getMethod(methodSig);
+            }
         }
         throw new RuntimeException("could not resolve concrete dispatch!\nType: "+concreteType+"\nMethod: "+m);
     }
@@ -498,13 +516,74 @@ public class Hierarchy
 
         ArraySet s = new ArraySet();
         
-        while (classesIt.hasNext())
-            s.add(resolveConcreteDispatch((SootClass)classesIt.next(), m));
+        while (classesIt.hasNext()) {
+            SootClass cl = (SootClass) classesIt.next();
+            if( Modifier.isAbstract( cl.getModifiers() ) ) continue;
+            s.add(resolveConcreteDispatch(cl, m));
+        }
 
         List l = new ArrayList(); l.addAll(s);
         return Collections.unmodifiableList(l);
     }
 
+    public int countAbstractDispatch(SootClass c, SootMethod m) 
+    {
+        int types = 0;
+        checkState();
+
+        Iterator classesIt = null;
+
+        if (c.isInterface()) {
+            classesIt = getImplementersOf(c).iterator();
+            HashSet classes = new HashSet();
+            while (classesIt.hasNext())
+                classes.addAll(getSubclassesOfIncluding((SootClass)classesIt.next()));
+            classesIt = classes.iterator();
+        }    
+            
+        else
+            classesIt = getSubclassesOfIncluding(c).iterator();
+
+        ArraySet s = new ArraySet();
+        
+        while (classesIt.hasNext()) {
+            SootClass cl = (SootClass) classesIt.next();
+            if( Modifier.isAbstract( cl.getModifiers() ) ) continue;
+            types++;
+            s.add(resolveConcreteDispatch(cl, m));
+        }
+
+        return s.size();
+    }
+    public int countAbstractDispatchTypes(SootClass c, SootMethod m) 
+    {
+        int types = 0;
+        checkState();
+
+        Iterator classesIt = null;
+
+        if (c.isInterface()) {
+            classesIt = getImplementersOf(c).iterator();
+            HashSet classes = new HashSet();
+            while (classesIt.hasNext())
+                classes.addAll(getSubclassesOfIncluding((SootClass)classesIt.next()));
+            classesIt = classes.iterator();
+        }    
+            
+        else
+            classesIt = getSubclassesOfIncluding(c).iterator();
+
+        ArraySet s = new ArraySet();
+        
+        while (classesIt.hasNext()) {
+            SootClass cl = (SootClass) classesIt.next();
+            if( Modifier.isAbstract( cl.getModifiers() ) ) continue;
+            types++;
+            s.add(resolveConcreteDispatch(cl, m));
+        }
+
+        return types;
+    }
     // what can get called if you have a set of possible receiver types
     /** Returns a list of possible targets for the given method and set of receiver types. */
     public List resolveAbstractDispatch(List classes, SootMethod m)

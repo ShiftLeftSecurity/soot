@@ -204,7 +204,7 @@ public class RefType extends BaseType implements ToBriefString, Comparable, RefL
         
     }
 
-    public Type getArrayBaseType() {
+    public Type getArrayElementType() {
 	if( className.equals( "java.lang.Object" )
 	    || className.equals( "java.io.Serializable" )
 	    || className.equals( "java.lang.Cloneable" ) ) {

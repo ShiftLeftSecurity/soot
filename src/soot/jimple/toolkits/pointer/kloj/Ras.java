@@ -2,8 +2,9 @@ package soot.jimple.toolkits.pointer.kloj;
 import soot.jimple.toolkits.pointer.*;
 import soot.*;
 import java.util.*;
+import soot.jimple.spark.PointsToSet;
 
-public abstract class Ras implements ObjectSet
+public abstract class Ras implements PointsToSet
 { 
     /** Leave this null for a type-insensitive analysis. */
     static FastHierarchy fh;
@@ -38,7 +39,7 @@ public abstract class Ras implements ObjectSet
     public void nextIter() {}
     public abstract boolean rasHasNonEmptyIntersection( Ras other );
 
-    public boolean hasNonEmptyIntersection( ObjectSet other ) {
+    public boolean hasNonEmptyIntersection( PointsToSet other ) {
 	if( other == null ) return false;
 	if( other instanceof FullObjectSet ) return true;
 	if( other instanceof AllocNode ) {
@@ -47,7 +48,7 @@ public abstract class Ras implements ObjectSet
 	    return rasHasNonEmptyIntersection( (Ras) other );
 	} else if( other instanceof Union ) {
 	    return other.hasNonEmptyIntersection( this );
-	} else throw new RuntimeException( "Unhandled type of ObjectSet"+other+
+	} else throw new RuntimeException( "Unhandled type of PointsToSet"+other+
 	" type is "+other.getClass() );
     }
     public Set possibleTypes() {

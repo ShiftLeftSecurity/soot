@@ -1,6 +1,7 @@
 package soot.jimple.toolkits.pointer;
 import java.util.*;
 import soot.*;
+import soot.jimple.spark.PointsToSet;
 
 public class FullRWSet extends RWSet {
     public boolean getCallsNative() {
@@ -17,7 +18,7 @@ public class FullRWSet extends RWSet {
     public Set getFields() {
 	throw new RuntimeException( "Unsupported" );
     }
-    public ObjectSet getBaseForField( Object f ) {
+    public PointsToSet getBaseForField( Object f ) {
 	throw new RuntimeException( "Unsupported" );
     }
     public boolean hasNonEmptyIntersection( RWSet other ) {
@@ -31,7 +32,7 @@ public class FullRWSet extends RWSet {
     public boolean addGlobal( SootField global ) {
 	throw new RuntimeException( "Unsupported" );
     }
-    public boolean addFieldRef( ObjectSet otherBase, Object field ) {
+    public boolean addFieldRef( PointsToSet otherBase, Object field ) {
 	throw new RuntimeException( "Unsupported" );
     }
     public boolean isEquivTo( RWSet other ) {

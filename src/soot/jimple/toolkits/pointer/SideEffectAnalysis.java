@@ -4,6 +4,7 @@ import soot.jimple.*;
 import soot.jimple.toolkits.invoke.*;
 import java.util.*;
 import soot.util.*;
+import soot.jimple.spark.PointsToSet;
 
 /** Generates side-effect information from a PointerAnalysis. */
 public class SideEffectAnalysis {
@@ -104,7 +105,7 @@ public class SideEffectAnalysis {
 	RWSet ret = null;
 	if( v instanceof InstanceFieldRef ) {
 	    InstanceFieldRef ifr = (InstanceFieldRef) v;
-	    ObjectSet base = pa.reachingObjects( m, s, (Local) ifr.getBase() );
+	    PointsToSet base = pa.reachingObjects( m, s, (Local) ifr.getBase() );
 	    ret = new StmtRWSet();
 	    ret.addFieldRef( base, ifr.getField() );
 	} else if( v instanceof StaticFieldRef ) {
@@ -113,7 +114,7 @@ public class SideEffectAnalysis {
 	    ret.addGlobal( sfr.getField() );
 	} else if( v instanceof ArrayRef ) {
 	    ArrayRef ar = (ArrayRef) v;
-	    ObjectSet base = pa.reachingObjects( m, s, (Local) ar.getBase() );
+	    PointsToSet base = pa.reachingObjects( m, s, (Local) ar.getBase() );
 	    ret = new StmtRWSet();
 	    ret.addFieldRef( base, PointerAnalysis.ARRAY_ELEMENTS_NODE );
 	}

@@ -62,14 +62,14 @@ public class HybridRas extends Ras
 	    if( n6 == null ) return; v.visit( n6 );
 	    if( n7 == null ) return; v.visit( n7 );
 	    if( n8 == null ) return; v.visit( n8 );
-	    if( n9 == null ) return; v.visit( n1 );
-	    if( n10 == null ) return; v.visit( n2 );
-	    if( n11 == null ) return; v.visit( n3 );
-	    if( n12 == null ) return; v.visit( n4 );
-	    if( n13 == null ) return; v.visit( n5 );
-	    if( n14 == null ) return; v.visit( n6 );
-	    if( n15 == null ) return; v.visit( n7 );
-	    if( n16 == null ) return; v.visit( n8 );
+	    if( n9 == null ) return; v.visit( n9 );
+	    if( n10 == null ) return; v.visit( n10 );
+	    if( n11 == null ) return; v.visit( n11 );
+	    if( n12 == null ) return; v.visit( n12 );
+	    if( n13 == null ) return; v.visit( n13 );
+	    if( n14 == null ) return; v.visit( n14 );
+	    if( n15 == null ) return; v.visit( n15 );
+	    if( n16 == null ) return; v.visit( n16 );
 	} else {
 	    for( int i=0; i < SIZE; i++ ) {
 		if( bits[i] != 0 ) for( int j=0; j<32; j++ ) {

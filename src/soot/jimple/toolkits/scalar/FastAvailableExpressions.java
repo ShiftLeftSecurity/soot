@@ -42,7 +42,7 @@ public class FastAvailableExpressions implements AvailableExpressions
     Map unitToEquivsBefore;
 
     /** Wrapper for AvailableExpressionsAnalysis. */ 
-    public FastAvailableExpressions(Body b)
+    public FastAvailableExpressions(Body b, SideEffectTester st)
     {
         if(Main.isVerbose)
             System.out.println("[" + b.getMethod().getName() +
@@ -50,7 +50,7 @@ public class FastAvailableExpressions implements AvailableExpressions
 
         FastAvailableExpressionsAnalysis analysis = 
             new FastAvailableExpressionsAnalysis(new CompleteUnitGraph(b),
-		    b.getMethod());
+		    b.getMethod(), st);
 
         // Build unitToExprs map
         {

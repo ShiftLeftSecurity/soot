@@ -1,16 +1,17 @@
 package soot.jimple.toolkits.pointer.kloj;
 import soot.jimple.toolkits.pointer.*;
 import java.util.*;
+import soot.jimple.spark.PointsToSet;
 
 public class ReallyCheapRasUnion extends Union {
 
     public boolean isEmpty() {
 	return false;
     }
-    public boolean hasNonEmptyIntersection( ObjectSet other ) {
+    public boolean hasNonEmptyIntersection( PointsToSet other ) {
 	return true;
     }
-    public boolean addAll( ObjectSet s ) {
+    public boolean addAll( PointsToSet s ) {
 	return false;
     }
     public Object clone() {

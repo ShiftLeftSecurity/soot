@@ -72,7 +72,7 @@ public class NullType extends Type implements RefLikeType
         ((TypeSwitch) sw).caseNullType(this);
     }
 
-    public Type getArrayBaseType() {
+    public Type getArrayElementType() {
 	throw new RuntimeException( "Attempt to get array base type of a non-array" );
     }
 }

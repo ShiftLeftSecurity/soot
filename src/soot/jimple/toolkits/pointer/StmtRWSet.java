@@ -1,11 +1,12 @@
 package soot.jimple.toolkits.pointer;
 import java.util.*;
 import soot.*;
+import soot.jimple.spark.PointsToSet;
 
 /** Represents the read or write set of a statement. */
 public class StmtRWSet extends RWSet {
     protected Object field;
-    protected ObjectSet base;
+    protected PointsToSet base;
     protected boolean callsNative = false;
 
     public boolean getCallsNative() {
@@ -39,7 +40,7 @@ public class StmtRWSet extends RWSet {
     }
 
     /** Returns a set of base objects whose field f is read/written. */
-    public ObjectSet getBaseForField( Object f ) {
+    public PointsToSet getBaseForField( Object f ) {
 	if( field.equals( f ) ) return base;
 	return null;
     }
@@ -71,7 +72,7 @@ public class StmtRWSet extends RWSet {
 	field = global;
 	return true;
     }
-    public boolean addFieldRef( ObjectSet otherBase, Object field ) {
+    public boolean addFieldRef( PointsToSet otherBase, Object field ) {
 	if( this.field != null || base != null ) 
 	    throw new RuntimeException( "Can't do that" );
 	this.field = field;

@@ -1,6 +1,7 @@
 package soot.jimple.toolkits.pointer;
 import java.util.*;
 import soot.*;
+import soot.jimple.spark.PointsToSet;
 
 /** Represents the read or write set of a statement. */
 public class MethodRWSet extends RWSet {
@@ -10,7 +11,7 @@ public class MethodRWSet extends RWSet {
     protected boolean isFull = false;
     static Set allGlobals = new HashSet();
     static Set allFields = new HashSet();
-    final static ObjectSet fullObjectSet = new FullObjectSet();
+    final static PointsToSet fullObjectSet = new FullObjectSet();
     public static int MAX_SIZE = Integer.MAX_VALUE;
 
     static int count = 0;
@@ -45,10 +46,10 @@ public class MethodRWSet extends RWSet {
     }
 
     /** Returns a set of base objects whose field f is read/written. */
-    public ObjectSet getBaseForField( Object f ) {
+    public PointsToSet getBaseForField( Object f ) {
 	if( isFull ) return fullObjectSet;
 	if( fields == null ) return null;
-	return (ObjectSet) fields.get( f );
+	return (PointsToSet) fields.get( f );
     }
 
     public boolean hasNonEmptyIntersection( RWSet oth ) {
@@ -107,7 +108,7 @@ public class MethodRWSet extends RWSet {
 	    if( o.fields != null ) {
 		for( Iterator it = o.fields.keySet().iterator(); it.hasNext(); ) {
 		    Object field = it.next();
-		    ObjectSet os = o.getBaseForField( field );
+		    PointsToSet os = o.getBaseForField( field );
 		    ret = addFieldRef( os, field ) | ret;
 		}
 	    }
@@ -135,10 +136,10 @@ public class MethodRWSet extends RWSet {
 	}
 	return ret;
     }
-    public boolean addFieldRef( ObjectSet otherBase, Object field ) {
+    public boolean addFieldRef( PointsToSet otherBase, Object field ) {
 	boolean ret = false;
 	if( fields == null ) fields = new HashMap();
-	ObjectSet base = getBaseForField( field );
+	PointsToSet base = getBaseForField( field );
 	if( base instanceof FullObjectSet ) return false;
 	if( otherBase instanceof FullObjectSet ) {
 	    fields.put( field, otherBase );

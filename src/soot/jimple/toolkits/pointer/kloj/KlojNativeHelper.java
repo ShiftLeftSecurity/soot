@@ -24,9 +24,14 @@ class KlojNativeHelper extends NativeHelper {
 	} else throw new RuntimeException( "Unrecognized node types "+lhs+rhs );
     }
     protected void assignObjectToImpl(ReferenceVariable lhs, AbstractObject obj) {
-	AllocNode objNode = AllocNode.v( 
-		new Pair( "AbstractObject", obj.getType() ),
-		obj.getType().getType(), currentMethod );
+	AllocNode objNode;
+        if( obj.getType().isAbstract() ) {
+            objNode = AllocNode.v( new Pair( "AbstractObject", obj.getType() ),
+                AnyType.v(), currentMethod );
+        } else { 
+            objNode = AllocNode.v( new Pair( "AbstractObject", obj.getType() ),
+                obj.getType().getType(), currentMethod );
+        }
 
 	if( lhs instanceof VarNode ) {
 	    graph.addNewEdge( objNode, (VarNode) lhs );
@@ -42,7 +47,7 @@ class KlojNativeHelper extends NativeHelper {
 	    return FieldRefNode.v( 
 		    b,
 		    PointerAnalysis.ARRAY_ELEMENTS_NODE,
-		    ( (RefLikeType) b.getType() ).getArrayBaseType(),
+		    ( (RefLikeType) b.getType() ).getArrayElementType(),
 		    currentMethod );
 	} else if( base instanceof FieldRefNode ) {
 	    FieldRefNode b = (FieldRefNode) base;
@@ -51,7 +56,7 @@ class KlojNativeHelper extends NativeHelper {
 	    return FieldRefNode.v( 
 		    l,
 		    PointerAnalysis.ARRAY_ELEMENTS_NODE,
-		    ( (RefLikeType) b.getType() ).getArrayBaseType(),
+		    ( (RefLikeType) b.getType() ).getArrayElementType(),
 		    currentMethod );
 	} else throw new RuntimeException( "Unrecognized node type "+base );
     }

@@ -1,6 +1,7 @@
 package soot.jimple.toolkits.pointer;
 import java.util.*;
 import soot.*;
+import soot.jimple.spark.PointsToSet;
 
 /** Represents the read or write set of a statement. */
 public class SiteRWSet extends RWSet {
@@ -45,11 +46,11 @@ public class SiteRWSet extends RWSet {
     }
 
     /** Returns a set of base objects whose field f is read/written. */
-    public ObjectSet getBaseForField( Object f ) {
+    public PointsToSet getBaseForField( Object f ) {
 	Union ret = null;
 	for( Iterator it = sets.iterator(); it.hasNext(); ) {
 	    RWSet s = (RWSet) it.next();
-	    ObjectSet os = s.getBaseForField( f );
+	    PointsToSet os = s.getBaseForField( f );
 	    if( os == null ) continue;
 	    if( os.isEmpty() ) continue;
 	    if( ret == null ) ret = Union.factory.newUnion();
@@ -79,7 +80,7 @@ public class SiteRWSet extends RWSet {
     public boolean addGlobal( SootField global ) {
 	throw new RuntimeException( "Not implemented; try MethodRWSet" );
     }
-    public boolean addFieldRef( ObjectSet otherBase, Object field ) {
+    public boolean addFieldRef( PointsToSet otherBase, Object field ) {
 	throw new RuntimeException( "Not implemented; try MethodRWSet" );
     }
     public boolean isEquivTo( RWSet other ) {

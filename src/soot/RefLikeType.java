@@ -5,5 +5,5 @@ import java.util.*;
 
 public interface RefLikeType
 {
-    Type getArrayBaseType();
+    Type getArrayElementType();
 }

@@ -50,15 +50,11 @@ class FastAvailableExpressionsAnalysis extends ForwardFlowAnalysis
     private static final Boolean FALSE = new Boolean(false);
     private static final Boolean TRUE = new Boolean(true);
     
-    public FastAvailableExpressionsAnalysis(DirectedGraph dg, SootMethod m)
+    public FastAvailableExpressionsAnalysis(DirectedGraph dg, SootMethod m,
+            SideEffectTester st )
     {
         super(dg);
-	if( Scene.v().hasActiveInvokeGraph() ) {
-	    st = new PASideEffectTester();
-	} else {
-	    st = new NaiveSideEffectTester();
-	}
-	st.newMethod( m );
+        this.st = st;
 
         CompleteUnitGraph g = (CompleteUnitGraph)dg;
         LocalDefs ld = new SimpleLocalDefs(g);

@@ -34,6 +34,7 @@ import soot.jimple.toolkits.scalar.*;
 import soot.jimple.toolkits.scalar.pre.*;
 import soot.jimple.toolkits.pointer.*;
 import soot.toolkits.scalar.*;
+import soot.jimple.spark.SparkTransformer;
 
 /** Manages the SootClasses of the application being analyzed. */
 public class Scene  //extends AbstractHost
@@ -156,6 +157,9 @@ public class Scene  //extends AbstractHost
 
         // Whole-Jimple transformation pack (--app)
         packNameToPack.put("wjtp", p = new Pack());
+        {
+            p.add(new Transform("wjtp.Spark", SparkTransformer.v(), "disabled"));
+        }
 
         // Whole-Jimple Optimization pack (--app -W)
         packNameToPack.put("wjop", p = new Pack());

@@ -1,6 +1,7 @@
 package soot.jimple.toolkits.pointer.kloj;
 import soot.jimple.toolkits.pointer.*;
 import java.util.*;
+import soot.jimple.spark.PointsToSet;
 
 public class RasUnion extends Union {
     Ras r;
@@ -9,7 +10,7 @@ public class RasUnion extends Union {
     public boolean isEmpty() {
 	return r == null || r.isEmpty();
     }
-    public boolean hasNonEmptyIntersection( ObjectSet other ) {
+    public boolean hasNonEmptyIntersection( PointsToSet other ) {
 	boolean ret;
 	
 	if( r == null ) {
@@ -26,7 +27,7 @@ public class RasUnion extends Union {
 	}
 	return ret;
     }
-    public boolean addAll( ObjectSet s ) {
+    public boolean addAll( PointsToSet s ) {
 	if( s == null || s.isEmpty() ) return false;
 	if( r == null ) {
 	    if( s instanceof Ras ) {

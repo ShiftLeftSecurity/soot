@@ -42,7 +42,7 @@ public class SiteDotField
 		type = Scene.v().getSootClass( "java.lang.Object" ).getType();
 	    } else {
 		ArrayType arrayType = (ArrayType) o1.getType();
-		type = arrayType.getArrayBaseType();
+		type = arrayType.getArrayElementType();
 	    }
 	}
     }

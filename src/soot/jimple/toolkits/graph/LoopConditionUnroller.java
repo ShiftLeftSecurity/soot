@@ -42,11 +42,16 @@ import soot.jimple.internal.*;
  * back-edge of the while-loop to the new block.<br>
  * After this transformation the edge between the original condition-block and
  * the loop-body is only executed once (and hence suitable for LCM) and we can
- * be sure, that the loop-body will get executed.
+ * be sure, that the loop-body will get executed.<br>
+ * Exceptions are ignored (the transformation is done on a
+ * <code>BriefUnitGraph</code>.
  */
-public class LoopConditionUnroller {
-  public int counterUnrolledConditions = 0;
-  public static int counterGlobalUnrolledConditions = 0;
+public class LoopConditionUnroller extends BodyTransformer {
+  public String getDeclaredOptions() {
+    return super.getDeclaredOptions() + " maxSize";
+  }
+
+  public String getDefaultOptions() { return "maxSize:15"; }
 
   /**
    * contained blocks are currently visiting successors. We need this to find
@@ -62,24 +67,30 @@ public class LoopConditionUnroller {
   private Map unitsToTraps;
 
   /**
-   * modifies the given blockGraph physicly, so that (some) while-loops have their
-   * condition-block unrolled.
-   *
-   * @param bg the Jimple-block-graph.
-   * @param maxSize the maximum size of a conditionblock to get cloned.
+   * unrolls conditions.
    */
   /* this implementation still fails in finding all possible while-loops, but
    * does a good job. */
-  public LoopConditionUnroller(BlockGraph bg, int maxSize) {
+  protected void internalTransform(Body body, String phaseName, Map options) {
+    if(Main.isVerbose)
+      System.out.println("[" + body.getMethod().getName() +
+                         "]     Unrolling Loop Conditions...");
+
     visitingSuccs = new HashSet();
     visitedBlocks = new HashSet();
-    this.body = bg.getBody();
-    this.maxSize = maxSize;
+    this.body = body;
+    this.maxSize = Options.getInt(options, "maxSize");
     
+    BlockGraph bg = new BriefBlockGraph(body);
     Iterator headIter = bg.getHeads().iterator();
     while (headIter.hasNext())
       unrollConditions((Block)headIter.next());
-    counterGlobalUnrolledConditions += counterUnrolledConditions;
+
+    UnitGraph cug = new CompleteUnitGraph(body);
+
+    if(Main.isVerbose)
+      System.out.println("[" + body.getMethod().getName() +
+                         "]     Unrolling Loop Conditions done.");
   }
     
   /**
@@ -164,15 +175,14 @@ public class LoopConditionUnroller {
   }
 
   /**
-   * returns a mapping of units to trap-changes. whenever the scope of a trap
-   * changes (ie. a trap opens or closes), an entry is added in the map, and the
-   * unit is mapped to the trap. The values associated to the keys are lists, as
-   * more than one exception can change at a unit.<br>
-   * Even if a trap opens and closes at a unit, this trap is only reported once
-   * (ie. is only once in the list).
+   * returns a mapping of units to trap-changes. whenever the scope of
+   * a trap changes (ie. a trap opens or closes), an entry is added in
+   * the map, and the unit is mapped to the trap. The values
+   * associated to the keys are lists, as more than one exception can
+   * change at a unit.<br> Even if a trap opens and closes at a unit,
+   * this trap is only reported once (ie. is only once in the list).
    *
-   * @return the map of units to changing traps.
-   */
+   * @return the map of units to changing traps.  */
   private Map getTraps() {
     /* if we already did the "calculation" return the cached result.*/
     if (unitsToTraps != null)
@@ -202,17 +212,16 @@ public class LoopConditionUnroller {
   }
     
   /**
-   * puts a copy (clone) of the given block in the unitChain. The block is
-   * ensured to have the same exceptions as the original block. (So we will
-   * modify the exception-chain). Furthermore the inserted block will not change
-   * the behaviour of the program.<br>
-   * Without any further modifications the returned block is unreachable. To
-   * make it reachable one must <code>goto</code> to the returned head of the
-   * new block.
+   * puts a copy (clone) of the given block in the unitChain. The
+   * block is ensured to have the same exceptions as the original
+   * block. (So we will modify the exception-chain). Furthermore the
+   * inserted block will not change the behaviour of the program.<br>
+   * Without any further modifications the returned block is
+   * unreachable. To make it reachable one must <code>goto</code> to
+   * the returned head of the new block.
    *
    * @param block the Block to clone.
-   * @return the head of the copied block.
-   */
+   * @return the head of the copied block.  */
   private Unit copyBlock(Block block) {
     Map traps = getTraps();
     Set openedTraps = new HashSet();
@@ -243,21 +252,27 @@ public class LoopConditionUnroller {
         while(trapIt.hasNext()) {
           Trap trap = (Trap)trapIt.next();
           if (trap.getBeginUnit() == currentUnit) {
-            openedTraps.add(trap);
             Trap copiedTrap = (Trap)trap.clone();
             copiedTrap.setBeginUnit(last);
             copiedTraps.put(trap, copiedTrap);
-            body.getTraps().insertAfter(trap, copiedTrap);
+
+            openedTraps.add(copiedTrap);
+            // insertAfter(toInsert, point)
+	    body.getTraps().insertAfter(copiedTrap, trap);
+
           }
           if (trap.getEndUnit() == currentUnit) {
-            openedTraps.remove(trap);
             Trap copiedTrap = (Trap)copiedTraps.get(trap);
             if (copiedTrap == null) {
               /* trap has been opened before the current block */
               copiedTrap = (Trap)trap.clone();
               copiedTrap.setBeginUnit(copiedHead);
-              body.getTraps().insertAfter(trap, copiedTrap);
-            }
+
+              body.getTraps().insertAfter(copiedTrap, trap);
+            } else {
+	      openedTraps.remove(copiedTrap);
+	    }
+
             copiedTrap.setEndUnit(last);
           }
         }
@@ -265,9 +280,9 @@ public class LoopConditionUnroller {
     }
     /* close all open traps */
     Iterator openedIterator = openedTraps.iterator();
-    while(openedIterator.hasNext())
-      ((Trap)openedIterator.next()).setEndUnit(tail);
-
+    while(openedIterator.hasNext()) {      
+      ((Trap)openedIterator.next()).setEndUnit(last);
+    }
     return copiedHead;
   }
 
@@ -296,7 +311,6 @@ public class LoopConditionUnroller {
             Block loopTailBlock = block; //just renaming for clearer code
 
             if (getSize(condition) <= maxSize) {
-              counterUnrolledConditions++;
               Unit copiedHead = copyBlock(condition);
               /* now just redirect the tail of the loop-body */
               Unit loopTail = loopTailBlock.getTail();

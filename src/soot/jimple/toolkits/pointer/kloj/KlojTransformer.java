@@ -26,6 +26,7 @@ public class KlojTransformer extends SceneTransformer
 	Date startIg = new Date();
 	InvokeGraphBuilder.v().transform( phaseName + ".igb" );
 	ig = Scene.v().getActiveInvokeGraph();
+        System.out.println( ig.computeStats() );
 	Date startBuild = new Date();
 	System.out.println( "Invoke Graph built in "+(startBuild.getTime() - startIg.getTime() )/1000+" seconds." );
 	NodePPG b;

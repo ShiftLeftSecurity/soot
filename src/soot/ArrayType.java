@@ -119,7 +119,7 @@ public class ArrayType extends Type implements RefLikeType
         ((TypeSwitch) sw).caseArrayType(this);
     }
 
-    public Type getArrayBaseType() {
+    public Type getArrayElementType() {
 	return getElementType();
     }
     public Type getElementType() {
