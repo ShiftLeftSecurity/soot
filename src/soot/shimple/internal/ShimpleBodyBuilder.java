@@ -348,13 +348,27 @@ public class ShimpleBodyBuilder
         if(heads.size() == 0)
             return;
 
-        // There should always be a single entry point in a
-        // CompleteBlockGraph: no exception entry points, etc.
-        // Right?
-        if(heads.size() != 1)
-            throw new RuntimeException("Dazed and confused.");
+        Block entry = null;
+
+        // if the CompleteBlockGraph has more than one head, make sure
+        // we have the right one (ie the one that is an actual entry
+        // point and not just dead code)
+        if(heads.size() == 1)
+            entry = (Block) heads.get(0);
+        else{
+            System.out.println("Warning:  Shimple found multiple entry-points in the CFG, assuming only one is reachable.");
+
+            Unit headUnit = (Unit) body.getUnits().getFirst();
+
+            for(int i = 0; i < heads.size(); i++){
+                Block block = (Block) heads.get(i);
+                if(headUnit.equals(block.getHead()))
+                    entry = block;
+            }
+        }
         
-        Block entry = (Block) heads.get(0);
+        if(entry == null)
+            throw new RuntimeException("Dazed and confused.");
         
         renameLocalsSearch(entry);
     }
@@ -692,13 +706,13 @@ public class ShimpleBodyBuilder
                     if(phi == null)
                         continue;
 
-                    trimExceptionalPhiNode(phi);
+                    trimPhiNode(phi);
                 }
             }
         }
     }
 
-    public void trimExceptionalPhiNode(PhiExpr phiExpr)
+    public void trimPhiNode(PhiExpr phiExpr)
     {
         /* A value may appear many times in an exceptional Phi. Hence,
            the same value may be associated with many UnitBoxes. We

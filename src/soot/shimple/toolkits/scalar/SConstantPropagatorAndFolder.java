@@ -139,7 +139,7 @@ public class SConstantPropagatorAndFolder extends BodyTransformer
                         if(defSrcBox.canContainValue(constant))
                             defSrcBox.setValue(constant);
                         else
-                            System.err.println("Warning: Couldn't propagate a constant.");
+                            System.out.println("Warning: Couldn't propagate a constant.");
                     }
                     
                     // update the uses
