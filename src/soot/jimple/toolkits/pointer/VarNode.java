@@ -58,6 +58,7 @@ public class VarNode extends ValNode
     public String toString() {
 	return "VarNode "+id+" "+val+" "+m;
     }
+    public int finishingNumber = 0;
     /*
     public int hashCode() {
 	return val.hashCode();
