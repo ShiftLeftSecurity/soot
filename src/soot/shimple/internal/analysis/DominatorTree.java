@@ -1,4 +1,3 @@
-
 /* Soot - a J*va Optimization Framework
  * Copyright (C) 2003 Navindra Umanee
  *
@@ -191,9 +190,7 @@ public class DominatorTree implements DirectedGraph
             return null;
 
         List dominatorsList = dominators.getDominators(block);
-
         Iterator dominatorsIt = dominatorsList.iterator();
-
         DominatorNode immediateDominator = null;
         
         while((immediateDominator == null) && dominatorsIt.hasNext()){
@@ -211,7 +208,7 @@ public class DominatorTree implements DirectedGraph
         }
 
         if(immediateDominator == null)
-            throw new RuntimeException("DominatorTree: Internal Algorithm Error.");
+            throw new RuntimeException("Assertion failed.");
         
         return immediateDominator;
     }

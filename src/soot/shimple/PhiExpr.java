@@ -112,7 +112,7 @@ public interface PhiExpr extends Expr, UnitBoxOwner, ToBriefString
     public void addArg(Value arg, Unit predTailUnit);
 
     /**
-     * The type of the PhiExpr is the type of its arguments.
+     * The type of the PhiExpr is usually the type of its arguments.
      **/
     public Type getType();
     public String toString();

@@ -47,12 +47,10 @@ public class GuaranteedDefs
         // build unit to guaranteed definitions map
         {
             unitToGuaranteedDefs = new HashMap(graph.size() * 2 + 1, 0.7f);
-
             Iterator unitIt = graph.iterator();
 
             while(unitIt.hasNext()){
                 Unit s = (Unit) unitIt.next();
-
                 FlowSet set = (FlowSet) analysis.getFlowBefore(s);
                 unitToGuaranteedDefs.put
                     (s, Collections.unmodifiableList(set.toList()));
@@ -86,21 +84,17 @@ class GuaranteedDefsAnalysis extends ForwardFlowAnalysis
         {
             Chain locals = graph.getBody().getLocals();
             FlowUniverse localUniverse = new CollectionFlowUniverse(locals);
-
             emptySet = new ArrayPackedSet(localUniverse);
         }
 
         // pre-compute preserve sets
         {
             unitToPreserveSet = new HashMap(graph.size() * 2 + 1, 0.7f);
-
             Iterator unitIt = graph.iterator();
 
             while(unitIt.hasNext()){
                 Unit s = (Unit) unitIt.next();
-                
                 BoundedFlowSet killSet = (BoundedFlowSet) emptySet.clone();
-                
                 Iterator boxIt = s.getDefBoxes().iterator();
 
                 // calculate kill set
@@ -121,14 +115,11 @@ class GuaranteedDefsAnalysis extends ForwardFlowAnalysis
         // pre-compute generate sets
         {
             unitToGenerateSet = new HashMap(graph.size() * 2 + 1, 0.7f);
-
             Iterator unitIt = graph.iterator();
 
             while(unitIt.hasNext()){
                 Unit s = (Unit) unitIt.next();
-
                 FlowSet genSet = (FlowSet) emptySet.clone();
-
                 Iterator boxIt = s.getDefBoxes().iterator();
 
                 while(boxIt.hasNext()){
@@ -152,9 +143,7 @@ class GuaranteedDefsAnalysis extends ForwardFlowAnalysis
     protected Object newInitialFlow()
     {
         BoundedFlowSet initSet = (BoundedFlowSet) emptySet.clone();
-
         initSet.complement(initSet);
-                           
         return initSet;
     }
 
@@ -173,6 +162,14 @@ class GuaranteedDefsAnalysis extends ForwardFlowAnalysis
 
         Unit entry = (Unit) heads.get(0);
         unitToBeforeFlow.put(entry, emptySet.clone());
+
+        /*
+        Iterator headsIt = graph.getHeads().iterator();
+        while(headsIt.hasNext()){
+            Object s = headsIt.next();
+            unitToBeforeFlow.put(s, emptySet.clone());
+        }
+        */
     }
 
     /**

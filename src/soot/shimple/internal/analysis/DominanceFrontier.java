@@ -50,34 +50,31 @@ public class DominanceFrontier
             bottomUpDispatch((DominatorNode)headsIt.next());
     }
 
-    // ** TODO: We should do something more efficient like Topological
-    // ** Sorting.  Soot actually has a implementation available.
+    // *** TODO: We should do something more efficient like
+    // *** Topological Sorting.  Soot actually has a implementation
+    // *** available.
     
     /**
      * Make sure we visit children first.
      **/
     public void bottomUpDispatch(DominatorNode node)
     {
-        if(node.isFrontierKnown()){
+        if(node.isFrontierKnown())
             return;
-        }
 
         Iterator children = node.getChildren().iterator();
 
         while(children.hasNext()){
             DominatorNode child = (DominatorNode) children.next();
 
-            if(!child.isFrontierKnown()){
+            if(!child.isFrontierKnown())
                 bottomUpDispatch(child);
-            }
-            else{
+            else
                 processNode(child);
-            }            
         }
 
         processNode(node);
     }
-            
 
     /**
      * Calculate dominance frontier for a set of basic blocks.

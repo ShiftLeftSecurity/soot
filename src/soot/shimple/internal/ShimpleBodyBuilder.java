@@ -95,7 +95,7 @@ public class ShimpleBodyBuilder
         cfg = new CompleteBlockGraph(body);
         dt = new DominatorTree(cfg, true);
         gd = new GuaranteedDefs(new CompleteUnitGraph(body));
-        origLocals = new ArrayList(cfg.getBody().getLocals());
+        origLocals = new ArrayList(body.getLocals());
         
         /* Carry out the transformations. */
         
@@ -142,7 +142,7 @@ public class ShimpleBodyBuilder
         // ** can we use LocalDefs instead?  don't think so.
         {
             Iterator localsIt = origLocals.iterator();
-            
+
             while(localsIt.hasNext()){
                 Local local = (Local)localsIt.next();
 
@@ -153,14 +153,10 @@ public class ShimpleBodyBuilder
 
                 while(blocksIt.hasNext()){
                     Block block = (Block)blocksIt.next();
-                
                     Iterator defBoxesIt = getDefBoxesFromBlock(block).iterator();
-
                     while(defBoxesIt.hasNext()){
                         Value def = ((ValueBox)defBoxesIt.next()).getValue();
 
-                        // ** equals or equivTo?  equals appears to
-                        // ** be correct for Locals in particular
                         if(def.equals(local)){
                             blockList.add(block);
                             break;
@@ -202,9 +198,7 @@ public class ShimpleBodyBuilder
 
                 while(!workList.empty()){
                     Block block = (Block) workList.pop();
-                    
                     DominatorNode node = dt.fetchNode(block);
-
                     Iterator frontierNodes = node.getDominanceFrontier().iterator();
 
                     while(frontierNodes.hasNext()){
@@ -212,7 +206,6 @@ public class ShimpleBodyBuilder
                         int fBIndex = frontierBlock.getIndexInMethod();
                         
                         if(hasAlreadyFlags[fBIndex] < iterCount){
-
                             // Make sure we don't add useless PHI-functions
                             if(isLocalDefinedOnEntry(local, frontierBlock))
                                 prependTrivialPhiNode(local, frontierBlock);
@@ -221,7 +214,6 @@ public class ShimpleBodyBuilder
 
                             if(workFlags[fBIndex] < iterCount){
                                 workFlags[fBIndex] = iterCount;
-
                                 workList.push(frontierBlock);
                             }
                         }
@@ -238,9 +230,7 @@ public class ShimpleBodyBuilder
     public void prependTrivialPhiNode(Local local, Block frontierBlock)
     {
         List preds = frontierBlock.getPreds();
-
         Unit trivialPhi = Jimple.v().newAssignStmt(local, Shimple.v().newPhiExpr(local, preds));
-
         Unit blockHead = frontierBlock.getHead();
 
         // is it a catch block?
@@ -260,19 +250,18 @@ public class ShimpleBodyBuilder
     {
         Iterator unitsIt = block.iterator();
 
+        if(!unitsIt.hasNext())
+            throw new RuntimeException("Empty block in CFG?");
+
         Unit unit = (Unit) unitsIt.next();
-        
-        // ***
-        // if(unit.equals(((Trap)body.getTraps().getFirst()).getHandlerUnit()))
-        // return false;
-        // else
-        // System.out.println(body.getTraps());
         
         // this will return null if the head unit is an inserted PHI statement
         List definedLocals = gd.getGuaranteedDefs(unit);
 
-        // *** TODO: Verify that this will never fail.
+        // this should not fail
         while(definedLocals == null){
+            if(!unitsIt.hasNext())
+                throw new RuntimeException("Empty block in CFG?");
             unit = (Unit) unitsIt.next();
             definedLocals = gd.getGuaranteedDefs(unit);
         }
@@ -286,7 +275,7 @@ public class ShimpleBodyBuilder
     protected Map newLocals;
 
     /**
-     * Maps renamed Local's to original Local's.
+     * Maps renamed Locals to original Locals.
      **/
     protected Map newLocalsToOldLocal;
 
@@ -336,7 +325,7 @@ public class ShimpleBodyBuilder
     {
         newLocals = new HashMap();
         newLocalsToOldLocal = new HashMap();
-        
+
         assignmentCounters = new int[origLocals.size()];
         namingStacks = new Stack[origLocals.size()];
 
@@ -431,7 +420,7 @@ public class ShimpleBodyBuilder
 
                     int localIndex = indexOfLocal(lhsLocal);
                     if(localIndex == -1)
-                        throw new RuntimeException("Dazed and confused.");
+                        throw new RuntimeException("Assertion failed.");
                 
                     Integer subscript = new Integer(assignmentCounters[localIndex]);
 
@@ -473,7 +462,7 @@ public class ShimpleBodyBuilder
                     // simulate whichPred
                     int argIndex = phiExpr.getArgIndex(block);
                     if(argIndex == -1)
-                        throw new RuntimeException("Dazed and confused.");
+                        throw new RuntimeException("Assertion failed.");
                         
                     ValueBox phiArgBox = phiExpr.getArgBox(argIndex);
 
@@ -481,7 +470,7 @@ public class ShimpleBodyBuilder
                     
                     int localIndex = indexOfLocal(phiArg);
                     if(localIndex == -1)
-                        throw new RuntimeException("Dazed and confused.");
+                        throw new RuntimeException("Assertion failed.");
                     
                     if(namingStacks[localIndex].empty())
                         continue;
@@ -518,7 +507,7 @@ public class ShimpleBodyBuilder
 
                 int lhsLocalIndex = indexOfLocal(lhsLocal);
                 if(lhsLocalIndex == -1)
-                    throw new RuntimeException("Dazed and confused.");
+                    throw new RuntimeException("Assertion failed.");
                 
                 namingStacks[lhsLocalIndex].pop();
             }
@@ -541,7 +530,6 @@ public class ShimpleBodyBuilder
         if(subscript.intValue() == 0)
             return oldLocal;
 
-
         // ** TODO: What if this name already exists?
         // In theory it doesn't matter since we are creating a new Local
         // object.  The text output can be wrong, however.
@@ -551,19 +539,20 @@ public class ShimpleBodyBuilder
 
         if(newLocal == null){
             newLocal = new JimpleLocal(name, oldLocal.getType());
-
             newLocals.put(name, newLocal);
             newLocalsToOldLocal.put(newLocal, oldLocal);
 
             // add proper Local declation
-            cfg.getBody().getLocals().add(newLocal);
+            body.getLocals().add(newLocal);
         }
 
         return newLocal;
     }
 
     /**
-     * Fetch the proper array index of local for the naming arrays.
+     * Convenient function that maps new Locals to the originating
+     * Local, and finds the appropriate array index into the naming
+     * structures.
      **/
     protected int indexOfLocal(Value local)
     {
@@ -580,92 +569,13 @@ public class ShimpleBodyBuilder
     }
 
     /**
-     * Remove PHI-functions from current body, high probablity this destroys
-     * SSA form.
-     *
-     * <p> Dead code elimination + register aggregation are performed
-     * as recommended by Cytron.  The Aggregator looks like it could
-     * use some improvements.  Skipped if "-p shimple
-     * naive-phi-elimination" is specified.
+     * Exceptional Phi nodes have a huge number of arguments and control
+     * flow predecessors by default.  Since it is useless trying to keep
+     * the number of arguments and control flow predecessors in synch,
+     * we might as well trim out all redundant arguments and eliminate
+     * a huge number of copy statements when we get out of SSA form in
+     * the process.
      **/
-    public static void eliminatePhiNodes(ShimpleBody body)
-    {
-        ShimpleOptions options = body.getOptions();
-        
-        // off by default
-        if(options.pre_optimize_phi_elimination() && !options.naive_phi_elimination())
-        {
-            DeadAssignmentEliminator.v().transform(body);
-            Aggregator.v().transform(body);
-        }
-
-        // offloaded in a separate function for historical reasons
-        eliminatePhiNodes(body.getUnits());
-
-        // on by default
-        if(options.post_optimize_phi_elimination() && !options.naive_phi_elimination())
-        {
-            DeadAssignmentEliminator.v().transform(body);
-            Aggregator.v().transform(body);
-        }
-    }
-    
-    /**
-     * Eliminate PHI-functions in block by naively replacing them with
-     * shimple assignment statements in the control flow predecessors.
-     **/
-    public static void eliminatePhiNodes(Chain units)
-    {
-        List phiNodes = new ArrayList();
-        Map stmtsToAppend = new HashMap();
-        
-        Iterator unitsIt = units.iterator();
-
-        while(unitsIt.hasNext()){
-            Unit unit = (Unit) unitsIt.next();
-
-            PhiExpr phi = Shimple.getPhiExpr(unit);
-            
-            if(phi == null)
-                continue;
-
-            Local lhsLocal = Shimple.getLhsLocal(unit);
-
-            for(int i = 0; i < phi.getArgCount(); i++){
-                Value phiValueArg = phi.getValueArg(i);
-                Unit pred = phi.getPredArg(i);
-                
-                AssignStmt convertedPhi = Jimple.v().newAssignStmt(lhsLocal, phiValueArg);
-                stmtsToAppend.put(convertedPhi, pred);
-            }
-
-            phiNodes.add(unit);
-        }
-
-        /* Avoid Concurrent Modification exceptions. */
-
-        Iterator stmtsIt = stmtsToAppend.keySet().iterator();
-
-        while(stmtsIt.hasNext()){
-            Unit stmt = (Unit) stmtsIt.next();
-            Unit pred = (Unit) stmtsToAppend.get(stmt);
-            
-            // *** Do necessary priming here
-            if(pred.branches())
-                units.insertBefore(stmt, pred);
-            else
-                units.insertAfter(stmt, pred);
-        }
-        
-        Iterator phiNodesIt = phiNodes.iterator();
-
-        while(phiNodesIt.hasNext()){
-            Unit removeMe = (Unit) phiNodesIt.next();
-            units.remove(removeMe);
-            removeMe.clearUnitBoxes();
-        }
-    }
-
     public void trimExceptionalPhiNodes()
     {
         Set handlerUnits = new HashSet();
@@ -695,6 +605,9 @@ public class ShimpleBodyBuilder
         }
     }
 
+    /**
+     * @see #trimExceptionalPhiNodes()
+     **/
     public void trimPhiNode(PhiExpr phiExpr)
     {
         /* A value may appear many times in an exceptional Phi. Hence,
@@ -786,7 +699,7 @@ public class ShimpleBodyBuilder
     public boolean dominates(Unit champ, Unit challenger)
     {
         if(champ == null || challenger == null)
-            throw new RuntimeException("Dazed and confused.");
+            throw new RuntimeException("Assertion failed.");
         
         // self-domination
         if(champ.equals(challenger))
@@ -809,7 +722,7 @@ public class ShimpleBodyBuilder
                     return false;
             }
 
-            throw new RuntimeException("Dazed and Confused");
+            throw new RuntimeException("Assertion failed.");
         }
 
         DominatorNode champNode = dt.fetchNode(champBlock);
@@ -818,7 +731,118 @@ public class ShimpleBodyBuilder
         return(champNode.dominates(challengerNode));
     }
 
+    /**
+     * Remove PHI-functions from current body, high probablity this destroys
+     * SSA form.
+     *
+     * <p> Dead code elimination + register aggregation are performed
+     * as recommended by Cytron.  The Aggregator looks like it could
+     * use some improvements.
+     *
+     * @see ShimpleOptions
+     **/
+    public static void eliminatePhiNodes(ShimpleBody body)
+    {
+        ShimpleOptions options = body.getOptions();
+        
+        // off by default
+        if(options.pre_optimize_phi_elimination() && !options.naive_phi_elimination())
+        {
+            DeadAssignmentEliminator.v().transform(body);
+            Aggregator.v().transform(body);
+        }
+
+        // offloaded in a separate function for historical reasons
+        doEliminatePhiNodes(body);
+
+        // on by default
+        if(options.post_optimize_phi_elimination() && !options.naive_phi_elimination())
+        {
+            DeadAssignmentEliminator.v().transform(body);
+            Aggregator.v().transform(body);
+        }
+    }
     
+    /**
+     * Eliminate PHI-functions in block by naively replacing them with
+     * shimple assignment statements in the control flow predecessors.
+     **/
+    public static void doEliminatePhiNodes(ShimpleBody body)
+    {
+        List phiNodes = new ArrayList();
+        Map stmtsToAppend = new HashMap();
+
+        Chain units = body.getUnits();
+        Iterator unitsIt = units.iterator();
+
+        while(unitsIt.hasNext()){
+            Unit unit = (Unit) unitsIt.next();
+            PhiExpr phi = Shimple.getPhiExpr(unit);
+
+            if(phi == null)
+                continue;
+
+            Local lhsLocal = Shimple.getLhsLocal(unit);
+
+            for(int i = 0; i < phi.getArgCount(); i++){
+                Value phiValueArg = phi.getValueArg(i);
+                Unit pred = phi.getPredArg(i);
+                AssignStmt convertedPhi = Jimple.v().newAssignStmt(lhsLocal, phiValueArg);
+                stmtsToAppend.put(convertedPhi, pred);
+            }
+
+            phiNodes.add(unit);
+        }
+
+        /* Avoid Concurrent Modification exceptions. */
+
+        Iterator stmtsIt = stmtsToAppend.keySet().iterator();
+
+        while(stmtsIt.hasNext()){
+            AssignStmt stmt = (AssignStmt) stmtsIt.next();
+            Unit pred = (Unit) stmtsToAppend.get(stmt);
+
+            // if we need to insert the copy statement *before* an
+            // instruction that happens to be *using* the Local being
+            // defined, we need to do some extra work to make sure we
+            // don't overwrite the old value of the local
+            if(pred.branches()){
+                boolean needPriming = false;
+                Local lhsLocal = (Local) stmt.getLeftOp();
+                Local savedLocal = Jimple.v().newLocal(lhsLocal.getName()+"_",
+                                                       lhsLocal.getType());
+                Iterator useBoxesIt = pred.getUseBoxes().iterator();
+
+                while(useBoxesIt.hasNext()){
+                    ValueBox useBox = (ValueBox) useBoxesIt.next();
+                    if(lhsLocal.equals(useBox.getValue())){
+                        needPriming = true;
+                        useBox.setValue(savedLocal);
+                    }
+                }
+
+                if(needPriming){
+                    body.getLocals().add(savedLocal);
+                    AssignStmt copyStmt = Jimple.v().newAssignStmt(savedLocal, lhsLocal);
+                    units.insertBefore(copyStmt, pred);
+                }
+
+                // this is all we really wanted to do!
+                units.insertBefore(stmt, pred);
+            }
+            else
+                units.insertAfter(stmt, pred);
+        }
+        
+        Iterator phiNodesIt = phiNodes.iterator();
+
+        while(phiNodesIt.hasNext()){
+            Unit removeMe = (Unit) phiNodesIt.next();
+            units.remove(removeMe);
+            removeMe.clearUnitBoxes();
+        }
+    }
+
     /**
      * Convenience function that really ought to be implemented in
      * soot.toolkits.graph.Block.

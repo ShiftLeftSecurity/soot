@@ -149,29 +149,25 @@ public class DominatorNode
     public List getDominanceFrontier()
     {
         if(!frontierKnown)
-            throw new RuntimeException("DominatorNode: Frontier not properly defined.");
+            throw new RuntimeException("Frontier not properly defined.");
             
         return dominanceFrontier;
     }
 
     public boolean isHead()
     {
-        if(parent == null){
+        if(parent == null)
             return true;
-        }
-        else{
+        else
             return false;
-        }
     }
     
     public boolean isTail()
     {
-        if(children.size() == 0){
+        if(children.size() == 0)
             return true;
-        }
-        else{
+        else
             return false;
-        }
     }
 
     public boolean dominates(DominatorNode node)

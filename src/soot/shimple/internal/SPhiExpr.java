@@ -50,8 +50,6 @@ public class SPhiExpr implements PhiExpr
 
         Iterator predsIt = preds.iterator();
         
-        // *** TODO: Should we use something more restrictive than
-        // *** RValueBox?
         while(predsIt.hasNext())
         {
             Block block = (Block) predsIt.next();
@@ -245,8 +243,6 @@ public class SPhiExpr implements PhiExpr
     {
         ValueUnitPair argPair = (ValueUnitPair) argPairs.get(index);
 
-        // boolean canDo = argBox.canContainValue(arg);
-
         if(argPair == null)
             return false;
 
@@ -295,8 +291,6 @@ public class SPhiExpr implements PhiExpr
         predTailUnit.addBoxPointingToThis(vup);
         argPairs.add(vup);
     }
-
-    
     
     public List getArgs()
     {
@@ -330,7 +324,6 @@ public class SPhiExpr implements PhiExpr
     public int equivHashCode()
     {
         // *** TODO: Do we need this?
-        
         throw new RuntimeException("Not Yet Implemented");
     }
 

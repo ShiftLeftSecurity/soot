@@ -67,12 +67,10 @@ public class DominatorsFinder
         // build block to dominators map
         {
             blockToDominators = new HashMap(graph.size() * 2 + 1, 0.7f);
-
             Iterator blockIt = graph.getBlocks().iterator();
 
             while(blockIt.hasNext()){
                 Block s = (Block) blockIt.next();
-
                 FlowSet set = (FlowSet) analysis.getFlowAfter(s);
                 blockToDominators.put(s, set);
             }
@@ -133,9 +131,7 @@ class DominatorsAnalysis extends ForwardFlowAnalysis
                 Block s = (Block) blockIt.next();
 
                 FlowSet genSet = (FlowSet) emptySet.clone();
-
                 genSet.add(s, genSet);
-
                 blockToGenerateSet.put(s, genSet);
             }
         }
@@ -150,9 +146,7 @@ class DominatorsAnalysis extends ForwardFlowAnalysis
     protected Object newInitialFlow()
     {
         BoundedFlowSet initSet = (BoundedFlowSet) emptySet.clone();
-
         initSet.complement(initSet);
-                           
         return initSet;
     }
 
@@ -161,6 +155,20 @@ class DominatorsAnalysis extends ForwardFlowAnalysis
      **/
     protected void customizeInitialFlowGraph()
     {
+        List heads = graph.getHeads();
+
+        if(heads.size() == 0)
+            return;
+
+        if(heads.size() != 1)
+            throw new RuntimeException("This version of Shimple was built against versions of CompleteBlockGraph and CompleteUnitGraph where only one head is possible.  If this has changed, then Shimple requires an update.");
+
+        Block entry = (Block) heads.get(0);
+        BoundedFlowSet initSet = (BoundedFlowSet) emptySet.clone();
+        initSet.add(entry, initSet);
+        unitToBeforeFlow.put(entry, initSet);
+                    
+        /*
         Iterator headsIt = graph.getHeads().iterator();
 
         while(headsIt.hasNext()){
@@ -169,6 +177,7 @@ class DominatorsAnalysis extends ForwardFlowAnalysis
             initSet.add(s, initSet);
             unitToBeforeFlow.put(s, initSet);
         }
+        */
     }
 
     /**

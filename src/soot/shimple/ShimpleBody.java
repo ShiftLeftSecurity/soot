@@ -50,6 +50,9 @@ public class ShimpleBody extends StmtBody
      **/
     protected ShimpleOptions options;
 
+    protected ShimpleLocalDefs localDefs = null;
+    protected LocalUses localUses = null;
+
     /**
      * Construct an empty ShimpleBody associated with m.
      **/
@@ -113,6 +116,8 @@ public class ShimpleBody extends StmtBody
      **/
     public void rebuild(boolean hasPhiNodes)
     {
+        localDefs = null;
+        localUses = null;
         new ShimpleBodyBuilder(this, hasPhiNodes);
         setIsSSA(true);
     }
@@ -170,6 +175,28 @@ public class ShimpleBody extends StmtBody
     }
 
     /**
+     * Returns a ShimpleLocalDefs interface for this body.
+     **/
+    public ShimpleLocalDefs getLocalDefs()
+    {
+        if(localDefs == null)
+            localDefs = new ShimpleLocalDefs(this);
+
+        return localDefs;
+    }
+
+    /**
+     * Returns a LocalUses interface for this body.
+     **/
+    public LocalUses getLocalUses()
+    {
+        if(localUses == null)
+            localUses = new SimpleLocalUses(this, getLocalDefs());
+
+        return localUses;
+    }
+
+    /**
      * Set isSSA boolean to indicate whether a ShimpleBody is still in SSA
      * form or not.   Could be useful for book-keeping purposes.
      **/
@@ -184,6 +211,11 @@ public class ShimpleBody extends StmtBody
     public void setIsSSA(boolean isSSA)
     {
         this.isSSA = isSSA;
+
+        if(!isSSA){
+            localUses = null;
+            localDefs = null;
+        }
     }
 
     /**

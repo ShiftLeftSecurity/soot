@@ -35,6 +35,9 @@ import java.io.*;
  * <p> This should normally be used in conjunction with the
  * constructor methods from soot.jimple.Jimple.
  *
+ * <p> Miscellaneous utility functions are also available in this
+ * class.
+ *
  * @author Navindra Umanee
  * @see soot.jimple.Jimple
  * @see <a
@@ -240,7 +243,7 @@ public class Shimple
             int argIndex = phiExpr.getArgIndex(remove);
 
             if(argIndex == -1)
-                throw new RuntimeException("Dazed and confused.");
+                throw new RuntimeException("Assertion failed.");
 
             // now we've got the value!
             Value argValue = phiExpr.getArgBox(argIndex).getValue();
