@@ -158,3 +158,12 @@ TightestQualifiersTagger
 ParameterAliasTagger
 KindNumberer
 ReachingDefsTagger
+LiveVarsTagger
+CFGPrinter
+InteractionHandler
+PhaseDumper
+AltClassLoader
+ThrowableSet.Manager
+UnitThrowAnalysis
+PedanticThrowAnalysis
+TrapTightener

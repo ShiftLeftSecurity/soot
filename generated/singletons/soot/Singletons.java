@@ -62,6 +62,7 @@ import soot.jimple.toolkits.annotation.qualifiers.*;
 import soot.jimple.toolkits.annotation.profiling.*;
 import soot.jimple.toolkits.annotation.tags.*;
 import soot.jimple.toolkits.annotation.defs.*;
+import soot.jimple.toolkits.annotation.liveness.*;
 import soot.jimple.toolkits.base.*;
 import soot.jimple.toolkits.graph.*;
 import soot.jimple.toolkits.invoke.*;
@@ -81,6 +82,9 @@ import soot.util.*;
 import soot.util.queue.*;
 import soot.shimple.*;
 import soot.shimple.toolkits.scalar.*;
+import soot.toolkits.graph.interaction.*;
+import soot.util.cfgcmd.*;
+import soot.toolkits.exceptions.*;
 
 /** A class to group together all the global variables in Soot. */
 public class Singletons {
@@ -1047,6 +1051,60 @@ public class Singletons {
     public ReachingDefsTagger ReachingDefsTagger() {
         if( instanceReachingDefsTagger == null ) instanceReachingDefsTagger = new ReachingDefsTagger( g );
         return instanceReachingDefsTagger;
+    }
+
+    private LiveVarsTagger instanceLiveVarsTagger;
+    public LiveVarsTagger LiveVarsTagger() {
+        if( instanceLiveVarsTagger == null ) instanceLiveVarsTagger = new LiveVarsTagger( g );
+        return instanceLiveVarsTagger;
+    }
+
+    private CFGPrinter instanceCFGPrinter;
+    public CFGPrinter CFGPrinter() {
+        if( instanceCFGPrinter == null ) instanceCFGPrinter = new CFGPrinter( g );
+        return instanceCFGPrinter;
+    }
+
+    private InteractionHandler instanceInteractionHandler;
+    public InteractionHandler InteractionHandler() {
+        if( instanceInteractionHandler == null ) instanceInteractionHandler = new InteractionHandler( g );
+        return instanceInteractionHandler;
+    }
+
+    private PhaseDumper instancePhaseDumper;
+    public PhaseDumper PhaseDumper() {
+        if( instancePhaseDumper == null ) instancePhaseDumper = new PhaseDumper( g );
+        return instancePhaseDumper;
+    }
+
+    private AltClassLoader instanceAltClassLoader;
+    public AltClassLoader AltClassLoader() {
+        if( instanceAltClassLoader == null ) instanceAltClassLoader = new AltClassLoader( g );
+        return instanceAltClassLoader;
+    }
+
+    private ThrowableSet.Manager instanceThrowableSetManager;
+    public ThrowableSet.Manager ThrowableSetManager() {
+        if( instanceThrowableSetManager == null ) instanceThrowableSetManager = new ThrowableSet.Manager( g );
+        return instanceThrowableSetManager;
+    }
+
+    private UnitThrowAnalysis instanceUnitThrowAnalysis;
+    public UnitThrowAnalysis UnitThrowAnalysis() {
+        if( instanceUnitThrowAnalysis == null ) instanceUnitThrowAnalysis = new UnitThrowAnalysis( g );
+        return instanceUnitThrowAnalysis;
+    }
+
+    private PedanticThrowAnalysis instancePedanticThrowAnalysis;
+    public PedanticThrowAnalysis PedanticThrowAnalysis() {
+        if( instancePedanticThrowAnalysis == null ) instancePedanticThrowAnalysis = new PedanticThrowAnalysis( g );
+        return instancePedanticThrowAnalysis;
+    }
+
+    private TrapTightener instanceTrapTightener;
+    public TrapTightener TrapTightener() {
+        if( instanceTrapTightener == null ) instanceTrapTightener = new TrapTightener( g );
+        return instanceTrapTightener;
     }
 
 }

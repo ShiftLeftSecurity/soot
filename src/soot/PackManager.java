@@ -44,6 +44,7 @@ import soot.jimple.toolkits.annotation.qualifiers.*;
 import soot.jimple.toolkits.annotation.nullcheck.*;
 import soot.jimple.toolkits.annotation.tags.*;
 import soot.jimple.toolkits.annotation.defs.*;
+import soot.jimple.toolkits.annotation.liveness.*;
 import soot.jimple.toolkits.pointer.*;
 import soot.jimple.toolkits.callgraph.*;
 import soot.tagkit.*;
@@ -56,6 +57,8 @@ import soot.jimple.spark.fieldrw.*;
 import soot.dava.*;
 import soot.dava.toolkits.base.misc.*;
 import soot.xml.*;
+import soot.toolkits.graph.*;
+import soot.toolkits.graph.interaction.*;
 
 /** Manages the Packs containing the various phases and their options. */
 public class PackManager {
@@ -74,6 +77,7 @@ public class PackManager {
         // Jimple body creation
         addPack(p = new JimpleBodyPack());
         {
+            p.add(new Transform("jb.tt", soot.toolkits.exceptions.TrapTightener.v()));
             p.add(new Transform("jb.ls", LocalSplitter.v()));
             p.add(new Transform("jb.a", Aggregator.v()));
             p.add(new Transform("jb.ule", UnusedLocalEliminator.v()));
@@ -156,7 +160,7 @@ public class PackManager {
 
         // Jimple transformation pack
         addPack(p = new BodyPack("jtp"));
-
+        
         // Jimple optimization pack
         addPack(p = new BodyPack("jop"));
         {
@@ -187,7 +191,15 @@ public class PackManager {
             p.add(new Transform("jap.parity", ParityTagger.v()));
             p.add(new Transform("jap.pat", ParameterAliasTagger.v()));
             p.add(new Transform("jap.rdtagger", ReachingDefsTagger.v()));
+            p.add(new Transform("jap.lvtagger", LiveVarsTagger.v()));
+            p.add(new Transform("jap.che", CastCheckEliminatorDumper.v()));
 	    
+        }
+
+        // CFG Viewer 
+        addPack(p = new BodyPack("cfg"));
+        {
+            p.add(new Transform("cfg.output", CFGPrinter.v()));
         }
         
         // Grimp body creation
@@ -275,10 +287,21 @@ public class PackManager {
             runWholeProgramPacks();
         }
         preProcessDAVA();
+        if (Options.v().interactive_mode()){
+            if (InteractionHandler.v().getInteractionListener() == null){
+                G.v().out.println("Cannot run in interactive mode. No listeners available. Continuing in regular mode.");
+                Options.v().set_interactive_mode(false);
+            }
+            else {
+                G.v().out.println("Running in interactive mode.");
+            }
+        }
         runBodyPacks( reachableClasses() );
     }
 
     public void writeOutput() {
+	if(Options.v().verbose())
+	    PhaseDumper.v().dumpBefore("output");
         if( Options.v().output_format() == Options.output_format_dava ) {
             postProcessDAVA();
         } else {
@@ -286,6 +309,8 @@ public class PackManager {
         }
         postProcessXML( reachableClasses() );
         releaseBodies( reachableClasses() );
+	if(Options.v().verbose())
+	    PhaseDumper.v().dumpAfter("output");
     }
 
     private void runWholeProgramPacks() {
@@ -483,7 +508,9 @@ public class PackManager {
                     tc.collectBodyTags(body);
                 }
             }
-             
+            
+            PackManager.v().getPack("cfg").apply(m.retrieveActiveBody());
+
             if (produceGrimp) {
                 m.setActiveBody(Grimp.v().newBody(m.getActiveBody(), "gb"));
                 PackManager.v().getPack("gop").apply(m.getActiveBody());

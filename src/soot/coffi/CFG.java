@@ -735,7 +735,7 @@ public class CFG {
 
 	    LinkedList newentries = new LinkedList();
 
-	    int orig_start_of_subr = headbefore.next.originalIndex; // inclusive
+	    int orig_start_of_subr = astore.next.originalIndex; // inclusive
 	    int orig_end_of_subr = ret.originalIndex; // again, inclusive
 
 	    for (int i=0; i<ca.exception_table_length; i++) 
@@ -4431,6 +4431,9 @@ public class CFG {
             String methodDescriptor = ((CONSTANT_Utf8_info) (constant_pool[i.descriptor_index])).
                 convert();
 
+           if (className.charAt(0) == '[')
+               className = "java.lang.Object";
+
             SootClass bclass = cm.getSootClass(className);
 
             Local[] parameters;
@@ -4659,6 +4662,9 @@ public class CFG {
                 String methodName = ((CONSTANT_Utf8_info) (constant_pool[i.name_index])).convert();
                 String methodDescriptor = ((CONSTANT_Utf8_info) (constant_pool[i.descriptor_index])).
                     convert();
+
+               if (className.charAt(0) == '[')
+                   className = "java.lang.Object";
 
                 SootClass bclass = cm.getSootClass(className);
 

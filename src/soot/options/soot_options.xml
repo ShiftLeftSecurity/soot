@@ -151,6 +151,14 @@ Provide detailed information about what Soot is doing as it runs.
 </long_desc>
 		</boolopt>
 		<boolopt>
+			<name>Interactive Mode</name>
+			<alias>interactive-mode</alias>
+			<short_desc>Run in interactive mode</short_desc>
+			<long_desc>
+Runs interactively, with Soot providing detailed information as it iterates through intra-procedural analyses.
+</long_desc>
+		</boolopt>
+		<boolopt>
 			<name>Application Mode</name>
 			<alias>app</alias>
 			<short_desc>Run in application mode</short_desc>
@@ -484,6 +492,70 @@ which can display the annotations together with the program
 source, to aid program understanding.
 </long_desc>
 		</boolopt>
+	<listopt>
+	  <name>Body Dumping Phases</name>
+	  <alias>dump-body</alias>
+	  <set_arg_label>phaseName</set_arg_label>
+	  <short_desc>Dump the internal representation of each method before and after phase <use_arg_label/></short_desc>
+	  <long_desc>
+<p>
+Specify that <use_arg_label/> is one of the phases to be dumped.
+For example <code>-dump-body jb -dump-body jb.a</code> would dump each
+method before and after the <code>jb</code> and <code>jb.a</code>
+phases.  The pseudo phase name ``<code>ALL</code>''
+causes all phases to be dumped.</p>
+<p>For this option to have any effect, the <code>soot.Pack</code>
+and <code>soot.SceneTransformer</code> classes must have been compiled
+with debugging enabled.</p> 
+<p>
+Output files appear in subdirectories under the
+soot output directory, with names like
+<var>className</var><code>/</code><var>methodSignature</var><code>/</code><var>phasename</var><code>-</code><var>graphType</var><code>-</code><var>number</var><code>.in</code>
+and
+<var>className</var><code>/</code><var>methodSignature</var><code>/</code><var>phasename</var><code>-</code><var>graphType</var><code>-</code><var>number</var><code>.out</code>.
+The ``<code>in</code>'' and
+``<code>out</code>'' suffixes distinguish the internal
+representations of the method before and after the phase
+executed.</p>
+</long_desc>
+	</listopt>
+	<listopt>
+	  <name>CFG Dumping Phases</name>
+	  <alias>dump-cfg</alias>
+	  <set_arg_label>phaseName</set_arg_label>
+	  <short_desc>Dump the internal representation of each CFG constructed during phase <use_arg_label/></short_desc>
+	  <long_desc>
+<p>
+Specify that any control flow graphs constructed during the
+<use_arg_label/> phases should be dumped.
+For example <code>-dump-cfg jb -dump-cfg bb.lso</code> would dump
+all
+CFGs constructed during the <code>jb</code> and <code>bb.lso</code>
+phases.  The pseudo phase name ``<code>ALL</code>''
+causes CFGs constructed in all phases to be dumped.</p>
+<p>This option has no effect if the CFG constructing classes were compiled
+with debugging disabled.</p> 
+<p>The control flow graphs are dumped in the form
+of a file containing input to <code>dot</code> graph visualization
+tool.  Output <code>dot</code> files are stored beneath the soot
+output directory, in files with names like:
+<var>className</var><code>/</code><var>methodSignature</var><code>/</code><var>phasename</var><code>-</code><var>graphType</var><code>-</code><var>number</var><code>.dot</code>,
+where <var>number</var> serves to distinguish graphs in phases
+that produce more than one (for example, the Aggregator may
+produce multiple <code>ExceptionalUnitGraph</code>s).</p>
+</long_desc>
+	</listopt>
+	<boolopt>
+	  <name>Show Exception Destinations</name>
+	  <alias>show-exception-dests</alias>
+	  <default>true</default>
+	  <short_desc>Include exception destination edges as well as CFG edges in dumped CFGs</short_desc>
+	  <long_desc>
+Indicate whether to show exception destination edges as
+well as control flow edges in
+dumps of exceptional control flow graphs.
+</long_desc>
+	</boolopt>
 	</section>
 	<section>
 		<name>Processing Options</name>
@@ -812,6 +884,34 @@ traps whose catch blocks are empty.
 						<name>Enabled</name>
 						<alias>enabled</alias>
                                                 <default>true</default>
+					</boolopt>
+					<boolopt>
+						<name>Remove unreachable traps</name>
+						<alias>remove-unreachable-traps</alias>
+                                                <default>false</default>
+	  					<long_desc>
+Remove exception table entries when none of the protected instructions can
+throw the exception being caught.
+</long_desc>
+					</boolopt>
+				</sub_phase>
+				<sub_phase>
+					<name>Trap Tightener</name>
+					<alias>jb.tt</alias>
+					<short_desc>Trap Tightener</short_desc>
+					<long_desc>
+The Trap Tightener changes the area protected by each exception handler,
+so that it begins with the first instruction in the old protected
+area which is actually capable of throwing an exception caught by the
+handler, and ends just after the last instruction in the old
+protected area which can throw an exception caught by the
+handler.  This reduces the chance of producing unverifiable code
+as a byproduct of pruning exceptional control flow within CFGs.
+</long_desc>
+					<boolopt>
+						<name>Enabled</name>
+						<alias>enabled</alias>
+                                                <default>false</default>
 					</boolopt>
 				</sub_phase>
 			</phase>
@@ -3087,6 +3187,15 @@ traps whose catch blocks are empty.
 						<short_desc/>
 						<long_desc/>
 					</boolopt>
+					<boolopt>
+						<name>Remove unreachable traps</name>
+						<alias>remove-unreachable-traps</alias>
+                                                <default>false</default>
+	  					<long_desc>
+Remove exception table entries when none of the protected instructions can
+throw the exception being caught.
+</long_desc>
+					</boolopt>
 				</sub_phase>
 				<sub_phase>
 					<name>Unconditional Branch Folder 1</name>
@@ -3130,6 +3239,15 @@ Another iteration of the Unreachable Code Eliminator.
                                                 <default>true</default>
 						<short_desc/>
 						<long_desc/>
+					</boolopt>
+					<boolopt>
+						<name>Remove unreachable traps</name>
+						<alias>remove-unreachable-traps</alias>
+                                                <default>false</default>
+	  					<long_desc>
+Remove exception table entries when none of the protected instructions can
+throw the exception being caught.
+</long_desc>
 					</boolopt>
 				</sub_phase>
 				<sub_phase>
@@ -3515,6 +3633,17 @@ information in these tags.  For example, even variables (such as
 					</boolopt>
                 </sub_phase>
                 <sub_phase>
+					<name>Live Variables Tagger</name>
+					<alias>jap.lvtagger</alias>
+					<short_desc>Creates color tags for live variables</short_desc>
+					<long_desc>Colors live variables.</long_desc>
+					<boolopt>
+						<name>Enabled</name>
+						<alias>enabled</alias>
+						<default>false</default>
+					</boolopt>
+                </sub_phase>
+                <sub_phase>
 					<name>Reaching Defs Tagger</name>
 					<alias>jap.rdtagger</alias>
 					<short_desc>Creates link tags for reaching defs</short_desc>
@@ -3525,7 +3654,101 @@ information in these tags.  For example, even variables (such as
 						<default>false</default>
 					</boolopt>
                 </sub_phase>
+                <sub_phase>
+					<name>Cast Elimination Check Tagger</name>
+					<alias>jap.che</alias>
+					<short_desc>Indicates whether cast checks can be eliminated</short_desc>
+					<long_desc>Indicates whether cast checks can be eliminated.</long_desc>
+					<boolopt>
+						<name>Enabled</name>
+						<alias>enabled</alias>
+						<default>false</default>
+					</boolopt>
+                </sub_phase>
 			</phase>
+            <phase>
+                <name>CFG Viewer</name>
+                <alias>cfg</alias>
+                <short_desc>Produces CFGs for viewing purposes</short_desc>
+                <long_desc>Produces CFGs in the form of dot files when run from the command line runs or graphs when run from within Eclipse.</long_desc>
+                <boolopt>
+                    <name>Enabled</name>
+                    <alias>enabled</alias>
+                    <default>false</default>
+                    <short_desc/>
+                    <long_desc/>
+                </boolopt>
+                <sub_phase>
+                    <name>CFG Output Options</name>
+                    <class>CFGOutputOptions</class>
+                    <alias>cfg.output</alias>
+                    <short_desc>Determines the type of graphs to output</short_desc>
+                    <long_desc>Determines the type of graphs to output</long_desc>
+                    <boolopt>
+                        <name>Enabled</name>
+                        <alias>enabled</alias>
+                        <default>false</default>
+                        <short_desc/>
+                        <long_desc/>
+                    </boolopt>
+                    
+                    <multiopt>
+                        <name>Graph Type</name>
+                        <alias>graph-type</alias>
+                        <short_desc>Determines which type of graph to output</short_desc>
+                        <long_desc>Determines which type of graph to output based on whether nodes are units or blocks and whether control flow associated with Exceptions is taken into consideration or not.</long_desc>
+                        <value>
+                            <name>Complete Unit Graph</name>
+                            <alias>complete-unit-graph</alias>
+                            <short_desc>Output a complete Unit Graph</short_desc>
+                            <long_desc>Output a complete Unit Graph, where nodes are units and control flow associated with Exceptions is taken into account.</long_desc>
+                            <default/>
+                        </value>
+                        <value>
+                            <name>Unit Graph</name>
+                            <alias>unit-graph</alias>
+                            <short_desc>Output a Unit Graph</short_desc>
+                            <long_desc>Output a Unit Graph, where nodes are units and control flow associated with Exceptions is not taken into account.</long_desc>
+                        </value>
+                        <value>
+                            <name>Complete Block Graph</name>
+                            <alias>complete-block-graph</alias>
+                            <short_desc>Output a complete Block Graph</short_desc>
+                            <long_desc>Output a complete Block Graph, where nodes are blocks and control flow associated with Exceptions is taken into account.</long_desc>
+                        </value>
+                        <value>
+                            <name>Brief Block Graph</name>
+                            <alias>brief-block-graph</alias>
+                            <short_desc>Output a brief Block Graph</short_desc>
+                            <long_desc>Output a brief Block Graph, where nodes are blocks and control flow associated with Exceptions is ignored.</long_desc>
+                        </value>
+                        <value>
+                            <name>Array Block Graph</name>
+                            <alias>array-block-graph</alias>
+                            <short_desc>Output an array Block Graph</short_desc>
+                            <long_desc>Output an array Block Graph</long_desc>
+                        </value>
+                    </multiopt>
+                    <multiopt>
+                        <name>Output Type</name>
+                        <alias>output-type</alias>
+                        <short_desc>Determines which type of files to generate</short_desc>
+                        <long_desc>Determines which type of files to generate</long_desc>
+                        <value>
+                            <name>Dot Files</name>
+                            <alias>dot-files</alias>
+                            <short_desc>Generate graphs as dot files</short_desc>
+                            <long_desc>Generate graphs as dot files that can be then be converted to post-script for viewing.</long_desc>
+                         </value>
+                         <value>
+                            <name>Eclipse Graphs</name>
+                            <alias>eclipse-graphs</alias>
+                            <short_desc>Generate graphs that can be manipulated within Eclipse</short_desc>
+                            <long_desc>Generate graphs that can be manipulated within Eclipse.</long_desc>
+                           </value>
+                           </multiopt>
+               </sub_phase>
+            </phase>
 			<phase>
 				<name>Grimp Body Creation</name>
 				<alias>gb</alias>
@@ -4006,6 +4229,94 @@ see the documentation for the <tt>shimp</tt>, <tt>stp</tt>, and
 <tt>sop</tt> phases.
 </long_desc>
 		</boolopt>
+						<multiopt>
+							<name>Default ThrowAnalysis</name>
+							<alias>throw-analysis</alias>
+							<long_desc>
+This option specifies how to estimate the exceptions which each statement
+may throw when constructing exceptional CFGs.
+        </long_desc>
+							<value>
+								<name>Pedantic</name>
+								<alias>pedantic</alias>
+								<default/>
+								<short_desc>Pedantically conservative throw analysis</short_desc>
+								<long_desc>
+Says that any instruction may throw any
+<code>Throwable</code> whatsoever. Strictly speaking this is
+correct, since the Java libraries include the
+<code>Thread.stop(Throwable)</code>
+method, which allows other threads to cause arbitrary exceptions
+to occur at arbitrary points in the execution of a victim thread.
+</long_desc>
+							</value>
+							<value>
+								<name>Unit</name>
+								<alias>unit</alias>
+								<short_desc>Unit Throw Analysis</short_desc>
+								<long_desc>
+Says that each statement in the intermediate representation
+may throw those exception types associated with the corresponding
+Java bytecode instructions in the JVM Specification.  The
+analysis deals with each statement in isolation, without regard
+to the surrounding program.
+</long_desc>
+							</value>
+						</multiopt>
+		<boolopt>
+			<name>Omit Excepting Unit Edges</name>
+			<alias>omit-excepting-unit-edges</alias>
+			<short_desc>Omit CFG edges to handlers from excepting units which lack side effects</short_desc>
+			<long_desc>
+<p>
+When constructing an <code>ExceptionalUnitGraph</code> or
+<code>ExceptionalBlockGraph</code>, include edges to an exception
+handler only from the predecessors of an instruction which may
+throw an exceptions to the handler, and not from the excepting
+instruction itself, unless the excepting instruction has
+potential side effects.
+</p>
+
+<p>
+Omitting edges from excepting units allows more accurate flow
+analyses (since if an instruction without side effects throws an
+exception, it has not changed the state of the computation). This
+accuracy, though, could lead optimizations to generate
+unverifiable code, since the dataflow analyses performed by
+bytecode verifiers might include paths to exception handlers from
+all protected instructions, regardless of whether the
+instructions have side effects.  (In practice, the pedantic throw
+analysis suffices to pass verification in all VMs tested with
+Soot to date, but the JVM specification does allow for less
+discriminating verifiers which would reject some code that might
+be generated using the pedantic throw analysis without also
+adding edges from all excepting units.)</p>
+</long_desc>
+		</boolopt>
+		<macroopt>
+			<name>Trim CFGs</name>
+			<alias>trim-cfgs</alias>
+			<expansion>-throw-analysis</expansion>
+			<expansion>unit</expansion>
+                        <expansion>-omit-excepting-unit-edges</expansion>
+			<expansion>-p</expansion>
+                        <expansion>jb.tt</expansion>
+                        <expansion>enabled:true</expansion>
+			<short_desc>Trim unrealizable exceptional edges from CFGs</short_desc>
+			<long_desc>
+<p>
+When constructing CFGs which include exceptional edges, minimize
+the number of edges leading to exception handlers by analyzing
+which instructions might actually be executed before an exception
+is thrown, instead of assuming that every instruction protected
+by a handler has the potential to throw an exception the handler
+catches.
+</p>
+<p>
+<code>-trim-cfgs</code> is shorthand for <code>-throw-analysis
+unit -omit-excepting-unit-edges -p jb.tt enabled:true</code>.</p>
+</long_desc>
+		</macroopt>
 	</section>
 	<section>
 		<name>Application Mode Options</name>

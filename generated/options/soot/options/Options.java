@@ -63,6 +63,8 @@ public class Options extends OptionsBase {
     public static final int output_format_class = 12;
     public static final int output_format_d = 13;
     public static final int output_format_dava = 13;
+    public static final int throw_analysis_pedantic = 1;
+    public static final int throw_analysis_unit = 2;
 
     public boolean parse( String[] argv ) {
         LinkedList phaseOptions = new LinkedList();
@@ -119,6 +121,11 @@ public class Options extends OptionsBase {
             || option.equals( "verbose" )
             )
                 verbose = true;
+  
+            else if( false 
+            || option.equals( "interactive-mode" )
+            )
+                interactive_mode = true;
   
             else if( false 
             || option.equals( "app" )
@@ -429,6 +436,41 @@ public class Options extends OptionsBase {
                 xml_attributes = true;
   
             else if( false
+            || option.equals( "dump-body" )
+            ) {
+                if( !hasMoreOptions() ) {
+                    G.v().out.println( "No value given for option -"+option );
+                    return false;
+                }
+                String value = nextOption();
+    
+                if( dump_body == null )
+                    dump_body = new LinkedList();
+
+                dump_body.add( value );
+            }
+  
+            else if( false
+            || option.equals( "dump-cfg" )
+            ) {
+                if( !hasMoreOptions() ) {
+                    G.v().out.println( "No value given for option -"+option );
+                    return false;
+                }
+                String value = nextOption();
+    
+                if( dump_cfg == null )
+                    dump_cfg = new LinkedList();
+
+                dump_cfg.add( value );
+            }
+  
+            else if( false 
+            || option.equals( "show-exception-dests" )
+            )
+                show_exception_dests = true;
+  
+            else if( false
             || option.equals( "p" )
             || option.equals( "phase-option" )
             ) {
@@ -496,6 +538,62 @@ public class Options extends OptionsBase {
             || option.equals( "via-shimple" )
             )
                 via_shimple = true;
+  
+            else if( false
+            || option.equals( "throw-analysis" )
+            ) {
+                if( !hasMoreOptions() ) {
+                    G.v().out.println( "No value given for option -"+option );
+                    return false;
+                }
+                String value = nextOption();
+    
+                if( false );
+    
+                else if( false
+                || value.equals( "pedantic" )
+                ) {
+                    if( throw_analysis != 0
+                    && throw_analysis != throw_analysis_pedantic ) {
+                        G.v().out.println( "Multiple values given for option "+option );
+                        return false;
+                    }
+                    throw_analysis = throw_analysis_pedantic;
+                }
+    
+                else if( false
+                || value.equals( "unit" )
+                ) {
+                    if( throw_analysis != 0
+                    && throw_analysis != throw_analysis_unit ) {
+                        G.v().out.println( "Multiple values given for option "+option );
+                        return false;
+                    }
+                    throw_analysis = throw_analysis_unit;
+                }
+    
+                else {
+                    G.v().out.println( "Invalid value "+value+" given for option -"+option );
+                    return false;
+                }
+           }
+  
+            else if( false 
+            || option.equals( "omit-excepting-unit-edges" )
+            )
+                omit_excepting_unit_edges = true;
+  
+            else if( false
+            || option.equals( "trim-cfgs" )
+            ) {
+                
+                pushOptions( "enabled:true" );
+                pushOptions( "jb.tt" );
+                pushOptions( "-p" );
+                pushOptions( "-omit-excepting-unit-edges" );
+                pushOptions( "unit" );
+                pushOptions( "-throw-analysis" );
+            }
   
             else if( false
             || option.equals( "i" )
@@ -701,6 +799,10 @@ public class Options extends OptionsBase {
     private boolean verbose = false;
     public void set_verbose( boolean setting ) { verbose = setting; }
   
+    public boolean interactive_mode() { return interactive_mode; }
+    private boolean interactive_mode = false;
+    public void set_interactive_mode( boolean setting ) { interactive_mode = setting; }
+  
     public boolean app() { return app; }
     private boolean app = false;
     public void set_app( boolean setting ) { app = setting; }
@@ -751,6 +853,26 @@ public class Options extends OptionsBase {
     private boolean xml_attributes = false;
     public void set_xml_attributes( boolean setting ) { xml_attributes = setting; }
   
+    public List dump_body() { 
+        if( dump_body == null )
+            return java.util.Collections.EMPTY_LIST;
+        else
+            return dump_body;
+    }
+    public void set_dump_body( List setting ) { dump_body = setting; }
+    private List dump_body = null;
+    public List dump_cfg() { 
+        if( dump_cfg == null )
+            return java.util.Collections.EMPTY_LIST;
+        else
+            return dump_cfg;
+    }
+    public void set_dump_cfg( List setting ) { dump_cfg = setting; }
+    private List dump_cfg = null;
+    public boolean show_exception_dests() { return show_exception_dests; }
+    private boolean show_exception_dests = false;
+    public void set_show_exception_dests( boolean setting ) { show_exception_dests = setting; }
+  
     public boolean via_grimp() { return via_grimp; }
     private boolean via_grimp = false;
     public void set_via_grimp( boolean setting ) { via_grimp = setting; }
@@ -758,6 +880,16 @@ public class Options extends OptionsBase {
     public boolean via_shimple() { return via_shimple; }
     private boolean via_shimple = false;
     public void set_via_shimple( boolean setting ) { via_shimple = setting; }
+  
+    public int throw_analysis() {
+        if( throw_analysis == 0 ) return throw_analysis_pedantic;
+        return throw_analysis; 
+    }
+    public void set_throw_analysis( int setting ) { throw_analysis = setting; }
+    private int throw_analysis = 0;
+    public boolean omit_excepting_unit_edges() { return omit_excepting_unit_edges; }
+    private boolean omit_excepting_unit_edges = false;
+    public void set_omit_excepting_unit_edges( boolean setting ) { omit_excepting_unit_edges = setting; }
   
     public List include() { 
         if( include == null )
@@ -830,6 +962,7 @@ public class Options extends OptionsBase {
 +padOpt(" -ph PHASE -phase-help PHASE", "Print help for specified PHASE" )
 +padOpt(" -version", "Display version information and exit" )
 +padOpt(" -v -verbose", "Verbose mode" )
++padOpt(" -interactive-mode", "Run in interactive mode" )
 +padOpt(" -app", "Run in application mode" )
 +padOpt(" -w -whole-program", "Run in whole-program mode" )
 +padOpt(" -ws -whole-shimple", "Run in whole-shimple mode" )
@@ -861,6 +994,9 @@ public class Options extends OptionsBase {
 +padVal(" c class (default)", "Produce .class Files" )
 +padVal(" d dava", "Produce dava-decompiled .java files" )
 +padOpt(" -xml-attributes", "Save tags to XML attributes for Eclipse" )
++padOpt(" -dump-body PHASENAME", "Dump the internal representation of each method before and after phase PHASENAME" )
++padOpt(" -dump-cfg PHASENAME", "Dump the internal representation of each CFG constructed during phase PHASENAME" )
++padOpt(" -show-exception-dests", "Include exception destination edges as well as CFG edges in dumped CFGs" )
 +"\nProcessing Options:\n"
       
 +padOpt(" -p PHASE OPT:VAL -phase-option PHASE OPT:VAL", "Set PHASE's OPT option to VALUE" )
@@ -868,6 +1004,11 @@ public class Options extends OptionsBase {
 +padOpt(" -W -whole-optimize", "Perform whole program optimizations" )
 +padOpt(" -via-grimp", "Convert to bytecode via Grimp instead of via Baf" )
 +padOpt(" -via-shimple", "Enable Shimple SSA representation" )
++padOpt(" -throw-analysis ARG", "" )
++padVal(" pedantic (default)", "Pedantically conservative throw analysis" )
++padVal(" unit", "Unit Throw Analysis" )
++padOpt(" -omit-excepting-unit-edges", "Omit CFG edges to handlers from excepting units which lack side effects" )
++padOpt(" -trim-cfgs", "Trim unrealizable exceptional edges from CFGs" )
 +"\nApplication Mode Options:\n"
       
 +padOpt(" -i PKG -include PKG", "Include classes in PKG as application classes" )
@@ -909,6 +1050,7 @@ public class Options extends OptionsBase {
         +padVal("jb.lp", "Local packer: minimizes number of locals")
         +padVal("jb.ne", "Nop eliminator")
         +padVal("jb.uce", "Unreachable code eliminator")
+        +padVal("jb.tt", "Trap Tightener")
         +padOpt("jj", "Creates a JimpleBody for each method directly from source")
         +padVal("jj.ls", "Local splitter: one local per DU-UD web")
         +padVal("jj.a", "Aggregator: removes some unnecessary copies")
@@ -965,7 +1107,11 @@ public class Options extends OptionsBase {
         +padVal("jap.cgtagger", "Call graph tagger")
         +padVal("jap.parity", "Parity tagger")
         +padVal("jap.pat", "Colour-codes method parameters that may be aliased")
+        +padVal("jap.lvtagger", "Creates color tags for live variables")
         +padVal("jap.rdtagger", "Creates link tags for reaching defs")
+        +padVal("jap.che", "Indicates whether cast checks can be eliminated")
+        +padOpt("cfg", "Produces CFGs for viewing purposes")
+        +padVal("cfg.output", "Determines the type of graphs to output")
         +padOpt("gb", "Creates a GrimpBody for each method")
         +padVal("gb.a1", "Aggregator: removes some copies, pre-folding")
         +padVal("gb.cf", "Constructor folder")
@@ -1071,7 +1217,14 @@ public class Options extends OptionsBase {
             return "Phase "+phaseName+":\n"+
                 "\nThe Unreachable Code Eliminator removes unreachable code and \ntraps whose catch blocks are empty. "
                 +"\n\nRecognized options (with default values):\n"
-                +padOpt( "enabled (true)", "" );
+                +padOpt( "enabled (true)", "" )
+                +padOpt( "remove-unreachable-traps (false)", "" );
+    
+        if( phaseName.equals( "jb.tt" ) )
+            return "Phase "+phaseName+":\n"+
+                "\nThe Trap Tightener changes the area protected by each exception \nhandler, so that it begins with the first instruction in the old \nprotected area which is actually capable of throwing an \nexception caught by the handler, and ends just after the last \ninstruction in the old protected area which can throw an \nexception caught by the handler. This reduces the chance of \nproducing unverifiable code as a byproduct of pruning \nexceptional control flow within CFGs. "
+                +"\n\nRecognized options (with default values):\n"
+                +padOpt( "enabled (false)", "" );
     
         if( phaseName.equals( "jj" ) )
             return "Phase "+phaseName+":\n"+
@@ -1492,7 +1645,8 @@ public class Options extends OptionsBase {
             return "Phase "+phaseName+":\n"+
                 "\nThe Unreachable Code Eliminator removes unreachable code and \ntraps whose catch blocks are empty. "
                 +"\n\nRecognized options (with default values):\n"
-                +padOpt( "enabled (true)", "" );
+                +padOpt( "enabled (true)", "" )
+                +padOpt( "remove-unreachable-traps (false)", "" );
     
         if( phaseName.equals( "jop.ubf1" ) )
             return "Phase "+phaseName+":\n"+
@@ -1504,7 +1658,8 @@ public class Options extends OptionsBase {
             return "Phase "+phaseName+":\n"+
                 "\nAnother iteration of the Unreachable Code Eliminator. "
                 +"\n\nRecognized options (with default values):\n"
-                +padOpt( "enabled (true)", "" );
+                +padOpt( "enabled (true)", "" )
+                +padOpt( "remove-unreachable-traps (false)", "" );
     
         if( phaseName.equals( "jop.ubf2" ) )
             return "Phase "+phaseName+":\n"+
@@ -1591,11 +1746,51 @@ public class Options extends OptionsBase {
                 +"\n\nRecognized options (with default values):\n"
                 +padOpt( "enabled (false)", "" );
     
+        if( phaseName.equals( "jap.lvtagger" ) )
+            return "Phase "+phaseName+":\n"+
+                "\nColors live variables."
+                +"\n\nRecognized options (with default values):\n"
+                +padOpt( "enabled (false)", "" );
+    
         if( phaseName.equals( "jap.rdtagger" ) )
             return "Phase "+phaseName+":\n"+
                 "\nFor each use of a local in a stmt creates a link to the reaching \ndef."
                 +"\n\nRecognized options (with default values):\n"
                 +padOpt( "enabled (false)", "" );
+    
+        if( phaseName.equals( "jap.che" ) )
+            return "Phase "+phaseName+":\n"+
+                "\nIndicates whether cast checks can be eliminated."
+                +"\n\nRecognized options (with default values):\n"
+                +padOpt( "enabled (false)", "" );
+    
+        if( phaseName.equals( "cfg" ) )
+            return "Phase "+phaseName+":\n"+
+                "\nProduces CFGs in the form of dot files when run from the command \nline runs or graphs when run from within Eclipse."
+                +"\n\nRecognized options (with default values):\n"
+                +padOpt( "enabled (false)", "" );
+    
+        if( phaseName.equals( "cfg.output" ) )
+            return "Phase "+phaseName+":\n"+
+                "\nDetermines the type of graphs to output"
+                +"\n\nRecognized options (with default values):\n"
+                +padOpt( "enabled (false)", "" )
+                +padOpt( "graph-type", "Determines which type of graph to output" )
+                +padVal( "complete-unit-graph (default)", "Output a complete Unit Graph" )
+                
+                +padVal( "unit-graph", "Output a Unit Graph" )
+                
+                +padVal( "complete-block-graph", "Output a complete Block Graph" )
+                
+                +padVal( "brief-block-graph", "Output a brief Block Graph" )
+                
+                +padVal( "array-block-graph", "Output an array Block Graph" )
+                
+                +padOpt( "output-type", "Determines which type of files to generate" )
+                +padVal( "dot-files", "Generate graphs as dot files" )
+                
+                +padVal( "eclipse-graphs", "Generate graphs that can be manipulated within Eclipse" )
+                ;
     
         if( phaseName.equals( "gb" ) )
             return "Phase "+phaseName+":\n"+
@@ -1771,6 +1966,11 @@ public class Options extends OptionsBase {
                 +"enabled ";
     
         if( phaseName.equals( "jb.uce" ) )
+            return ""
+                +"enabled "
+                +"remove-unreachable-traps ";
+    
+        if( phaseName.equals( "jb.tt" ) )
             return ""
                 +"enabled ";
     
@@ -2033,7 +2233,8 @@ public class Options extends OptionsBase {
     
         if( phaseName.equals( "jop.uce1" ) )
             return ""
-                +"enabled ";
+                +"enabled "
+                +"remove-unreachable-traps ";
     
         if( phaseName.equals( "jop.ubf1" ) )
             return ""
@@ -2041,7 +2242,8 @@ public class Options extends OptionsBase {
     
         if( phaseName.equals( "jop.uce2" ) )
             return ""
-                +"enabled ";
+                +"enabled "
+                +"remove-unreachable-traps ";
     
         if( phaseName.equals( "jop.ubf2" ) )
             return ""
@@ -2104,9 +2306,27 @@ public class Options extends OptionsBase {
             return ""
                 +"enabled ";
     
+        if( phaseName.equals( "jap.lvtagger" ) )
+            return ""
+                +"enabled ";
+    
         if( phaseName.equals( "jap.rdtagger" ) )
             return ""
                 +"enabled ";
+    
+        if( phaseName.equals( "jap.che" ) )
+            return ""
+                +"enabled ";
+    
+        if( phaseName.equals( "cfg" ) )
+            return ""
+                +"enabled ";
+    
+        if( phaseName.equals( "cfg.output" ) )
+            return ""
+                +"enabled "
+                +"graph-type "
+                +"output-type ";
     
         if( phaseName.equals( "gb" ) )
             return ""
@@ -2249,7 +2469,12 @@ public class Options extends OptionsBase {
     
         if( phaseName.equals( "jb.uce" ) )
             return ""
-              +"enabled:true ";
+              +"enabled:true "
+              +"remove-unreachable-traps:false ";
+    
+        if( phaseName.equals( "jb.tt" ) )
+            return ""
+              +"enabled:false ";
     
         if( phaseName.equals( "jj" ) )
             return ""
@@ -2510,7 +2735,8 @@ public class Options extends OptionsBase {
     
         if( phaseName.equals( "jop.uce1" ) )
             return ""
-              +"enabled:true ";
+              +"enabled:true "
+              +"remove-unreachable-traps:false ";
     
         if( phaseName.equals( "jop.ubf1" ) )
             return ""
@@ -2518,7 +2744,8 @@ public class Options extends OptionsBase {
     
         if( phaseName.equals( "jop.uce2" ) )
             return ""
-              +"enabled:true ";
+              +"enabled:true "
+              +"remove-unreachable-traps:false ";
     
         if( phaseName.equals( "jop.ubf2" ) )
             return ""
@@ -2581,9 +2808,26 @@ public class Options extends OptionsBase {
             return ""
               +"enabled:false ";
     
+        if( phaseName.equals( "jap.lvtagger" ) )
+            return ""
+              +"enabled:false ";
+    
         if( phaseName.equals( "jap.rdtagger" ) )
             return ""
               +"enabled:false ";
+    
+        if( phaseName.equals( "jap.che" ) )
+            return ""
+              +"enabled:false ";
+    
+        if( phaseName.equals( "cfg" ) )
+            return ""
+              +"enabled:false ";
+    
+        if( phaseName.equals( "cfg.output" ) )
+            return ""
+              +"enabled:false "
+              +"graph-type:complete-unit-graph ";
     
         if( phaseName.equals( "gb" ) )
             return ""
@@ -2681,6 +2925,7 @@ public class Options extends OptionsBase {
         if( phaseName.equals( "jb.lp" ) ) return;
         if( phaseName.equals( "jb.ne" ) ) return;
         if( phaseName.equals( "jb.uce" ) ) return;
+        if( phaseName.equals( "jb.tt" ) ) return;
         if( phaseName.equals( "jj" ) ) return;
         if( phaseName.equals( "jj.ls" ) ) return;
         if( phaseName.equals( "jj.a" ) ) return;
@@ -2737,7 +2982,11 @@ public class Options extends OptionsBase {
         if( phaseName.equals( "jap.cgtagger" ) ) return;
         if( phaseName.equals( "jap.parity" ) ) return;
         if( phaseName.equals( "jap.pat" ) ) return;
+        if( phaseName.equals( "jap.lvtagger" ) ) return;
         if( phaseName.equals( "jap.rdtagger" ) ) return;
+        if( phaseName.equals( "jap.che" ) ) return;
+        if( phaseName.equals( "cfg" ) ) return;
+        if( phaseName.equals( "cfg.output" ) ) return;
         if( phaseName.equals( "gb" ) ) return;
         if( phaseName.equals( "gb.a1" ) ) return;
         if( phaseName.equals( "gb.cf" ) ) return;
@@ -2786,6 +3035,8 @@ public class Options extends OptionsBase {
             G.v().out.println( "Warning: Options exist for non-existent phase jb.ne" );
         if( !PackManager.v().hasPhase( "jb.uce" ) )
             G.v().out.println( "Warning: Options exist for non-existent phase jb.uce" );
+        if( !PackManager.v().hasPhase( "jb.tt" ) )
+            G.v().out.println( "Warning: Options exist for non-existent phase jb.tt" );
         if( !PackManager.v().hasPhase( "jj" ) )
             G.v().out.println( "Warning: Options exist for non-existent phase jj" );
         if( !PackManager.v().hasPhase( "jj.ls" ) )
@@ -2898,8 +3149,16 @@ public class Options extends OptionsBase {
             G.v().out.println( "Warning: Options exist for non-existent phase jap.parity" );
         if( !PackManager.v().hasPhase( "jap.pat" ) )
             G.v().out.println( "Warning: Options exist for non-existent phase jap.pat" );
+        if( !PackManager.v().hasPhase( "jap.lvtagger" ) )
+            G.v().out.println( "Warning: Options exist for non-existent phase jap.lvtagger" );
         if( !PackManager.v().hasPhase( "jap.rdtagger" ) )
             G.v().out.println( "Warning: Options exist for non-existent phase jap.rdtagger" );
+        if( !PackManager.v().hasPhase( "jap.che" ) )
+            G.v().out.println( "Warning: Options exist for non-existent phase jap.che" );
+        if( !PackManager.v().hasPhase( "cfg" ) )
+            G.v().out.println( "Warning: Options exist for non-existent phase cfg" );
+        if( !PackManager.v().hasPhase( "cfg.output" ) )
+            G.v().out.println( "Warning: Options exist for non-existent phase cfg.output" );
         if( !PackManager.v().hasPhase( "gb" ) )
             G.v().out.println( "Warning: Options exist for non-existent phase gb" );
         if( !PackManager.v().hasPhase( "gb.a1" ) )

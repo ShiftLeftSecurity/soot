@@ -39,6 +39,9 @@ import ca.mcgill.sable.soot.attributes.SootAttributesJavaColorer;
 import ca.mcgill.sable.soot.editors.*;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.jdt.core.*;
+import ca.mcgill.sable.soot.cfg.*;
+
+import com.sun.rsasign.o;
 
 
 import java.util.*;
@@ -63,6 +66,7 @@ public abstract class SootLauncher  implements IWorkbenchWindowActionDelegate {
 	private SootDefaultCommands sdc;
 	private SootOutputFilesHandler fileHandler;
 	private DavaHandler davaHandler;
+	private ArrayList cfgList;
 	
 	public void run(IAction action) {
 		
@@ -129,8 +133,9 @@ public abstract class SootLauncher  implements IWorkbenchWindowActionDelegate {
 		try {   
         	newProcessStarting();
             op = new SootRunner(temp, Display.getCurrent(), mainClass);
+           	((SootRunner)op).setParent(this);
             ModalContext.run(op, true, new NullProgressMonitor(), Display.getCurrent());
-            
+            setCfgList(((SootRunner)op).getCfgList());
  		} 
  		catch (InvocationTargetException e1) {
     		// handle exception
@@ -143,6 +148,19 @@ public abstract class SootLauncher  implements IWorkbenchWindowActionDelegate {
  		}
 
 	}
+	
+	/*public boolean handleNewAnalysis(String name){
+		IWorkbenchWindow window = SootPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow();
+		
+		Shell shell = Display.getCurrent().getActiveShell();
+		if (shell == null){
+			System.out.println("shell is null");
+		}
+		MessageDialog msgDialog = new MessageDialog(shell, "Interaction Question",  null,"Do you want to interact with analysis: "+name+" ?",0, new String []{"Yes", "No"}, 0);
+		msgDialog.open();
+		boolean result = msgDialog.getReturnCode() == 0 ? true: false;
+		return result;
+	}*/
 	
 	protected void runSootAsProcess(String cmd) {
 		
@@ -270,6 +288,25 @@ public abstract class SootLauncher  implements IWorkbenchWindowActionDelegate {
             }
 		}*/
 		SootPlugin.getDefault().getPartManager().updatePart(activeEdPart);
+		// run cfgviewer
+		if (getCfgList() != null){
+			Iterator it = getCfgList().iterator();
+			while (it.hasNext()){
+				ModelCreator mc = new ModelCreator();
+				System.out.println("struct: "+getStructured().getFirstElement().getClass());
+				//mc.setResource((IResource)getStructured().getFirstElement());
+				mc.setSootGraph((soot.toolkits.graph.DirectedGraph)it.next());
+				//mc.createModel();
+				mc.displayModel();
+			
+			}
+		}
+		//CFGViewer cv;
+		//Iterator it = getCfgList().iterator();
+		//while (it.hasNext()){
+		//	cv = new CFGViewer();
+		//	cv.run(it.next());
+		//}
 	}
 	
 
@@ -414,6 +451,20 @@ public abstract class SootLauncher  implements IWorkbenchWindowActionDelegate {
 	 */
 	public void setDavaHandler(DavaHandler handler) {
 		davaHandler = handler;
+	}
+
+	/**
+	 * @return
+	 */
+	public ArrayList getCfgList() {
+		return cfgList;
+	}
+
+	/**
+	 * @param list
+	 */
+	public void setCfgList(ArrayList list) {
+		cfgList = list;
 	}
 
 }

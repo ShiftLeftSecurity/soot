@@ -30,6 +30,8 @@ import soot.*;
 import soot.toolkits.graph.*;
 import soot.util.*;
 import java.util.*;
+import soot.options.*;
+import soot.toolkits.graph.interaction.*;
 
 /**
  *   Abstract class that provides the fixed point iteration functionality
@@ -93,6 +95,7 @@ public abstract class ForwardFlowAnalysis extends FlowAnalysis
         {
             Object previousAfterFlow = newInitialFlow();
 
+            int iterationCounter = 0;
             while(!changedUnits.isEmpty())
             {
                 Object beforeFlow;
@@ -130,7 +133,19 @@ next());
                 // Compute afterFlow and store it.
                 {
                     afterFlow = unitToAfterFlow.get(s);
+                    if (Options.v().interactive_mode()){
+                        Object savedInfo = newInitialFlow();
+                        copy(beforeFlow, savedInfo);
+                        FlowInfo fi = new FlowInfo(savedInfo, s, true);
+                        InteractionHandler.v().handleBeforeAnalysisEvent(fi);
+                    }
                     flowThrough(beforeFlow, s, afterFlow);
+                    if (Options.v().interactive_mode()){
+                        Object aSavedInfo = newInitialFlow();
+                        copy(afterFlow, aSavedInfo);
+                        FlowInfo fi = new FlowInfo(aSavedInfo, s, false);
+                        InteractionHandler.v().handleAfterAnalysisEvent(fi);
+                    }
                     numComputations++;
                 }
 
