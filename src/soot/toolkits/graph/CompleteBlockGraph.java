@@ -75,6 +75,9 @@ public class CompleteBlockGraph extends BlockGraph
     public CompleteBlockGraph(CompleteUnitGraph unitGraph)
     {
         super(unitGraph);
+
+	if (DEBUG)
+	    soot.util.PhaseDumper.v().dumpGraph(this, mBody);
     }
 }
 

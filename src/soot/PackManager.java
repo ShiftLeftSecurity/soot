@@ -244,6 +244,8 @@ public class PackManager {
     }
 
     public void writeOutput() {
+	if(Options.v().verbose())
+	    PhaseDumper.v().dumpBefore("output");
         if( Options.v().output_format() == Options.output_format_dava ) {
             postProcessDAVA();
         } else {
@@ -251,6 +253,8 @@ public class PackManager {
         }
         postProcessXML( reachableClasses() );
         releaseBodies( reachableClasses() );
+	if(Options.v().verbose())
+	    PhaseDumper.v().dumpAfter("output");
     }
 
     private void runWholeProgramPacks() {

@@ -455,6 +455,59 @@ which can display the annotations together with the program
 source, to aid program understanding.
 </long_desc>
 		</boolopt>
+	<listopt>
+	  <name>Body Dumping Phases</name>
+	  <alias>dump-body</alias>
+	  <set_arg_label>phaseName</set_arg_label>
+	  <short_desc>Dump the internal representation of each method before and after phase <use_arg_label/></short_desc>
+	  <long_desc>
+<p>
+Specify that <use_arg_label/> is one of the phases to be dumped.
+For example <code>-dump-body jb -dump-body jb.a</code> would dump each
+method before and after the <code>jb</code> and <code>jb.a</code>
+phases.  The pseudo phase name ``<code>ALL</code>''
+causes all phases to be dumped.</p>
+<p>For this option to have any effect, the <code>soot.Pack</code>
+and <code>soot.SceneTransformer</code> classes must have been compiled
+with debugging enabled.</p> 
+<p>
+Output files appear in subdirectories under the
+soot output directory, with names like
+<var>className</var><code>/</code><var>methodSignature</var><code>/</code><var>phasename</var><code>-</code><var>graphType</var><code>-</code><var>number</var><code>.in</code>
+and
+<var>className</var><code>/</code><var>methodSignature</var><code>/</code><var>phasename</var><code>-</code><var>graphType</var><code>-</code><var>number</var><code>.out</code>.
+The ``<code>in</code>'' and
+``<code>out</code>'' suffixes distinguish the internal
+representations of the method before and after the phase
+executed.</p>
+</long_desc>
+	</listopt>
+	<listopt>
+	  <name>CFG Dumping Phases</name>
+	  <alias>dump-cfg</alias>
+	  <set_arg_label>phaseName</set_arg_label>
+	  <short_desc>Dump the internal representation of each CFG constructed during phase <use_arg_label/></short_desc>
+	  <long_desc>
+<p>
+Specify that any control flow graphs constructed during the
+<use_arg_label/> phases should be dumped.
+For example <code>-dump-cfg jb -dump-cfg bb.lso</code> would dump
+all
+CFGs constructed during the <code>jb</code> and <code>bb.lso</code>
+phases.  The pseudo phase name ``<code>ALL</code>''
+causes CFGs constructed in all phases to be dumped.</p>
+<p>This option has no effect if the CFG constructing classes were compiled
+with debugging disabled.</p> 
+<p>The control flow graphs are dumped in the form
+of a file containing input to <code>dot</code> graph visualization
+tool.  Output <code>dot</code> files are stored beneath the soot
+output directory, in files with names like:
+<var>className</var><code>/</code><var>methodSignature</var><code>/</code><var>phasename</var><code>-</code><var>graphType</var><code>-</code><var>number</var><code>.dot</code>,
+where <var>number</var> serves to distinguish graphs in phases
+that produce more than one (for example, the Aggregator may
+produce multiple <code>CompleteUnitGraph</code>s).</p>
+</long_desc>
+	</listopt>
 	</section>
 	<section>
 		<name>Processing Options</name>
@@ -473,6 +526,23 @@ This is a mechanism for specifying phase-specific options to
 different parts of Soot. See <var>Soot phase options</var> for
 details about the available phases and options.</p>
 </long_desc>
+
+<!--
+      <phase>
+        <name>CFG/Exceptions Control</name>
+        <alias>cfgex</alias>
+        <class>CFGExceptionsOptions</class>
+	<short_desc>Sets parameters for the generation of control flow graphs</short_desc>
+        <long_desc>
+<p>
+CFG/Exceptions Control is not a phase, per se, but a place to
+collect options that control the analysis of exceptional control
+flow, the generation of control flow graphs, and the use of
+control flow graphs. These graphs are
+constructed and used by many phases of Soot.</p>
+</long_desc>
+-->
+
 			<phase>
 				<name>Jimple Body Creation</name>
 				<alias>jb</alias>
@@ -783,6 +853,15 @@ traps whose catch blocks are empty.
 						<name>Enabled</name>
 						<alias>enabled</alias>
                                                 <default>true</default>
+					</boolopt>
+					<boolopt>
+						<name>Remove unreachable traps</name>
+						<alias>remove-unreachable-traps</alias>
+                                                <default>false</default>
+	  					<long_desc>
+Remove exception table entries when none of the protected instructions can
+throw the exception being caught.
+</long_desc>
 					</boolopt>
 				</sub_phase>
 			</phase>
@@ -2641,6 +2720,15 @@ traps whose catch blocks are empty.
 						<short_desc/>
 						<long_desc/>
 					</boolopt>
+					<boolopt>
+						<name>Remove unreachable traps</name>
+						<alias>remove-unreachable-traps</alias>
+                                                <default>false</default>
+	  					<long_desc>
+Remove exception table entries when none of the protected instructions can
+throw the exception being caught.
+</long_desc>
+					</boolopt>
 				</sub_phase>
 				<sub_phase>
 					<name>Unconditional Branch Folder 1</name>
@@ -2684,6 +2772,15 @@ Another iteration of the Unreachable Code Eliminator.
                                                 <default>true</default>
 						<short_desc/>
 						<long_desc/>
+					</boolopt>
+					<boolopt>
+						<name>Remove unreachable traps</name>
+						<alias>remove-unreachable-traps</alias>
+                                                <default>false</default>
+	  					<long_desc>
+Remove exception table entries when none of the protected instructions can
+throw the exception being caught.
+</long_desc>
 					</boolopt>
 				</sub_phase>
 				<sub_phase>

@@ -20,6 +20,8 @@
 package soot.exceptions;
 
 import soot.Unit;
+import soot.Singletons;
+import soot.G;
 import soot.exceptions.*;
 
 /**
@@ -31,15 +33,34 @@ import soot.exceptions.*;
  * arrive asynchronously from the perspective of the victim thread.
  */
 public class PedanticThrowAnalysis implements ThrowAnalysis {
+
     /**
-     * Returns {@link ThrowableSet.Manager.ALL_THROWABLES
-     * ALL_THROWABLES} as the set of types that the specified unit
-     * might throw, regardless of the unit's identity.
+     * Constructs a <code>PedanticThrowAnalysis</code> for inclusion in 
+     * Soot's global variable manager, {@link G}.
+     *
+     * @param g guarantees that the constructor may only be called 
+     * from {@link Singletons}.
+     */
+    public PedanticThrowAnalysis(Singletons.Global g) {}
+
+    /**
+     * Returns the single instance of <code>PedanticThrowAnalysis</code>.
+     *
+     * @return Soot's <code>PedanticThrowAnalysis</code>.
+     */
+    public static PedanticThrowAnalysis v() { 
+	return G.v().PedanticThrowAnalysis(); 
+    }
+
+
+    /**
+     * Returns {@link ThrowableSet.Manager.ALL_THROWABLES} as the set
+     * of types that the specified unit might throw, regardless of the
+     * unit's identity.
      *
      * @param u {@link Unit} whose exceptions are to be returned.
      *
-     * @return {@link ThrowableSet.Manager.ALL_THROWABLES
-     * ALL_THROWABLES}.
+     * @return {@link ThrowableSet.Manager.ALL_THROWABLES}.
      */
     public ThrowableSet mightThrow(Unit u) {
 	return ThrowableSet.Manager.v().ALL_THROWABLES;

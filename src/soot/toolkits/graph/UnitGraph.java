@@ -31,6 +31,7 @@ package soot.toolkits.graph;
 import soot.*;
 import soot.util.*;
 import java.util.*;
+import soot.options.Options;
 
 
 /**
@@ -46,6 +47,9 @@ import java.util.*;
 
 public abstract class UnitGraph implements DirectedGraph
 {
+    protected boolean DEBUG = true; // Controls whether subclass
+				    // constructors dump a representation
+				    // of the graph they build.
     List heads;
     List tails;
 
@@ -65,7 +69,11 @@ public abstract class UnitGraph implements DirectedGraph
     protected UnitGraph( Body body) {
 	this.body = body;
 	unitChain = body.getUnits();
-        method = getBody().getMethod();
+        method = body.getMethod();
+        if(Options.v().verbose())
+	    G.v().out.println("[" + method.getName() + "]     Constructing " + 
+			      this.getClass().getName() + "...");
+      
     }
     
 

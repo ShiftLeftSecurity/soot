@@ -46,6 +46,22 @@ import soot.exceptions.*;
 public class UnitThrowAnalysis implements ThrowAnalysis {
 
     /**
+     * Constructs a <code>UnitThrowAnalysis</code> for inclusion in 
+     * Soot's global variable manager, {@link G}.
+     *
+     * @param g guarantees that the constructor may only be called 
+     * from {@link Singletons}.
+     */
+    public UnitThrowAnalysis(Singletons.Global g) {}
+
+    /**
+     * Returns the single instance of <code>UnitThrowAnalysis</code>.
+     *
+     * @return Soot's <code>UnitThrowAnalysis</code>.
+     */
+    public static UnitThrowAnalysis v() { return G.v().UnitThrowAnalysis(); }
+
+    /**
      * Returns the set of types that the specified unit
      * might throw.
      *
@@ -227,21 +243,25 @@ public class UnitThrowAnalysis implements ThrowAnalysis {
 
 	public void caseStaticInvokeInst(StaticInvokeInst i) {
 	    result = result.add(mgr.LINKAGE_ERRORS);
+	    result = result.add(mightThrow(i.getMethod()));
 	}
 
 	public void caseVirtualInvokeInst(VirtualInvokeInst i) {
 	    result = result.add(mgr.NULL_POINTER_EXCEPTION);
 	    result = result.add(mgr.LINKAGE_ERRORS);
+	    result = result.add(mightThrow(i.getMethod()));
 	}
 
 	public void caseInterfaceInvokeInst(InterfaceInvokeInst i) {
 	    result = result.add(mgr.NULL_POINTER_EXCEPTION);
 	    result = result.add(mgr.LINKAGE_ERRORS);
+	    result = result.add(mightThrow(i.getMethod()));
 	}
 
 	public void caseSpecialInvokeInst(SpecialInvokeInst i) {
 	    result = result.add(mgr.NULL_POINTER_EXCEPTION);
 	    result = result.add(mgr.LINKAGE_ERRORS);
+	    result = result.add(mightThrow(i.getMethod()));
 	}
 
 	public void caseThrowInst(ThrowInst i) {
@@ -356,11 +376,12 @@ public class UnitThrowAnalysis implements ThrowAnalysis {
 	}
 
 	public void caseEnterMonitorInst(EnterMonitorInst i) {
-	    result = result.add(mgr.ILLEGAL_MONITOR_STATE_EXCEPTION);
+	    result = result.add(mgr.NULL_POINTER_EXCEPTION);
 	}
 
 	public void caseExitMonitorInst(ExitMonitorInst i) {
 	    result = result.add(mgr.ILLEGAL_MONITOR_STATE_EXCEPTION);
+	    result = result.add(mgr.NULL_POINTER_EXCEPTION);
 	}
 
 	public void caseAssignStmt(AssignStmt s) {
@@ -599,7 +620,8 @@ public class UnitThrowAnalysis implements ThrowAnalysis {
 		// but toType will have a value.
 		FastHierarchy h = Scene.v().getOrMakeFastHierarchy();
 		if (fromType == null || fromType instanceof UnknownType ||
-		    (! h.canStoreType(fromType, toType))) {
+		    ((! (fromType instanceof NullType)) &&
+		     (! h.canStoreType(fromType, toType)))) {
 		    result = result.add(mgr.CLASS_CAST_EXCEPTION);
 		}
 	    }

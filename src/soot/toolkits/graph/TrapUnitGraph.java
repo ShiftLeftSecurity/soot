@@ -24,10 +24,6 @@
  */
 
 
- 
-
-
-
 package soot.toolkits.graph;
 
 import soot.*;
@@ -61,8 +57,8 @@ import soot.options.Options;
  *  In <tt>CompleteUnitGraph</tt>, when a <tt>Unit</tt> may throw
  *  an exception that is caught by a <tt>Trap</tt>, there are edges from	
  *  every predecessor of the excepting <tt>Unit</tt> to the <tt>Trap</tt>'s
- *  handler.  In <tt>TrapUnitGraph</tt>, edges are not added from the 
- *  predecessors of excepting <tt>Unit</tt>s</li>
+ *  handler. In <tt>TrapUnitGraph</tt>, edges are not added from the 
+ *  predecessors of excepting <tt>Unit</tt>s</li>.
  *  <li>
  *  In <tt>CompleteUnitGraph</tt>, when a <tt>Unit</tt> may throw an
  *  exception that is caught by a <tt>Trap</tt>, there is no edge from
@@ -83,10 +79,6 @@ public class TrapUnitGraph extends UnitGraph
         super(body);
 	int size = unitChain.size();
 
-        if(Options.v().verbose())
-            G.v().out.println("[" + method.getName() + 
-                               "]     Constructing TrapUnitGraph...");
-      
         if(Options.v().time())
             Timers.v().graphTimer.start();
 
@@ -101,6 +93,9 @@ public class TrapUnitGraph extends UnitGraph
 
         if(Options.v().time())
             Timers.v().graphTimer.end();
+
+	if (DEBUG)
+	    soot.util.PhaseDumper.v().dumpGraph(this, body);
     }
 
 

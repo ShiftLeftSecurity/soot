@@ -43,7 +43,6 @@ import soot.options.Options;
  */
 public class BriefUnitGraph extends UnitGraph
 {
-
     /**
      *   Constructs a BriefUnitGraph given a Body instance.
      *   @param body The underlying body we want to make a 
@@ -54,10 +53,6 @@ public class BriefUnitGraph extends UnitGraph
         super(body);
 	int size = unitChain.size();
 
-        if(Options.v().verbose())
-            G.v().out.println("[" + method.getName() + 
-                               "]     Constructing BriefUnitGraph...");
-      
         if(Options.v().time())
             Timers.v().graphTimer.start();
 
@@ -71,6 +66,9 @@ public class BriefUnitGraph extends UnitGraph
 
         if(Options.v().time())
             Timers.v().graphTimer.end();
+
+	if (DEBUG)
+	    soot.util.PhaseDumper.v().dumpGraph(this, body);
     }
 }
 

@@ -151,5 +151,8 @@ Shimple
 SConstantPropagatorAndFolder
 NullPointerColorer
 ParityTagger
-ThrowableSet.Manager
+PhaseDumper
 AltClassLoader
+ThrowableSet.Manager
+UnitThrowAnalysis
+PedanticThrowAnalysis

@@ -72,6 +72,9 @@ public class ArrayRefBlockGraph extends BlockGraph
     public  ArrayRefBlockGraph(BriefUnitGraph unitGraph)
     {
         super(unitGraph);
+
+	if (DEBUG)
+	    soot.util.PhaseDumper.v().dumpGraph(this, mBody);
     }
 
     

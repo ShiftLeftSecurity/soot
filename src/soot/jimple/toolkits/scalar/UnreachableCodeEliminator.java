@@ -59,16 +59,38 @@ public class UnreachableCodeEliminator extends BodyTransformer
         // Bad idea! Some methods are extremely long. It broke because the recursion reached the
         // 3799th level.
 
-        if (!body.getUnits().isEmpty())
-            visitStmts((Stmt)body.getUnits().getFirst());
+	// We need a map from Units that handle Traps, to a Set of their
+	// Traps, so we can remove the Traps should we remove the handler.
+	Map handlerToTraps = new HashMap();
 
-	// Create a map from units that start Traps, to their
-	// Traps, so we can recognize when we remove an
-	// unreachable Trap.
-	Map trapHandlers = new HashMap();
-	for (Iterator it = body.getTraps().iterator(); it.hasNext(); ) {
-	    Trap trap = (Trap) it.next();
-	    trapHandlers.put(trap.getHandlerUnit(), trap);
+        if (!body.getUnits().isEmpty()) {
+	    LinkedList startPoints = new LinkedList();
+	    startPoints.addLast(body.getUnits().getFirst());
+
+	    // Add trap handlers to startPoints unless we are removing
+	    // unreachable traps.
+	    boolean addHandlersToStart = 
+		(! PhaseOptions.getBoolean(options, "remove-unreachable-traps"));
+
+	    for (Iterator it = body.getTraps().iterator(); it.hasNext(); ) {
+		Trap trap = (Trap) it.next();
+		Unit handler = trap.getHandlerUnit();
+		if (addHandlersToStart) {
+		    // Don't add handlers for empty traps to the starting
+		    // points, since we're about to remove those traps anyway.
+		    if (trap.getBeginUnit() != trap.getEndUnit()) {
+			startPoints.addLast(handler);
+		    }
+		}
+		Set handlersTraps = (Set) handlerToTraps.get(handler);
+		if (handlersTraps == null) {
+		    handlersTraps = new ArraySet(3);
+		    handlerToTraps.put(handler, handlersTraps);
+		}
+		handlersTraps.add(trap);
+	    }
+
+            visitStmts(startPoints);
 	}
 
         Iterator stmtIt = body.getUnits().snapshotIterator();
@@ -80,9 +102,12 @@ public class UnreachableCodeEliminator extends BodyTransformer
             if (!visited.contains(stmt)) 
             {
                 body.getUnits().remove(stmt);
-		Trap trap = (Trap) trapHandlers.get(stmt);
-		if (trap != null) {
-		    body.getTraps().remove(trap);
+		Set traps = (Set) handlerToTraps.get(stmt);
+		if (traps != null) {
+		    for (Iterator it = traps.iterator(); it.hasNext(); ) {
+			Trap trap = (Trap) it.next();
+			body.getTraps().remove(trap);
+		    }
 		}
                 numPruned++;
             }
@@ -105,12 +130,9 @@ public class UnreachableCodeEliminator extends BodyTransformer
         
   } // pruneUnreachables
 
-    private void visitStmts(Stmt head) {
+    private void visitStmts(LinkedList st) {
 
-        // Do DFS of the unit graph, starting at the head node.
-
-        LinkedList st = new LinkedList();
-        st.addLast(head);
+        // Do DFS of the unit graph, starting from the passed nodes.
 
         while (!st.isEmpty()) {
             Object stmt = st.removeLast();

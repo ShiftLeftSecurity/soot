@@ -77,6 +77,9 @@ public class ZonedBlockGraph extends BlockGraph
     public  ZonedBlockGraph(BriefUnitGraph unitGraph)
     {
         super(unitGraph);
+
+	if (DEBUG)
+	    soot.util.PhaseDumper.v().dumpGraph(this, mBody);
     }
 
 
