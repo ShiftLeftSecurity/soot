@@ -1597,6 +1597,13 @@ public class CFG {
 			// that will leave the last unit outside
 			// the protected area.
 			afterEndStmt = (Stmt) units.getLast();
+		    } else if (endIns == targetIns) {
+			// The protected area ends at the beginning of
+			// its own handler. We don't want to inadvertently
+			// include the new IdentityStmt we just inserted
+			// at the beginning of the handler into
+			// its own protected region.
+			afterEndStmt = newTarget;
 		    } else {
 			afterEndStmt = (Stmt) instructionToLastStmt.get(endIns);
 		    }
