@@ -17,12 +17,12 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package soot.exceptions;
+package soot.toolkits.exceptions;
 
 import soot.Unit;
 import soot.Singletons;
 import soot.G;
-import soot.exceptions.*;
+import soot.toolkits.exceptions.*;
 
 /**
  * A {@link ThrowAnalysis} which says that every unit can throw every

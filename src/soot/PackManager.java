@@ -74,7 +74,7 @@ public class PackManager {
         // Jimple body creation
         addPack(p = new JimpleBodyPack());
         {
-            p.add(new Transform("jb.tt", soot.exceptions.TrapTightener.v()));
+            p.add(new Transform("jb.tt", soot.toolkits.exceptions.TrapTightener.v()));
             p.add(new Transform("jb.ls", LocalSplitter.v()));
             p.add(new Transform("jb.a", Aggregator.v()));
             p.add(new Transform("jb.ule", UnusedLocalEliminator.v()));

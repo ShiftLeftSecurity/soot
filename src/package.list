@@ -60,4 +60,4 @@ soot.shimple
 soot.shimple.toolkits.scalar
 soot.relations
 soot.util.cfgcmd
-soot.exceptions
+soot.toolkits.exceptions

@@ -31,7 +31,7 @@ import java.util.*;
 
 import soot.*;
 import soot.baf.Baf;
-import soot.exceptions.*;
+import soot.toolkits.exceptions.*;
 import soot.jimple.JimpleBody;
 import soot.grimp.Grimp;
 import soot.shimple.Shimple;

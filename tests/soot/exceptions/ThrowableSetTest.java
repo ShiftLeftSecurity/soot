@@ -1,4 +1,4 @@
-package soot.exceptions;
+package soot.toolkits.exceptions;
 
 import soot.*;
 import java.util.*;
@@ -6,7 +6,7 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import soot.exceptions.ExceptionTestUtility.*;
+import soot.toolkits.exceptions.ExceptionTestUtility.*;
 
 public class ThrowableSetTest extends TestCase {
 

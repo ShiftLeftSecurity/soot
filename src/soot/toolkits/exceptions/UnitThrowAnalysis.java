@@ -17,7 +17,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package soot.exceptions;
+package soot.toolkits.exceptions;
 
 import java.util.Iterator;
 import soot.*;
@@ -26,7 +26,7 @@ import soot.jimple.*;
 import soot.grimp.*;
 import soot.shimple.ShimpleValueSwitch;
 import soot.shimple.PhiExpr;
-import soot.exceptions.*;
+import soot.toolkits.exceptions.*;
 
 /**
  * A {@link ThrowAnalysis} which returns the set of runtime exceptions

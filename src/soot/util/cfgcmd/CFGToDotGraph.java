@@ -22,7 +22,7 @@ package soot.util.cfgcmd;
 import java.util.*;
 
 import soot.*;
-import soot.exceptions.ThrowableSet;
+import soot.toolkits.exceptions.ThrowableSet;
 import soot.toolkits.graph.DirectedGraph;
 import soot.toolkits.graph.BlockGraph;
 import soot.toolkits.graph.CompleteUnitGraph;

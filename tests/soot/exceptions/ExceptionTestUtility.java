@@ -1,4 +1,4 @@
-package soot.exceptions;
+package soot.toolkits.exceptions;
 
 import soot.*;
 import java.util.*;

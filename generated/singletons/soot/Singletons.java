@@ -83,7 +83,7 @@ import soot.shimple.*;
 import soot.shimple.toolkits.scalar.*;
 import soot.relations.*;
 import soot.util.cfgcmd.*;
-import soot.exceptions.*;
+import soot.toolkits.exceptions.*;
 
 /** A class to group together all the global variables in Soot. */
 public class Singletons {

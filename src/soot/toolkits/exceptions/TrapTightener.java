@@ -17,7 +17,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package soot.exceptions;
+package soot.toolkits.exceptions;
 
 import java.util.Collection;
 import java.util.Iterator;

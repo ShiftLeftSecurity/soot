@@ -1,4 +1,4 @@
-package soot.exceptions;
+package soot.toolkits.exceptions;
 
 import soot.*;
 import soot.toolkits.scalar.*;
@@ -6,13 +6,13 @@ import soot.jimple.*;
 import soot.jimple.internal.*;
 import soot.grimp.*;
 import soot.grimp.internal.*;
-import soot.exceptions.*;
+import soot.toolkits.exceptions.*;
 import java.util.*;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import soot.exceptions.ExceptionTestUtility;
-import soot.exceptions.ExceptionTestUtility.ExceptionHashSet;
+import soot.toolkits.exceptions.ExceptionTestUtility;
+import soot.toolkits.exceptions.ExceptionTestUtility.ExceptionHashSet;
 
 public class UnitThrowAnalysisTest extends TestCase {
 
