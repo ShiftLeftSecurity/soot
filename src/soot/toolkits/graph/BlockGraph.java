@@ -52,11 +52,11 @@ public class BlockGraph implements DirectedGraph
     List mHeads = new ArrayList();
     List mTails = new ArrayList();
 
-    static final int COMPLETE = 0;
-    static final int BRIEF = 1;
-    static final int ZONED = 2;
+    public static final int COMPLETE = 0;
+    public static final int BRIEF = 1;
+    public static final int ZONED = 2;
 
-    static final int ARRAYREF = 99;
+    public static final int ARRAYREF = 99;
 
     private Map blockToSuccs;
     private Map blockToPreds;
@@ -72,7 +72,7 @@ public class BlockGraph implements DirectedGraph
      *   @see ZonedBlockGraph
      *   @see ArrayRefBlockGraph 
      */
-    BlockGraph(Body aBody, int type) 
+    public BlockGraph(Body aBody, int type) 
     {
         /* Algorithm used to compute basic blocks:
          * 1) Identify basic block leaders: these are the units that mark
@@ -560,7 +560,8 @@ public class BlockGraph implements DirectedGraph
 
     public List getTails()
     {
-        throw new RuntimeException("not yet implemented");
+      return new LinkedList();
+      //        throw new RuntimeException("not yet implemented");
     }
 
     public List getPredsOf(Object s)

@@ -58,8 +58,7 @@ public class UnitGraph implements DirectedGraph
     Chain unitChain;
 
 
-    UnitGraph( Body unitBody, boolean addExceptionEdges)
-    {
+    public UnitGraph( Body unitBody, boolean addExceptionEdges) {
 	this( unitBody, addExceptionEdges, false);
     }
 
@@ -77,8 +76,9 @@ public class UnitGraph implements DirectedGraph
      *   @see Body
      *   @see Unit
      */
-    UnitGraph(Body unitBody, boolean addExceptionEdges, boolean firstStmtWorkaround)
-    {
+    public UnitGraph(Body unitBody, 
+		     boolean addExceptionEdges, 
+		     boolean firstStmtWorkaround) {
         body = unitBody;
         unitChain = body.getUnits();
         method = getBody().getMethod();

@@ -69,10 +69,8 @@ public class NaiveSideEffectTester implements SideEffectTester
         // If it's an invoke, then only locals are safe.
         if (s.containsInvokeExpr())
         {
-            if (v instanceof Local)
-                return false;
-            else 
-                return true;
+	    if (!(v instanceof Local))
+		return true;
         }
 
         // otherwise, use boxes tell all.
@@ -107,10 +105,8 @@ public class NaiveSideEffectTester implements SideEffectTester
         // If it's an invoke, then only locals are safe.
         if (s.containsInvokeExpr())
         {
-            if (v instanceof Local)
-                return false;
-            else 
-                return true;
+	    if (!(v instanceof Local))
+		return true;
         }
 
         // otherwise, def boxes tell all.
