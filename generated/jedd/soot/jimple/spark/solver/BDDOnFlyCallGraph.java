@@ -26,65 +26,97 @@ public class BDDOnFlyCallGraph {
     
     private BDDCallGraph callGraph;
     
-    public BDDReachableMethods reachableMethods() { return this.reachableMethods; }
+    public BDDReachableMethods reachableMethods() { return reachableMethods; }
     
-    public BDDCallGraph callGraph() { return this.callGraph; }
+    public BDDCallGraph callGraph() { return callGraph; }
     
     public BDDOnFlyCallGraph(BDDPAG pag) {
         super();
         this.pag = pag;
-        this.callGraph = new BDDCallGraph();
-        BDDContextManager cm = BDDCallGraphBuilder.makeContextManager(this.callGraph);
-        this.reachableMethods = new BDDReachableMethods(this.callGraph, Scene.v().getEntryPoints());
-        this.ofcgb = new BDDOnFlyCallGraphBuilder(pag, cm, this.reachableMethods);
-        this.reachablesReader = this.reachableMethods.listener();
-        this.callEdges = cm.callGraph().listener();
+        callGraph = new BDDCallGraph();
+        BDDContextManager cm = BDDCallGraphBuilder.makeContextManager(callGraph);
+        reachableMethods = new BDDReachableMethods(callGraph, Scene.v().getEntryPoints());
+        ofcgb = new BDDOnFlyCallGraphBuilder(pag, cm, reachableMethods);
+        reachablesReader = reachableMethods.listener();
+        callEdges = cm.callGraph().listener();
     }
     
     public void build() {
-        this.ofcgb.processReachables();
+        ofcgb.processReachables();
         this.processReachables();
         this.processCallEdges();
     }
     
     private void processReachables() {
-        this.reachableMethods.update();
+        reachableMethods.update();
         while (true) {
-            final Relation methodContexts =
-              new Relation(new Attribute[] { method.v(), ctxt.v() },
-                           new PhysicalDomain[] { V1.v(), T1.v() },
-                           this.reachablesReader.next());
-            if (Jedd.v().equals(Jedd.v().read(methodContexts), Jedd.v().falseBDD())) return;
-            this.addToPAG(new Relation(new Attribute[] { method.v(), ctxt.v() },
-                                       new PhysicalDomain[] { V2.v(), T2.v() },
-                                       Jedd.v().replace(methodContexts,
-                                                        new PhysicalDomain[] { V1.v(), T1.v() },
-                                                        new PhysicalDomain[] { V2.v(), T2.v() })));
+            final jedd.internal.RelationContainer methodContexts =
+              new jedd.internal.RelationContainer(new Attribute[] { method.v(), ctxt.v() },
+                                                  new PhysicalDomain[] { V1.v(), T1.v() },
+                                                  ("<soot.jimple.spark.bdddomains.method:soot.jimple.spark.bdddo" +
+                                                   "mains.V1, soot.jimple.spark.bdddomains.ctxt:soot.jimple.spar" +
+                                                   "k.bdddomains.T1> methodContexts = reachablesReader.next(); a" +
+                                                   "t /home/olhotak/soot-2-jedd/src/soot/jimple/spark/solver/BDD" +
+                                                   "OnFlyCallGraph.jedd:70,12"),
+                                                  reachablesReader.next());
+            if (jedd.internal.Jedd.v().equals(jedd.internal.Jedd.v().read(methodContexts),
+                                              jedd.internal.Jedd.v().falseBDD()))
+                return;
+            this.addToPAG(new jedd.internal.RelationContainer(new Attribute[] { method.v(), ctxt.v() },
+                                                              new PhysicalDomain[] { V2.v(), T2.v() },
+                                                              ("this.addToPAG(jedd.internal.Jedd.v().replace(methodContexts," +
+                                                               " new jedd.PhysicalDomain[...], new jedd.PhysicalDomain[...])" +
+                                                               ") at /home/olhotak/soot-2-jedd/src/soot/jimple/spark/solver/" +
+                                                               "BDDOnFlyCallGraph.jedd:72,12"),
+                                                              jedd.internal.Jedd.v().replace(methodContexts,
+                                                                                             new PhysicalDomain[] { V1.v(), T1.v() },
+                                                                                             new PhysicalDomain[] { V2.v(), T2.v() })));
         }
     }
     
-    private void addToPAG(final Relation methodContexts) {
-        final Relation methods =
-          new Relation(new Attribute[] { method.v() },
-                       new PhysicalDomain[] { V2.v() },
-                       Jedd.v().project(methodContexts, new PhysicalDomain[] { T2.v() }));
+    private void addToPAG(final jedd.internal.RelationContainer methodContexts) {
+        final jedd.internal.RelationContainer methods =
+          new jedd.internal.RelationContainer(new Attribute[] { method.v() },
+                                              new PhysicalDomain[] { V2.v() },
+                                              ("<soot.jimple.spark.bdddomains.method:soot.jimple.spark.bdddo" +
+                                               "mains.V2> methods = jedd.internal.Jedd.v().project(methodCon" +
+                                               "texts, new jedd.PhysicalDomain[...]); at /home/olhotak/soot-" +
+                                               "2-jedd/src/soot/jimple/spark/solver/BDDOnFlyCallGraph.jedd:7" +
+                                               "6,8"),
+                                              jedd.internal.Jedd.v().project(methodContexts,
+                                                                             new PhysicalDomain[] { T2.v() }));
         for (Iterator methIt =
-               new Relation(new Attribute[] { method.v() }, new PhysicalDomain[] { V2.v() }, methods).iterator();
+               new jedd.internal.RelationContainer(new Attribute[] { method.v() },
+                                                   new PhysicalDomain[] { V2.v() },
+                                                   ("methods.iterator() at /home/olhotak/soot-2-jedd/src/soot/jim" +
+                                                    "ple/spark/solver/BDDOnFlyCallGraph.jedd:77,31"),
+                                                   methods).iterator();
              methIt.hasNext();
              ) {
             final SootMethod meth = (SootMethod) methIt.next();
-            AbstractMethodPAG mpag = AbstractMethodPAG.v(this.pag, meth);
+            AbstractMethodPAG mpag = AbstractMethodPAG.v(pag, meth);
             mpag.build();
-            final Relation contexts =
-              new Relation(new Attribute[] { ctxt.v() },
-                           new PhysicalDomain[] { T2.v() },
-                           Jedd.v().compose(Jedd.v().read(methodContexts),
-                                            Jedd.v().literal(new Object[] { meth },
-                                                             new Attribute[] { method.v() },
-                                                             new PhysicalDomain[] { V2.v() }),
-                                            new PhysicalDomain[] { V2.v() }));
+            final jedd.internal.RelationContainer contexts =
+              new jedd.internal.RelationContainer(new Attribute[] { ctxt.v() },
+                                                  new PhysicalDomain[] { T2.v() },
+                                                  ("<soot.jimple.spark.bdddomains.ctxt:soot.jimple.spark.bdddoma" +
+                                                   "ins.T2> contexts = jedd.internal.Jedd.v().compose(jedd.inter" +
+                                                   "nal.Jedd.v().read(methodContexts), jedd.internal.Jedd.v().li" +
+                                                   "teral(new java.lang.Object[...], new jedd.Attribute[...], ne" +
+                                                   "w jedd.PhysicalDomain[...]), new jedd.PhysicalDomain[...]); " +
+                                                   "at /home/olhotak/soot-2-jedd/src/soot/jimple/spark/solver/BD" +
+                                                   "DOnFlyCallGraph.jedd:81,12"),
+                                                  jedd.internal.Jedd.v().compose(jedd.internal.Jedd.v().read(methodContexts),
+                                                                                 jedd.internal.Jedd.v().literal(new Object[] { meth },
+                                                                                                                new Attribute[] { method.v() },
+                                                                                                                new PhysicalDomain[] { V2.v() }),
+                                                                                 new PhysicalDomain[] { V2.v() }));
             for (Iterator contextIt =
-                   new Relation(new Attribute[] { ctxt.v() }, new PhysicalDomain[] { T2.v() }, contexts).iterator();
+                   new jedd.internal.RelationContainer(new Attribute[] { ctxt.v() },
+                                                       new PhysicalDomain[] { T2.v() },
+                                                       ("contexts.iterator() at /home/olhotak/soot-2-jedd/src/soot/ji" +
+                                                        "mple/spark/solver/BDDOnFlyCallGraph.jedd:83,38"),
+                                                       contexts).iterator();
                  contextIt.hasNext();
                  ) {
                 final Object context = (Object) contextIt.next();
@@ -96,40 +128,60 @@ public class BDDOnFlyCallGraph {
     private void processCallEdges() {
         Stmt s = null;
         while (true) {
-            final Relation e =
-              new Relation(new Attribute[] { srcm.v(), srcc.v(), stmt.v(), kind.v(), tgtm.v(), tgtc.v() },
-                           new PhysicalDomain[] { V1.v(), T1.v(), ST.v(), H2.v(), V2.v(), T2.v() },
-                           this.callEdges.next());
-            if (Jedd.v().equals(Jedd.v().read(e), Jedd.v().falseBDD())) break;
-            final Relation mc =
-              new Relation(new Attribute[] { method.v(), ctxt.v() },
-                           new PhysicalDomain[] { V2.v(), T2.v() },
-                           Jedd.v().project(e, new PhysicalDomain[] { T1.v(), ST.v(), V1.v(), H2.v() }));
-            this.addToPAG(new Relation(new Attribute[] { method.v(), ctxt.v() },
-                                       new PhysicalDomain[] { V2.v(), T2.v() },
-                                       mc));
+            final jedd.internal.RelationContainer e =
+              new jedd.internal.RelationContainer(new Attribute[] { srcm.v(), srcc.v(), stmt.v(), kind.v(), tgtm.v(), tgtc.v() },
+                                                  new PhysicalDomain[] { V1.v(), T1.v(), ST.v(), H2.v(), V2.v(), T2.v() },
+                                                  ("<soot.jimple.spark.bdddomains.srcm:soot.jimple.spark.bdddoma" +
+                                                   "ins.V1, soot.jimple.spark.bdddomains.srcc:soot.jimple.spark." +
+                                                   "bdddomains.T1, soot.jimple.spark.bdddomains.stmt:soot.jimple" +
+                                                   ".spark.bdddomains.ST, soot.jimple.spark.bdddomains.kind:soot" +
+                                                   ".jimple.spark.bdddomains.H2, soot.jimple.spark.bdddomains.tg" +
+                                                   "tm:soot.jimple.spark.bdddomains.V2, soot.jimple.spark.bdddom" +
+                                                   "ains.tgtc:soot.jimple.spark.bdddomains.T2> e = callEdges.nex" +
+                                                   "t(); at /home/olhotak/soot-2-jedd/src/soot/jimple/spark/solv" +
+                                                   "er/BDDOnFlyCallGraph.jedd:92,12"),
+                                                  callEdges.next());
+            if (jedd.internal.Jedd.v().equals(jedd.internal.Jedd.v().read(e), jedd.internal.Jedd.v().falseBDD())) break;
+            final jedd.internal.RelationContainer mc =
+              new jedd.internal.RelationContainer(new Attribute[] { method.v(), ctxt.v() },
+                                                  new PhysicalDomain[] { V2.v(), T2.v() },
+                                                  ("<soot.jimple.spark.bdddomains.method:soot.jimple.spark.bdddo" +
+                                                   "mains.V2, soot.jimple.spark.bdddomains.ctxt:soot.jimple.spar" +
+                                                   "k.bdddomains.T2> mc = jedd.internal.Jedd.v().project(e, new " +
+                                                   "jedd.PhysicalDomain[...]); at /home/olhotak/soot-2-jedd/src/" +
+                                                   "soot/jimple/spark/solver/BDDOnFlyCallGraph.jedd:94,12"),
+                                                  jedd.internal.Jedd.v().project(e,
+                                                                                 new PhysicalDomain[] { V1.v(), T1.v(), H2.v(), ST.v() }));
+            this.addToPAG(new jedd.internal.RelationContainer(new Attribute[] { method.v(), ctxt.v() },
+                                                              new PhysicalDomain[] { V2.v(), T2.v() },
+                                                              ("this.addToPAG(mc) at /home/olhotak/soot-2-jedd/src/soot/jimp" +
+                                                               "le/spark/solver/BDDOnFlyCallGraph.jedd:96,12"),
+                                                              mc));
             Iterator it =
-              new Relation(new Attribute[] { srcc.v(), tgtm.v(), stmt.v(), srcm.v(), kind.v(), tgtc.v() },
-                           new PhysicalDomain[] { T1.v(), V2.v(), ST.v(), V1.v(), H2.v(), T2.v() },
-                           e).iterator(new Attribute[] { srcm.v(), srcc.v(), stmt.v(), kind.v(), tgtm.v(), tgtc.v() });
+              new jedd.internal.RelationContainer(new Attribute[] { tgtc.v(), srcm.v(), srcc.v(), tgtm.v(), kind.v(), stmt.v() },
+                                                  new PhysicalDomain[] { T2.v(), V1.v(), T1.v(), V2.v(), H2.v(), ST.v() },
+                                                  ("e.iterator(new jedd.Attribute[...]) at /home/olhotak/soot-2-" +
+                                                   "jedd/src/soot/jimple/spark/solver/BDDOnFlyCallGraph.jedd:97," +
+                                                   "26"),
+                                                  e).iterator(new Attribute[] { srcm.v(), srcc.v(), stmt.v(), kind.v(), tgtm.v(), tgtc.v() });
             while (it.hasNext()) {
                 Object[] edge = (Object[]) it.next();
-                this.pag.addCallTarget(new Edge(MethodContext.v((SootMethod) edge[0], edge[1]),
-                                                (Stmt) edge[2],
-                                                MethodContext.v((SootMethod) edge[4], edge[5]),
-                                                ((Integer) edge[3]).intValue()));
+                pag.addCallTarget(new Edge(MethodContext.v((SootMethod) edge[0], edge[1]),
+                                           (Stmt) edge[2],
+                                           MethodContext.v((SootMethod) edge[4], edge[5]),
+                                           ((Integer) edge[3]).intValue()));
             }
         }
     }
     
-    public BDDOnFlyCallGraphBuilder ofcgb() { return this.ofcgb; }
+    public BDDOnFlyCallGraphBuilder ofcgb() { return ofcgb; }
     
-    public void updatedNodes(final Relation types) {
-        this.ofcgb.addTypes(new Relation(new Attribute[] { var.v(), type.v() },
-                                         new PhysicalDomain[] { V3.v(), T2.v() },
-                                         Jedd.v().replace(types,
-                                                          new PhysicalDomain[] { T1.v() },
-                                                          new PhysicalDomain[] { T2.v() })));
+    public void updatedNodes(final jedd.internal.RelationContainer types) {
+        ofcgb.addTypes(new jedd.internal.RelationContainer(new Attribute[] { type.v(), var.v() },
+                                                           new PhysicalDomain[] { T2.v(), V1.v() },
+                                                           ("ofcgb.addTypes(types) at /home/olhotak/soot-2-jedd/src/soot/" +
+                                                            "jimple/spark/solver/BDDOnFlyCallGraph.jedd:113,8"),
+                                                           types));
     }
     
     public void mergedWith(Node n1, Node n2) {  }

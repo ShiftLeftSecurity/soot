@@ -47,8 +47,7 @@ public class BDDSparkTransformer extends AbstractSparkTransformer
     {
         BDDSparkOptions opts = new BDDSparkOptions( options );
 
-        System.loadLibrary("jeddbuddy");
-        Jedd.v();
+        Jedd.v().setBackend("buddy");
         if( opts.profile() ) {
             Jedd.v().enableProfiling();
         }
@@ -108,7 +107,7 @@ public class BDDSparkTransformer extends AbstractSparkTransformer
         }
         if( opts.profile() ) {
             try {
-                JeddProfiler.v().printInfo( new PrintStream( new GZIPOutputStream(
+                Jedd.v().outputProfile( new PrintStream( new GZIPOutputStream(
                     new FileOutputStream( new File( "profile.sql.gz")))));
             } catch( IOException e ) {
                 throw new RuntimeException( "Couldn't output Jedd profile "+e );

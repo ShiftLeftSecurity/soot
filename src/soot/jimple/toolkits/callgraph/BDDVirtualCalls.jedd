@@ -36,7 +36,7 @@ public final class BDDVirtualCalls {
 
     /** Compute virtual call targets given new pairs of a receiver type and 
      *  signature. */
-    public void addTypes( <type, signature> newTypes ) {
+    public void addTypes( <type:T1, signature:H1> newTypes ) {
         // make sure the hierarchy is up-to-date
         hier.update();
 
@@ -44,8 +44,8 @@ public final class BDDVirtualCalls {
         newTypes -= (method=>) answer;
 
         // for each tuple [t, s], make it [t, s, t].
-        <subt:T1, signature:H1, supt:T2> toResolve =
-            (type=>subt) newTypes {signature} >< (type=>supt) newTypes {signature};
+        <subt:T1, signature:H1, supt:T2> toResolve = 
+            (type=>subt, type=>supt) newTypes;
 
         // close under AnySubType; that is, if the receiver is AnySubType(t),
         // replace it with all subtypes of t

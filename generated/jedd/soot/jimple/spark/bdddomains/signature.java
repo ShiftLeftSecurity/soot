@@ -5,9 +5,11 @@ import soot.*;
 import soot.jimple.spark.pag.*;
 
 public class signature extends Attribute {
-    public Numberer numberer() { return Scene.v().getSubSigNumberer(); }
+    public final SIG domain = (SIG) SIG.v();
     
-    public static Attribute v() { return signature.instance; }
+    public Domain domain() { return domain; }
+    
+    public static Attribute v() { return instance; }
     
     private static Attribute instance = new signature();
     

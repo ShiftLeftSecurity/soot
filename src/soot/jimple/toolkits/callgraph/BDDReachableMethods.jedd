@@ -70,9 +70,9 @@ public class BDDReachableMethods
      * that have become reachable since the last call. */
     public void update() {
         while(true) {
-            <srcm, srcc, stmt, tgtm, tgtc, kind> e = edgeSource.next();
+            <srcm, srcc, stmt:ST, tgtm, tgtc, kind:H2> e = edgeSource.next();
             if( e == 0B ) break;
-            e &= (=>stmt, =>tgtm, =>tgtc, =>kind, method=>srcm, ctxt=>srcc) set;
+            e &= e {srcm, srcc} >< set {method, ctxt};
             addMethod( targets(e) );
         }
         while(true) {

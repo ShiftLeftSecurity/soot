@@ -1,8 +1,12 @@
 package soot.util.queue;
 
 class BDDChunk {
-    final jedd.Relation bdd =
-      new jedd.Relation(new jedd.Attribute[] {  }, new jedd.PhysicalDomain[] {  }, jedd.Jedd.v().falseBDD());
+    final jedd.internal.RelationContainer bdd =
+      new jedd.internal.RelationContainer(new jedd.Attribute[] {  },
+                                          new jedd.PhysicalDomain[] {  },
+                                          ("<> bdd = jedd.internal.Jedd.v().falseBDD() at /home/olhotak/" +
+                                           "soot-2-jedd/src/soot/util/queue/BDDChunk.jedd:34,4"),
+                                          jedd.internal.Jedd.v().falseBDD());
     
     BDDChunk next;
     

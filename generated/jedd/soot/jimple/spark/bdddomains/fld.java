@@ -5,9 +5,11 @@ import soot.*;
 import soot.jimple.spark.pag.*;
 
 public class fld extends Attribute {
-    public Numberer numberer() { return Scene.v().getFieldNumberer(); }
+    public final FIELD domain = (FIELD) FIELD.v();
     
-    public static Attribute v() { return fld.instance; }
+    public Domain domain() { return domain; }
+    
+    public static Attribute v() { return instance; }
     
     private static Attribute instance = new fld();
     

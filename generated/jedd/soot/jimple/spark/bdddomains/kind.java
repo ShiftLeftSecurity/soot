@@ -5,9 +5,11 @@ import soot.*;
 import soot.jimple.spark.pag.*;
 
 public class kind extends Attribute {
-    public Numberer numberer() { return soot.jimple.toolkits.callgraph.KindNumberer.v(); }
+    public final KIND domain = (KIND) KIND.v();
     
-    public static Attribute v() { return kind.instance; }
+    public Domain domain() { return domain; }
+    
+    public static Attribute v() { return instance; }
     
     private static Attribute instance = new kind();
     

@@ -5,9 +5,11 @@ import soot.*;
 import soot.jimple.spark.pag.*;
 
 public class ctxt extends Attribute {
-    public Numberer numberer() { return Scene.v().getContextNumberer(); }
+    public final CONTEXT domain = (CONTEXT) CONTEXT.v();
     
-    public static Attribute v() { return ctxt.instance; }
+    public Domain domain() { return domain; }
+    
+    public static Attribute v() { return instance; }
     
     private static Attribute instance = new ctxt();
     

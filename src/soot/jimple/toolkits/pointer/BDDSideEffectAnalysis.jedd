@@ -132,7 +132,7 @@ public class BDDSideEffectAnalysis {
         // find the transitive closure of call graph edges
         <srcm:V1, stmt, tgtm:V2> closecg = (srcc=>, kind=>, tgtc=>) cg.edges;
         while( closecg != ( closecg |=
-            closecg {tgtm} <> (stmt=>, srcm=>V3) closecg {srcm} ) );
+            closecg {tgtm} <> (srcm=>V3)(stmt=>) closecg {srcm} ) );
 
         // close the read/write sets under the closure of call graph edges
         read |= (srcm=>method) ( closecg {tgtm} <> (stmt=>) ntread {method} );

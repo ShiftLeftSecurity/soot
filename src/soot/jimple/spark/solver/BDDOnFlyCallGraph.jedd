@@ -109,7 +109,7 @@ public class BDDOnFlyCallGraph {
 
     public BDDOnFlyCallGraphBuilder ofcgb() { return ofcgb; }
 
-    public void updatedNodes( <var, type> types ) {
+    public void updatedNodes( <var, type:T2> types ) {
         ofcgb.addTypes( types );
         /* TODO: deal with string constants
         if( ofcgb.wantStringConstants( receiver ) ) {

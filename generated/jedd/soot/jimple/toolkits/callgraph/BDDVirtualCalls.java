@@ -13,61 +13,93 @@ public final class BDDVirtualCalls {
         this.initialize();
     }
     
-    public void addTypes(final jedd.Relation newTypes) {
-        this.hier.update();
-        newTypes.eqMinus(jedd.Jedd.v().project(jedd.Jedd.v().replace(this.answer,
-                                                                     new jedd.PhysicalDomain[] { T1.v() },
-                                                                     new jedd.PhysicalDomain[] { T2.v() }),
-                                               new jedd.PhysicalDomain[] { V2.v() }));
-        final jedd.Relation toResolve =
-          new jedd.Relation(new jedd.Attribute[] { subt.v(), signature.v(), supt.v() },
-                            new jedd.PhysicalDomain[] { T1.v(), H1.v(), T2.v() },
-                            jedd.Jedd.v().join(jedd.Jedd.v().read(jedd.Jedd.v().replace(newTypes,
-                                                                                        new jedd.PhysicalDomain[] { T2.v() },
-                                                                                        new jedd.PhysicalDomain[] { T1.v() })),
-                                               newTypes,
-                                               new jedd.PhysicalDomain[] { H1.v() }));
-        toResolve.eqUnion(jedd.Jedd.v().replace(jedd.Jedd.v().compose(jedd.Jedd.v().read(toResolve),
-                                                                      jedd.Jedd.v().replace(this.hier.anySub(),
-                                                                                            new jedd.PhysicalDomain[] { T2.v() },
-                                                                                            new jedd.PhysicalDomain[] { T3.v() }),
-                                                                      new jedd.PhysicalDomain[] { T1.v() }),
-                                                new jedd.PhysicalDomain[] { T3.v() },
-                                                new jedd.PhysicalDomain[] { T1.v() }));
+    public void addTypes(final jedd.internal.RelationContainer newTypes) {
+        hier.update();
+        newTypes.eqMinus(jedd.internal.Jedd.v().project(answer, new jedd.PhysicalDomain[] { V2.v() }));
+        final jedd.internal.RelationContainer toResolve =
+          new jedd.internal.RelationContainer(new jedd.Attribute[] { subt.v(), signature.v(), supt.v() },
+                                              new jedd.PhysicalDomain[] { T1.v(), H1.v(), T2.v() },
+                                              ("<soot.jimple.spark.bdddomains.subt:soot.jimple.spark.bdddoma" +
+                                               "ins.T1, soot.jimple.spark.bdddomains.signature:soot.jimple.s" +
+                                               "park.bdddomains.H1, soot.jimple.spark.bdddomains.supt:soot.j" +
+                                               "imple.spark.bdddomains.T2> toResolve = jedd.internal.Jedd.v(" +
+                                               ").copy(jedd.internal.Jedd.v().replace(newTypes, new jedd.Phy" +
+                                               "sicalDomain[...], new jedd.PhysicalDomain[...]), new jedd.Ph" +
+                                               "ysicalDomain[...], new jedd.PhysicalDomain[...]); at /home/o" +
+                                               "lhotak/soot-2-jedd/src/soot/jimple/toolkits/callgraph/BDDVir" +
+                                               "tualCalls.jedd:47,8"),
+                                              jedd.internal.Jedd.v().copy(jedd.internal.Jedd.v().replace(newTypes,
+                                                                                                         new jedd.PhysicalDomain[] { T1.v() },
+                                                                                                         new jedd.PhysicalDomain[] { T2.v() }),
+                                                                          new jedd.PhysicalDomain[] { T2.v() },
+                                                                          new jedd.PhysicalDomain[] { T1.v() }));
+        toResolve.eqUnion(jedd.internal.Jedd.v().replace(jedd.internal.Jedd.v().compose(jedd.internal.Jedd.v().read(toResolve),
+                                                                                        jedd.internal.Jedd.v().replace(hier.anySub(),
+                                                                                                                       new jedd.PhysicalDomain[] { T2.v() },
+                                                                                                                       new jedd.PhysicalDomain[] { T3.v() }),
+                                                                                        new jedd.PhysicalDomain[] { T1.v() }),
+                                                         new jedd.PhysicalDomain[] { T3.v() },
+                                                         new jedd.PhysicalDomain[] { T1.v() }));
         do  {
-            final jedd.Relation resolved =
-              new jedd.Relation(new jedd.Attribute[] { subt.v(), signature.v(), supt.v(), method.v() },
-                                new jedd.PhysicalDomain[] { T1.v(), H1.v(), T2.v(), V2.v() },
-                                jedd.Jedd.v().join(jedd.Jedd.v().read(toResolve),
-                                                   this.declaresMethod,
-                                                   new jedd.PhysicalDomain[] { T2.v(), H1.v() }));
-            toResolve.eqMinus(jedd.Jedd.v().project(resolved, new jedd.PhysicalDomain[] { V2.v() }));
-            this.answer.eqUnion(jedd.Jedd.v().project(resolved, new jedd.PhysicalDomain[] { T2.v() }));
-            toResolve.eq(jedd.Jedd.v().replace(jedd.Jedd.v().compose(jedd.Jedd.v().read(toResolve),
-                                                                     jedd.Jedd.v().replace(this.hier.extend(),
-                                                                                           new jedd.PhysicalDomain[] { T1.v(), T2.v() },
-                                                                                           new jedd.PhysicalDomain[] { T2.v(), T3.v() }),
-                                                                     new jedd.PhysicalDomain[] { T2.v() }),
-                                               new jedd.PhysicalDomain[] { T3.v() },
-                                               new jedd.PhysicalDomain[] { T2.v() }));
-        }while(!jedd.Jedd.v().equals(jedd.Jedd.v().read(toResolve), jedd.Jedd.v().falseBDD())); 
+            final jedd.internal.RelationContainer resolved =
+              new jedd.internal.RelationContainer(new jedd.Attribute[] { subt.v(), signature.v(), supt.v(), method.v() },
+                                                  new jedd.PhysicalDomain[] { T1.v(), H1.v(), T2.v(), V2.v() },
+                                                  ("<soot.jimple.spark.bdddomains.subt:soot.jimple.spark.bdddoma" +
+                                                   "ins.T1, soot.jimple.spark.bdddomains.signature:soot.jimple.s" +
+                                                   "park.bdddomains.H1, soot.jimple.spark.bdddomains.supt:soot.j" +
+                                                   "imple.spark.bdddomains.T2, soot.jimple.spark.bdddomains.meth" +
+                                                   "od:soot.jimple.spark.bdddomains.V2> resolved = jedd.internal" +
+                                                   ".Jedd.v().join(jedd.internal.Jedd.v().read(toResolve), decla" +
+                                                   "resMethod, new jedd.PhysicalDomain[...]); at /home/olhotak/s" +
+                                                   "oot-2-jedd/src/soot/jimple/toolkits/callgraph/BDDVirtualCall" +
+                                                   "s.jedd:58,12"),
+                                                  jedd.internal.Jedd.v().join(jedd.internal.Jedd.v().read(toResolve),
+                                                                              declaresMethod,
+                                                                              new jedd.PhysicalDomain[] { T2.v(), H1.v() }));
+            toResolve.eqMinus(jedd.internal.Jedd.v().project(resolved, new jedd.PhysicalDomain[] { V2.v() }));
+            answer.eqUnion(jedd.internal.Jedd.v().project(resolved, new jedd.PhysicalDomain[] { T2.v() }));
+            toResolve.eq(jedd.internal.Jedd.v().replace(jedd.internal.Jedd.v().compose(jedd.internal.Jedd.v().read(toResolve),
+                                                                                       jedd.internal.Jedd.v().replace(jedd.internal.Jedd.v().replace(hier.extend(),
+                                                                                                                                                     new jedd.PhysicalDomain[] { T2.v() },
+                                                                                                                                                     new jedd.PhysicalDomain[] { T3.v() }),
+                                                                                                                      new jedd.PhysicalDomain[] { T1.v() },
+                                                                                                                      new jedd.PhysicalDomain[] { T2.v() }),
+                                                                                       new jedd.PhysicalDomain[] { T2.v() }),
+                                                        new jedd.PhysicalDomain[] { T3.v() },
+                                                        new jedd.PhysicalDomain[] { T2.v() }));
+        }while(!jedd.internal.Jedd.v().equals(jedd.internal.Jedd.v().read(toResolve),
+                                              jedd.internal.Jedd.v().falseBDD())); 
     }
     
-    public jedd.Relation answer() {
-        return new jedd.Relation(new jedd.Attribute[] { method.v(), signature.v(), type.v() },
-                                 new jedd.PhysicalDomain[] { V2.v(), H1.v(), T1.v() },
-                                 this.answer);
+    public jedd.internal.RelationContainer answer() {
+        return new jedd.internal.RelationContainer(new jedd.Attribute[] { signature.v(), method.v(), type.v() },
+                                                   new jedd.PhysicalDomain[] { H1.v(), V2.v(), T1.v() },
+                                                   ("return answer; at /home/olhotak/soot-2-jedd/src/soot/jimple/" +
+                                                    "toolkits/callgraph/BDDVirtualCalls.jedd:73,8"),
+                                                   answer);
     }
     
-    private final jedd.Relation declaresMethod =
-      new jedd.Relation(new jedd.Attribute[] { type.v(), signature.v(), method.v() },
-                        new jedd.PhysicalDomain[] { T2.v(), H1.v(), V2.v() },
-                        jedd.Jedd.v().falseBDD());
+    private final jedd.internal.RelationContainer declaresMethod =
+      new jedd.internal.RelationContainer(new jedd.Attribute[] { type.v(), signature.v(), method.v() },
+                                          new jedd.PhysicalDomain[] { T2.v(), H1.v(), V2.v() },
+                                          ("private <soot.jimple.spark.bdddomains.type:soot.jimple.spark" +
+                                           ".bdddomains.T2, soot.jimple.spark.bdddomains.signature:soot." +
+                                           "jimple.spark.bdddomains.H1, soot.jimple.spark.bdddomains.met" +
+                                           "hod:soot.jimple.spark.bdddomains.V2> declaresMethod = jedd.i" +
+                                           "nternal.Jedd.v().falseBDD() at /home/olhotak/soot-2-jedd/src" +
+                                           "/soot/jimple/toolkits/callgraph/BDDVirtualCalls.jedd:77,12"),
+                                          jedd.internal.Jedd.v().falseBDD());
     
-    private final jedd.Relation answer =
-      new jedd.Relation(new jedd.Attribute[] { type.v(), signature.v(), method.v() },
-                        new jedd.PhysicalDomain[] { T1.v(), H1.v(), V2.v() },
-                        jedd.Jedd.v().falseBDD());
+    private final jedd.internal.RelationContainer answer =
+      new jedd.internal.RelationContainer(new jedd.Attribute[] { type.v(), signature.v(), method.v() },
+                                          new jedd.PhysicalDomain[] { T1.v(), H1.v(), V2.v() },
+                                          ("private <soot.jimple.spark.bdddomains.type:soot.jimple.spark" +
+                                           ".bdddomains.T1, soot.jimple.spark.bdddomains.signature:soot." +
+                                           "jimple.spark.bdddomains.H1, soot.jimple.spark.bdddomains.met" +
+                                           "hod:soot.jimple.spark.bdddomains.V2> answer = jedd.internal." +
+                                           "Jedd.v().falseBDD() at /home/olhotak/soot-2-jedd/src/soot/ji" +
+                                           "mple/toolkits/callgraph/BDDVirtualCalls.jedd:78,12"),
+                                          jedd.internal.Jedd.v().falseBDD());
     
     private BDDHierarchy hier;
     
@@ -77,9 +109,9 @@ public final class BDDVirtualCalls {
             for (Iterator mIt = cl.getMethods().iterator(); mIt.hasNext(); ) {
                 final SootMethod m = (SootMethod) mIt.next();
                 if (m.isAbstract()) continue;
-                this.declaresMethod.eqUnion(jedd.Jedd.v().literal(new Object[] { m.getDeclaringClass().getType(), m.getNumberedSubSignature(), m },
-                                                                  new jedd.Attribute[] { type.v(), signature.v(), method.v() },
-                                                                  new jedd.PhysicalDomain[] { T2.v(), H1.v(), V2.v() }));
+                declaresMethod.eqUnion(jedd.internal.Jedd.v().literal(new Object[] { m.getDeclaringClass().getType(), m.getNumberedSubSignature(), m },
+                                                                      new jedd.Attribute[] { type.v(), signature.v(), method.v() },
+                                                                      new jedd.PhysicalDomain[] { T2.v(), H1.v(), V2.v() }));
             }
         }
     }

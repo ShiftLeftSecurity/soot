@@ -79,7 +79,7 @@ public final class BDDOnFlyCallGraphBuilder extends AbstractOnFlyCallGraphBuilde
         }
     }
     public void addTypes( <var, type> types ) {
-        <type, stmt, method, signature:H1, kind> signatures =
+        <type, stmt:ST, method, signature:H1, kind> signatures =
             virtualCallSites {var} <> types {var};
         virtualCalls.addTypes( (stmt=>, method=>, kind=>) signatures );
         <srcm, stmt, kind, tgtm> edges =

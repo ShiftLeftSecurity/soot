@@ -5,9 +5,11 @@ import soot.*;
 import soot.jimple.spark.pag.*;
 
 public class stmt extends Attribute {
-    public Numberer numberer() { return Scene.v().getUnitNumberer(); }
+    public final STMT domain = (STMT) STMT.v();
     
-    public static Attribute v() { return stmt.instance; }
+    public Domain domain() { return domain; }
+    
+    public static Attribute v() { return instance; }
     
     private static Attribute instance = new stmt();
     

@@ -3,10 +3,5 @@ import jedd.*;
 import soot.*;
 import soot.jimple.spark.pag.*;
 
-public class fld extends Attribute {
-    public Numberer numberer() {
-        return Scene.v().getFieldNumberer();
-    }
-    public static Attribute v() { return instance; }
-    private static Attribute instance = new fld();
+public class fld(FIELD) extends Attribute {
 }

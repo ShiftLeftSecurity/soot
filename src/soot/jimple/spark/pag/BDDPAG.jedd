@@ -48,7 +48,8 @@ public class BDDPAG extends AbstractPAG {
     public PointsToSet reachingObjects( Local l ) {
         VarNode vn = findLocalVarNode( l );
         if( vn == null ) return EmptyPointsToSet.v();
-        return new BDDPointsToSet( (var =>) (pointsTo & (=>obj) new { vn => var }) );
+        return new BDDPointsToSet( 
+            (var=>) (pointsTo {var} >< new { vn => var }{var}) );
     }
     public PointsToSet reachingObjects( SootField f ) {
         throw new RuntimeException( "NYI" );

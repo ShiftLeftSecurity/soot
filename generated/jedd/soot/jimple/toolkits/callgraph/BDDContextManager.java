@@ -11,11 +11,11 @@ import soot.jimple.spark.bdddomains.*;
 public interface BDDContextManager {
     void addStaticEdge(MethodOrMethodContext src, Unit srcUnit, SootMethod target, int kind);
     
-    void addStaticEdges(Object sourceContext, final jedd.Relation edges);
+    void addStaticEdges(Object sourceContext, final jedd.internal.RelationContainer edges);
     
     void addVirtualEdge(MethodOrMethodContext src, Unit srcUnit, SootMethod target, int kind, Object typeContext);
     
-    void addVirtualEdges(final jedd.Relation edges);
+    void addVirtualEdges(final jedd.internal.RelationContainer edges);
     
     BDDCallGraph callGraph();
 }

@@ -5,9 +5,11 @@ import soot.*;
 import soot.jimple.spark.pag.*;
 
 public class tgtm extends Attribute {
-    public Numberer numberer() { return Scene.v().getMethodNumberer(); }
+    public final METHOD domain = (METHOD) METHOD.v();
     
-    public static Attribute v() { return tgtm.instance; }
+    public Domain domain() { return domain; }
+    
+    public static Attribute v() { return instance; }
     
     private static Attribute instance = new tgtm();
     

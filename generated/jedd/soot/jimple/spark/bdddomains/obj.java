@@ -5,9 +5,11 @@ import soot.*;
 import soot.jimple.spark.pag.*;
 
 public class obj extends Attribute {
-    public Numberer numberer() { return ((BDDPAG) Scene.v().getPointsToAnalysis()).getAllocNodeNumberer(); }
+    public final OBJ domain = (OBJ) OBJ.v();
     
-    public static Attribute v() { return obj.instance; }
+    public Domain domain() { return domain; }
+    
+    public static Attribute v() { return instance; }
     
     private static Attribute instance = new obj();
     

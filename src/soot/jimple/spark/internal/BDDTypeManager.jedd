@@ -141,8 +141,8 @@ public final class BDDTypeManager extends AbstractTypeManager {
 
         bddhier.update();
         <subt, supt> bddts = bddhier.subtypeRelation();
-        bddts = bddts & (var=>, type=>supt, =>subt) varNodeType;
-        bddts = bddts & (obj=>, type=>subt, =>supt) allocNodeType;
+        bddts = bddts {supt} >< (var=>) varNodeType {type};
+        bddts = bddts {subt} >< (obj=>) allocNodeType {type};
         if( bddts == typeSubtype ) {
             System.out.println( "bdd and non-bdd hierarchy match" );
         } else {

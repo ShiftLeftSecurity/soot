@@ -5,9 +5,11 @@ import soot.*;
 import soot.jimple.spark.pag.*;
 
 public class srcc extends Attribute {
-    public Numberer numberer() { return Scene.v().getContextNumberer(); }
+    public final CONTEXT domain = (CONTEXT) CONTEXT.v();
     
-    public static Attribute v() { return srcc.instance; }
+    public Domain domain() { return domain; }
+    
+    public static Attribute v() { return instance; }
     
     private static Attribute instance = new srcc();
     

@@ -5,9 +5,11 @@ import soot.*;
 import soot.jimple.spark.pag.*;
 
 public class supt extends Attribute {
-    public Numberer numberer() { return Scene.v().getTypeNumberer(); }
+    public final TYPE domain = (TYPE) TYPE.v();
     
-    public static Attribute v() { return supt.instance; }
+    public Domain domain() { return domain; }
+    
+    public static Attribute v() { return instance; }
     
     private static Attribute instance = new supt();
     

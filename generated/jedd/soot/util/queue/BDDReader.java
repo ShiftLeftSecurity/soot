@@ -8,24 +8,35 @@ public class BDDReader implements Cloneable {
     BDDReader(BDDQueue q) {
         super();
         this.q = q;
-        this.chunk = q.newChunk();
+        chunk = q.newChunk();
     }
     
-    public jedd.Relation next() {
-        final jedd.Relation ret = new jedd.Relation(new jedd.Attribute[] {  }, new jedd.PhysicalDomain[] {  });
+    public jedd.internal.RelationContainer next() {
+        final jedd.internal.RelationContainer ret =
+          new jedd.internal.RelationContainer(new jedd.Attribute[] {  },
+                                              new jedd.PhysicalDomain[] {  },
+                                              ("<> ret; at /home/olhotak/soot-2-jedd/src/soot/util/queue/BDD" +
+                                               "Reader.jedd:41,8"));
         do  {
-            ret.eq(this.chunk.bdd);
-            this.chunk = this.chunk.next;
-            if (this.chunk == null) this.chunk = this.q.newChunk();
-        }while(jedd.Jedd.v().equals(jedd.Jedd.v().read(ret), jedd.Jedd.v().falseBDD()) && this.chunk.next != null); 
-        return new jedd.Relation(new jedd.Attribute[] {  }, new jedd.PhysicalDomain[] {  }, ret);
+            ret.eq(chunk.bdd);
+            chunk = chunk.next;
+            if (chunk == null) chunk = q.newChunk();
+        }while(jedd.internal.Jedd.v().equals(jedd.internal.Jedd.v().read(ret), jedd.internal.Jedd.v().falseBDD()) &&
+                 chunk.next != null); 
+        return new jedd.internal.RelationContainer(new jedd.Attribute[] {  },
+                                                   new jedd.PhysicalDomain[] {  },
+                                                   ("return ret; at /home/olhotak/soot-2-jedd/src/soot/util/queue" +
+                                                    "/BDDReader.jedd:47,8"),
+                                                   ret);
     }
     
     public boolean hasNext() {
-        while (jedd.Jedd.v().equals(jedd.Jedd.v().read(this.chunk.bdd), jedd.Jedd.v().falseBDD()) &&
-                 this.chunk.next != null)
-            this.chunk = this.chunk.next;
-        return !jedd.Jedd.v().equals(jedd.Jedd.v().read(this.chunk.bdd), jedd.Jedd.v().falseBDD());
+        while (jedd.internal.Jedd.v().equals(jedd.internal.Jedd.v().read(chunk.bdd),
+                                             jedd.internal.Jedd.v().falseBDD()) &&
+                 chunk.next != null)
+            chunk = chunk.next;
+        return !jedd.internal.Jedd.v().equals(jedd.internal.Jedd.v().read(chunk.bdd),
+                                              jedd.internal.Jedd.v().falseBDD());
     }
     
     private BDDReader(BDDQueue q, BDDChunk chunk) {
@@ -34,5 +45,5 @@ public class BDDReader implements Cloneable {
         this.chunk = chunk;
     }
     
-    public Object clone() { return new BDDReader(this.q, this.chunk); }
+    public Object clone() { return new BDDReader(q, chunk); }
 }

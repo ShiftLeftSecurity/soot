@@ -3,10 +3,5 @@ import jedd.*;
 import soot.*;
 import soot.jimple.spark.pag.*;
 
-public class supt extends Attribute {
-    public Numberer numberer() {
-        return Scene.v().getTypeNumberer();
-    }
-    public static Attribute v() { return instance; }
-    private static Attribute instance = new supt();
+public class supt(TYPE) extends Attribute {
 }

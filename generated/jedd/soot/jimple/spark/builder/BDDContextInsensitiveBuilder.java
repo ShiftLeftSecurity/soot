@@ -30,22 +30,22 @@ public class BDDContextInsensitiveBuilder {
     }
     
     public AbstractPAG setup(BDDSparkOptions opts) {
-        this.pag = new BDDPAG(opts);
-        if (opts.simulate_natives()) { NativeHelper.register(new SparkNativeHelper(this.pag)); }
+        pag = new BDDPAG(opts);
+        if (opts.simulate_natives()) { NativeHelper.register(new SparkNativeHelper(pag)); }
         if (opts.on_fly_cg() && !opts.vta()) {
-            this.ofcg = new BDDOnFlyCallGraph(this.pag);
-            this.pag.setOnFlyCallGraph(this.ofcg);
+            ofcg = new BDDOnFlyCallGraph(pag);
+            pag.setOnFlyCallGraph(ofcg);
         } else {
             
         }
-        return this.pag;
+        return pag;
     }
     
     public void build() {
         BDDReader callEdges;
-        if (this.ofcg != null) {
-            callEdges = this.ofcg.callGraph().listener();
-            this.ofcg.build();
+        if (ofcg != null) {
+            callEdges = ofcg.callGraph().listener();
+            ofcg.build();
         }
     }
     
