@@ -143,27 +143,28 @@ public final class BDDPropagator extends Propagator {
             newPointsTo.eq(jedd.internal.Jedd.v().minus(jedd.internal.Jedd.v().read(pag.pointsTo), oldPointsTo));
             if (ofcg != null) {
                 ofcg.updatedNodes(new jedd.internal.RelationContainer(new jedd.Attribute[] { var.v(), type.v() },
-                                                                      new jedd.PhysicalDomain[] { V1.v(), T2.v() },
-                                                                      ("ofcg.updatedNodes(jedd.internal.Jedd.v().replace(jedd.intern" +
-                                                                       "al.Jedd.v().compose(jedd.internal.Jedd.v().read(newPointsTo)" +
-                                                                       ", typeManager.allocNodeType(), new jedd.PhysicalDomain[...])" +
-                                                                       ", new jedd.PhysicalDomain[...], new jedd.PhysicalDomain[...]" +
-                                                                       ")) at /home/olhotak/soot-2-jedd/src/soot/jimple/spark/solver" +
-                                                                       "/BDDPropagator.jedd:80,16"),
-                                                                      jedd.internal.Jedd.v().replace(jedd.internal.Jedd.v().compose(jedd.internal.Jedd.v().read(newPointsTo),
-                                                                                                                                    typeManager.allocNodeType(),
-                                                                                                                                    new jedd.PhysicalDomain[] { H1.v() }),
-                                                                                                     new jedd.PhysicalDomain[] { T1.v() },
-                                                                                                     new jedd.PhysicalDomain[] { T2.v() })));
+                                                                      new jedd.PhysicalDomain[] { V3.v(), T2.v() },
+                                                                      ("ofcg.updatedNodes(jedd.internal.Jedd.v().compose(jedd.intern" +
+                                                                       "al.Jedd.v().read(jedd.internal.Jedd.v().replace(newPointsTo," +
+                                                                       " new jedd.PhysicalDomain[...], new jedd.PhysicalDomain[...])" +
+                                                                       "), jedd.internal.Jedd.v().replace(typeManager.allocNodeType(" +
+                                                                       "), new jedd.PhysicalDomain[...], new jedd.PhysicalDomain[..." +
+                                                                       "]), new jedd.PhysicalDomain[...])) at /home/olhotak/soot-2-j" +
+                                                                       "edd/src/soot/jimple/spark/solver/BDDPropagator.jedd:80,16"),
+                                                                      jedd.internal.Jedd.v().compose(jedd.internal.Jedd.v().read(jedd.internal.Jedd.v().replace(newPointsTo,
+                                                                                                                                                                new jedd.PhysicalDomain[] { V1.v() },
+                                                                                                                                                                new jedd.PhysicalDomain[] { V3.v() })),
+                                                                                                     jedd.internal.Jedd.v().replace(typeManager.allocNodeType(),
+                                                                                                                                    new jedd.PhysicalDomain[] { T1.v() },
+                                                                                                                                    new jedd.PhysicalDomain[] { T2.v() }),
+                                                                                                     new jedd.PhysicalDomain[] { H1.v() })));
                 ofcg.build();
             }
             objectsBeingStored.eq(jedd.internal.Jedd.v().replace(jedd.internal.Jedd.v().compose(jedd.internal.Jedd.v().read(pag.stores),
-                                                                                                jedd.internal.Jedd.v().replace(newPointsTo,
-                                                                                                                               new jedd.PhysicalDomain[] { H1.v() },
-                                                                                                                               new jedd.PhysicalDomain[] { H2.v() }),
+                                                                                                newPointsTo,
                                                                                                 new jedd.PhysicalDomain[] { V1.v() }),
-                                                                 new jedd.PhysicalDomain[] { V2.v() },
-                                                                 new jedd.PhysicalDomain[] { V1.v() }));
+                                                                 new jedd.PhysicalDomain[] { V2.v(), H1.v() },
+                                                                 new jedd.PhysicalDomain[] { V1.v(), H2.v() }));
             newStorePt.eq(jedd.internal.Jedd.v().minus(jedd.internal.Jedd.v().read(objectsBeingStored), oldStorePt));
             oldStorePt.eqUnion(newStorePt);
             newFieldPt.eq(jedd.internal.Jedd.v().compose(jedd.internal.Jedd.v().read(oldStorePt),

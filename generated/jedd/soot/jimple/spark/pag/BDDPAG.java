@@ -68,7 +68,7 @@ public class BDDPAG extends AbstractPAG {
                                                     "in[...]).iterator() at /home/olhotak/soot-2-jedd/src/soot/ji" +
                                                     "mple/spark/pag/BDDPAG.jedd:71,39"),
                                                    jedd.internal.Jedd.v().project(stores,
-                                                                                  new jedd.PhysicalDomain[] { V2.v(), FD.v() })).iterator();
+                                                                                  new jedd.PhysicalDomain[] { FD.v(), V2.v() })).iterator();
     }
     
     public Iterator loadSourcesIterator() { throw new RuntimeException("NYI"); }

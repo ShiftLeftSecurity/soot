@@ -276,7 +276,7 @@ class ConstraintChecker extends AbstractStmtSwitch
 	ArrayRef ref = (ArrayRef) l;
 	TypeNode base = hierarchy.typeNode(((Local) ref.getBase()).getType());
 
-	if(!base.hasElement())
+	if(!base.isArray())
 	  {
 	    error("Type Error(16)");
 	  }
@@ -342,14 +342,14 @@ class ConstraintChecker extends AbstractStmtSwitch
 	ArrayRef ref = (ArrayRef) r;
 	TypeNode base = hierarchy.typeNode(((Local) ref.getBase()).getType());
 
-	if(!base.hasElement())
+	if(!base.isArray())
 	  {
-	    if(base == hierarchy.NULL)
-	    {
-	      return;
-	    }
-
 	    error("Type Error(19): " + base + " is not an array type");
+	  }
+
+	if(base == hierarchy.NULL)
+	  {
+	    return;
 	  }
 
 	if(!left.hasDescendantOrSelf(base.element()))
@@ -591,7 +591,7 @@ class ConstraintChecker extends AbstractStmtSwitch
       {
 	InstanceOfExpr ioe = (InstanceOfExpr) r;
 	TypeNode type = hierarchy.typeNode(ioe.getCheckType());
-	TypeNode op = hierarchy.typeNode(((Local) ioe.getOp()).getType());
+	TypeNode op = hierarchy.typeNode(ioe.getOp().getType());
 	
 	try
 	  {
@@ -696,7 +696,7 @@ class ConstraintChecker extends AbstractStmtSwitch
 
 	if(le.getOp() instanceof Local)
 	  {
-	    if(!hierarchy.typeNode(((Local) le.getOp()).getType()).hasElement())
+	    if(!hierarchy.typeNode(((Local) le.getOp()).getType()).isArray())
 	      {
 		error("Type Error(39)");
 	      }

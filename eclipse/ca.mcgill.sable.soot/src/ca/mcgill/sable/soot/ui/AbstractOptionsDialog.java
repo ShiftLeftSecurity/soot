@@ -111,6 +111,28 @@ public abstract class AbstractOptionsDialog extends TitleAreaDialog implements I
 		return (String)getDefList().get(key);
 	}
 
+	public String getArrayDef(String key){
+		String res = "";
+		//System.out.println(getDefList().get(key).getClass());
+		if (getDefList().get(key) instanceof ArrayList){
+		
+		ArrayList list = (ArrayList)getDefList().get(key);
+		Iterator it = list.iterator();
+		while (it.hasNext()){
+			if (res.equals("")){
+				res = res + (String)it.next();
+			}
+			else {
+				res = res + "\r\n" + (String)it.next();
+			}
+		}
+		}
+		else {
+			res = (String)getDefList().get(key);
+		}
+		return res;
+	}
+	
 	// This sets the title in the shell that displays the
 	// options dialog box
 	protected void configureShell(Shell shell){

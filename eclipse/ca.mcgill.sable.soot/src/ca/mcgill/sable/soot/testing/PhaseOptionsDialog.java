@@ -76,6 +76,8 @@ Composite Miscellaneous_OptionsChild = Miscellaneous_OptionsCreate(getPageContai
 
 Composite jbChild = jbCreate(getPageContainer());
 
+Composite jjChild = jjCreate(getPageContainer());
+
 Composite cgChild = cgCreate(getPageContainer());
 
 Composite wstpChild = wstpCreate(getPageContainer());
@@ -133,6 +135,30 @@ Composite jbjb_lpChild = jbjb_lpCreate(getPageContainer());
 Composite jbjb_neChild = jbjb_neCreate(getPageContainer());
 
 Composite jbjb_uceChild = jbjb_uceCreate(getPageContainer());
+
+Composite jjjj_lsChild = jjjj_lsCreate(getPageContainer());
+
+Composite jjjj_aChild = jjjj_aCreate(getPageContainer());
+
+Composite jjjj_uleChild = jjjj_uleCreate(getPageContainer());
+
+Composite jjjj_trChild = jjjj_trCreate(getPageContainer());
+
+Composite jjjj_ulpChild = jjjj_ulpCreate(getPageContainer());
+
+Composite jjjj_lnsChild = jjjj_lnsCreate(getPageContainer());
+
+Composite jjjj_cpChild = jjjj_cpCreate(getPageContainer());
+
+Composite jjjj_daeChild = jjjj_daeCreate(getPageContainer());
+
+Composite jjjj_cp_uleChild = jjjj_cp_uleCreate(getPageContainer());
+
+Composite jjjj_lpChild = jjjj_lpCreate(getPageContainer());
+
+Composite jjjj_neChild = jjjj_neCreate(getPageContainer());
+
+Composite jjjj_uceChild = jjjj_uceCreate(getPageContainer());
 
 Composite cgcg_chaChild = cgcg_chaCreate(getPageContainer());
 
@@ -213,6 +239,8 @@ Composite japjap_cgtaggerChild = japjap_cgtaggerCreate(getPageContainer());
 Composite japjap_parityChild = japjap_parityCreate(getPageContainer());
 
 Composite japjap_patChild = japjap_patCreate(getPageContainer());
+
+Composite japjap_rdtaggerChild = japjap_rdtaggerCreate(getPageContainer());
 
 Composite gbgb_a1Child = gbgb_a1Create(getPageContainer());
 
@@ -429,6 +457,144 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		getjbjb_uceenabled_widget().getButton().addSelectionListener(this);
 		
 		
+		makeNewEnableGroup("jj");
+		
+		
+		addToEnableGroup("jj", getjjenabled_widget(), "enabled");
+		
+		
+		addToEnableGroup("jj", getjjuse_original_names_widget(), "use-original-names");
+		
+		
+		getjjenabled_widget().getButton().addSelectionListener(this);
+		
+		getjjuse_original_names_widget().getButton().addSelectionListener(this);
+		
+		
+		makeNewEnableGroup("jj", "jj.ls");
+		
+		
+		addToEnableGroup("jj", "jj.ls", getjjjj_lsenabled_widget(), "enabled");
+		
+		getjjjj_lsenabled_widget().getButton().addSelectionListener(this);
+		
+		
+		makeNewEnableGroup("jj", "jj.a");
+		
+		
+		addToEnableGroup("jj", "jj.a", getjjjj_aenabled_widget(), "enabled");
+		
+		addToEnableGroup("jj", "jj.a", getjjjj_aonly_stack_locals_widget(), "only-stack-locals");
+		
+		getjjjj_aenabled_widget().getButton().addSelectionListener(this);
+		
+		getjjjj_aonly_stack_locals_widget().getButton().addSelectionListener(this);
+		
+		
+		makeNewEnableGroup("jj", "jj.ule");
+		
+		
+		addToEnableGroup("jj", "jj.ule", getjjjj_uleenabled_widget(), "enabled");
+		
+		getjjjj_uleenabled_widget().getButton().addSelectionListener(this);
+		
+		
+		makeNewEnableGroup("jj", "jj.tr");
+		
+		
+		addToEnableGroup("jj", "jj.tr", getjjjj_trenabled_widget(), "enabled");
+		
+		getjjjj_trenabled_widget().getButton().addSelectionListener(this);
+		
+		
+		makeNewEnableGroup("jj", "jj.ulp");
+		
+		
+		addToEnableGroup("jj", "jj.ulp", getjjjj_ulpenabled_widget(), "enabled");
+		
+		addToEnableGroup("jj", "jj.ulp", getjjjj_ulpunsplit_original_locals_widget(), "unsplit-original-locals");
+		
+		getjjjj_ulpenabled_widget().getButton().addSelectionListener(this);
+		
+		getjjjj_ulpunsplit_original_locals_widget().getButton().addSelectionListener(this);
+		
+		
+		makeNewEnableGroup("jj", "jj.lns");
+		
+		
+		addToEnableGroup("jj", "jj.lns", getjjjj_lnsenabled_widget(), "enabled");
+		
+		addToEnableGroup("jj", "jj.lns", getjjjj_lnsonly_stack_locals_widget(), "only-stack-locals");
+		
+		getjjjj_lnsenabled_widget().getButton().addSelectionListener(this);
+		
+		getjjjj_lnsonly_stack_locals_widget().getButton().addSelectionListener(this);
+		
+		
+		makeNewEnableGroup("jj", "jj.cp");
+		
+		
+		addToEnableGroup("jj", "jj.cp", getjjjj_cpenabled_widget(), "enabled");
+		
+		addToEnableGroup("jj", "jj.cp", getjjjj_cponly_regular_locals_widget(), "only-regular-locals");
+		
+		addToEnableGroup("jj", "jj.cp", getjjjj_cponly_stack_locals_widget(), "only-stack-locals");
+		
+		getjjjj_cpenabled_widget().getButton().addSelectionListener(this);
+		
+		getjjjj_cponly_regular_locals_widget().getButton().addSelectionListener(this);
+		
+		getjjjj_cponly_stack_locals_widget().getButton().addSelectionListener(this);
+		
+		
+		makeNewEnableGroup("jj", "jj.dae");
+		
+		
+		addToEnableGroup("jj", "jj.dae", getjjjj_daeenabled_widget(), "enabled");
+		
+		addToEnableGroup("jj", "jj.dae", getjjjj_daeonly_stack_locals_widget(), "only-stack-locals");
+		
+		getjjjj_daeenabled_widget().getButton().addSelectionListener(this);
+		
+		getjjjj_daeonly_stack_locals_widget().getButton().addSelectionListener(this);
+		
+		
+		makeNewEnableGroup("jj", "jj.cp-ule");
+		
+		
+		addToEnableGroup("jj", "jj.cp-ule", getjjjj_cp_uleenabled_widget(), "enabled");
+		
+		getjjjj_cp_uleenabled_widget().getButton().addSelectionListener(this);
+		
+		
+		makeNewEnableGroup("jj", "jj.lp");
+		
+		
+		addToEnableGroup("jj", "jj.lp", getjjjj_lpenabled_widget(), "enabled");
+		
+		addToEnableGroup("jj", "jj.lp", getjjjj_lpunsplit_original_locals_widget(), "unsplit-original-locals");
+		
+		getjjjj_lpenabled_widget().getButton().addSelectionListener(this);
+		
+		getjjjj_lpunsplit_original_locals_widget().getButton().addSelectionListener(this);
+		
+		
+		makeNewEnableGroup("jj", "jj.ne");
+		
+		
+		addToEnableGroup("jj", "jj.ne", getjjjj_neenabled_widget(), "enabled");
+		
+		getjjjj_neenabled_widget().getButton().addSelectionListener(this);
+		
+		
+		makeNewEnableGroup("jj", "jj.uce");
+		
+		
+		addToEnableGroup("jj", "jj.uce", getjjjj_uceenabled_widget(), "enabled");
+		
+		getjjjj_uceenabled_widget().getButton().addSelectionListener(this);
+		
+		
 		makeNewEnableGroup("cg");
 		
 		
@@ -515,6 +681,9 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 
 		
 		addToEnableGroup("cg", "cg.spark", getcgcg_sparkmerge_stringbuffer_widget(), "merge-stringbuffer");
+
+		
+		addToEnableGroup("cg", "cg.spark", getcgcg_sparkstring_constants_widget(), "string-constants");
 
 		
 		addToEnableGroup("cg", "cg.spark", getcgcg_sparksimulate_natives_widget(), "simulate-natives");
@@ -610,6 +779,9 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 
 		
 		addToEnableGroup("cg", "cg.bdd", getcgcg_bddmerge_stringbuffer_widget(), "merge-stringbuffer");
+
+		
+		addToEnableGroup("cg", "cg.bdd", getcgcg_bddstring_constants_widget(), "string-constants");
 
 		
 		addToEnableGroup("cg", "cg.bdd", getcgcg_bddsimulate_natives_widget(), "simulate-natives");
@@ -717,6 +889,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		
 		addToEnableGroup("wjop", "wjop.si", getwjopwjop_sienabled_widget(), "enabled");
 		
+		addToEnableGroup("wjop", "wjop.si", getwjopwjop_sirerun_jb_widget(), "rerun-jb");
+		
 		addToEnableGroup("wjop", "wjop.si", getwjopwjop_siinsert_null_checks_widget(), "insert-null-checks");
 		
 		addToEnableGroup("wjop", "wjop.si", getwjopwjop_siinsert_redundant_casts_widget(), "insert-redundant-casts");
@@ -730,6 +904,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		addToEnableGroup("wjop", "wjop.si", getwjopwjop_simax_inlinee_size_widget(), "max-inlinee-size");
 		
 		getwjopwjop_sienabled_widget().getButton().addSelectionListener(this);
+		
+		getwjopwjop_sirerun_jb_widget().getButton().addSelectionListener(this);
 		
 		getwjopwjop_siinsert_null_checks_widget().getButton().addSelectionListener(this);
 		
@@ -1102,6 +1278,14 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		addToEnableGroup("jap", "jap.pat", getjapjap_patenabled_widget(), "enabled");
 		
 		getjapjap_patenabled_widget().getButton().addSelectionListener(this);
+		
+		
+		makeNewEnableGroup("jap", "jap.rdtagger");
+		
+		
+		addToEnableGroup("jap", "jap.rdtagger", getjapjap_rdtaggerenabled_widget(), "enabled");
+		
+		getjapjap_rdtaggerenabled_widget().getButton().addSelectionListener(this);
 		
 		
 		makeNewEnableGroup("gb");
@@ -1717,6 +1901,216 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 			getConfig().put(getjbjb_uceenabled_widget().getAlias(), new Boolean(boolRes));
 		}
 		
+		boolRes = getjjenabled_widget().getButton().getSelection();
+		
+		
+		defBoolRes = true;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getjjenabled_widget().getAlias(), new Boolean(boolRes));
+		}
+		
+		boolRes = getjjuse_original_names_widget().getButton().getSelection();
+		
+		
+		defBoolRes = true;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getjjuse_original_names_widget().getAlias(), new Boolean(boolRes));
+		}
+		
+		boolRes = getjjjj_lsenabled_widget().getButton().getSelection();
+		
+		
+		defBoolRes = false;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getjjjj_lsenabled_widget().getAlias(), new Boolean(boolRes));
+		}
+		
+		boolRes = getjjjj_aenabled_widget().getButton().getSelection();
+		
+		
+		defBoolRes = true;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getjjjj_aenabled_widget().getAlias(), new Boolean(boolRes));
+		}
+		
+		boolRes = getjjjj_aonly_stack_locals_widget().getButton().getSelection();
+		
+		
+		defBoolRes = true;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getjjjj_aonly_stack_locals_widget().getAlias(), new Boolean(boolRes));
+		}
+		
+		boolRes = getjjjj_uleenabled_widget().getButton().getSelection();
+		
+		
+		defBoolRes = true;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getjjjj_uleenabled_widget().getAlias(), new Boolean(boolRes));
+		}
+		
+		boolRes = getjjjj_trenabled_widget().getButton().getSelection();
+		
+		
+		defBoolRes = false;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getjjjj_trenabled_widget().getAlias(), new Boolean(boolRes));
+		}
+		
+		boolRes = getjjjj_ulpenabled_widget().getButton().getSelection();
+		
+		
+		defBoolRes = false;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getjjjj_ulpenabled_widget().getAlias(), new Boolean(boolRes));
+		}
+		
+		boolRes = getjjjj_ulpunsplit_original_locals_widget().getButton().getSelection();
+		
+		
+		defBoolRes = false;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getjjjj_ulpunsplit_original_locals_widget().getAlias(), new Boolean(boolRes));
+		}
+		
+		boolRes = getjjjj_lnsenabled_widget().getButton().getSelection();
+		
+		
+		defBoolRes = true;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getjjjj_lnsenabled_widget().getAlias(), new Boolean(boolRes));
+		}
+		
+		boolRes = getjjjj_lnsonly_stack_locals_widget().getButton().getSelection();
+		
+		
+		defBoolRes = false;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getjjjj_lnsonly_stack_locals_widget().getAlias(), new Boolean(boolRes));
+		}
+		
+		boolRes = getjjjj_cpenabled_widget().getButton().getSelection();
+		
+		
+		defBoolRes = true;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getjjjj_cpenabled_widget().getAlias(), new Boolean(boolRes));
+		}
+		
+		boolRes = getjjjj_cponly_regular_locals_widget().getButton().getSelection();
+		
+		
+		defBoolRes = false;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getjjjj_cponly_regular_locals_widget().getAlias(), new Boolean(boolRes));
+		}
+		
+		boolRes = getjjjj_cponly_stack_locals_widget().getButton().getSelection();
+		
+		
+		defBoolRes = true;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getjjjj_cponly_stack_locals_widget().getAlias(), new Boolean(boolRes));
+		}
+		
+		boolRes = getjjjj_daeenabled_widget().getButton().getSelection();
+		
+		
+		defBoolRes = true;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getjjjj_daeenabled_widget().getAlias(), new Boolean(boolRes));
+		}
+		
+		boolRes = getjjjj_daeonly_stack_locals_widget().getButton().getSelection();
+		
+		
+		defBoolRes = true;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getjjjj_daeonly_stack_locals_widget().getAlias(), new Boolean(boolRes));
+		}
+		
+		boolRes = getjjjj_cp_uleenabled_widget().getButton().getSelection();
+		
+		
+		defBoolRes = true;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getjjjj_cp_uleenabled_widget().getAlias(), new Boolean(boolRes));
+		}
+		
+		boolRes = getjjjj_lpenabled_widget().getButton().getSelection();
+		
+		
+		defBoolRes = false;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getjjjj_lpenabled_widget().getAlias(), new Boolean(boolRes));
+		}
+		
+		boolRes = getjjjj_lpunsplit_original_locals_widget().getButton().getSelection();
+		
+		
+		defBoolRes = false;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getjjjj_lpunsplit_original_locals_widget().getAlias(), new Boolean(boolRes));
+		}
+		
+		boolRes = getjjjj_neenabled_widget().getButton().getSelection();
+		
+		
+		defBoolRes = true;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getjjjj_neenabled_widget().getAlias(), new Boolean(boolRes));
+		}
+		
+		boolRes = getjjjj_uceenabled_widget().getButton().getSelection();
+		
+		
+		defBoolRes = true;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getjjjj_uceenabled_widget().getAlias(), new Boolean(boolRes));
+		}
+		
 		boolRes = getcgenabled_widget().getButton().getSelection();
 		
 		
@@ -1915,6 +2309,16 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 
 		if (boolRes != defBoolRes) {
 			getConfig().put(getcgcg_sparkmerge_stringbuffer_widget().getAlias(), new Boolean(boolRes));
+		}
+		
+		boolRes = getcgcg_sparkstring_constants_widget().getButton().getSelection();
+		
+		
+		defBoolRes = false;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getcgcg_sparkstring_constants_widget().getAlias(), new Boolean(boolRes));
 		}
 		
 		boolRes = getcgcg_sparksimulate_natives_widget().getButton().getSelection();
@@ -2217,6 +2621,16 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 			getConfig().put(getcgcg_bddmerge_stringbuffer_widget().getAlias(), new Boolean(boolRes));
 		}
 		
+		boolRes = getcgcg_bddstring_constants_widget().getButton().getSelection();
+		
+		
+		defBoolRes = false;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getcgcg_bddstring_constants_widget().getAlias(), new Boolean(boolRes));
+		}
+		
 		boolRes = getcgcg_bddsimulate_natives_widget().getButton().getSelection();
 		
 		
@@ -2455,6 +2869,16 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 
 		if (boolRes != defBoolRes) {
 			getConfig().put(getwjopwjop_sienabled_widget().getAlias(), new Boolean(boolRes));
+		}
+		
+		boolRes = getwjopwjop_sirerun_jb_widget().getButton().getSelection();
+		
+		
+		defBoolRes = true;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getwjopwjop_sirerun_jb_widget().getAlias(), new Boolean(boolRes));
 		}
 		
 		boolRes = getwjopwjop_siinsert_null_checks_widget().getButton().getSelection();
@@ -3093,6 +3517,16 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 			getConfig().put(getjapjap_patenabled_widget().getAlias(), new Boolean(boolRes));
 		}
 		
+		boolRes = getjapjap_rdtaggerenabled_widget().getButton().getSelection();
+		
+		
+		defBoolRes = false;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getjapjap_rdtaggerenabled_widget().getAlias(), new Boolean(boolRes));
+		}
+		
 		boolRes = getgbenabled_widget().getButton().getSelection();
 		
 		
@@ -3665,6 +4099,133 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 			subSectParent = jb_jb_uce_branch;
 			
 			
+			//Java To Jimple Body Creation
+			SootOption jj_branch = new SootOption("Java To Jimple Body Creation", "jj");
+			parent.addChild(jj_branch);
+			subParent = jj_branch;
+
+
+			
+			SootOption jj_jj_ls_branch = new SootOption("Local Splitter", "jjjj_ls");
+			subParent.addChild(jj_jj_ls_branch);
+
+
+			
+
+			
+			subSectParent = jj_jj_ls_branch;
+			
+			
+			SootOption jj_jj_a_branch = new SootOption("Jimple Local Aggregator", "jjjj_a");
+			subParent.addChild(jj_jj_a_branch);
+
+
+			
+
+			
+			subSectParent = jj_jj_a_branch;
+			
+			
+			SootOption jj_jj_ule_branch = new SootOption("Unused Local Eliminator", "jjjj_ule");
+			subParent.addChild(jj_jj_ule_branch);
+
+
+			
+
+			
+			subSectParent = jj_jj_ule_branch;
+			
+			
+			SootOption jj_jj_tr_branch = new SootOption("Type Assigner", "jjjj_tr");
+			subParent.addChild(jj_jj_tr_branch);
+
+
+			
+
+			
+			subSectParent = jj_jj_tr_branch;
+			
+			
+			SootOption jj_jj_ulp_branch = new SootOption("Unsplit-originals Local Packer", "jjjj_ulp");
+			subParent.addChild(jj_jj_ulp_branch);
+
+
+			
+
+			
+			subSectParent = jj_jj_ulp_branch;
+			
+			
+			SootOption jj_jj_lns_branch = new SootOption("Local Name Standardizer", "jjjj_lns");
+			subParent.addChild(jj_jj_lns_branch);
+
+
+			
+
+			
+			subSectParent = jj_jj_lns_branch;
+			
+			
+			SootOption jj_jj_cp_branch = new SootOption("Copy Propagator", "jjjj_cp");
+			subParent.addChild(jj_jj_cp_branch);
+
+
+			
+
+			
+			subSectParent = jj_jj_cp_branch;
+			
+			
+			SootOption jj_jj_dae_branch = new SootOption("Dead Assignment Eliminator", "jjjj_dae");
+			subParent.addChild(jj_jj_dae_branch);
+
+
+			
+
+			
+			subSectParent = jj_jj_dae_branch;
+			
+			
+			SootOption jj_jj_cp_ule_branch = new SootOption("Post-copy propagation Unused Local Eliminator", "jjjj_cp_ule");
+			subParent.addChild(jj_jj_cp_ule_branch);
+
+
+			
+
+			
+			subSectParent = jj_jj_cp_ule_branch;
+			
+			
+			SootOption jj_jj_lp_branch = new SootOption("Local Packer", "jjjj_lp");
+			subParent.addChild(jj_jj_lp_branch);
+
+
+			
+
+			
+			subSectParent = jj_jj_lp_branch;
+			
+			
+			SootOption jj_jj_ne_branch = new SootOption("Nop Eliminator", "jjjj_ne");
+			subParent.addChild(jj_jj_ne_branch);
+
+
+			
+
+			
+			subSectParent = jj_jj_ne_branch;
+			
+			
+			SootOption jj_jj_uce_branch = new SootOption("Unreachable Code Eliminator", "jjjj_uce");
+			subParent.addChild(jj_jj_uce_branch);
+
+
+			
+
+			
+			subSectParent = jj_jj_uce_branch;
+			
+			
 			//Call Graph Constructor
 			SootOption cg_branch = new SootOption("Call Graph Constructor", "cg");
 			parent.addChild(cg_branch);
@@ -4093,6 +4654,16 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 
 			
 			subSectParent = jap_jap_pat_branch;
+			
+			
+			SootOption jap_jap_rdtagger_branch = new SootOption("Reaching Defs Tagger", "japjap_rdtagger");
+			subParent.addChild(jap_jap_rdtagger_branch);
+
+
+			
+
+			
+			subSectParent = jap_jap_rdtagger_branch;
 			
 			
 			//Grimp Body Creation
@@ -4697,6 +5268,216 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		return jbjb_uceenabled_widget;
 	}	
 	
+	private BooleanOptionWidget jjenabled_widget;
+	
+	private void setjjenabled_widget(BooleanOptionWidget widget) {
+		jjenabled_widget = widget;
+	}
+	
+	public BooleanOptionWidget getjjenabled_widget() {
+		return jjenabled_widget;
+	}	
+	
+	private BooleanOptionWidget jjuse_original_names_widget;
+	
+	private void setjjuse_original_names_widget(BooleanOptionWidget widget) {
+		jjuse_original_names_widget = widget;
+	}
+	
+	public BooleanOptionWidget getjjuse_original_names_widget() {
+		return jjuse_original_names_widget;
+	}	
+	
+	private BooleanOptionWidget jjjj_lsenabled_widget;
+	
+	private void setjjjj_lsenabled_widget(BooleanOptionWidget widget) {
+		jjjj_lsenabled_widget = widget;
+	}
+	
+	public BooleanOptionWidget getjjjj_lsenabled_widget() {
+		return jjjj_lsenabled_widget;
+	}	
+	
+	private BooleanOptionWidget jjjj_aenabled_widget;
+	
+	private void setjjjj_aenabled_widget(BooleanOptionWidget widget) {
+		jjjj_aenabled_widget = widget;
+	}
+	
+	public BooleanOptionWidget getjjjj_aenabled_widget() {
+		return jjjj_aenabled_widget;
+	}	
+	
+	private BooleanOptionWidget jjjj_aonly_stack_locals_widget;
+	
+	private void setjjjj_aonly_stack_locals_widget(BooleanOptionWidget widget) {
+		jjjj_aonly_stack_locals_widget = widget;
+	}
+	
+	public BooleanOptionWidget getjjjj_aonly_stack_locals_widget() {
+		return jjjj_aonly_stack_locals_widget;
+	}	
+	
+	private BooleanOptionWidget jjjj_uleenabled_widget;
+	
+	private void setjjjj_uleenabled_widget(BooleanOptionWidget widget) {
+		jjjj_uleenabled_widget = widget;
+	}
+	
+	public BooleanOptionWidget getjjjj_uleenabled_widget() {
+		return jjjj_uleenabled_widget;
+	}	
+	
+	private BooleanOptionWidget jjjj_trenabled_widget;
+	
+	private void setjjjj_trenabled_widget(BooleanOptionWidget widget) {
+		jjjj_trenabled_widget = widget;
+	}
+	
+	public BooleanOptionWidget getjjjj_trenabled_widget() {
+		return jjjj_trenabled_widget;
+	}	
+	
+	private BooleanOptionWidget jjjj_ulpenabled_widget;
+	
+	private void setjjjj_ulpenabled_widget(BooleanOptionWidget widget) {
+		jjjj_ulpenabled_widget = widget;
+	}
+	
+	public BooleanOptionWidget getjjjj_ulpenabled_widget() {
+		return jjjj_ulpenabled_widget;
+	}	
+	
+	private BooleanOptionWidget jjjj_ulpunsplit_original_locals_widget;
+	
+	private void setjjjj_ulpunsplit_original_locals_widget(BooleanOptionWidget widget) {
+		jjjj_ulpunsplit_original_locals_widget = widget;
+	}
+	
+	public BooleanOptionWidget getjjjj_ulpunsplit_original_locals_widget() {
+		return jjjj_ulpunsplit_original_locals_widget;
+	}	
+	
+	private BooleanOptionWidget jjjj_lnsenabled_widget;
+	
+	private void setjjjj_lnsenabled_widget(BooleanOptionWidget widget) {
+		jjjj_lnsenabled_widget = widget;
+	}
+	
+	public BooleanOptionWidget getjjjj_lnsenabled_widget() {
+		return jjjj_lnsenabled_widget;
+	}	
+	
+	private BooleanOptionWidget jjjj_lnsonly_stack_locals_widget;
+	
+	private void setjjjj_lnsonly_stack_locals_widget(BooleanOptionWidget widget) {
+		jjjj_lnsonly_stack_locals_widget = widget;
+	}
+	
+	public BooleanOptionWidget getjjjj_lnsonly_stack_locals_widget() {
+		return jjjj_lnsonly_stack_locals_widget;
+	}	
+	
+	private BooleanOptionWidget jjjj_cpenabled_widget;
+	
+	private void setjjjj_cpenabled_widget(BooleanOptionWidget widget) {
+		jjjj_cpenabled_widget = widget;
+	}
+	
+	public BooleanOptionWidget getjjjj_cpenabled_widget() {
+		return jjjj_cpenabled_widget;
+	}	
+	
+	private BooleanOptionWidget jjjj_cponly_regular_locals_widget;
+	
+	private void setjjjj_cponly_regular_locals_widget(BooleanOptionWidget widget) {
+		jjjj_cponly_regular_locals_widget = widget;
+	}
+	
+	public BooleanOptionWidget getjjjj_cponly_regular_locals_widget() {
+		return jjjj_cponly_regular_locals_widget;
+	}	
+	
+	private BooleanOptionWidget jjjj_cponly_stack_locals_widget;
+	
+	private void setjjjj_cponly_stack_locals_widget(BooleanOptionWidget widget) {
+		jjjj_cponly_stack_locals_widget = widget;
+	}
+	
+	public BooleanOptionWidget getjjjj_cponly_stack_locals_widget() {
+		return jjjj_cponly_stack_locals_widget;
+	}	
+	
+	private BooleanOptionWidget jjjj_daeenabled_widget;
+	
+	private void setjjjj_daeenabled_widget(BooleanOptionWidget widget) {
+		jjjj_daeenabled_widget = widget;
+	}
+	
+	public BooleanOptionWidget getjjjj_daeenabled_widget() {
+		return jjjj_daeenabled_widget;
+	}	
+	
+	private BooleanOptionWidget jjjj_daeonly_stack_locals_widget;
+	
+	private void setjjjj_daeonly_stack_locals_widget(BooleanOptionWidget widget) {
+		jjjj_daeonly_stack_locals_widget = widget;
+	}
+	
+	public BooleanOptionWidget getjjjj_daeonly_stack_locals_widget() {
+		return jjjj_daeonly_stack_locals_widget;
+	}	
+	
+	private BooleanOptionWidget jjjj_cp_uleenabled_widget;
+	
+	private void setjjjj_cp_uleenabled_widget(BooleanOptionWidget widget) {
+		jjjj_cp_uleenabled_widget = widget;
+	}
+	
+	public BooleanOptionWidget getjjjj_cp_uleenabled_widget() {
+		return jjjj_cp_uleenabled_widget;
+	}	
+	
+	private BooleanOptionWidget jjjj_lpenabled_widget;
+	
+	private void setjjjj_lpenabled_widget(BooleanOptionWidget widget) {
+		jjjj_lpenabled_widget = widget;
+	}
+	
+	public BooleanOptionWidget getjjjj_lpenabled_widget() {
+		return jjjj_lpenabled_widget;
+	}	
+	
+	private BooleanOptionWidget jjjj_lpunsplit_original_locals_widget;
+	
+	private void setjjjj_lpunsplit_original_locals_widget(BooleanOptionWidget widget) {
+		jjjj_lpunsplit_original_locals_widget = widget;
+	}
+	
+	public BooleanOptionWidget getjjjj_lpunsplit_original_locals_widget() {
+		return jjjj_lpunsplit_original_locals_widget;
+	}	
+	
+	private BooleanOptionWidget jjjj_neenabled_widget;
+	
+	private void setjjjj_neenabled_widget(BooleanOptionWidget widget) {
+		jjjj_neenabled_widget = widget;
+	}
+	
+	public BooleanOptionWidget getjjjj_neenabled_widget() {
+		return jjjj_neenabled_widget;
+	}	
+	
+	private BooleanOptionWidget jjjj_uceenabled_widget;
+	
+	private void setjjjj_uceenabled_widget(BooleanOptionWidget widget) {
+		jjjj_uceenabled_widget = widget;
+	}
+	
+	public BooleanOptionWidget getjjjj_uceenabled_widget() {
+		return jjjj_uceenabled_widget;
+	}	
+	
 	private BooleanOptionWidget cgenabled_widget;
 	
 	private void setcgenabled_widget(BooleanOptionWidget widget) {
@@ -4897,6 +5678,16 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 	
 	public BooleanOptionWidget getcgcg_sparkmerge_stringbuffer_widget() {
 		return cgcg_sparkmerge_stringbuffer_widget;
+	}	
+	
+	private BooleanOptionWidget cgcg_sparkstring_constants_widget;
+	
+	private void setcgcg_sparkstring_constants_widget(BooleanOptionWidget widget) {
+		cgcg_sparkstring_constants_widget = widget;
+	}
+	
+	public BooleanOptionWidget getcgcg_sparkstring_constants_widget() {
+		return cgcg_sparkstring_constants_widget;
 	}	
 	
 	private BooleanOptionWidget cgcg_sparksimulate_natives_widget;
@@ -5207,6 +5998,16 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		return cgcg_bddmerge_stringbuffer_widget;
 	}	
 	
+	private BooleanOptionWidget cgcg_bddstring_constants_widget;
+	
+	private void setcgcg_bddstring_constants_widget(BooleanOptionWidget widget) {
+		cgcg_bddstring_constants_widget = widget;
+	}
+	
+	public BooleanOptionWidget getcgcg_bddstring_constants_widget() {
+		return cgcg_bddstring_constants_widget;
+	}	
+	
 	private BooleanOptionWidget cgcg_bddsimulate_natives_widget;
 	
 	private void setcgcg_bddsimulate_natives_widget(BooleanOptionWidget widget) {
@@ -5447,6 +6248,16 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 	
 	public BooleanOptionWidget getwjopwjop_sienabled_widget() {
 		return wjopwjop_sienabled_widget;
+	}	
+	
+	private BooleanOptionWidget wjopwjop_sirerun_jb_widget;
+	
+	private void setwjopwjop_sirerun_jb_widget(BooleanOptionWidget widget) {
+		wjopwjop_sirerun_jb_widget = widget;
+	}
+	
+	public BooleanOptionWidget getwjopwjop_sirerun_jb_widget() {
+		return wjopwjop_sirerun_jb_widget;
 	}	
 	
 	private BooleanOptionWidget wjopwjop_siinsert_null_checks_widget;
@@ -6103,6 +6914,16 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		return japjap_patenabled_widget;
 	}	
 	
+	private BooleanOptionWidget japjap_rdtaggerenabled_widget;
+	
+	private void setjapjap_rdtaggerenabled_widget(BooleanOptionWidget widget) {
+		japjap_rdtaggerenabled_widget = widget;
+	}
+	
+	public BooleanOptionWidget getjapjap_rdtaggerenabled_widget() {
+		return japjap_rdtaggerenabled_widget;
+	}	
+	
 	private BooleanOptionWidget gbenabled_widget;
 	
 	private void setgbenabled_widget(BooleanOptionWidget widget) {
@@ -6518,7 +7339,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupGeneral_Options = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupGeneral_Options.setLayout(layout);
@@ -6669,7 +7491,7 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		defKey = defKey.trim();
 
 		if (isInDefList(defKey)) {
-			defaultString = getStringDef(defKey);	
+			defaultString = getArrayDef(defKey);	
 		}
 		else {
 			
@@ -6690,7 +7512,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupInput_Options = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupInput_Options.setLayout(layout);
@@ -6765,7 +7588,7 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		defKey = defKey.trim();
 
 		if (isInDefList(defKey)) {
-			defaultString = getStringDef(defKey);	
+			defaultString = getArrayDef(defKey);	
 		}
 		else {
 			
@@ -6801,7 +7624,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupOutput_Options = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupOutput_Options.setLayout(layout);
@@ -6957,7 +7781,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupProcessing_Options = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupProcessing_Options.setLayout(layout);
@@ -7050,7 +7875,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupjb = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupjb.setLayout(layout);
@@ -7111,7 +7937,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupjbjb_ls = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupjbjb_ls.setLayout(layout);
@@ -7156,7 +7983,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupjbjb_a = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupjbjb_a.setLayout(layout);
@@ -7217,7 +8045,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupjbjb_ule = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupjbjb_ule.setLayout(layout);
@@ -7262,7 +8091,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupjbjb_tr = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupjbjb_tr.setLayout(layout);
@@ -7307,7 +8137,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupjbjb_ulp = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupjbjb_ulp.setLayout(layout);
@@ -7368,7 +8199,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupjbjb_lns = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupjbjb_lns.setLayout(layout);
@@ -7429,7 +8261,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupjbjb_cp = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupjbjb_cp.setLayout(layout);
@@ -7506,7 +8339,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupjbjb_dae = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupjbjb_dae.setLayout(layout);
@@ -7567,7 +8401,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupjbjb_cp_ule = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupjbjb_cp_ule.setLayout(layout);
@@ -7612,7 +8447,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupjbjb_lp = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupjbjb_lp.setLayout(layout);
@@ -7673,7 +8509,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupjbjb_ne = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupjbjb_ne.setLayout(layout);
@@ -7718,7 +8555,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupjbjb_uce = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupjbjb_uce.setLayout(layout);
@@ -7759,11 +8597,738 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 
 
 
+	private Composite jjCreate(Composite parent) {
+		String defKey;
+		String defaultString;
+		boolean defaultBool = false;
+	    String defaultArray;
+       
+		Group editGroupjj = new Group(parent, SWT.NONE);
+		GridLayout layout = new GridLayout();
+		editGroupjj.setLayout(layout);
+	
+	 	editGroupjj.setText("Java To Jimple Body Creation");
+	 	
+		editGroupjj.setData("id", "jj");
+		
+		String descjj = "Creates a JimpleBody for each method directly from source";	
+		if (descjj.length() > 0) {
+			Label descLabeljj = new Label(editGroupjj, SWT.WRAP);
+			descLabeljj.setText(descjj);
+		}
+		OptionData [] data;	
+		
+		
+		
+		
+		defKey = "p"+" "+"jj"+" "+"enabled";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = true;
+			
+		}
+
+		setjjenabled_widget(new BooleanOptionWidget(editGroupjj, SWT.NONE, new OptionData("Enabled", "p", "jj","enabled", "\n", defaultBool)));
+		
+		
+		
+		defKey = "p"+" "+"jj"+" "+"use-original-names";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = true;
+			
+		}
+
+		setjjuse_original_names_widget(new BooleanOptionWidget(editGroupjj, SWT.NONE, new OptionData("Use Original Names", "p", "jj","use-original-names", "\nRetain the original names for local variables when the source \nincludes those names. Otherwise, Soot gives variables generic \nnames based on their types. ", defaultBool)));
+		
+		
+
+		
+		return editGroupjj;
+	}
+
+
+
+	private Composite jjjj_lsCreate(Composite parent) {
+		String defKey;
+		String defaultString;
+		boolean defaultBool = false;
+	    String defaultArray;
+       
+		Group editGroupjjjj_ls = new Group(parent, SWT.NONE);
+		GridLayout layout = new GridLayout();
+		editGroupjjjj_ls.setLayout(layout);
+	
+	 	editGroupjjjj_ls.setText("Local Splitter");
+	 	
+		editGroupjjjj_ls.setData("id", "jjjj_ls");
+		
+		String descjjjj_ls = "Local splitter: one local per DU-UD web";	
+		if (descjjjj_ls.length() > 0) {
+			Label descLabeljjjj_ls = new Label(editGroupjjjj_ls, SWT.WRAP);
+			descLabeljjjj_ls.setText(descjjjj_ls);
+		}
+		OptionData [] data;	
+		
+		
+		
+		
+		defKey = "p"+" "+"jj.ls"+" "+"enabled";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = false;
+			
+		}
+
+		setjjjj_lsenabled_widget(new BooleanOptionWidget(editGroupjjjj_ls, SWT.NONE, new OptionData("Enabled", "p", "jj.ls","enabled", "\n", defaultBool)));
+		
+		
+
+		
+		return editGroupjjjj_ls;
+	}
+
+
+
+	private Composite jjjj_aCreate(Composite parent) {
+		String defKey;
+		String defaultString;
+		boolean defaultBool = false;
+	    String defaultArray;
+       
+		Group editGroupjjjj_a = new Group(parent, SWT.NONE);
+		GridLayout layout = new GridLayout();
+		editGroupjjjj_a.setLayout(layout);
+	
+	 	editGroupjjjj_a.setText("Jimple Local Aggregator");
+	 	
+		editGroupjjjj_a.setData("id", "jjjj_a");
+		
+		String descjjjj_a = "Aggregator: removes some unnecessary copies";	
+		if (descjjjj_a.length() > 0) {
+			Label descLabeljjjj_a = new Label(editGroupjjjj_a, SWT.WRAP);
+			descLabeljjjj_a.setText(descjjjj_a);
+		}
+		OptionData [] data;	
+		
+		
+		
+		
+		defKey = "p"+" "+"jj.a"+" "+"enabled";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = true;
+			
+		}
+
+		setjjjj_aenabled_widget(new BooleanOptionWidget(editGroupjjjj_a, SWT.NONE, new OptionData("Enabled", "p", "jj.a","enabled", "\n", defaultBool)));
+		
+		
+		
+		defKey = "p"+" "+"jj.a"+" "+"only-stack-locals";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = true;
+			
+		}
+
+		setjjjj_aonly_stack_locals_widget(new BooleanOptionWidget(editGroupjjjj_a, SWT.NONE, new OptionData("Only Stack Locals", "p", "jj.a","only-stack-locals", "\nOnly aggregate locals that represent stack locations in the \noriginal bytecode. (Stack locals can be distinguished in Jimple \nby the character with which their names begin.) ", defaultBool)));
+		
+		
+
+		
+		return editGroupjjjj_a;
+	}
+
+
+
+	private Composite jjjj_uleCreate(Composite parent) {
+		String defKey;
+		String defaultString;
+		boolean defaultBool = false;
+	    String defaultArray;
+       
+		Group editGroupjjjj_ule = new Group(parent, SWT.NONE);
+		GridLayout layout = new GridLayout();
+		editGroupjjjj_ule.setLayout(layout);
+	
+	 	editGroupjjjj_ule.setText("Unused Local Eliminator");
+	 	
+		editGroupjjjj_ule.setData("id", "jjjj_ule");
+		
+		String descjjjj_ule = "Unused local eliminator";	
+		if (descjjjj_ule.length() > 0) {
+			Label descLabeljjjj_ule = new Label(editGroupjjjj_ule, SWT.WRAP);
+			descLabeljjjj_ule.setText(descjjjj_ule);
+		}
+		OptionData [] data;	
+		
+		
+		
+		
+		defKey = "p"+" "+"jj.ule"+" "+"enabled";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = true;
+			
+		}
+
+		setjjjj_uleenabled_widget(new BooleanOptionWidget(editGroupjjjj_ule, SWT.NONE, new OptionData("Enabled", "p", "jj.ule","enabled", "\n", defaultBool)));
+		
+		
+
+		
+		return editGroupjjjj_ule;
+	}
+
+
+
+	private Composite jjjj_trCreate(Composite parent) {
+		String defKey;
+		String defaultString;
+		boolean defaultBool = false;
+	    String defaultArray;
+       
+		Group editGroupjjjj_tr = new Group(parent, SWT.NONE);
+		GridLayout layout = new GridLayout();
+		editGroupjjjj_tr.setLayout(layout);
+	
+	 	editGroupjjjj_tr.setText("Type Assigner");
+	 	
+		editGroupjjjj_tr.setData("id", "jjjj_tr");
+		
+		String descjjjj_tr = "Assigns types to locals";	
+		if (descjjjj_tr.length() > 0) {
+			Label descLabeljjjj_tr = new Label(editGroupjjjj_tr, SWT.WRAP);
+			descLabeljjjj_tr.setText(descjjjj_tr);
+		}
+		OptionData [] data;	
+		
+		
+		
+		
+		defKey = "p"+" "+"jj.tr"+" "+"enabled";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = false;
+			
+		}
+
+		setjjjj_trenabled_widget(new BooleanOptionWidget(editGroupjjjj_tr, SWT.NONE, new OptionData("Enabled", "p", "jj.tr","enabled", "\n", defaultBool)));
+		
+		
+
+		
+		return editGroupjjjj_tr;
+	}
+
+
+
+	private Composite jjjj_ulpCreate(Composite parent) {
+		String defKey;
+		String defaultString;
+		boolean defaultBool = false;
+	    String defaultArray;
+       
+		Group editGroupjjjj_ulp = new Group(parent, SWT.NONE);
+		GridLayout layout = new GridLayout();
+		editGroupjjjj_ulp.setLayout(layout);
+	
+	 	editGroupjjjj_ulp.setText("Unsplit-originals Local Packer");
+	 	
+		editGroupjjjj_ulp.setData("id", "jjjj_ulp");
+		
+		String descjjjj_ulp = "Local packer: minimizes number of locals";	
+		if (descjjjj_ulp.length() > 0) {
+			Label descLabeljjjj_ulp = new Label(editGroupjjjj_ulp, SWT.WRAP);
+			descLabeljjjj_ulp.setText(descjjjj_ulp);
+		}
+		OptionData [] data;	
+		
+		
+		
+		
+		defKey = "p"+" "+"jj.ulp"+" "+"enabled";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = false;
+			
+		}
+
+		setjjjj_ulpenabled_widget(new BooleanOptionWidget(editGroupjjjj_ulp, SWT.NONE, new OptionData("Enabled", "p", "jj.ulp","enabled", "\n", defaultBool)));
+		
+		
+		
+		defKey = "p"+" "+"jj.ulp"+" "+"unsplit-original-locals";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = false;
+			
+		}
+
+		setjjjj_ulpunsplit_original_locals_widget(new BooleanOptionWidget(editGroupjjjj_ulp, SWT.NONE, new OptionData("Unsplit Original Locals", "p", "jj.ulp","unsplit-original-locals", "\nUse the variable names in the original source as a guide when \ndetermining how to share local variables among non-interfering \nvariable usages. This recombines named locals which were split \nby the Local Splitter. ", defaultBool)));
+		
+		
+
+		
+		return editGroupjjjj_ulp;
+	}
+
+
+
+	private Composite jjjj_lnsCreate(Composite parent) {
+		String defKey;
+		String defaultString;
+		boolean defaultBool = false;
+	    String defaultArray;
+       
+		Group editGroupjjjj_lns = new Group(parent, SWT.NONE);
+		GridLayout layout = new GridLayout();
+		editGroupjjjj_lns.setLayout(layout);
+	
+	 	editGroupjjjj_lns.setText("Local Name Standardizer");
+	 	
+		editGroupjjjj_lns.setData("id", "jjjj_lns");
+		
+		String descjjjj_lns = "Local name standardizer";	
+		if (descjjjj_lns.length() > 0) {
+			Label descLabeljjjj_lns = new Label(editGroupjjjj_lns, SWT.WRAP);
+			descLabeljjjj_lns.setText(descjjjj_lns);
+		}
+		OptionData [] data;	
+		
+		
+		
+		
+		defKey = "p"+" "+"jj.lns"+" "+"enabled";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = true;
+			
+		}
+
+		setjjjj_lnsenabled_widget(new BooleanOptionWidget(editGroupjjjj_lns, SWT.NONE, new OptionData("Enabled", "p", "jj.lns","enabled", "\n", defaultBool)));
+		
+		
+		
+		defKey = "p"+" "+"jj.lns"+" "+"only-stack-locals";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = false;
+			
+		}
+
+		setjjjj_lnsonly_stack_locals_widget(new BooleanOptionWidget(editGroupjjjj_lns, SWT.NONE, new OptionData("Only Stack Locals", "p", "jj.lns","only-stack-locals", "\nOnly standardizes the names of variables that represent stack \nlocations in the original bytecode. This becomes the default \nwhen the `use-original-names' option is specified for the `jb' \nphase. ", defaultBool)));
+		
+		
+
+		
+		return editGroupjjjj_lns;
+	}
+
+
+
+	private Composite jjjj_cpCreate(Composite parent) {
+		String defKey;
+		String defaultString;
+		boolean defaultBool = false;
+	    String defaultArray;
+       
+		Group editGroupjjjj_cp = new Group(parent, SWT.NONE);
+		GridLayout layout = new GridLayout();
+		editGroupjjjj_cp.setLayout(layout);
+	
+	 	editGroupjjjj_cp.setText("Copy Propagator");
+	 	
+		editGroupjjjj_cp.setData("id", "jjjj_cp");
+		
+		String descjjjj_cp = "Copy propagator";	
+		if (descjjjj_cp.length() > 0) {
+			Label descLabeljjjj_cp = new Label(editGroupjjjj_cp, SWT.WRAP);
+			descLabeljjjj_cp.setText(descjjjj_cp);
+		}
+		OptionData [] data;	
+		
+		
+		
+		
+		defKey = "p"+" "+"jj.cp"+" "+"enabled";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = true;
+			
+		}
+
+		setjjjj_cpenabled_widget(new BooleanOptionWidget(editGroupjjjj_cp, SWT.NONE, new OptionData("Enabled", "p", "jj.cp","enabled", "\n", defaultBool)));
+		
+		
+		
+		defKey = "p"+" "+"jj.cp"+" "+"only-regular-locals";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = false;
+			
+		}
+
+		setjjjj_cponly_regular_locals_widget(new BooleanOptionWidget(editGroupjjjj_cp, SWT.NONE, new OptionData("Only Regular Locals", "p", "jj.cp","only-regular-locals", "\nOnly propagate copies through ``regular'' locals, that is, \nthose declared in the source bytecode. ", defaultBool)));
+		
+		
+		
+		defKey = "p"+" "+"jj.cp"+" "+"only-stack-locals";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = true;
+			
+		}
+
+		setjjjj_cponly_stack_locals_widget(new BooleanOptionWidget(editGroupjjjj_cp, SWT.NONE, new OptionData("Only Stack Locals", "p", "jj.cp","only-stack-locals", "\nOnly propagate copies through locals that represent stack \nlocations in the original bytecode. ", defaultBool)));
+		
+		
+
+		
+		return editGroupjjjj_cp;
+	}
+
+
+
+	private Composite jjjj_daeCreate(Composite parent) {
+		String defKey;
+		String defaultString;
+		boolean defaultBool = false;
+	    String defaultArray;
+       
+		Group editGroupjjjj_dae = new Group(parent, SWT.NONE);
+		GridLayout layout = new GridLayout();
+		editGroupjjjj_dae.setLayout(layout);
+	
+	 	editGroupjjjj_dae.setText("Dead Assignment Eliminator");
+	 	
+		editGroupjjjj_dae.setData("id", "jjjj_dae");
+		
+		String descjjjj_dae = "Dead assignment eliminator";	
+		if (descjjjj_dae.length() > 0) {
+			Label descLabeljjjj_dae = new Label(editGroupjjjj_dae, SWT.WRAP);
+			descLabeljjjj_dae.setText(descjjjj_dae);
+		}
+		OptionData [] data;	
+		
+		
+		
+		
+		defKey = "p"+" "+"jj.dae"+" "+"enabled";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = true;
+			
+		}
+
+		setjjjj_daeenabled_widget(new BooleanOptionWidget(editGroupjjjj_dae, SWT.NONE, new OptionData("Enabled", "p", "jj.dae","enabled", "\n", defaultBool)));
+		
+		
+		
+		defKey = "p"+" "+"jj.dae"+" "+"only-stack-locals";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = true;
+			
+		}
+
+		setjjjj_daeonly_stack_locals_widget(new BooleanOptionWidget(editGroupjjjj_dae, SWT.NONE, new OptionData("Only Stack Locals", "p", "jj.dae","only-stack-locals", "\nOnly eliminate dead assignments to locals that represent stack \nlocations in the original bytecode. ", defaultBool)));
+		
+		
+
+		
+		return editGroupjjjj_dae;
+	}
+
+
+
+	private Composite jjjj_cp_uleCreate(Composite parent) {
+		String defKey;
+		String defaultString;
+		boolean defaultBool = false;
+	    String defaultArray;
+       
+		Group editGroupjjjj_cp_ule = new Group(parent, SWT.NONE);
+		GridLayout layout = new GridLayout();
+		editGroupjjjj_cp_ule.setLayout(layout);
+	
+	 	editGroupjjjj_cp_ule.setText("Post-copy propagation Unused Local Eliminator");
+	 	
+		editGroupjjjj_cp_ule.setData("id", "jjjj_cp_ule");
+		
+		String descjjjj_cp_ule = "Post-copy propagation unused local eliminator";	
+		if (descjjjj_cp_ule.length() > 0) {
+			Label descLabeljjjj_cp_ule = new Label(editGroupjjjj_cp_ule, SWT.WRAP);
+			descLabeljjjj_cp_ule.setText(descjjjj_cp_ule);
+		}
+		OptionData [] data;	
+		
+		
+		
+		
+		defKey = "p"+" "+"jj.cp-ule"+" "+"enabled";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = true;
+			
+		}
+
+		setjjjj_cp_uleenabled_widget(new BooleanOptionWidget(editGroupjjjj_cp_ule, SWT.NONE, new OptionData("Enabled", "p", "jj.cp-ule","enabled", "\n", defaultBool)));
+		
+		
+
+		
+		return editGroupjjjj_cp_ule;
+	}
+
+
+
+	private Composite jjjj_lpCreate(Composite parent) {
+		String defKey;
+		String defaultString;
+		boolean defaultBool = false;
+	    String defaultArray;
+       
+		Group editGroupjjjj_lp = new Group(parent, SWT.NONE);
+		GridLayout layout = new GridLayout();
+		editGroupjjjj_lp.setLayout(layout);
+	
+	 	editGroupjjjj_lp.setText("Local Packer");
+	 	
+		editGroupjjjj_lp.setData("id", "jjjj_lp");
+		
+		String descjjjj_lp = "Local packer: minimizes number of locals";	
+		if (descjjjj_lp.length() > 0) {
+			Label descLabeljjjj_lp = new Label(editGroupjjjj_lp, SWT.WRAP);
+			descLabeljjjj_lp.setText(descjjjj_lp);
+		}
+		OptionData [] data;	
+		
+		
+		
+		
+		defKey = "p"+" "+"jj.lp"+" "+"enabled";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = false;
+			
+		}
+
+		setjjjj_lpenabled_widget(new BooleanOptionWidget(editGroupjjjj_lp, SWT.NONE, new OptionData("Enabled", "p", "jj.lp","enabled", "\n", defaultBool)));
+		
+		
+		
+		defKey = "p"+" "+"jj.lp"+" "+"unsplit-original-locals";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = false;
+			
+		}
+
+		setjjjj_lpunsplit_original_locals_widget(new BooleanOptionWidget(editGroupjjjj_lp, SWT.NONE, new OptionData("Unsplit Original Locals", "p", "jj.lp","unsplit-original-locals", "\nUse the variable names in the original source as a guide when \ndetermining how to share local variables across non-interfering \nvariable usages. This recombines named locals which were split \nby the Local Splitter. ", defaultBool)));
+		
+		
+
+		
+		return editGroupjjjj_lp;
+	}
+
+
+
+	private Composite jjjj_neCreate(Composite parent) {
+		String defKey;
+		String defaultString;
+		boolean defaultBool = false;
+	    String defaultArray;
+       
+		Group editGroupjjjj_ne = new Group(parent, SWT.NONE);
+		GridLayout layout = new GridLayout();
+		editGroupjjjj_ne.setLayout(layout);
+	
+	 	editGroupjjjj_ne.setText("Nop Eliminator");
+	 	
+		editGroupjjjj_ne.setData("id", "jjjj_ne");
+		
+		String descjjjj_ne = "Nop eliminator";	
+		if (descjjjj_ne.length() > 0) {
+			Label descLabeljjjj_ne = new Label(editGroupjjjj_ne, SWT.WRAP);
+			descLabeljjjj_ne.setText(descjjjj_ne);
+		}
+		OptionData [] data;	
+		
+		
+		
+		
+		defKey = "p"+" "+"jj.ne"+" "+"enabled";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = true;
+			
+		}
+
+		setjjjj_neenabled_widget(new BooleanOptionWidget(editGroupjjjj_ne, SWT.NONE, new OptionData("Enabled", "p", "jj.ne","enabled", "\n", defaultBool)));
+		
+		
+
+		
+		return editGroupjjjj_ne;
+	}
+
+
+
+	private Composite jjjj_uceCreate(Composite parent) {
+		String defKey;
+		String defaultString;
+		boolean defaultBool = false;
+	    String defaultArray;
+       
+		Group editGroupjjjj_uce = new Group(parent, SWT.NONE);
+		GridLayout layout = new GridLayout();
+		editGroupjjjj_uce.setLayout(layout);
+	
+	 	editGroupjjjj_uce.setText("Unreachable Code Eliminator");
+	 	
+		editGroupjjjj_uce.setData("id", "jjjj_uce");
+		
+		String descjjjj_uce = "Unreachable code eliminator";	
+		if (descjjjj_uce.length() > 0) {
+			Label descLabeljjjj_uce = new Label(editGroupjjjj_uce, SWT.WRAP);
+			descLabeljjjj_uce.setText(descjjjj_uce);
+		}
+		OptionData [] data;	
+		
+		
+		
+		
+		defKey = "p"+" "+"jj.uce"+" "+"enabled";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = true;
+			
+		}
+
+		setjjjj_uceenabled_widget(new BooleanOptionWidget(editGroupjjjj_uce, SWT.NONE, new OptionData("Enabled", "p", "jj.uce","enabled", "\n", defaultBool)));
+		
+		
+
+		
+		return editGroupjjjj_uce;
+	}
+
+
+
 	private Composite cgCreate(Composite parent) {
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupcg = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupcg.setLayout(layout);
@@ -7940,7 +9505,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupcgcg_cha = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupcgcg_cha.setLayout(layout);
@@ -8001,7 +9567,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupcgcg_spark = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupcgcg_spark.setLayout(layout);
@@ -8046,7 +9613,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupcgSpark_General_Options = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupcgSpark_General_Options.setLayout(layout);
@@ -8139,7 +9707,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupcgSpark_Pointer_Assignment_Graph_Building_Options = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupcgSpark_Pointer_Assignment_Graph_Building_Options.setLayout(layout);
@@ -8238,6 +9807,22 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		
 		
 		
+		defKey = "p"+" "+"cg.spark"+" "+"string-constants";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = false;
+			
+		}
+
+		setcgcg_sparkstring_constants_widget(new BooleanOptionWidget(editGroupcgSpark_Pointer_Assignment_Graph_Building_Options, SWT.NONE, new OptionData("Propagate All String Constants", "p", "cg.spark","string-constants", "\nWhen this option is set to false, Spark only distinguishes \nstring constants that may be the name of a class loaded \ndynamically using reflection, and all other string constants are \nlumped together into a single string constant node. Setting this \noption to true causes all string constants to be propagated \nindividually. ", defaultBool)));
+		
+		
+		
 		defKey = "p"+" "+"cg.spark"+" "+"simulate-natives";
 		defKey = defKey.trim();
 
@@ -8296,7 +9881,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupcgSpark_Pointer_Assignment_Graph_Simplification_Options = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupcgSpark_Pointer_Assignment_Graph_Simplification_Options.setLayout(layout);
@@ -8373,7 +9959,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupcgSpark_Points_To_Set_Flowing_Options = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupcgSpark_Points_To_Set_Flowing_Options.setLayout(layout);
@@ -8606,7 +10193,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupcgSpark_Output_Options = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupcgSpark_Output_Options.setLayout(layout);
@@ -8779,7 +10367,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupcgcg_bdd = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupcgcg_bdd.setLayout(layout);
@@ -8824,7 +10413,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupcgBDD_Spark_General_Options = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupcgBDD_Spark_General_Options.setLayout(layout);
@@ -8933,7 +10523,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupcgBDD_Spark_Pointer_Assignment_Graph_Building_Options = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupcgBDD_Spark_Pointer_Assignment_Graph_Building_Options.setLayout(layout);
@@ -9032,6 +10623,22 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		
 		
 		
+		defKey = "p"+" "+"cg.bdd"+" "+"string-constants";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = false;
+			
+		}
+
+		setcgcg_bddstring_constants_widget(new BooleanOptionWidget(editGroupcgBDD_Spark_Pointer_Assignment_Graph_Building_Options, SWT.NONE, new OptionData("Propagate All String Constants", "p", "cg.bdd","string-constants", "\nWhen this option is set to false, Spark only distinguishes \nstring constants that may be the name of a class loaded \ndynamically using reflection, and all other string constants are \nlumped together into a single string constant node. Setting this \noption to true causes all string constants to be propagated \nindividually. ", defaultBool)));
+		
+		
+		
 		defKey = "p"+" "+"cg.bdd"+" "+"simulate-natives";
 		defKey = defKey.trim();
 
@@ -9090,7 +10697,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupcgBDD_Spark_Pointer_Assignment_Graph_Simplification_Options = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupcgBDD_Spark_Pointer_Assignment_Graph_Simplification_Options.setLayout(layout);
@@ -9167,7 +10775,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupcgBDD_Spark_Output_Options = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupcgBDD_Spark_Output_Options.setLayout(layout);
@@ -9340,7 +10949,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupwstp = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupwstp.setLayout(layout);
@@ -9385,7 +10995,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupwsop = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupwsop.setLayout(layout);
@@ -9430,7 +11041,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupwjtp = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupwjtp.setLayout(layout);
@@ -9475,7 +11087,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupwjop = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupwjop.setLayout(layout);
@@ -9520,7 +11133,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupwjopwjop_smb = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupwjopwjop_smb.setLayout(layout);
@@ -9633,7 +11247,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupwjopwjop_si = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupwjopwjop_si.setLayout(layout);
@@ -9665,6 +11280,22 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 
 		setwjopwjop_sienabled_widget(new BooleanOptionWidget(editGroupwjopwjop_si, SWT.NONE, new OptionData("Enabled", "p", "wjop.si","enabled", "\n", defaultBool)));
+		
+		
+		
+		defKey = "p"+" "+"wjop.si"+" "+"rerun-jb";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = true;
+			
+		}
+
+		setwjopwjop_sirerun_jb_widget(new BooleanOptionWidget(editGroupwjopwjop_si, SWT.NONE, new OptionData("Reconstruct Jimple body after inlining", "p", "wjop.si","rerun-jb", "\nWhen a method with array parameters is inlined, its variables \nmay need to be assigned different types than they had in the \noriginal method to produce compilable code. When this option is \nset, Soot re-runs the Jimple Body pack on each method body which \nhas had another method inlined into it so that the typing \nalgorithm can reassign the types. ", defaultBool)));
 		
 		
 		
@@ -9791,7 +11422,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupwjap = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupwjap.setLayout(layout);
@@ -9836,7 +11468,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupwjapwjap_ra = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupwjapwjap_ra.setLayout(layout);
@@ -9881,7 +11514,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupwjapwjap_umt = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupwjapwjap_umt.setLayout(layout);
@@ -9926,7 +11560,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupwjapwjap_uft = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupwjapwjap_uft.setLayout(layout);
@@ -9971,7 +11606,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupwjapwjap_tqt = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupwjapwjap_tqt.setLayout(layout);
@@ -10016,7 +11652,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupshimple = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupshimple.setLayout(layout);
@@ -10135,7 +11772,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupstp = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupstp.setLayout(layout);
@@ -10180,7 +11818,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupsop = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupsop.setLayout(layout);
@@ -10225,7 +11864,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupsopsop_cpf = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupsopsop_cpf.setLayout(layout);
@@ -10286,7 +11926,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupjtp = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupjtp.setLayout(layout);
@@ -10331,7 +11972,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupjop = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupjop.setLayout(layout);
@@ -10376,7 +12018,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupjopjop_cse = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupjopjop_cse.setLayout(layout);
@@ -10437,7 +12080,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupjopjop_bcm = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupjopjop_bcm.setLayout(layout);
@@ -10498,7 +12142,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupjopjop_lcm = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupjopjop_lcm.setLayout(layout);
@@ -10611,7 +12256,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupjopjop_cp = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupjopjop_cp.setLayout(layout);
@@ -10688,7 +12334,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupjopjop_cpf = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupjopjop_cpf.setLayout(layout);
@@ -10733,7 +12380,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupjopjop_cbf = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupjopjop_cbf.setLayout(layout);
@@ -10778,7 +12426,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupjopjop_dae = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupjopjop_dae.setLayout(layout);
@@ -10839,7 +12488,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupjopjop_uce1 = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupjopjop_uce1.setLayout(layout);
@@ -10884,7 +12534,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupjopjop_ubf1 = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupjopjop_ubf1.setLayout(layout);
@@ -10929,7 +12580,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupjopjop_uce2 = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupjopjop_uce2.setLayout(layout);
@@ -10974,7 +12626,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupjopjop_ubf2 = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupjopjop_ubf2.setLayout(layout);
@@ -11019,7 +12672,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupjopjop_ule = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupjopjop_ule.setLayout(layout);
@@ -11064,7 +12718,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupjap = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupjap.setLayout(layout);
@@ -11109,7 +12764,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupjapjap_npc = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupjapjap_npc.setLayout(layout);
@@ -11186,7 +12842,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupjapjap_npcolorer = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupjapjap_npcolorer.setLayout(layout);
@@ -11231,7 +12888,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupjapjap_abc = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupjapjap_abc.setLayout(layout);
@@ -11404,7 +13062,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupjapjap_profiling = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupjapjap_profiling.setLayout(layout);
@@ -11465,7 +13124,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupjapjap_sea = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupjapjap_sea.setLayout(layout);
@@ -11526,7 +13186,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupjapjap_fieldrw = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupjapjap_fieldrw.setLayout(layout);
@@ -11586,7 +13247,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupjapjap_cgtagger = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupjapjap_cgtagger.setLayout(layout);
@@ -11631,7 +13293,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupjapjap_parity = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupjapjap_parity.setLayout(layout);
@@ -11676,7 +13339,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupjapjap_pat = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupjapjap_pat.setLayout(layout);
@@ -11717,11 +13381,58 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 
 
 
+	private Composite japjap_rdtaggerCreate(Composite parent) {
+		String defKey;
+		String defaultString;
+		boolean defaultBool = false;
+	    String defaultArray;
+       
+		Group editGroupjapjap_rdtagger = new Group(parent, SWT.NONE);
+		GridLayout layout = new GridLayout();
+		editGroupjapjap_rdtagger.setLayout(layout);
+	
+	 	editGroupjapjap_rdtagger.setText("Reaching Defs Tagger");
+	 	
+		editGroupjapjap_rdtagger.setData("id", "japjap_rdtagger");
+		
+		String descjapjap_rdtagger = "Creates link tags for reaching defs";	
+		if (descjapjap_rdtagger.length() > 0) {
+			Label descLabeljapjap_rdtagger = new Label(editGroupjapjap_rdtagger, SWT.WRAP);
+			descLabeljapjap_rdtagger.setText(descjapjap_rdtagger);
+		}
+		OptionData [] data;	
+		
+		
+		
+		
+		defKey = "p"+" "+"jap.rdtagger"+" "+"enabled";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = false;
+			
+		}
+
+		setjapjap_rdtaggerenabled_widget(new BooleanOptionWidget(editGroupjapjap_rdtagger, SWT.NONE, new OptionData("Enabled", "p", "jap.rdtagger","enabled", "\n", defaultBool)));
+		
+		
+
+		
+		return editGroupjapjap_rdtagger;
+	}
+
+
+
 	private Composite gbCreate(Composite parent) {
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupgb = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupgb.setLayout(layout);
@@ -11766,7 +13477,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupgbgb_a1 = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupgbgb_a1.setLayout(layout);
@@ -11827,7 +13539,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupgbgb_cf = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupgbgb_cf.setLayout(layout);
@@ -11872,7 +13585,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupgbgb_a2 = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupgbgb_a2.setLayout(layout);
@@ -11933,7 +13647,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupgbgb_ule = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupgbgb_ule.setLayout(layout);
@@ -11978,7 +13693,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupgop = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupgop.setLayout(layout);
@@ -12023,7 +13739,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupbb = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupbb.setLayout(layout);
@@ -12068,7 +13785,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupbbbb_lso = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupbbbb_lso.setLayout(layout);
@@ -12209,7 +13927,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupbbbb_pho = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupbbbb_pho.setLayout(layout);
@@ -12254,7 +13973,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupbbbb_ule = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupbbbb_ule.setLayout(layout);
@@ -12299,7 +14019,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupbbbb_lp = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupbbbb_lp.setLayout(layout);
@@ -12360,7 +14081,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupbop = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupbop.setLayout(layout);
@@ -12405,7 +14127,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGrouptag = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGrouptag.setLayout(layout);
@@ -12450,7 +14173,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGrouptagtag_ln = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGrouptagtag_ln.setLayout(layout);
@@ -12495,7 +14219,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGrouptagtag_an = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGrouptagtag_an.setLayout(layout);
@@ -12540,7 +14265,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGrouptagtag_dep = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGrouptagtag_dep.setLayout(layout);
@@ -12585,7 +14311,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGrouptagtag_fieldrw = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGrouptagtag_fieldrw.setLayout(layout);
@@ -12630,7 +14357,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupApplication_Mode_Options = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupApplication_Mode_Options.setLayout(layout);
@@ -12669,7 +14397,7 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		defKey = defKey.trim();
 
 		if (isInDefList(defKey)) {
-			defaultString = getStringDef(defKey);	
+			defaultString = getArrayDef(defKey);	
 		}
 		else {
 			
@@ -12684,7 +14412,7 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		defKey = defKey.trim();
 
 		if (isInDefList(defKey)) {
-			defaultString = getStringDef(defKey);	
+			defaultString = getArrayDef(defKey);	
 		}
 		else {
 			
@@ -12699,7 +14427,7 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		defKey = defKey.trim();
 
 		if (isInDefList(defKey)) {
-			defaultString = getStringDef(defKey);	
+			defaultString = getArrayDef(defKey);	
 		}
 		else {
 			
@@ -12714,7 +14442,7 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		defKey = defKey.trim();
 
 		if (isInDefList(defKey)) {
-			defaultString = getStringDef(defKey);	
+			defaultString = getArrayDef(defKey);	
 		}
 		else {
 			
@@ -12729,7 +14457,7 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		defKey = defKey.trim();
 
 		if (isInDefList(defKey)) {
-			defaultString = getStringDef(defKey);	
+			defaultString = getArrayDef(defKey);	
 		}
 		else {
 			
@@ -12750,7 +14478,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupInput_Attribute_Options = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupInput_Attribute_Options.setLayout(layout);
@@ -12811,7 +14540,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupAnnotation_Options = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupAnnotation_Options.setLayout(layout);
@@ -12904,7 +14634,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		String defKey;
 		String defaultString;
 		boolean defaultBool = false;
-		
+	    String defaultArray;
+       
 		Group editGroupMiscellaneous_Options = new Group(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		editGroupMiscellaneous_Options.setLayout(layout);

@@ -21,6 +21,7 @@ package soot;
 
 import soot.tagkit.*;
 import soot.util.*;
+import soot.xml.*;
 import java.util.*;
 import java.io.*;
 
@@ -31,7 +32,8 @@ public class XMLAttributesPrinter {
 	private String useFilename;
 	private SootClass sootClass;
 	private String outputDir;
-
+    private ArrayList attributes;
+    
 	private void setOutputDir(String dir) {
 		outputDir = dir;
 	}
@@ -49,6 +51,7 @@ public class XMLAttributesPrinter {
 	}
 
 	private void initFile() {
+        attributes = new ArrayList();
 		try {
 		  streamOut = new FileOutputStream(getUseFilename());
 		  writerOut = new PrintWriter(new OutputStreamWriter(streamOut));
@@ -65,111 +68,38 @@ public class XMLAttributesPrinter {
 		  writerOut.println("</attributes>");
 		  writerOut.close();
 	}
-	public void printAttrs(SootClass c) {
-		
-		int java_ln = 0;
-		int jimple_ln = 0;
+    
+	public void printAttrs(SootClass c, soot.xml.TagCollector tc) {
 	
-        // tag fields
-        Iterator fit = c.getFields().iterator();
-		while (fit.hasNext()){
-            SootField sf = (SootField)fit.next();
-            Iterator fTags = sf.getTags().iterator();
-            startPrintAttribute();
-            while (fTags.hasNext()){
-                Tag t = (Tag)fTags.next();
-                printAttributeTag(t);
-            }
-            endPrintAttribute();
+        tc.collectKeyTags(c);
+        Iterator fIt = c.getFields().iterator();
+        while (fIt.hasNext()){
+            SootField sf = (SootField)fIt.next();
+            tc.collectFieldTags(sf);
         }
-        
-        // tag methods
-        Iterator it = c.getMethods().iterator();
-		while (it.hasNext()) {
-			SootMethod sm = (SootMethod)it.next();
-			if (!sm.hasActiveBody()) {
-				continue;
-			}
-			if (!sm.getTags().isEmpty()){
-				Iterator mTags = sm.getTags().iterator();
-				startPrintAttribute();
-				while (mTags.hasNext()){
-					Tag t = (Tag)mTags.next();
-					printAttributeTag(t);
-				}
-				endPrintAttribute();
-			}
-			
-			Body b = sm.getActiveBody();
-			Iterator itUnits = b.getUnits().iterator();
-			while (itUnits.hasNext()) {
-				Unit u = (Unit)itUnits.next();
-				Iterator itTags = u.getTags().iterator();
-				startPrintAttribute();
-				while (itTags.hasNext()) {
-			   		Tag t = (Tag)itTags.next();
-					printAttributeTag(t);
-				}
-				Iterator valBoxIt = u.getUseAndDefBoxes().iterator();
-				while (valBoxIt.hasNext()){
-					ValueBox vb = (ValueBox)valBoxIt.next();
-					if (!vb.getTags().isEmpty()){
-						startPrintValBoxAttr();
-						Iterator tagsIt = vb.getTags().iterator(); 
-						while (tagsIt.hasNext()) {
-							Tag t = (Tag)tagsIt.next();
-							printAttributeTag(t);
-						}
-						endPrintValBoxAttr();
-					}
-				}
-				endPrintAttribute();	
-			}
-		}
+        Iterator mIt = c.getMethods().iterator();
+        while (mIt.hasNext()){
+            SootMethod sm = (SootMethod)mIt.next();
+            tc.collectMethodTags(sm);
+        }
+        tc.printTags(writerOut);
+        tc.printKeys(writerOut);
+		finishFile();
+	}
+    
+	public void printAttrs(SootClass c) {
+	
+        soot.xml.TagCollector tc = new soot.xml.TagCollector();
+        tc.collectKeyTags(c);
+        tc.collectTags(c);
+        tc.printTags(writerOut);
+        tc.printKeys(writerOut);
 		finishFile();
 	}
 
-	
+	 
 	FileOutputStream streamOut = null;
 	PrintWriter writerOut = null;
-	
-	private void printAttributeTag(Tag t) {
-		if (t instanceof LineNumberTag) {
-			printJavaLnAttr((new Integer(((LineNumberTag)t).toString())).intValue());
-		}
-		else if (t instanceof JimpleLineNumberTag) {
-            JimpleLineNumberTag jlnTag = (JimpleLineNumberTag)t;
-			printJimpleLnAttr(jlnTag.getStartLineNumber(), jlnTag.getEndLineNumber());
-		}
-		else if (t instanceof SourceLineNumberTag) {
-            SourceLineNumberTag jlnTag = (SourceLineNumberTag)t; 
-			printJavaLnAttr(jlnTag.getStartLineNumber(), jlnTag.getEndLineNumber());
-		}
-		else if (t instanceof LinkTag) {
-			LinkTag lt = (LinkTag)t;
-			Host h = lt.getLink();
-			printLinkAttr(formatForXML(lt.toString()), getJimpleLnOfHost(h), getJavaLnOfHost(h), lt.getClassName());
-		}
-		else if (t instanceof StringTag) {
-			printTextAttr(formatForXML(((StringTag)t).toString()));
-		}
-		else if (t instanceof SourcePositionTag){
-			SourcePositionTag pt = (SourcePositionTag)t;
-			printSourcePositionAttr(pt.getStartOffset(), pt.getEndOffset());
-		}
-        else if (t instanceof PositionTag){
-			PositionTag pt = (PositionTag)t;
-			printPositionAttr(pt.getStartOffset(), pt.getEndOffset());
-		}
-		else if (t instanceof ColorTag){
-			ColorTag ct = (ColorTag)t;
-			printColorAttr(ct.getRed(), ct.getGreen(), ct.getBlue(), ct.isForeground());
-		}
-		else {
-			printTextAttr(t.toString());
-		}
-								
-	}
 	
 	private int getJavaLnOfHost(Host h){
 		Iterator it = h.getTags().iterator();
@@ -180,6 +110,9 @@ public class XMLAttributesPrinter {
 				//G.v().out.println("t is LineNumberTag");
 				return ((SourceLineNumberTag)t).getStartLineNumber();
 			}
+            else if (t instanceof LineNumberTag){
+                return (new Integer(((LineNumberTag)t).toString())).intValue();
+            }
 		}
 		return 0;
 	}
@@ -194,84 +127,7 @@ public class XMLAttributesPrinter {
 		}
 		return 0;
 	}
-	
-	private void startPrintAttribute(){
-		writerOut.println("<attribute>");
-	}
 
-	private void printJavaLnAttr(int start_ln, int end_ln){
-		writerOut.println("<java_start_ln>"+start_ln+"</java_start_ln>");
-		writerOut.println("<java_end_ln>"+end_ln+"</java_end_ln>");
-	}
-
-	private void printJavaLnAttr(int java_ln){
-		writerOut.println("<java_ln>"+java_ln+"</java_ln>");
-	}
-
-	private void printJimpleLnAttr(int jimple_ln){
-		writerOut.println("<jimple_ln>"+jimple_ln+"</jimple_ln>");
-	}
-
-	private void printJimpleLnAttr(int start_ln, int end_ln){
-		writerOut.println("<jimple_start_ln>"+start_ln+"</jimple_start_ln>");
-		writerOut.println("<jimple_end_ln>"+end_ln+"</jimple_end_ln>");
-	}
-
-	private void printTextAttr(String text){
-		writerOut.println("<text>"+text+"</text>");
-	}
-	
-	private void printLinkAttr(String label, int jimpleLink, int javaLink, String className){
-		writerOut.println("<link_attribute>");
-		writerOut.println("<link_label>"+label+"</link_label>");
-		writerOut.println("<jimple_link>"+jimpleLink+"</jimple_link>");
-		writerOut.println("<java_link>"+javaLink+"</java_link>");
-		writerOut.println("<className>"+className+"</className>");
-		writerOut.println("</link_attribute>");
-	}
-
-	/*private void startPrintSourceValBoxAttr(){
-		writerOut.println("<source_value_box_attribute>");
-	}*/
-    
-	private void startPrintValBoxAttr(){
-		writerOut.println("<value_box_attribute>");
-	}
-
-	private void printSourcePositionAttr(int start, int end){
-		writerOut.println("<sourceStartOffset>"+start+"</sourceStartOffset>");
-		writerOut.println("<sourceEndOffset>"+end+"</sourceEndOffset>");
-	}
-    
-	private void printPositionAttr(int start, int end){
-		writerOut.println("<startOffset>"+start+"</startOffset>");
-		writerOut.println("<endOffset>"+end+"</endOffset>");
-	}
-	
-	private void printColorAttr(int r, int g, int b, boolean fg){
-		writerOut.println("<red>"+r+"</red>");
-		writerOut.println("<green>"+g+"</green>");
-		writerOut.println("<blue>"+b+"</blue>");
-        if (fg) {
-		    writerOut.println("<fg>1</fg>");
-        }
-        else {
-		    writerOut.println("<fg>0</fg>");    
-        }
-	}
-	
-	/*private void endPrintSourceValBoxAttr(){
-		writerOut.println("</source_value_box_attribute>");
-	}*/
-    
-	private void endPrintValBoxAttr(){
-		writerOut.println("</value_box_attribute>");
-	}
-	
-	private void endPrintAttribute(){
-		writerOut.println("</attribute>");
-	}
-	
 
 	private void initAttributesDir() {
 	

@@ -72,8 +72,8 @@ public class BDDSideEffectAnalysis {
             System.out.println("***" + m + s + v);
             Scene.v().getUnitNumberer().add(s);
             InstanceFieldRef ifr = (InstanceFieldRef) v;
-            return new jedd.internal.RelationContainer(new jedd.Attribute[] { method.v(), fld.v(), stmt.v(), obj.v() },
-                                                       new jedd.PhysicalDomain[] { V2.v(), FD.v(), ST.v(), H1.v() },
+            return new jedd.internal.RelationContainer(new jedd.Attribute[] { fld.v(), stmt.v(), method.v(), obj.v() },
+                                                       new jedd.PhysicalDomain[] { FD.v(), ST.v(), V2.v(), H1.v() },
                                                        ("return jedd.internal.Jedd.v().compose(jedd.internal.Jedd.v()" +
                                                         ".read(jedd.internal.Jedd.v().literal(new java.lang.Object[.." +
                                                         ".], new jedd.Attribute[...], new jedd.PhysicalDomain[...]))," +
@@ -105,8 +105,8 @@ public class BDDSideEffectAnalysis {
                     System.out.println("***" + m + s + v);
                     Scene.v().getUnitNumberer().add(s);
                     ArrayRef ar = (ArrayRef) v;
-                    return new jedd.internal.RelationContainer(new jedd.Attribute[] { method.v(), fld.v(), stmt.v(), obj.v() },
-                                                               new jedd.PhysicalDomain[] { V2.v(), FD.v(), ST.v(), H1.v() },
+                    return new jedd.internal.RelationContainer(new jedd.Attribute[] { fld.v(), stmt.v(), method.v(), obj.v() },
+                                                               new jedd.PhysicalDomain[] { FD.v(), ST.v(), V2.v(), H1.v() },
                                                                ("return jedd.internal.Jedd.v().compose(jedd.internal.Jedd.v()" +
                                                                 ".read(jedd.internal.Jedd.v().literal(new java.lang.Object[.." +
                                                                 ".], new jedd.Attribute[...], new jedd.PhysicalDomain[...]))," +
@@ -192,15 +192,15 @@ public class BDDSideEffectAnalysis {
                                                "/soot-2-jedd/src/soot/jimple/toolkits/pointer/BDDSideEffectA" +
                                                "nalysis.jedd:133,8"),
                                               jedd.internal.Jedd.v().project(cg.edges,
-                                                                             new jedd.PhysicalDomain[] { T2.v(), T1.v(), H2.v() }));
+                                                                             new jedd.PhysicalDomain[] { T1.v(), T2.v(), H2.v() }));
         while (!jedd.internal.Jedd.v().equals(jedd.internal.Jedd.v().read(closecg),
                                               closecg.eqUnion(jedd.internal.Jedd.v().compose(jedd.internal.Jedd.v().read(jedd.internal.Jedd.v().replace(closecg,
                                                                                                                                                         new jedd.PhysicalDomain[] { V2.v() },
                                                                                                                                                         new jedd.PhysicalDomain[] { V3.v() })),
-                                                                                             jedd.internal.Jedd.v().project(jedd.internal.Jedd.v().replace(closecg,
-                                                                                                                                                           new jedd.PhysicalDomain[] { V1.v() },
-                                                                                                                                                           new jedd.PhysicalDomain[] { V3.v() }),
-                                                                                                                            new jedd.PhysicalDomain[] { ST.v() }),
+                                                                                             jedd.internal.Jedd.v().replace(jedd.internal.Jedd.v().project(closecg,
+                                                                                                                                                           new jedd.PhysicalDomain[] { ST.v() }),
+                                                                                                                            new jedd.PhysicalDomain[] { V1.v() },
+                                                                                                                            new jedd.PhysicalDomain[] { V3.v() }),
                                                                                              new jedd.PhysicalDomain[] { V3.v() }))))
             ;
         read.eqUnion(jedd.internal.Jedd.v().replace(jedd.internal.Jedd.v().compose(jedd.internal.Jedd.v().read(closecg),
@@ -226,7 +226,7 @@ public class BDDSideEffectAnalysis {
                                                     "main[...]).iterator() at /home/olhotak/soot-2-jedd/src/soot/" +
                                                     "jimple/toolkits/pointer/BDDSideEffectAnalysis.jedd:144,80"),
                                                    jedd.internal.Jedd.v().project(cg.edges,
-                                                                                  new jedd.PhysicalDomain[] { T2.v(), V1.v(), T1.v(), H2.v(), ST.v() })).iterator();
+                                                                                  new jedd.PhysicalDomain[] { T1.v(), T2.v(), ST.v(), V1.v(), H2.v() })).iterator();
              mIt.hasNext();
              ) {
             final SootMethod m = (SootMethod) mIt.next();
@@ -260,8 +260,8 @@ public class BDDSideEffectAnalysis {
             }
         }
         System.out.println("Read sets:\n" +
-                           new jedd.internal.RelationContainer(new jedd.Attribute[] { method.v(), fld.v(), stmt.v(), obj.v() },
-                                                               new jedd.PhysicalDomain[] { V1.v(), FD.v(), ST.v(), H1.v() },
+                           new jedd.internal.RelationContainer(new jedd.Attribute[] { fld.v(), stmt.v(), method.v(), obj.v() },
+                                                               new jedd.PhysicalDomain[] { FD.v(), ST.v(), V1.v(), H1.v() },
                                                                ("jedd.internal.Jedd.v().join(jedd.internal.Jedd.v().read(jedd" +
                                                                 ".internal.Jedd.v().replace(read, new jedd.PhysicalDomain[..." +
                                                                 "], new jedd.PhysicalDomain[...])), methods, new jedd.Physica" +
@@ -273,8 +273,8 @@ public class BDDSideEffectAnalysis {
                                                                                            methods,
                                                                                            new jedd.PhysicalDomain[] { V1.v() })).toString());
         System.out.println("Write sets:\n" +
-                           new jedd.internal.RelationContainer(new jedd.Attribute[] { method.v(), fld.v(), stmt.v(), obj.v() },
-                                                               new jedd.PhysicalDomain[] { V1.v(), FD.v(), ST.v(), H1.v() },
+                           new jedd.internal.RelationContainer(new jedd.Attribute[] { fld.v(), stmt.v(), method.v(), obj.v() },
+                                                               new jedd.PhysicalDomain[] { FD.v(), ST.v(), V1.v(), H1.v() },
                                                                ("jedd.internal.Jedd.v().join(jedd.internal.Jedd.v().read(writ" +
                                                                 "e), methods, new jedd.PhysicalDomain[...]).toString() at /ho" +
                                                                 "me/olhotak/soot-2-jedd/src/soot/jimple/toolkits/pointer/BDDS" +
@@ -283,14 +283,14 @@ public class BDDSideEffectAnalysis {
                                                                                            methods,
                                                                                            new jedd.PhysicalDomain[] { V1.v() })).toString());
         System.out.println("NTRead:\n" +
-                           new jedd.internal.RelationContainer(new jedd.Attribute[] { method.v(), fld.v(), stmt.v(), obj.v() },
-                                                               new jedd.PhysicalDomain[] { V2.v(), FD.v(), ST.v(), H1.v() },
+                           new jedd.internal.RelationContainer(new jedd.Attribute[] { fld.v(), stmt.v(), method.v(), obj.v() },
+                                                               new jedd.PhysicalDomain[] { FD.v(), ST.v(), V2.v(), H1.v() },
                                                                ("ntread.toString() at /home/olhotak/soot-2-jedd/src/soot/jimp" +
                                                                 "le/toolkits/pointer/BDDSideEffectAnalysis.jedd:169,40"),
                                                                ntread).toString());
         System.out.println("NTWrite:\n" +
-                           new jedd.internal.RelationContainer(new jedd.Attribute[] { method.v(), fld.v(), stmt.v(), obj.v() },
-                                                               new jedd.PhysicalDomain[] { V1.v(), FD.v(), ST.v(), H1.v() },
+                           new jedd.internal.RelationContainer(new jedd.Attribute[] { fld.v(), stmt.v(), method.v(), obj.v() },
+                                                               new jedd.PhysicalDomain[] { FD.v(), ST.v(), V1.v(), H1.v() },
                                                                ("ntwrite.toString() at /home/olhotak/soot-2-jedd/src/soot/jim" +
                                                                 "ple/toolkits/pointer/BDDSideEffectAnalysis.jedd:170,41"),
                                                                ntwrite).toString());

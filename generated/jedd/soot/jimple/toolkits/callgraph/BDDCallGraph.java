@@ -36,16 +36,16 @@ public final class BDDCallGraph {
     
     public void addEdges(final jedd.internal.RelationContainer edges) {
         this.edges.eqUnion(edges);
-        queue.add(new jedd.internal.RelationContainer(new Attribute[] { tgtc.v(), srcm.v(), srcc.v(), tgtm.v(), kind.v(), stmt.v() },
-                                                      new PhysicalDomain[] { T2.v(), V1.v(), T1.v(), V2.v(), H2.v(), ST.v() },
+        queue.add(new jedd.internal.RelationContainer(new Attribute[] { tgtm.v(), srcc.v(), tgtc.v(), stmt.v(), srcm.v(), kind.v() },
+                                                      new PhysicalDomain[] { V2.v(), T1.v(), T2.v(), ST.v(), V1.v(), H2.v() },
                                                       ("queue.add(edges) at /home/olhotak/soot-2-jedd/src/soot/jimpl" +
                                                        "e/toolkits/callgraph/BDDCallGraph.jedd:42,8"),
                                                       edges));
     }
     
     public jedd.internal.RelationContainer edgesOutOf(final jedd.internal.RelationContainer m) {
-        return new jedd.internal.RelationContainer(new Attribute[] { tgtc.v(), srcm.v(), srcc.v(), tgtm.v(), kind.v(), stmt.v() },
-                                                   new PhysicalDomain[] { T2.v(), V1.v(), T1.v(), V2.v(), H2.v(), ST.v() },
+        return new jedd.internal.RelationContainer(new Attribute[] { tgtm.v(), srcc.v(), tgtc.v(), stmt.v(), srcm.v(), kind.v() },
+                                                   new PhysicalDomain[] { V2.v(), T1.v(), T2.v(), ST.v(), V1.v(), H2.v() },
                                                    ("return jedd.internal.Jedd.v().join(jedd.internal.Jedd.v().re" +
                                                     "ad(edges), m, new jedd.PhysicalDomain[...]); at /home/olhota" +
                                                     "k/soot-2-jedd/src/soot/jimple/toolkits/callgraph/BDDCallGrap" +
@@ -56,8 +56,8 @@ public final class BDDCallGraph {
     }
     
     public jedd.internal.RelationContainer edgesOutOf(SootMethod m) {
-        return new jedd.internal.RelationContainer(new Attribute[] { tgtc.v(), srcm.v(), srcc.v(), tgtm.v(), kind.v(), stmt.v() },
-                                                   new PhysicalDomain[] { T2.v(), V1.v(), T1.v(), V2.v(), H2.v(), ST.v() },
+        return new jedd.internal.RelationContainer(new Attribute[] { tgtm.v(), srcc.v(), tgtc.v(), stmt.v(), srcm.v(), kind.v() },
+                                                   new PhysicalDomain[] { V2.v(), T1.v(), T2.v(), ST.v(), V1.v(), H2.v() },
                                                    ("return jedd.internal.Jedd.v().join(jedd.internal.Jedd.v().re" +
                                                     "ad(edges), jedd.internal.Jedd.v().literal(new java.lang.Obje" +
                                                     "ct[...], new jedd.Attribute[...], new jedd.PhysicalDomain[.." +

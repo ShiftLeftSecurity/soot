@@ -59,8 +59,8 @@ public final class BDDOnFlyCallGraphBuilder extends AbstractOnFlyCallGraphBuilde
                                                    "lyCallGraphBuilder.jedd:73,12"),
                                                   worklist.next());
             Iterator it =
-              new jedd.internal.RelationContainer(new Attribute[] { method.v(), ctxt.v() },
-                                                  new PhysicalDomain[] { V1.v(), T1.v() },
+              new jedd.internal.RelationContainer(new Attribute[] { ctxt.v(), method.v() },
+                                                  new PhysicalDomain[] { T1.v(), V1.v() },
                                                   ("methodContext.iterator(new jedd.Attribute[...]) at /home/olh" +
                                                    "otak/soot-2-jedd/src/soot/jimple/toolkits/callgraph/BDDOnFly" +
                                                    "CallGraphBuilder.jedd:74,26"),
@@ -83,25 +83,21 @@ public final class BDDOnFlyCallGraphBuilder extends AbstractOnFlyCallGraphBuilde
                                                "re:soot.jimple.spark.bdddomains.H1, soot.jimple.spark.bdddom" +
                                                "ains.kind:soot.jimple.spark.bdddomains.H2> signatures = jedd" +
                                                ".internal.Jedd.v().compose(jedd.internal.Jedd.v().read(virtu" +
-                                               "alCallSites), jedd.internal.Jedd.v().replace(types, new jedd" +
-                                               ".PhysicalDomain[...], new jedd.PhysicalDomain[...]), new jed" +
-                                               "d.PhysicalDomain[...]); at /home/olhotak/soot-2-jedd/src/soo" +
-                                               "t/jimple/toolkits/callgraph/BDDOnFlyCallGraphBuilder.jedd:82" +
-                                               ",8"),
+                                               "alCallSites), types, new jedd.PhysicalDomain[...]); at /home" +
+                                               "/olhotak/soot-2-jedd/src/soot/jimple/toolkits/callgraph/BDDO" +
+                                               "nFlyCallGraphBuilder.jedd:82,8"),
                                               jedd.internal.Jedd.v().compose(jedd.internal.Jedd.v().read(virtualCallSites),
-                                                                             jedd.internal.Jedd.v().replace(types,
-                                                                                                            new PhysicalDomain[] { V1.v() },
-                                                                                                            new PhysicalDomain[] { V3.v() }),
+                                                                             types,
                                                                              new PhysicalDomain[] { V3.v() }));
-        virtualCalls.addTypes(new jedd.internal.RelationContainer(new Attribute[] { signature.v(), type.v() },
-                                                                  new PhysicalDomain[] { H1.v(), T1.v() },
+        virtualCalls.addTypes(new jedd.internal.RelationContainer(new Attribute[] { type.v(), signature.v() },
+                                                                  new PhysicalDomain[] { T1.v(), H1.v() },
                                                                   ("virtualCalls.addTypes(jedd.internal.Jedd.v().replace(jedd.in" +
                                                                    "ternal.Jedd.v().project(signatures, new jedd.PhysicalDomain[" +
                                                                    "...]), new jedd.PhysicalDomain[...], new jedd.PhysicalDomain" +
                                                                    "[...])) at /home/olhotak/soot-2-jedd/src/soot/jimple/toolkit" +
                                                                    "s/callgraph/BDDOnFlyCallGraphBuilder.jedd:84,8"),
                                                                   jedd.internal.Jedd.v().replace(jedd.internal.Jedd.v().project(signatures,
-                                                                                                                                new PhysicalDomain[] { V1.v(), H2.v(), ST.v() }),
+                                                                                                                                new PhysicalDomain[] { ST.v(), V1.v(), H2.v() }),
                                                                                                  new PhysicalDomain[] { T2.v() },
                                                                                                  new PhysicalDomain[] { T1.v() })));
         final jedd.internal.RelationContainer edges =
@@ -122,8 +118,8 @@ public final class BDDOnFlyCallGraphBuilder extends AbstractOnFlyCallGraphBuilde
                                                                                                             new PhysicalDomain[] { T1.v() },
                                                                                                             new PhysicalDomain[] { T2.v() }),
                                                                              new PhysicalDomain[] { T2.v(), H1.v() }));
-        cm.addVirtualEdges(new jedd.internal.RelationContainer(new Attribute[] { srcm.v(), tgtm.v(), kind.v(), stmt.v() },
-                                                               new PhysicalDomain[] { V1.v(), V2.v(), H2.v(), ST.v() },
+        cm.addVirtualEdges(new jedd.internal.RelationContainer(new Attribute[] { tgtm.v(), stmt.v(), srcm.v(), kind.v() },
+                                                               new PhysicalDomain[] { V2.v(), ST.v(), V1.v(), H2.v() },
                                                                ("cm.addVirtualEdges(edges) at /home/olhotak/soot-2-jedd/src/s" +
                                                                 "oot/jimple/toolkits/callgraph/BDDOnFlyCallGraphBuilder.jedd:" +
                                                                 "88,8"),
@@ -196,7 +192,7 @@ public final class BDDOnFlyCallGraphBuilder extends AbstractOnFlyCallGraphBuilde
                                                                "[...])) at /home/olhotak/soot-2-jedd/src/soot/jimple/toolkit" +
                                                                "s/callgraph/BDDOnFlyCallGraphBuilder.jedd:153,8"),
                                                               jedd.internal.Jedd.v().project(cicg.edgesOutOf(momc.method()),
-                                                                                             new PhysicalDomain[] { T2.v(), T1.v() })));
+                                                                                             new PhysicalDomain[] { T1.v(), T2.v() })));
     }
     
     protected void addEdge(SootMethod src, Stmt stmt, SootMethod tgt, int kind) { cicg.addEdge(src, stmt, tgt, kind); }

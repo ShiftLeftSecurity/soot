@@ -8,8 +8,8 @@ import java.util.*;
 public final class BDDHierarchy {
     public jedd.internal.RelationContainer subtypeRelation() {
         this.update();
-        return new jedd.internal.RelationContainer(new jedd.Attribute[] { supt.v(), subt.v() },
-                                                   new jedd.PhysicalDomain[] { T2.v(), T1.v() },
+        return new jedd.internal.RelationContainer(new jedd.Attribute[] { subt.v(), supt.v() },
+                                                   new jedd.PhysicalDomain[] { T1.v(), T2.v() },
                                                    ("return closure; at /home/olhotak/soot-2-jedd/src/soot/jimple" +
                                                     "/spark/internal/BDDHierarchy.jedd:36,8"),
                                                    closure);
@@ -42,8 +42,8 @@ public final class BDDHierarchy {
                                           jedd.internal.Jedd.v().falseBDD());
     
     public jedd.internal.RelationContainer extend() {
-        return new jedd.internal.RelationContainer(new jedd.Attribute[] { supt.v(), subt.v() },
-                                                   new jedd.PhysicalDomain[] { T2.v(), T1.v() },
+        return new jedd.internal.RelationContainer(new jedd.Attribute[] { subt.v(), supt.v() },
+                                                   new jedd.PhysicalDomain[] { T1.v(), T2.v() },
                                                    ("return extend; at /home/olhotak/soot-2-jedd/src/soot/jimple/" +
                                                     "spark/internal/BDDHierarchy.jedd:59,35"),
                                                    extend);

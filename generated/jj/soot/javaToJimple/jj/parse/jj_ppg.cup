@@ -25,7 +25,8 @@ parser Grm extends polyglot.ext.jl.parse.Grm {:
     }
 
     public static Position pos(Object first, Object last){
-       
+      
+        //System.out.println("first: "+first+" class: "+first.getClass()+" last: "+last+" class: "+last.getClass());
         Position fpos = null;
         Position epos = null;
         if (first instanceof Node) {
@@ -464,7 +465,10 @@ modifiers_opt ::=
 
 modifiers ::=
     modifier:a {:  RESULT = a;  :}
- |  modifiers:a modifier:b {:  RESULT = a.set(b);  :};
+ |  modifiers:a modifier:b {:
+                           if (a .intersects(b)) parser.die(parser.position());    
+                 RESULT = a.set(b); 
+                           :};
 
 modifier ::=
     PUBLIC:a {:  RESULT = Flags.PUBLIC;  :}
@@ -546,7 +550,8 @@ class_body_declaration ::=
             List l = new TypedList(new LinkedList(), ClassMember.class, false);
                l.add(parser.nf.Initializer(parser.pos(a), Flags.NONE, a));
                RESULT = l; 
-            :};
+            :}
+ |  SEMICOLON {:  RESULT = Collections.EMPTY_LIST;  :};
 
 class_member_declaration ::=
     field_declaration:a {:  RESULT = a;  :}
@@ -781,7 +786,8 @@ interface_member_declaration ::=
                             List l = new TypedList(new LinkedList(), ClassMember.class, false);
                l.add(a);
                RESULT = l; 
-                            :};
+                            :}
+ |  SEMICOLON {:  RESULT = Collections.EMPTY_LIST;  :};
 
 constant_declaration ::=
     field_declaration:a {:  RESULT = a;  :};
@@ -927,12 +933,12 @@ if_then_statement ::=
 
 if_then_else_statement ::=
     IF:n LPAREN expression:a RPAREN statement_no_short_if:b ELSE statement:c {:
-                                                                             RESULT = parser.nf.If(parser.pos(n, b), a, b, c); 
+                                                                             RESULT = parser.nf.If(parser.pos(n, c), a, b, c); 
                                                                              :};
 
 if_then_else_statement_no_short_if ::=
     IF:n LPAREN expression:a RPAREN statement_no_short_if:b ELSE statement_no_short_if:c {:
-                                                                                         RESULT = parser.nf.If(parser.pos(n, b), a, b, c); 
+                                                                                         RESULT = parser.nf.If(parser.pos(n, c), a, b, c); 
                                                                                          :};
 
 switch_statement ::=
@@ -1194,11 +1200,11 @@ argument_list ::=
 
 array_creation_expression ::=
     NEW:n primitive_type:a dim_exprs:b dims_opt:c {:
-                                                  RESULT = parser.nf.NewArray(parser.pos(n, c), a, b,
+                                                  RESULT = parser.nf.NewArray(parser.pos(n, b), a, b,
                 c.intValue()); 
                                                   :}
  |  NEW:n class_or_interface_type:a dim_exprs:b dims_opt:c {:
-                                                           RESULT = parser.nf.NewArray(parser.pos(n, c), a, b, 
+                                                           RESULT = parser.nf.NewArray(parser.pos(n, b), a, b, 
                 c.intValue()); 
                                                            :}
  |  NEW:n primitive_type:a dims:b array_initializer:c {:
@@ -1284,44 +1290,44 @@ postfix_expression ::=
  |  postdecrement_expression:a {:  RESULT = a;  :};
 
 postincrement_expression ::=
-    postfix_expression:a PLUSPLUS {:
-                                  RESULT = parser.nf.Unary(parser.pos(a), a, Unary.POST_INC); 
-                                  :};
+    postfix_expression:a PLUSPLUS:b {:
+                                    RESULT = parser.nf.Unary(parser.pos(a,b), a, Unary.POST_INC); 
+                                    :};
 
 postdecrement_expression ::=
-    postfix_expression:a MINUSMINUS {:
-                                    RESULT = parser.nf.Unary(parser.pos(a), a, Unary.POST_DEC); 
-                                    :};
+    postfix_expression:a MINUSMINUS:b {:
+                                      RESULT = parser.nf.Unary(parser.pos(a,b), a, Unary.POST_DEC); 
+                                      :};
 
 unary_expression ::=
     preincrement_expression:a {:  RESULT = a;  :}
  |  predecrement_expression:a {:  RESULT = a;  :}
- |  PLUS unary_expression:a {:
-                            RESULT = parser.nf.Unary(parser.pos(a), Unary.POS, a); 
-                            :}
- |  MINUS unary_expression:a {:
-                             RESULT = parser.nf.Unary(parser.pos(a), Unary.NEG, a); 
-                             :}
+ |  PLUS:b unary_expression:a {:
+                              RESULT = parser.nf.Unary(parser.pos(b,a), Unary.POS, a); 
+                              :}
+ |  MINUS:b unary_expression:a {:
+                               RESULT = parser.nf.Unary(parser.pos(b,a), Unary.NEG, a); 
+                               :}
  |  unary_expression_not_plus_minus:a {:  RESULT = a;  :};
 
 preincrement_expression ::=
-    PLUSPLUS unary_expression:a {:
-                                RESULT = parser.nf.Unary(parser.pos(a), Unary.PRE_INC, a); 
-                                :};
+    PLUSPLUS:b unary_expression:a {:
+                                  RESULT = parser.nf.Unary(parser.pos(b,a), Unary.PRE_INC, a); 
+                                  :};
 
 predecrement_expression ::=
-    MINUSMINUS unary_expression:a {:
-                                  RESULT = parser.nf.Unary(parser.pos(a), Unary.PRE_DEC, a); 
-                                  :};
+    MINUSMINUS:b unary_expression:a {:
+                                    RESULT = parser.nf.Unary(parser.pos(b,a), Unary.PRE_DEC, a); 
+                                    :};
 
 unary_expression_not_plus_minus ::=
     postfix_expression:a {:  RESULT = a;  :}
- |  COMP unary_expression:a {:
-                            RESULT = parser.nf.Unary(parser.pos(a), Unary.BIT_NOT, a); 
-                            :}
- |  NOT unary_expression:a {:
-                           RESULT = parser.nf.Unary(parser.pos(a), Unary.NOT, a); 
-                           :}
+ |  COMP:b unary_expression:a {:
+                              RESULT = parser.nf.Unary(parser.pos(b,a), Unary.BIT_NOT, a); 
+                              :}
+ |  NOT:b unary_expression:a {:
+                             RESULT = parser.nf.Unary(parser.pos(b,a), Unary.NOT, a); 
+                             :}
  |  cast_expression:a {:  RESULT = a;  :};
 
 cast_expression ::=
@@ -1450,7 +1456,7 @@ conditional_or_expression ::=
 conditional_expression ::=
     conditional_or_expression:a {:  RESULT = a;  :}
  |  conditional_or_expression:a QUESTION expression:b COLON conditional_expression:c {:
-                                                                                     RESULT = parser.nf.Conditional(parser.pos(a, b), a, 
+                                                                                     RESULT = parser.nf.Conditional(parser.pos(a, c), a, 
                 b, c); 
                                                                                      :};
 

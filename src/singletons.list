@@ -157,3 +157,4 @@ UnreachableFieldsTagger
 TightestQualifiersTagger
 ParameterAliasTagger
 KindNumberer
+ReachingDefsTagger

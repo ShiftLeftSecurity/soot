@@ -2,6 +2,23 @@ package soot.javaToJimple;
 
 public class Util {
     
+    public static void addLnPosTags(soot.tagkit.Host host, polyglot.util.Position pos) {
+        if (pos != null) {
+            if (pos instanceof soot.javaToJimple.jj.DPosition){
+                soot.javaToJimple.jj.DPosition dpos = (soot.javaToJimple.jj.DPosition)pos;
+                addLnPosTags(host, dpos.line(), dpos.endLine(), dpos.column(), dpos.endCol()); 
+            }
+        }
+    }
+    
+    public static void addLnPosTags(soot.tagkit.Host host, int sline, int eline, int spos, int epos) {
+        if (soot.options.Options.v().keep_line_number()){
+            host.addTag(new soot.tagkit.SourceLnPosTag(sline, eline, spos, epos));
+        }
+        //host.addTag(new soot.tagkit.SourceLineNumberTag(sline, eline));
+        //host.addTag(new soot.tagkit.SourcePositionTag(spos, epos));
+    }
+    
     /**
      * Position Tag Adder
      */
@@ -9,7 +26,14 @@ public class Util {
         if (pos != null) {
             if (pos instanceof soot.javaToJimple.jj.DPosition){
                 soot.javaToJimple.jj.DPosition dpos = (soot.javaToJimple.jj.DPosition)pos;
+                /*if (host instanceof soot.jimple.Stmt) {
+                    System.out.println("host is a stmt and adding SourcePosTag: "+host.toString());
+                }
+                System.out.println("adding pos tag: "+dpos+" to host: "+host.getClass());*/
                 addPosTag(host, dpos.column(), dpos.endCol());
+            }
+            else {
+                System.out.println("not a dpos");
             }
         }
     }
@@ -28,7 +52,9 @@ public class Util {
     }
 
     public static void addMethodLineTag(soot.tagkit.Host host, int sline, int eline){
-        host.addTag(new soot.tagkit.SourceLineNumberTag(sline, eline));    
+        if (soot.options.Options.v().keep_line_number()){
+            host.addTag(new soot.tagkit.SourceLineNumberTag(sline, eline));    
+        }
     }
     
     /**
@@ -46,6 +72,15 @@ public class Util {
                 
             }
         }
+    }
+    
+    /**
+     * Line Tag Adder
+     */
+    public static void addLineTag(soot.tagkit.Host host, int sLine, int eLine) {
+
+        host.addTag(new soot.tagkit.SourceLineNumberTag(sLine, eLine));
+                    
     }
     
     /**
@@ -115,6 +150,7 @@ public class Util {
             else {
 			    className = classType.fullName();
             }
+            //System.out.println("className for type: "+className);
 			sootType = soot.RefType.v(className);
 		}
 		else{

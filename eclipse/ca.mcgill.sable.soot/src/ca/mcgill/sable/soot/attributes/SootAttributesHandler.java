@@ -23,10 +23,13 @@ import java.util.*;
 
 public class SootAttributesHandler {
 
-	private Vector attrList;
+	private ArrayList attrList;
 	//private HashMap fileList;
 	private String fileName;
 	private HashMap projList;
+	private long valuesSetTime;
+	private boolean update = true;
+	private ArrayList keyList;
 
 	private static final String NEWLINE = "\n\r";
 	
@@ -34,13 +37,18 @@ public class SootAttributesHandler {
 				
 	}
 	
-	public void setAttrList(Vector attrList) {
-		this.attrList = attrList;
+	public void setAttrList(ArrayList attrList) {
+		if (this.attrList == null){
+			this.attrList = new ArrayList();
+		}
+		this.attrList.addAll(attrList);
 	}
 
 	public String getJimpleAttributes(int lnNum) {
-		Iterator it = getAttrList().iterator();
 		StringBuffer sb = new StringBuffer();
+		if (getAttrList() == null) return sb.toString();
+		Iterator it = getAttrList().iterator();
+		
 		while (it.hasNext()) {
 			SootAttribute sa = (SootAttribute)it.next();
 			if (sa.attrForJimpleLn(lnNum)) {
@@ -67,8 +75,9 @@ public class SootAttributesHandler {
 	}
 	
 	public String getJavaAttribute(int lnNum) {
-		Iterator it = getAttrList().iterator();
 		StringBuffer sb = new StringBuffer();
+		if (getAttrList() == null) return sb.toString();
+		Iterator it = getAttrList().iterator();
 		while (it.hasNext()) {
 			SootAttribute sa = (SootAttribute)it.next();
 			if (sa.attrForJavaLn(lnNum)) {
@@ -82,21 +91,23 @@ public class SootAttributesHandler {
 	}
 
 	public ArrayList getJavaLinks(int lnNum){
-		Iterator it = getAttrList().iterator();
 		ArrayList list = new ArrayList();
+		if (getAttrList() == null) return list;
+		Iterator it = getAttrList().iterator();
 		while (it.hasNext()){
 			SootAttribute sa = (SootAttribute)it.next();
-			System.out.println("links for line: "+lnNum);
+			//System.out.println("links for line: "+lnNum);
 			if (sa.attrForJavaLn(lnNum)){
 				if (sa.getAllLinkAttrs() != null){
 				
 					list.addAll(sa.getAllLinkAttrs());
 				}
-				System.out.println("list length: "+list.size());
+				//System.out.println("list length: "+list.size());
 			}
 		}
 		return list;
 	}
+
 
 	/**
 	 * Returns the projList.
@@ -118,7 +129,7 @@ public class SootAttributesHandler {
 	 * Returns the attrList.
 	 * @return Vector
 	 */
-	public Vector getAttrList() {
+	public ArrayList getAttrList() {
 		return attrList;
 	}
 
@@ -136,6 +147,48 @@ public class SootAttributesHandler {
 	 */
 	public void setFileName(String fileName) {
 		this.fileName = fileName;
+	}
+
+	/**
+	 * @return
+	 */
+	public long getValuesSetTime() {
+		return valuesSetTime;
+	}
+
+	/**
+	 * @param l
+	 */
+	public void setValuesSetTime(long l) {
+		valuesSetTime = l;
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean isUpdate() {
+		return update;
+	}
+
+	/**
+	 * @param b
+	 */
+	public void setUpdate(boolean b) {
+		update = b;
+	}
+
+	/**
+	 * @return
+	 */
+	public ArrayList getKeyList() {
+		return keyList;
+	}
+
+	/**
+	 * @param list
+	 */
+	public void setKeyList(ArrayList list) {
+		keyList = list;
 	}
 
 }

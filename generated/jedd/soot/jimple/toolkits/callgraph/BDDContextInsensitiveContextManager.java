@@ -23,8 +23,8 @@ public class BDDContextInsensitiveContextManager implements BDDContextManager {
     }
     
     public void addStaticEdges(Object sourceContext, final jedd.internal.RelationContainer edges) {
-        cg.addEdges(new jedd.internal.RelationContainer(new jedd.Attribute[] { tgtc.v(), srcc.v(), srcm.v(), tgtm.v(), kind.v(), stmt.v() },
-                                                        new jedd.PhysicalDomain[] { T2.v(), T1.v(), V1.v(), V2.v(), H2.v(), ST.v() },
+        cg.addEdges(new jedd.internal.RelationContainer(new jedd.Attribute[] { srcc.v(), tgtc.v(), tgtm.v(), stmt.v(), srcm.v(), kind.v() },
+                                                        new jedd.PhysicalDomain[] { T1.v(), T2.v(), V2.v(), ST.v(), V1.v(), H2.v() },
                                                         ("cg.addEdges(jedd.internal.Jedd.v().join(jedd.internal.Jedd.v" +
                                                          "().read(jedd.internal.Jedd.v().literal(new java.lang.Object[" +
                                                          "...], new jedd.Attribute[...], new jedd.PhysicalDomain[...])" +
@@ -47,8 +47,8 @@ public class BDDContextInsensitiveContextManager implements BDDContextManager {
     }
     
     public void addVirtualEdges(final jedd.internal.RelationContainer edges) {
-        cg.addEdges(new jedd.internal.RelationContainer(new jedd.Attribute[] { tgtc.v(), srcc.v(), srcm.v(), tgtm.v(), kind.v(), stmt.v() },
-                                                        new jedd.PhysicalDomain[] { T2.v(), T1.v(), V1.v(), V2.v(), H2.v(), ST.v() },
+        cg.addEdges(new jedd.internal.RelationContainer(new jedd.Attribute[] { srcc.v(), tgtc.v(), tgtm.v(), stmt.v(), srcm.v(), kind.v() },
+                                                        new jedd.PhysicalDomain[] { T1.v(), T2.v(), V2.v(), ST.v(), V1.v(), H2.v() },
                                                         ("cg.addEdges(jedd.internal.Jedd.v().join(jedd.internal.Jedd.v" +
                                                          "().read(jedd.internal.Jedd.v().literal(new java.lang.Object[" +
                                                          "...], new jedd.Attribute[...], new jedd.PhysicalDomain[...])" +

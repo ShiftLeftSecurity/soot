@@ -43,6 +43,7 @@ import soot.jimple.toolkits.annotation.fields.*;
 import soot.jimple.toolkits.annotation.qualifiers.*;
 import soot.jimple.toolkits.annotation.nullcheck.*;
 import soot.jimple.toolkits.annotation.tags.*;
+import soot.jimple.toolkits.annotation.defs.*;
 import soot.jimple.toolkits.pointer.*;
 import soot.jimple.toolkits.callgraph.*;
 import soot.tagkit.*;
@@ -87,6 +88,24 @@ public class PackManager {
             p.add(new Transform("jb.uce", UnreachableCodeEliminator.v()));
         }
 
+        // Java to Jimple - Jimple body creation
+        addPack(p = new JavaToJimpleBodyPack());
+        {
+            p.add(new Transform("jj.ls", LocalSplitter.v()));
+            p.add(new Transform("jj.a", Aggregator.v()));
+            p.add(new Transform("jj.ule", UnusedLocalEliminator.v()));
+            p.add(new Transform("jj.ne", NopEliminator.v()));
+            p.add(new Transform("jj.tr", TypeAssigner.v()));
+            p.add(new Transform("jj.ulp", LocalPacker.v()));
+            p.add(new Transform("jj.lns", LocalNameStandardizer.v()));
+            p.add(new Transform("jj.cp", CopyPropagator.v()));
+            p.add(new Transform("jj.dae", DeadAssignmentEliminator.v()));
+            p.add(new Transform("jj.cp-ule", UnusedLocalEliminator.v()));
+            p.add(new Transform("jj.lp", LocalPacker.v()));
+            p.add(new Transform("jj.uce", UnreachableCodeEliminator.v()));
+        
+        }
+        
         // Call graph pack
         addPack(p = new CallGraphPack("cg"));
         {
@@ -167,6 +186,7 @@ public class PackManager {
             p.add(new Transform("jap.cgtagger", CallGraphTagger.v()));
             p.add(new Transform("jap.parity", ParityTagger.v()));
             p.add(new Transform("jap.pat", ParameterAliasTagger.v()));
+            p.add(new Transform("jap.rdtagger", ReachingDefsTagger.v()));
 	    
         }
         
@@ -417,6 +437,8 @@ public class PackManager {
                 throw new RuntimeException();
         }
 
+        soot.xml.TagCollector tc = new soot.xml.TagCollector();
+        
         boolean wholeShimple = Options.v().whole_shimple();
         if( Options.v().via_shimple() ) produceShimple = true;
 
@@ -456,8 +478,12 @@ public class PackManager {
                 PackManager.v().getPack("jtp").apply(body);
                 PackManager.v().getPack("jop").apply(body);
                 PackManager.v().getPack("jap").apply(body);
+                if (Options.v().xml_attributes() && Options.v().output_format() != Options.output_format_jimple) {
+                    //System.out.println("collecting body tags");
+                    tc.collectBodyTags(body);
+                }
             }
-
+             
             if (produceGrimp) {
                 m.setActiveBody(Grimp.v().newBody(m.getActiveBody(), "gb"));
                 PackManager.v().getPack("gop").apply(m.getActiveBody());
@@ -467,6 +493,11 @@ public class PackManager {
                 PackManager.v().getPack("bop").apply(m.getActiveBody());
                 PackManager.v().getPack("tag").apply(m.getActiveBody());
             }
+        }
+            
+        if (Options.v().xml_attributes() && Options.v().output_format() != Options.output_format_jimple) {
+            processXMLForClass(c, tc);
+            //System.out.println("processed xml for class");
         }
 
         if (produceDava) {
@@ -552,15 +583,28 @@ public class PackManager {
     }
 
     private void postProcessXML( Iterator classes ) {
-        final int format = Options.v().output_format();
         if (!Options.v().xml_attributes()) return;
+        if (Options.v().output_format() != Options.output_format_jimple) return;
         while( classes.hasNext() ) {
             SootClass c = (SootClass) classes.next();
-            String fileName = SourceLocator.v().getFileNameFor(c, format);
-            XMLAttributesPrinter xap = new XMLAttributesPrinter(fileName,
-                    SourceLocator.v().getOutputDir());
-            xap.printAttrs(c);
+            processXMLForClass(c);
         }
+    }
+
+    private void processXMLForClass(SootClass c, TagCollector tc){
+        final int format = Options.v().output_format();
+        String fileName = SourceLocator.v().getFileNameFor(c, format);
+        XMLAttributesPrinter xap = new XMLAttributesPrinter(fileName,
+               SourceLocator.v().getOutputDir());
+        xap.printAttrs(c, tc);
+    }
+    
+    private void processXMLForClass(SootClass c){
+        final int format = Options.v().output_format();
+        String fileName = SourceLocator.v().getFileNameFor(c, format);
+        XMLAttributesPrinter xap = new XMLAttributesPrinter(fileName,
+               SourceLocator.v().getOutputDir());
+        xap.printAttrs(c);
     }
 
     private void releaseBodies( SootClass cl ) {

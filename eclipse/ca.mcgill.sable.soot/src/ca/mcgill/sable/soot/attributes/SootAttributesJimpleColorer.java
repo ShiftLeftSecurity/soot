@@ -28,136 +28,54 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.*;
+import org.eclipse.ui.texteditor.AbstractTextEditor;
 
+import ca.mcgill.sable.soot.SootPlugin;
 import ca.mcgill.sable.soot.editors.*;
 
-public class SootAttributesJimpleColorer {
+public class SootAttributesJimpleColorer extends AbstractAttributesColorer implements Runnable{
 
 
-	private ITextViewer viewer;
-	private IEditorPart editorPart;
-    private ArrayList textPresList;
+	public void run(){
+		init();
+        computeColors();	
+	}
 	
-	public void computeColors(SootAttributesHandler handler, ITextViewer viewer, IEditorPart editorPart){
-		setViewer(viewer);
-		setEditorPart(editorPart);
-		Iterator it = handler.getAttrList().iterator();
-		//TextPresentation tp = new TextPresentation();
-		//System.out.println("computing colors");
+	public void computeColors(){//SootAttributesHandler handler, ITextViewer viewer, IEditorPart editorPart){
+		
+		if ((getHandler() == null) || (getHandler().getAttrList() == null)) return;
+        ArrayList sortedAttrs = sortAttrsByLength(getHandler().getAttrList());
+		Iterator it = getHandler().getAttrList().iterator();
+		
+		setStyleList(new ArrayList());
+
+        getDisplay().asyncExec( new Runnable() {
+            public void run(){
+                setBgColor(getViewer().getTextWidget().getBackground());  
+            };
+        });
+        
 		while (it.hasNext()) {
 			// sets colors for stmts
 			SootAttribute sa = (SootAttribute)it.next();
-			if ((sa.getRed() == 0) && (sa.getGreen() == 0) && (sa.getBlue() == 0)){
-			}
-			else {
-				setAttributeTextColor(sa.getJimpleStartLn(), sa.getJimpleEndLn(), sa.getJimpleOffsetStart()+1, sa.getJimpleOffsetEnd()+1, sa.getRGBColor());//, tp);
-			}
-			// sets colors for valueboxes
-			if (sa.getValueAttrs() != null){
-				Iterator valIt = sa.getValueAttrs().iterator();
-				while (valIt.hasNext()){
-					PosColAttribute vba = (PosColAttribute)valIt.next();
-					if ((vba.getRed() == 0) && (vba.getGreen() == 0) && (vba.getBlue() == 0)){
-					}
-					else {
-						setAttributeTextColor(sa.getJimpleStartLn(), sa.getJimpleEndLn(), vba.getStartOffset()+1, vba.getEndOffset()+1, vba.getRGBColor());//, tp);
-					}
-				}
-			}
-		}
-		//return tp;
-					
-	}
-	
-	private void setAttributeTextColor(int line, int eline, int start, int end, RGB colorKey) {//, TextPresentation tp){
-		Display display = getEditorPart().getSite().getShell().getDisplay();
-		TextPresentation tp = new TextPresentation();
-        if (getTextPresList() == null) {
-            setTextPresList(new ArrayList());
-        }
-        getTextPresList().add(tp);
-		ColorManager colorManager = new ColorManager();
-		int sLineOffset = 0;
-		int eLineOffset = 0;
-		System.out.println("line: "+line+" eline: "+eline+" spos: "+start+" epos: "+end);
-		try {
-			sLineOffset = getViewer().getDocument().getLineOffset((line-1));
-			eLineOffset = getViewer().getDocument().getLineOffset((eline-1));
-		}
-		catch(Exception e){	
-		}
-		System.out.println("sLineOffset: "+sLineOffset);
-		System.out.println("eLineOffset: "+eLineOffset);
-		StyleRange sr = new StyleRange((sLineOffset + start - 1	), ((eLineOffset + end -1) - (sLineOffset + start - 1)), colorManager.getColor(IJimpleColorConstants.JIMPLE_DEFAULT), colorManager.getColor(colorKey));
-		tp.addStyleRange(sr);
-		Color c = tp.getFirstStyleRange().background;
-		
-		final TextPresentation newPresentation = tp;
-		
-		display.asyncExec( new Runnable() {
-			public void run() {
-				getViewer().changeTextPresentation(newPresentation, true);
-			};
-		});
-		
-		//tp.clear();
+            if ((sa.getJimpleStartLn() != 0) && (sa.getJimpleEndLn() != 0)) {
+                if ((sa.getJimpleStartPos() != 0) && (sa.getJimpleEndPos() != 0)){
+			        if (sa.getColor() != null){
 			
+                        boolean fg = sa.getColor().fg() == 1 ? true: false;
+                   
+			    	    setAttributeTextColor(sa.getJimpleStartLn(), sa.getJimpleEndLn(), sa.getJimpleStartPos()+1, sa.getJimpleEndPos()+1, sa.getRGBColor(), fg);//, tp);
+                    }
+                }
+			}
+			        
+		}
 		
+		changeStyles();			
 	}
-    
-    public void clearTextPresentations(){
-        if (getTextPresList() == null) return;
-        
-        Iterator it = getTextPresList().iterator();
-        while (it.hasNext()){
-            TextPresentation tp = (TextPresentation)it.next();
-            tp.clear();
-            //System.out.println("cleared TextPresentation");
-        }
-        
-    }
+	protected void setLength(SootAttribute sa, int len){
+		sa.setJimpleLength(len);
+	}
 	
-
-	/**
-	 * @return
-	 */
-	public ITextViewer getViewer() {
-		return viewer;
-	}
-
-	/**
-	 * @param viewer
-	 */
-	public void setViewer(ITextViewer viewer) {
-		this.viewer = viewer;
-	}
-
-	/**
-	 * @return
-	 */
-	public IEditorPart getEditorPart() {
-		return editorPart;
-	}
-
-	/**
-	 * @param part
-	 */
-	public void setEditorPart(IEditorPart part) {
-		editorPart = part;
-	}
-
-    /**
-     * @return
-     */
-    public ArrayList getTextPresList() {
-        return textPresList;
-    }
-
-    /**
-     * @param list
-     */
-    public void setTextPresList(ArrayList list) {
-        textPresList = list;
-    }
 
 }

@@ -177,20 +177,20 @@ public final class BDDTypeManager extends AbstractTypeManager {
         } else {
             System.out.println("bdd and non-bdd hierarchy don\'t match");
             System.out.println("size of bdd: " +
-                               new jedd.internal.RelationContainer(new jedd.Attribute[] { supt.v(), subt.v() },
-                                                                   new jedd.PhysicalDomain[] { T2.v(), T1.v() },
+                               new jedd.internal.RelationContainer(new jedd.Attribute[] { subt.v(), supt.v() },
+                                                                   new jedd.PhysicalDomain[] { T1.v(), T2.v() },
                                                                    ("bddts.size() at /home/olhotak/soot-2-jedd/src/soot/jimple/sp" +
                                                                     "ark/internal/BDDTypeManager.jedd:150,48"),
                                                                    bddts).size() +
                                " size of non-bdd: " +
-                               new jedd.internal.RelationContainer(new jedd.Attribute[] { supt.v(), subt.v() },
-                                                                   new jedd.PhysicalDomain[] { T2.v(), T1.v() },
+                               new jedd.internal.RelationContainer(new jedd.Attribute[] { subt.v(), supt.v() },
+                                                                   new jedd.PhysicalDomain[] { T1.v(), T2.v() },
                                                                    ("typeSubtype.size() at /home/olhotak/soot-2-jedd/src/soot/jim" +
                                                                     "ple/spark/internal/BDDTypeManager.jedd:150,82"),
                                                                    typeSubtype).size());
             System.out.println("missing pairs: ");
-            System.out.println(new jedd.internal.RelationContainer(new jedd.Attribute[] { supt.v(), subt.v() },
-                                                                   new jedd.PhysicalDomain[] { T2.v(), T1.v() },
+            System.out.println(new jedd.internal.RelationContainer(new jedd.Attribute[] { subt.v(), supt.v() },
+                                                                   new jedd.PhysicalDomain[] { T1.v(), T2.v() },
                                                                    ("jedd.internal.Jedd.v().minus(jedd.internal.Jedd.v().read(bdd" +
                                                                     "ts), typeSubtype).toString() at /home/olhotak/soot-2-jedd/sr" +
                                                                     "c/soot/jimple/spark/internal/BDDTypeManager.jedd:152,52"),

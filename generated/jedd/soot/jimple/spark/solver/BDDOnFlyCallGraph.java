@@ -62,15 +62,15 @@ public class BDDOnFlyCallGraph {
             if (jedd.internal.Jedd.v().equals(jedd.internal.Jedd.v().read(methodContexts),
                                               jedd.internal.Jedd.v().falseBDD()))
                 return;
-            this.addToPAG(new jedd.internal.RelationContainer(new Attribute[] { method.v(), ctxt.v() },
-                                                              new PhysicalDomain[] { V2.v(), T2.v() },
+            this.addToPAG(new jedd.internal.RelationContainer(new Attribute[] { ctxt.v(), method.v() },
+                                                              new PhysicalDomain[] { T2.v(), V2.v() },
                                                               ("this.addToPAG(jedd.internal.Jedd.v().replace(methodContexts," +
                                                                " new jedd.PhysicalDomain[...], new jedd.PhysicalDomain[...])" +
                                                                ") at /home/olhotak/soot-2-jedd/src/soot/jimple/spark/solver/" +
                                                                "BDDOnFlyCallGraph.jedd:72,12"),
                                                               jedd.internal.Jedd.v().replace(methodContexts,
-                                                                                             new PhysicalDomain[] { V1.v(), T1.v() },
-                                                                                             new PhysicalDomain[] { V2.v(), T2.v() })));
+                                                                                             new PhysicalDomain[] { T1.v(), V1.v() },
+                                                                                             new PhysicalDomain[] { T2.v(), V2.v() })));
         }
     }
     
@@ -151,15 +151,15 @@ public class BDDOnFlyCallGraph {
                                                    "jedd.PhysicalDomain[...]); at /home/olhotak/soot-2-jedd/src/" +
                                                    "soot/jimple/spark/solver/BDDOnFlyCallGraph.jedd:94,12"),
                                                   jedd.internal.Jedd.v().project(e,
-                                                                                 new PhysicalDomain[] { V1.v(), T1.v(), H2.v(), ST.v() }));
-            this.addToPAG(new jedd.internal.RelationContainer(new Attribute[] { method.v(), ctxt.v() },
-                                                              new PhysicalDomain[] { V2.v(), T2.v() },
+                                                                                 new PhysicalDomain[] { T1.v(), ST.v(), V1.v(), H2.v() }));
+            this.addToPAG(new jedd.internal.RelationContainer(new Attribute[] { ctxt.v(), method.v() },
+                                                              new PhysicalDomain[] { T2.v(), V2.v() },
                                                               ("this.addToPAG(mc) at /home/olhotak/soot-2-jedd/src/soot/jimp" +
                                                                "le/spark/solver/BDDOnFlyCallGraph.jedd:96,12"),
                                                               mc));
             Iterator it =
-              new jedd.internal.RelationContainer(new Attribute[] { tgtc.v(), srcm.v(), srcc.v(), tgtm.v(), kind.v(), stmt.v() },
-                                                  new PhysicalDomain[] { T2.v(), V1.v(), T1.v(), V2.v(), H2.v(), ST.v() },
+              new jedd.internal.RelationContainer(new Attribute[] { tgtm.v(), srcc.v(), tgtc.v(), stmt.v(), srcm.v(), kind.v() },
+                                                  new PhysicalDomain[] { V2.v(), T1.v(), T2.v(), ST.v(), V1.v(), H2.v() },
                                                   ("e.iterator(new jedd.Attribute[...]) at /home/olhotak/soot-2-" +
                                                    "jedd/src/soot/jimple/spark/solver/BDDOnFlyCallGraph.jedd:97," +
                                                    "26"),
@@ -178,7 +178,7 @@ public class BDDOnFlyCallGraph {
     
     public void updatedNodes(final jedd.internal.RelationContainer types) {
         ofcgb.addTypes(new jedd.internal.RelationContainer(new Attribute[] { type.v(), var.v() },
-                                                           new PhysicalDomain[] { T2.v(), V1.v() },
+                                                           new PhysicalDomain[] { T2.v(), V3.v() },
                                                            ("ofcgb.addTypes(types) at /home/olhotak/soot-2-jedd/src/soot/" +
                                                             "jimple/spark/solver/BDDOnFlyCallGraph.jedd:113,8"),
                                                            types));
