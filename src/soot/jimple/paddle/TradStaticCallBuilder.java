@@ -20,7 +20,8 @@
 package soot.jimple.paddle;
 import soot.*;
 import soot.jimple.paddle.queue.*;
-import soot.jimple.toolkits.callgraph.*;
+import soot.jimple.toolkits.callgraph.Edge;
+import soot.jimple.toolkits.callgraph.VirtualCalls;
 import soot.jimple.*;
 import soot.util.*;
 import java.util.*;

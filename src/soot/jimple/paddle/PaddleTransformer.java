@@ -24,7 +24,8 @@ import soot.jimple.*;
 import java.util.*;
 import soot.options.PaddleOptions;
 import soot.tagkit.*;
-import soot.jimple.toolkits.callgraph.*;
+import soot.jimple.toolkits.callgraph.CallGraph;
+import soot.jimple.toolkits.callgraph.Edge;
 import soot.jimple.toolkits.pointer.util.*;
 import java.io.*;
 
