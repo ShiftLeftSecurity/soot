@@ -112,17 +112,19 @@ public class SootClass
 {
     private static char fileSeparator = System.getProperty("file.separator").charAt(0);
 
-    String name;
-    int modifiers;
-    List fields = new ArrayList();
-    List methods = new ArrayList();
-    List interfaces = new ArrayList();
+    private String name;
+    private int modifiers;
+    private List fields = new ArrayList();
+    private List methods = new ArrayList();
+    private List interfaces = new ArrayList();
 
-    SootClassManager manager;
-    boolean isManaged;
+    private SootClassManager manager;
+    private boolean isManaged;
 
-    SootClass superClass;
+    private SootClass superClass;
 
+    private boolean isPhantom;
+    
     /**
         Constructs an empty SootClass with the given name and modifiers.
     */
@@ -153,6 +155,27 @@ public class SootClass
         return isManaged;
     }
 
+    
+    /**
+        Is this class a phantom class?
+    */
+
+    public boolean isPhantom()
+    {
+        return isPhantom;
+    }
+
+    
+    /**
+        Set the phantom nature of the class
+    */
+
+    public void setPhantom(boolean value)
+    {
+        isPhantom = value;
+    }
+
+    
     /**
         Returns the SootClassManager of this class.
     */

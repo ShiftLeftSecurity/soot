@@ -79,6 +79,26 @@ public class SootField
 
     boolean isDeclared = false;
     SootClass declaringClass;
+    boolean isPhantom;
+        
+    /**
+        Is this field a phantom?
+    */
+
+    public boolean isPhantom()
+    {
+        return isPhantom;
+    }
+
+    
+    /**
+        Set the phantom nature of the field.
+    */
+
+    public void setPhantom(boolean value)
+    {
+        isPhantom = value;
+    }
 
     public SootField(String name, Type type, int modifiers)
     {

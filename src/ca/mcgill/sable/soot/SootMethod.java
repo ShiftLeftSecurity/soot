@@ -95,6 +95,7 @@ public class SootMethod
     List exceptions = new ArrayList();
 
     Body activeBody;
+    boolean isPhantom;
     
     /**
      * Hooks for coffi.  Do not use!
@@ -162,6 +163,26 @@ public class SootMethod
     public String getName()
     {
         return name;
+    }
+
+    
+    /**
+        Is this method a phantom method?
+    */
+
+    public boolean isPhantom()
+    {
+        return isPhantom;
+    }
+
+    
+    /**
+        Set the phantom nature of the method.
+    */
+
+    public void setPhantom(boolean value)
+    {
+        isPhantom = value;
     }
 
     public SootClass getDeclaringClass() throws NotDeclaredException
