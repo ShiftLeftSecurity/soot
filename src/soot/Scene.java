@@ -32,6 +32,7 @@ import java.util.*;
 import soot.jimple.toolkits.invoke.*;
 import soot.jimple.toolkits.scalar.*;
 import soot.jimple.toolkits.scalar.pre.*;
+import soot.jimple.toolkits.pointer.*;
 import soot.toolkits.scalar.*;
 
 /** Manages the SootClasses of the application being analyzed. */
@@ -52,7 +53,10 @@ public class Scene  //extends AbstractHost
     Map phaseToOptionMaps = new HashMap();
 
     Hierarchy activeHierarchy;
+    FastHierarchy activeFastHierarchy;
     InvokeGraph activeInvokeGraph;
+    PointerAnalysis activePointerAnalysis;
+    SideEffectAnalysis activeSideEffectAnalysis;
 
     boolean allowsPhantomRefs = false;
     private boolean allowsLazyResolving = false;
@@ -437,6 +441,115 @@ public class Scene  //extends AbstractHost
         return null;
     }
 
+    /****************************************************************************/
+    /**
+        Retrieves the active side-effect analysis
+     */
+
+    public SideEffectAnalysis getActiveSideEffectAnalysis() 
+    {
+        if(!hasActiveSideEffectAnalysis()) {
+	    setActiveSideEffectAnalysis( new SideEffectAnalysis(
+			getActivePointerAnalysis(),
+			getActiveInvokeGraph() ) );
+	}
+            
+        return activeSideEffectAnalysis;
+    }
+    
+    /**
+        Sets the active side-effect analysis
+     */
+     
+    public void setActiveSideEffectAnalysis(SideEffectAnalysis sea)
+    {
+        activeSideEffectAnalysis = sea;
+    }
+
+    public boolean hasActiveSideEffectAnalysis()
+    {
+        return activeSideEffectAnalysis != null;
+    }
+    
+    public void releaseActiveSideEffectAnalysis()
+    {
+        activeSideEffectAnalysis = null;
+    }
+
+    /****************************************************************************/
+    /**
+        Retrieves the active pointer analysis
+     */
+
+    public PointerAnalysis getActivePointerAnalysis() 
+    {
+        if(!hasActivePointerAnalysis()) {
+	    return new DumbPointerAnalysis();
+	}
+            
+        return activePointerAnalysis;
+    }
+    
+    /**
+        Sets the active pointer analysis
+     */
+     
+    public void setActivePointerAnalysis(PointerAnalysis pa)
+    {
+        activePointerAnalysis = pa;
+    }
+
+    public boolean hasActivePointerAnalysis()
+    {
+        return activePointerAnalysis != null;
+    }
+    
+    public void releaseActivePointerAnalysis()
+    {
+        activePointerAnalysis = null;
+    }
+
+    /****************************************************************************/
+    /** Makes a new fast hierarchy is none is active, and returns the active
+     * fast hierarchy. */
+    public FastHierarchy getOrMakeFastHierarchy() {
+	if(!hasActiveFastHierarchy() ) {
+	    setActiveFastHierarchy( new FastHierarchy() );
+	}
+	return getActiveFastHierarchy();
+    }
+    /**
+        Retrieves the active fast hierarchy
+     */
+
+    public FastHierarchy getActiveFastHierarchy() 
+    {
+        if(!hasActiveFastHierarchy())
+            throw new RuntimeException("no active FastHierarchy present for scene");
+            
+        return activeFastHierarchy;
+    }
+    
+    /**
+        Sets the active hierarchy
+     */
+     
+    public void setActiveFastHierarchy(FastHierarchy hierarchy)
+    {
+        activeFastHierarchy = hierarchy;
+    }
+
+    public boolean hasActiveFastHierarchy()
+    {
+        return activeFastHierarchy != null;
+    }
+    
+    public void releaseActiveFastHierarchy()
+    {
+        activeFastHierarchy = null;
+    }
+
+    /****************************************************************************/
     /**
         Retrieves the active hierarchy
      */
@@ -468,6 +581,7 @@ public class Scene  //extends AbstractHost
         activeHierarchy = null;
     }
 
+    /****************************************************************************/
     /**
         Retrieves the active invokeGraph for this method.
      */

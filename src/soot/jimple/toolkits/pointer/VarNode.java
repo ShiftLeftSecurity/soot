@@ -1,0 +1,63 @@
+package soot.jimple.toolkits.pointer;
+import java.util.*;
+import soot.*;
+
+public class VarNode extends ValNode
+{
+    static Map nodeMap = new HashMap(4);
+    public static VarNode v( Object val ) {
+	VarNode ret = (VarNode) nodeMap.get( val );
+	return ret;
+    }
+
+    public static VarNode v( Object val, Type t, SootMethod m ) {
+	VarNode ret = (VarNode) nodeMap.get( val );
+	if( ret == null ) {
+	    nodeMap.put( val, ret = new VarNode( val, t, m ) );
+	} else {
+	    if( !ret.getType().equals( t ) ) {
+		throw new RuntimeException( "Inconsistent types: "+ret.getType()+" and "+t );
+	    }
+	}
+	return ret;
+    }
+    public static Collection getAll() {
+	return nodeMap.values();
+    }
+
+    int edgesIn;
+    Object val;
+    public SootMethod m;
+    Map fields = new HashMap(4);
+    public Collection getAllFieldRefs() {
+	return fields.values();
+    }
+    public FieldRefNode dot( Object field ) {
+	return (FieldRefNode) fields.get( field );
+    }
+    protected VarNode( Object val, Type t, SootMethod m ) {
+	super(t);
+	this.val = val;
+	this.m = m;
+    }
+    void addField( FieldRefNode frn, Object field ) {
+	fields.put( field, frn );
+    }
+    public Object getVal() {
+	return val;
+    }
+    public String toString() {
+	return "VarNode "+id+" "+val+" "+m;
+    }
+    /*
+    public int hashCode() {
+	return val.hashCode();
+    }
+    public boolean equals( Object o ) {
+	if( o instanceof VarNode ) {
+	    return val.equals( ((VarNode) o).val );
+	} else return false;
+    }
+    */
+}
+
