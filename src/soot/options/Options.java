@@ -411,6 +411,36 @@ public class Options extends OptionsBase {
                 xml_attributes = true;
   
             else if( false
+            || option.equals( "dump-body" )
+            ) {
+                if( !hasMoreOptions() ) {
+                    G.v().out.println( "No value given for option -"+option );
+                    return false;
+                }
+                String value = nextOption();
+    
+                if( dump_body == null )
+                    dump_body = new LinkedList();
+
+                dump_body.add( value );
+            }
+  
+            else if( false
+            || option.equals( "dump-cfg" )
+            ) {
+                if( !hasMoreOptions() ) {
+                    G.v().out.println( "No value given for option -"+option );
+                    return false;
+                }
+                String value = nextOption();
+    
+                if( dump_cfg == null )
+                    dump_cfg = new LinkedList();
+
+                dump_cfg.add( value );
+            }
+  
+            else if( false
             || option.equals( "p" )
             || option.equals( "phase-option" )
             ) {
@@ -726,6 +756,22 @@ public class Options extends OptionsBase {
     private boolean xml_attributes = false;
     public void set_xml_attributes( boolean setting ) { xml_attributes = setting; }
   
+    public List dump_body() { 
+        if( dump_body == null )
+            return java.util.Collections.EMPTY_LIST;
+        else
+            return dump_body;
+    }
+    public void set_dump_body( List setting ) { dump_body = setting; }
+    private List dump_body = null;
+    public List dump_cfg() { 
+        if( dump_cfg == null )
+            return java.util.Collections.EMPTY_LIST;
+        else
+            return dump_cfg;
+    }
+    public void set_dump_cfg( List setting ) { dump_cfg = setting; }
+    private List dump_cfg = null;
     public boolean via_grimp() { return via_grimp; }
     private boolean via_grimp = false;
     public void set_via_grimp( boolean setting ) { via_grimp = setting; }
@@ -834,6 +880,8 @@ public class Options extends OptionsBase {
 +padVal(" c class (default)", "Produce .class Files" )
 +padVal(" d dava", "Produce dava-decompiled .java files" )
 +padOpt(" -xml-attributes", "Save tags to XML attributes for Eclipse" )
++padOpt(" -dump-body PHASENAME", "Dump the internal representation of each method before and after phase PHASENAME" )
++padOpt(" -dump-cfg PHASENAME", "Dump the internal representation of each CFG constructed during phase PHASENAME" )
 +"\nProcessing Options:\n"
       
 +padOpt(" -p PHASE OPT:VAL -phase-option PHASE OPT:VAL", "Set PHASE's OPT option to VALUE" )
@@ -1024,7 +1072,8 @@ public class Options extends OptionsBase {
             return "Phase "+phaseName+":\n"+
                 "\nThe Unreachable Code Eliminator removes unreachable code and \ntraps whose catch blocks are empty. "
                 +"\n\nRecognized options (with default values):\n"
-                +padOpt( "enabled (true)", "" );
+                +padOpt( "enabled (true)", "" )
+                +padOpt( "remove-unreachable-traps (false)", "" );
     
         if( phaseName.equals( "cg" ) )
             return "Phase "+phaseName+":\n"+
@@ -1321,7 +1370,8 @@ public class Options extends OptionsBase {
             return "Phase "+phaseName+":\n"+
                 "\nThe Unreachable Code Eliminator removes unreachable code and \ntraps whose catch blocks are empty. "
                 +"\n\nRecognized options (with default values):\n"
-                +padOpt( "enabled (true)", "" );
+                +padOpt( "enabled (true)", "" )
+                +padOpt( "remove-unreachable-traps (false)", "" );
     
         if( phaseName.equals( "jop.ubf1" ) )
             return "Phase "+phaseName+":\n"+
@@ -1333,7 +1383,8 @@ public class Options extends OptionsBase {
             return "Phase "+phaseName+":\n"+
                 "\nAnother iteration of the Unreachable Code Eliminator. "
                 +"\n\nRecognized options (with default values):\n"
-                +padOpt( "enabled (true)", "" );
+                +padOpt( "enabled (true)", "" )
+                +padOpt( "remove-unreachable-traps (false)", "" );
     
         if( phaseName.equals( "jop.ubf2" ) )
             return "Phase "+phaseName+":\n"+
@@ -1588,7 +1639,8 @@ public class Options extends OptionsBase {
     
         if( phaseName.equals( "jb.uce" ) )
             return ""
-                +"enabled ";
+                +"enabled "
+                +"remove-unreachable-traps ";
     
         if( phaseName.equals( "cg" ) )
             return ""
@@ -1767,7 +1819,8 @@ public class Options extends OptionsBase {
     
         if( phaseName.equals( "jop.uce1" ) )
             return ""
-                +"enabled ";
+                +"enabled "
+                +"remove-unreachable-traps ";
     
         if( phaseName.equals( "jop.ubf1" ) )
             return ""
@@ -1775,7 +1828,8 @@ public class Options extends OptionsBase {
     
         if( phaseName.equals( "jop.uce2" ) )
             return ""
-                +"enabled ";
+                +"enabled "
+                +"remove-unreachable-traps ";
     
         if( phaseName.equals( "jop.ubf2" ) )
             return ""
@@ -1974,7 +2028,8 @@ public class Options extends OptionsBase {
     
         if( phaseName.equals( "jb.uce" ) )
             return ""
-              +"enabled:true ";
+              +"enabled:true "
+              +"remove-unreachable-traps:false ";
     
         if( phaseName.equals( "cg" ) )
             return ""
@@ -2153,7 +2208,8 @@ public class Options extends OptionsBase {
     
         if( phaseName.equals( "jop.uce1" ) )
             return ""
-              +"enabled:true ";
+              +"enabled:true "
+              +"remove-unreachable-traps:false ";
     
         if( phaseName.equals( "jop.ubf1" ) )
             return ""
@@ -2161,7 +2217,8 @@ public class Options extends OptionsBase {
     
         if( phaseName.equals( "jop.uce2" ) )
             return ""
-              +"enabled:true ";
+              +"enabled:true "
+              +"remove-unreachable-traps:false ";
     
         if( phaseName.equals( "jop.ubf2" ) )
             return ""
