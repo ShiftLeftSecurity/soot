@@ -31,10 +31,11 @@ public class ValueUnitPair extends AbstractUnitBox implements ValueBox, UnitBox
     protected Value value;
 
     /**
-     *  Constructs a ValueUnitPair from a Unit object and a Value object.
-     *  @param value some Value
-     *  @param unit some Unit.
-     */
+     * Constructs a ValueUnitPair from a Unit object and a Value object.
+     * 
+     * @param value some Value
+     * @param unit some Unit.
+     **/
     public ValueUnitPair(Value value, Unit unit)
     {
         this.value = value;
@@ -42,17 +43,17 @@ public class ValueUnitPair extends AbstractUnitBox implements ValueBox, UnitBox
     }
 
     /**
-     *   Two ValueUnitPairs are equal iff they hold the same
-     *   Unit objects and the same Value objects within them.
+     * Two ValueUnitPairs are equal iff they hold the same
+     * Unit objects and the same Value objects within them.
      *
-     *   @param other another ValueUnitPair
-     *   @return true if other contains the same objects as this.
-     */
+     * @param other another ValueUnitPair
+     * @return true if other contains the same objects as this.
+     **/
     public boolean equals(Object other)
     {
         if(other instanceof ValueUnitPair &&
-            ((ValueUnitPair) other).value == this.value &&
-            ((ValueUnitPair) other).unit == this.unit)
+           ((ValueUnitPair) other).value == this.value &&
+           ((ValueUnitPair) other).unit == this.unit)
             return true;
         else
             return false;
