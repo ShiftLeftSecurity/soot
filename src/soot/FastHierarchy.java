@@ -203,7 +203,7 @@ public class FastHierarchy
 	    } else {
 		return false;
 	    }
-	} else if( child instanceof NullType ) {
+	} else if( child instanceof AnyType ) {
 	    if( !(parent instanceof RefLikeType ) ) {
 		throw new RuntimeException( "Unhandled type "+parent );
 	    } else {
@@ -218,7 +218,9 @@ public class FastHierarchy
 		|| parent.equals( RefType.v( "java.lang.Cloneable" ) );
 	    }
 	    ArrayType aparent = (ArrayType) parent;
+					        
 	    // You can store a int[][] in a Object[]. Yuck!
+	    // Also, you can store a Interface[] in a Object[]
 	    return ( achild.numDimensions == aparent.numDimensions &&
 		    achild.baseType instanceof RefType &&
 		    aparent.baseType instanceof RefType &&
@@ -245,7 +247,7 @@ public class FastHierarchy
 	}
 	if( childInterval == null ) { // child is interface
 	    if( parentInterval != null ) { // parent is not interface
-		return false;
+		return parent.equals( RefType.v("java.lang.Object").getSootClass() );
 	    } else {
 		return getAllSubinterfaces( parent ).contains( child );
 	    }
@@ -267,7 +269,7 @@ public class FastHierarchy
 	SootClass declaringClass = m.getDeclaringClass();
 	for( Iterator it = concreteTypes.iterator(); it.hasNext(); ) {
 	    Type t = (Type) it.next();
-	    if( t instanceof NullType ) {
+	    if( t instanceof AnyType ) {
 		String methodSig = m.getSubSignature();
 		HashSet s = new HashSet();
 		s.add( declaringClass );

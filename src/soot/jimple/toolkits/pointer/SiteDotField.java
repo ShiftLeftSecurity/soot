@@ -9,7 +9,17 @@ public class SiteDotField
     protected Type type;
     public AllocNode o1;
     public Object o2;
-    public SiteDotField( AllocNode o1, Object o2 ) { 
+    protected static HashMap nodeMap = new HashMap();
+    public static SiteDotField v( AllocNode o1, Object o2 ) { 
+	Pair p = new Pair( o1, o2 );
+	SiteDotField ret = (SiteDotField) nodeMap.get( p );
+	if( ret == null ) {
+	    ret = new SiteDotField( o1, o2 );
+	    nodeMap.put( p, ret );
+	}
+	return ret;
+    }
+    protected SiteDotField( AllocNode o1, Object o2 ) { 
 	if( o1 == null ) throw new RuntimeException( "No, you can't make it null" );
 	if( o2 == null ) throw new RuntimeException( "No, you can't make it null" );
 	this.o1 = o1; 
@@ -32,15 +42,6 @@ public class SiteDotField
 		type = arrayType.baseType;
 	    }
 	}
-    }
-    public int hashCode() {
-	return o1.hashCode() + o2.hashCode();
-    }
-    public boolean equals( Object other ) {
-	if( other instanceof SiteDotField ) {
-	    SiteDotField p = (SiteDotField) other;
-	    return o1.equals( p.o1 ) && o2.equals( p.o2 );
-	} else return false;
     }
     public Type getType() {
 	return type;

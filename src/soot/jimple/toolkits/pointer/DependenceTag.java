@@ -42,20 +42,30 @@ public class DependenceTag implements Tag
 	callsNative = true;
     }
 
+    protected DependenceTag getOrAdd( Unit s ) {
+	DependenceTag t;
+	if( s.hasTag( "DependenceTag" ) ) {
+	    t = (DependenceTag) s.getTag( "DependenceTag" );
+	} else {
+	    t = new DependenceTag();
+	    s.addTag( t );
+	}
+	return t;
+    }
     public void addStmtRR( Unit s ) {
-	dependentStmtsRR.add( s );
+	dependentStmtsRR.add( getOrAdd(s) );
     }
 
     public void addStmtRW( Unit s ) {
-	dependentStmtsRW.add( s );
+	dependentStmtsRW.add( getOrAdd(s) );
     }
 
     public void addStmtWR( Unit s ) {
-	dependentStmtsWR.add( s );
+	dependentStmtsWR.add( getOrAdd(s) );
     }
 
     public void addStmtWW( Unit s ) {
-	dependentStmtsWW.add( s );
+	dependentStmtsWW.add( getOrAdd(s) );
     }
 
     public String getName()
@@ -67,45 +77,31 @@ public class DependenceTag implements Tag
 	throw new RuntimeException( "A map mapping units to labels is needed." );
     }
 
-    public byte[] getValue( Map instToLabel )
-    {
-	StringBuffer buf = new StringBuffer();
+    public byte[] getHeader() {
+	byte[] ret = new byte[9];
+	Set[] sets = { dependentStmtsRR, dependentStmtsRW, dependentStmtsWR,
+	    dependentStmtsWW };
+	for( int i = 0; i < sets.length; i++ ) {
+	    if( !sets[i].isEmpty() ) {
+		ret[i*2] = (byte)( ( sets[i].size() >> 8 ) & 0xff );
+		ret[i*2+1] = (byte)( sets[i].size() & 0xff );
+	    }
+	}
 	if( callsNative ) {
-	    buf.append( "N%" );
+	    ret[8] |= 1;
 	}
-	if( !dependentStmtsRR.isEmpty() ) {
-	    buf.append( "RR" );
-	    for( Iterator it = dependentStmtsRR.iterator(); it.hasNext(); ) {
-		Unit u = (Unit) it.next();
-		String label = (String) instToLabel.get( u );
-		buf.append( label+"%" );
+	return ret;
+    }
+    public String getSets( Map instToLabel, Map tagToUnit ) {
+	StringBuffer buf = new StringBuffer();
+	Set[] sets = { dependentStmtsRR, dependentStmtsRW, dependentStmtsWR,
+	    dependentStmtsWW };
+	for( int i = 0; i < sets.length; i++ ) {
+	    for( Iterator it = sets[i].iterator(); it.hasNext(); ) {
+		buf.append( "%"+instToLabel.get(tagToUnit.get(it.next()))+"%" );
 	    }
 	}
-	if( !dependentStmtsRW.isEmpty() ) {
-	    buf.append( "RW" );
-	    for( Iterator it = dependentStmtsRW.iterator(); it.hasNext(); ) {
-		Unit u = (Unit) it.next();
-		String label = (String) instToLabel.get( u );
-		buf.append( label+"%" );
-	    }
-	}
-	if( !dependentStmtsWR.isEmpty() ) {
-	    buf.append( "WR" );
-	    for( Iterator it = dependentStmtsWR.iterator(); it.hasNext(); ) {
-		Unit u = (Unit) it.next();
-		String label = (String) instToLabel.get( u );
-		buf.append( label+"%" );
-	    }
-	}
-	if( !dependentStmtsWW.isEmpty() ) {
-	    buf.append( "WW" );
-	    for( Iterator it = dependentStmtsWW.iterator(); it.hasNext(); ) {
-		Unit u = (Unit) it.next();
-		String label = (String) instToLabel.get( u );
-		buf.append( label+"%" );
-	    }
-	}
-	return buf.toString().getBytes();
+	return buf.toString();
     }
 
     public String toString()

@@ -55,6 +55,14 @@ public abstract class PointerStmtSwitch extends AbstractStmtSwitch {
     }
     /** A method invocation. dest is null if there is no reference type return value. */
     protected abstract void caseInvokeStmt( Local dest, InvokeExpr e );
+    /** A throw statement */
+    protected void caseThrowStmt( Local thrownException ) {
+	caseUninterestingStmt(statement);
+    }
+    /** A catch statement */
+    protected void caseCatchStmt( Local dest, CaughtExceptionRef cer ) {
+	caseUninterestingStmt(statement);
+    }
     /** Any other statement */
     protected void caseUninterestingStmt( Stmt s ) {};
 
@@ -64,7 +72,15 @@ public abstract class PointerStmtSwitch extends AbstractStmtSwitch {
 	Value rhs = s.getRightOp();
 	if( ! (lhs.getType() instanceof RefType)
 	&&  ! (lhs.getType() instanceof ArrayType) ) {
+	    if( rhs instanceof InvokeExpr ) {
+		caseInvokeStmt( null, (InvokeExpr) rhs );
+		return;
+	    }
 	    caseUninterestingStmt( s );
+	    return;
+	}
+	if( rhs instanceof InvokeExpr ) {
+	    caseInvokeStmt( (Local) lhs, (InvokeExpr) rhs );
 	    return;
 	}
 	if( lhs instanceof Local ) {
@@ -82,34 +98,38 @@ public abstract class PointerStmtSwitch extends AbstractStmtSwitch {
 		caseNewArrayStmt( (Local) lhs, (NewArrayExpr) rhs );
 	    } else if( rhs instanceof NewMultiArrayExpr ) {
 		caseNewMultiArrayStmt( (Local) lhs, (NewMultiArrayExpr) rhs );
-	    } else if( rhs instanceof InvokeExpr ) {
-		caseInvokeStmt( (Local) lhs, (InvokeExpr)rhs );
 	    } else if( rhs instanceof CastExpr ) {
 		CastExpr r = (CastExpr) rhs;
 		Value rv = r.getOp();
 		if( rv instanceof Constant ) {
-		    caseAssignConstStmt( (Local) lhs, (Constant) rv );
+		    caseAssignConstStmt( lhs, (Constant) rv );
 		} else {
 		    caseCastStmt( (Local) lhs, (Local) rv, r );
 		}
-	    }
+	    } else if( rhs instanceof Constant ) {
+		caseAssignConstStmt( lhs, (Constant) rhs );
+	    } else throw new RuntimeException( "unhandled stmt "+s );
 	} else if( lhs instanceof InstanceFieldRef ) {
 	    if( rhs instanceof Local ) {
 		caseStoreStmt( (InstanceFieldRef) lhs, (Local) rhs );
-	    }
+	    } else if( rhs instanceof Constant ) {
+		caseAssignConstStmt( lhs, (Constant) rhs );
+	    } else throw new RuntimeException( "unhandled stmt "+s );
 	} else if( lhs instanceof ArrayRef ) {
 	    if( rhs instanceof Local ) {
 		caseArrayStoreStmt( (ArrayRef) lhs, (Local) rhs );
-	    }
+	    } else if( rhs instanceof Constant ) {
+		caseAssignConstStmt( lhs, (Constant) rhs );
+	    } else throw new RuntimeException( "unhandled stmt "+s );
 	} else if( lhs instanceof StaticFieldRef ) {
 	    if( rhs instanceof Local ) {
 		caseGlobalStoreStmt( (StaticFieldRef) lhs, (Local) rhs );
-	    }
-	} else if( rhs instanceof InvokeExpr ) {
-	    caseInvokeStmt( null, (InvokeExpr) rhs );
+	    } else if( rhs instanceof Constant ) {
+		caseAssignConstStmt( lhs, (Constant) rhs );
+	    } else throw new RuntimeException( "unhandled stmt "+s );
 	} else if( rhs instanceof Constant ) {
 	    caseAssignConstStmt( lhs, (Constant) rhs );
-	}
+	} else throw new RuntimeException( "unhandled stmt "+s );
     }
     public final void caseReturnStmt(ReturnStmt s) {
 	statement = s;
@@ -143,8 +163,16 @@ public abstract class PointerStmtSwitch extends AbstractStmtSwitch {
 	     return;
 	}
 	Local llhs = (Local) lhs;
-	IdentityRef rrhs = (IdentityRef) rhs;
-	caseIdentityStmt( llhs, rrhs );
+	if( rhs instanceof CaughtExceptionRef ) {
+	    caseCatchStmt( llhs, (CaughtExceptionRef) rhs );
+	} else {
+	    IdentityRef rrhs = (IdentityRef) rhs;
+	    caseIdentityStmt( llhs, rrhs );
+	}
+    }
+    public final void caseThrowStmt( ThrowStmt s) {
+	statement = s;
+	caseThrowStmt( (Local) s.getOp() );
     }
 }
 

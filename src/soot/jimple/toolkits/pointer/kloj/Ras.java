@@ -7,7 +7,7 @@ public abstract class Ras implements ObjectSet
 { 
     /** Leave this null for a type-insensitive analysis. */
     static FastHierarchy fh;
-    static RasFactory factory;
+    public static RasFactory factory;
 
     Type type;
     protected Ras( Type t ) {
@@ -17,6 +17,9 @@ public abstract class Ras implements ObjectSet
     public abstract boolean contains( AllocNode n );
     public abstract void forall( RasVisitor v );
     public abstract boolean add( AllocNode n );
+    public boolean fastAddAll( Ras r ) {
+	return addAll( r );
+    }
     public boolean addAll( Ras r ) {
 	class AddAllVisitor extends RasVisitor {
 	    boolean changed = false;

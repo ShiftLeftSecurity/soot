@@ -628,6 +628,7 @@ public class SootClass extends AbstractHost
     }
 
     /**
+	WARNING: interfaces are subclasses of the java.lang.Object class!
         Does this class have a superclass? False implies that this is
         the java.lang.Object class.  Note that interfaces are
         subclasses of the java.lang.Object class.  */
@@ -639,6 +640,7 @@ public class SootClass extends AbstractHost
     }
 
     /**
+	WARNING: interfaces are subclasses of the java.lang.Object class!
         Returns the superclass of this class. (see hasSuperclass())
     */
 

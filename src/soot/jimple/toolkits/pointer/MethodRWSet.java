@@ -10,8 +10,8 @@ public class MethodRWSet extends RWSet {
     protected boolean isFull = false;
     static Set allGlobals = new HashSet();
     static Set allFields = new HashSet();
-    static ObjectSet fullObjectSet = new FullObjectSet();
-    final static int MAX_SIZE = 32;
+    final static ObjectSet fullObjectSet = new FullObjectSet();
+    final static int MAX_SIZE = Integer.MAX_VALUE;
 
     static int count = 0;
     public MethodRWSet() {
@@ -85,8 +85,12 @@ public class MethodRWSet extends RWSet {
 	boolean ret = false;
 	if( other instanceof MethodRWSet ) {
 	    MethodRWSet o = (MethodRWSet) other;
+	    if( o.getCallsNative() ) {
+		ret = !getCallsNative() | ret;
+		setCallsNative();
+	    }
 	    if( o.isFull ) {
-		ret = !isFull;
+		ret = !isFull | ret;
 		isFull = true;
 		globals = null;
 		fields = null;
@@ -164,7 +168,7 @@ public class MethodRWSet extends RWSet {
 	fieldCount++;
 	if( 0 == ( fieldCount % 1000 ) ) System.out.println( "Added "+fieldCount+"th field" );
 
-	if( size > 10 && (( size & (size-1) )== 0 ) ) {
+	if( size > 1000 && (( size & (size-1) )== 0 ) ) {
 	    System.out.println( "This method has reached "+size+" fields" );
 	}
     }

@@ -21,7 +21,8 @@ class Base extends NodePPG implements PointerAnalysis
 	s.setBase( this );
 	Union.factory = new UnionFactory() {
 	    //ReallyCheapRasUnion ru =  new ReallyCheapRasUnion();
-	    public Union newUnion() { return new RasUnion(); }
+	    //public Union newUnion() { return new RasUnion(); }
+	    public Union newUnion() { return new MemoryEfficientRasUnion(); }
 	};
 	if( Options.getString( options, "ras" ).equals( "bit" ) ) {
 	    System.out.println( "Using BitRas" );
@@ -100,6 +101,19 @@ class Base extends NodePPG implements PointerAnalysis
 	    int i =  ( (Ras) rasmap.get( key ) ).size();
 	    if( i >= counts.length ) i = counts.length-1;
 	    counts[ i ]++;
+	    {
+		Object o = key;
+		if( ebbMap != null ) {
+		    o = ebbMap.get( o );
+		    if( o == null ) o = key;
+		}
+		Ras r = (Ras) rasmap.get( o );
+		if( r != null ) {
+		    System.out.println( ""+o+" is reached by "+r.possibleTypes() );
+		} else {
+		    System.out.println( ""+o+" has no ras" );
+		}
+	    }
 	    if( false && ( i > 2300 || ( i > 2100 && i < 2200 ) || ( i > 1630 && i < 1640 ) ) ) {
 		System.out.print( ""+i+": " );
 		if( key instanceof Node ) {
@@ -173,6 +187,9 @@ class Base extends NodePPG implements PointerAnalysis
     }
     public ObjectSet reachingObjects( SootMethod method, Stmt stmt, Local l ) {
 	VarNode v = VarNode.v( l );
+	if( v == null ) {
+	    throw new RuntimeException( "Couldn't find varnode for local "+l+" in stmt "+stmt+" in method "+method );
+	}
 	if( ebbMap != null ) {
 	    VarNode vv = (VarNode) ebbMap.get( v );
 	    if( vv != null ) v = vv;

@@ -174,7 +174,7 @@ class InterProc {
 
 	if( RinardTransformer.v().optionMuDotFiles ) {
 	    try {
-		Body b = callee.getActiveBody();
+		Body b = callee.retrieveActiveBody();
 	    PrintStream outSt = new PrintStream(
 		new FileOutputStream( b.getMethod().getDeclaringClass().getName() + "."
 					+b.getMethod().getName()+

@@ -28,8 +28,8 @@ public class NodePPG extends PointerPropagationGraph
         Object src, Type srcType, 
         Object dest, Type destType )
     {
-	VarNode from = VarNode.v( src, srcType, currentMethod ); 
-	VarNode to = VarNode.v( dest, destType, currentMethod );
+	VarNode from = VarNode.v( src, srcType, method ); 
+	VarNode to = VarNode.v( dest, destType, method );
 
 	addSimpleEdge( from, to );
     }
@@ -45,12 +45,12 @@ public class NodePPG extends PointerPropagationGraph
         Object field, Type fieldType, 
         Object dest, Type destType ) 
     {
-	VarNode to = VarNode.v( dest, destType, currentMethod  );
+	VarNode to = VarNode.v( dest, destType, method  );
 
 	addLoadEdge(
 		FieldRefNode.v( 
-		    VarNode.v( base, baseType, currentMethod  ), 
-		    field, fieldType, currentMethod  ), 
+		    VarNode.v( base, baseType, method  ), 
+		    field, fieldType, method  ), 
 		to );
     }
     public void addLoadEdge( FieldRefNode src, VarNode dest ) {
@@ -65,11 +65,11 @@ public class NodePPG extends PointerPropagationGraph
         Object base, Type baseType,
         Object field, Type fieldType ) 
     {
-	VarNode from = VarNode.v( src, srcType, currentMethod  );
+	VarNode from = VarNode.v( src, srcType, method  );
 	addStoreEdge( from,
 		FieldRefNode.v( 
-		    VarNode.v( base, baseType, currentMethod  ),
-		    field, fieldType, currentMethod  ) );
+		    VarNode.v( base, baseType, method  ),
+		    field, fieldType, method  ) );
     }
     public void addStoreEdge( VarNode src, FieldRefNode dest ) {
 	if( stores.put( src, dest ) ) {
@@ -80,9 +80,9 @@ public class NodePPG extends PointerPropagationGraph
         Object newExpr, Type newExprType, 
         Object dest, Type destType ) 
     {
-	VarNode to = VarNode.v( dest, destType, currentMethod  );
+	VarNode to = VarNode.v( dest, destType, method  );
 	addNewEdge( 
-		AllocNode.v( newExpr, newExprType, currentMethod ),
+		AllocNode.v( newExpr, newExprType, method ),
 		to );
     }
     public void addNewEdge( AllocNode src, VarNode dest ) {
@@ -100,6 +100,13 @@ public class NodePPG extends PointerPropagationGraph
 	System.out.println( "Simple: "+countSimples );
 	System.out.println( "Loads:  "+countLoads );
 	System.out.println( "Stores: "+countStores );
+	MultiMap[] m = { news, simple, loads, stores };
+	for( int i = 0; i < m.length; i++ ) {
+	    for( Iterator it = m[i].keySet().iterator(); it.hasNext(); ) {
+		Node key = (Node) it.next();
+		System.out.println( key.toString() + m[i].get( key ).toString() );
+	    }
+	}
     }
 
     public void addLocalAfterLoad() {
@@ -152,6 +159,16 @@ public class NodePPG extends PointerPropagationGraph
 		    ebbMap.put( to, from );
 		}
 	    } while( changes );
+	}
+	for( Iterator it = ebbMap.keySet().iterator(); it.hasNext(); ) {
+	    VarNode to = (VarNode) it.next();
+	    VarNode from = to;
+	    while( true ) {
+		VarNode newFrom = (VarNode) ebbMap.get( from );
+		if( newFrom == null ) break;
+		from = newFrom;
+	    }
+	    ebbMap.put( to, from );
 	}
 	for( Iterator it = new LinkedList( loads.keySet() ).iterator(); it.hasNext(); ) {
 	    FieldRefNode n = (FieldRefNode) it.next();
@@ -233,7 +250,7 @@ public class NodePPG extends PointerPropagationGraph
 		    m.getDeclaringClass().getType(), m );
 	}
 	if( isType( m.getReturnType() ) ) {
-	    if( !returnsAsFields ) {
+	    if( m.isStatic() || !returnsAsFields ) {
 		retNode = VarNode.v( new Pair( m, PointerAnalysis.RETURN_NODE ),
 			m.getReturnType(), m );
 	    } else {
@@ -253,7 +270,7 @@ public class NodePPG extends PointerPropagationGraph
 	ValNode[] args = new ValNode[ m.getParameterCount() ];
 	for( int i = 0; i < m.getParameterCount(); i++ ) {
 	    if( !isType( m.getParameterType(i) ) ) continue;
-	    if( !parmsAsFields ) {
+	    if( m.isStatic() || !parmsAsFields ) {
 		args[i] = VarNode.v(new Pair( m, new Integer(i) ), m.getParameterType(i), m );
 	    } else {
 		args[i] = FieldRefNode.v(

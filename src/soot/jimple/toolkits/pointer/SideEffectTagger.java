@@ -27,7 +27,7 @@ public class SideEffectTagger extends BodyTransformer
     protected void internalTransform(Body b, String phaseName, Map options)
     {
 	SideEffectAnalysis sea = Scene.v().getActiveSideEffectAnalysis();
-	sea.findRWSetsForMethod( b.getMethod() );
+	sea.findNTRWSets( b.getMethod() );
 	HashMap stmtToReadSet = new HashMap();
 	HashMap stmtToWriteSet = new HashMap();
 	optionDontTag = Options.getBoolean( options, "dont-tag" );
@@ -57,15 +57,17 @@ public class SideEffectTagger extends BodyTransformer
 		    if( tag == null ) tag = new DependenceTag();
 		    tag.addStmtWR( inner );
 		}
-		if( outerRead != null && innerRead != null &&
-			outerRead.hasNonEmptyIntersection( innerRead ) ) {
-		    if( tag == null ) tag = new DependenceTag();
-		    tag.addStmtRR( inner );
-		}
-		if( outerWrite != null && innerWrite != null &&
-			outerWrite.hasNonEmptyIntersection( innerWrite ) ) {
-		    if( tag == null ) tag = new DependenceTag();
-		    tag.addStmtWW( inner );
+		if( outer != inner ) {
+		    if( outerRead != null && innerRead != null &&
+			    outerRead.hasNonEmptyIntersection( innerRead ) ) {
+			if( tag == null ) tag = new DependenceTag();
+			tag.addStmtRR( inner );
+		    }
+		    if( outerWrite != null && innerWrite != null &&
+			    outerWrite.hasNonEmptyIntersection( innerWrite ) ) {
+			if( tag == null ) tag = new DependenceTag();
+			tag.addStmtWW( inner );
+		    }
 		}
 	    }
 	    if( ( outerRead != null && outerRead.getCallsNative() ) 

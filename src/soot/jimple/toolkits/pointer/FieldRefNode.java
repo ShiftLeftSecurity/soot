@@ -36,6 +36,9 @@ public class FieldRefNode extends ValNode
     public Object getField() {
 	return field;
     }
+    public String toString() {
+	return "FieldRefNode "+id+" "+base+"."+field+" "+m;
+    }
     /*
     public boolean equals( Object o ) {
 	if( o instanceof FieldRefNode ) {

@@ -307,6 +307,10 @@ public class VariableTypeAnalysis
 							  (VTATypeGraph.getVTALabel(m, base)));
 
                             List targets = h.resolveConcreteDispatch(validReachingTypes, ie.getMethod());
+			    if( targets.isEmpty() ) {
+				System.out.println( "Couldn't resolve dispatch "+s+" in method "+m );
+				System.out.println( "reaching types: "+validReachingTypes );
+			    }
                             Iterator targetsIt = targets.iterator();
                             
                             while (targetsIt.hasNext())

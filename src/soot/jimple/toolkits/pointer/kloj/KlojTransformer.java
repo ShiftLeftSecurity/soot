@@ -17,9 +17,9 @@ public class KlojTransformer extends SceneTransformer
     public static KlojTransformer v() { return instance; }
 
     public String getDeclaredOptions() { return super.getDeclaredOptions() +
-	" method dump-pag ras ignore-types dump-pag-benchmark hash-ras ebb parms-as-fields parms-not-as-fields in-parms-as-fields add-local-after-load collapse-objects types-for-sites merge-stringbuffer simulate-natives"; }
+	" method dump-pag ras ignore-types dump-pag-benchmark hash-ras ebb parms-as-fields parms-not-as-fields in-parms-as-fields add-local-after-load collapse-objects types-for-sites merge-stringbuffer simulate-natives dont-trim-callgraph"; }
 
-    public String getDefaultOptions() { return " method:worklist ras:colour ebb:true "; }
+    public String getDefaultOptions() { return " method:worklist ras:colour ebb:true simulate-natives "; }
 
     protected void internalTransform( String phaseName, Map options)
     {
@@ -50,6 +50,8 @@ public class KlojTransformer extends SceneTransformer
 		s = new IterativeScheduler( h );
 	    } else if( method.equals( "worklist" ) ) {
 		s = new WorklistScheduler( h );
+	    } else if( method.equals( "merge-iter" ) ) {
+		s = new MergingIterativeScheduler();
 	    } else {
 		throw new RuntimeException( "Unknown method specified" );
 	    }
@@ -90,6 +92,13 @@ public class KlojTransformer extends SceneTransformer
 	Date doneCompute = new Date();
 	System.out.println( "Solution found in "+(doneCompute.getTime() - startCompute.getTime() )/1000+" seconds." );
 	b.dumpStats();
+	if( !Options.getBoolean( options, "dont-trim-callgraph" ) ) {
+	    System.out.println( ig.computeStats() );
+	    new InvokeGraphTrimmer( (PointerAnalysis) b, ig ).trimInvokeGraph();
+	    System.out.println( ig.computeStats() );
+	    Date doneTrim = new Date();
+	    System.out.println( "Graph trimmed in "+(doneTrim.getTime() - doneCompute.getTime() )/1000+" seconds." );
+	}
 	if( b instanceof PointerAnalysis ) {
 	    Scene.v().setActivePointerAnalysis( (PointerAnalysis) b );
 	}

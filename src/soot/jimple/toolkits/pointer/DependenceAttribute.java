@@ -15,15 +15,27 @@ public class DependenceAttribute extends CodeAttribute {
 
 	Iterator tagIt = mTags.iterator();
 	Iterator unitIt = mUnits.iterator();
+	Map tagToUnit = new HashMap();
 
 	while (tagIt.hasNext())
 	{
 	    Object unit = unitIt.next();
-	    Object tag = tagIt.next();
+	    DependenceTag tag = (DependenceTag) tagIt.next();
+	    tagToUnit.put( tag, unit );
+	}
 
-	    buf.append("%"+instToLabel.get(unit) + "%"+
-		new String(Base64.encode(
-			((DependenceTag)tag).getValue(instToLabel))));
+	tagIt = mTags.iterator();
+	unitIt = mUnits.iterator();
+
+	while (tagIt.hasNext())
+	{
+	    Object unit = unitIt.next();
+	    DependenceTag tag = (DependenceTag) tagIt.next();
+
+	    buf.append("%"+instToLabel.get(unit) + "%");
+	    buf.append( new String(Base64.encode(
+			((DependenceTag)tag).getHeader())));
+	    buf.append( tag.getSets( instToLabel, tagToUnit ) );
 	}
 
 	return buf.toString();

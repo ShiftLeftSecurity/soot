@@ -9,10 +9,41 @@ import soot.util.*;
 public class SideEffectAnalysis {
     PointerAnalysis pa;
     InvokeGraph ig;
-    Map methodToReadSet = new HashMap();
-    Map methodToWriteSet = new HashMap();
+    //Map methodToReadSet = new HashMap();
+    //Map methodToWriteSet = new HashMap();
+    Map methodToNTReadSet = new HashMap();
+    Map methodToNTWriteSet = new HashMap();
     int rwsetcount = 0;
 
+    public void findNTRWSets( SootMethod method ) {
+	if( methodToNTReadSet.containsKey( method )
+	    && methodToNTWriteSet.containsKey( method ) ) return;
+	
+	RWSet read = new MethodRWSet();
+	RWSet write = new MethodRWSet();
+	for( Iterator sIt = method.retrieveActiveBody().getUnits().iterator();
+		sIt.hasNext(); ) {
+	    Stmt s = (Stmt) sIt.next();
+	    if( !s.containsInvokeExpr() ) {
+		read.union( readSet( method, s ) );
+		write.union( writeSet( method, s ) );
+	    }
+	}
+	methodToNTReadSet.put( method, read );
+	methodToNTWriteSet.put( method, write );
+    }
+
+    public RWSet nonTransitiveReadSet( SootMethod method ) {
+	findNTRWSets( method );
+	return (RWSet) methodToNTReadSet.get( method );
+    }
+
+    public RWSet nonTransitiveWriteSet( SootMethod method ) {
+	findNTRWSets( method );
+	return (RWSet) methodToNTWriteSet.get( method );
+    }
+
+    /*
     public void findRWSetsForMethod( SootMethod method ) {
 	if( methodToReadSet.containsKey( method ) && 
 		methodToWriteSet.containsKey( method ) ) return;
@@ -131,6 +162,7 @@ public class SideEffectAnalysis {
 	} while( ch );
 	System.out.println( "Done finding native sets for "+method );
     }
+    */
 
     public SideEffectAnalysis( PointerAnalysis pa, InvokeGraph ig ) {
 	System.out.println( "Created new sea" );
@@ -138,49 +170,49 @@ public class SideEffectAnalysis {
 	this.ig = ig;
     }
 
-    HashMap stmtToReadSet = new HashMap();
     public RWSet readSet( SootMethod method, Stmt stmt ) {
-	RWSet ret = (RWSet) stmtToReadSet.get( stmt );
-	if( ret != null ) return ret;
+	RWSet ret = null;
 	if( stmt.containsInvokeExpr() ) {
-	    for( Iterator targets = ig.getTargetsOf( stmt ).iterator();
+	    for( Iterator targets = ig.mcg.getMethodsReachableFrom(
+			ig.getTargetsOf( stmt ) ).iterator();
 		    targets.hasNext(); ) {
-		if( ret == null ) ret = new MethodRWSet();
 		SootMethod target = (SootMethod) targets.next();
-		if( !target.isConcrete() ) continue;
-		findRWSetsForMethod( target );
-		ret.union( (RWSet) methodToReadSet.get( target ) );
+		if( target.isNative() ) {
+		    if( ret == null ) ret = new MethodRWSet();
+		    ret.setCallsNative();
+		} else if( target.isConcrete() ) {
+		    if( ret == null ) ret = new MethodRWSet();
+		    ret.union( nonTransitiveReadSet( target ) );
+		}
 	    }
-	}
-	if( stmt instanceof AssignStmt ) {
+	} else if( stmt instanceof AssignStmt ) {
 	    AssignStmt a = (AssignStmt) stmt;
 	    Value r = a.getRightOp();
 	    ret = addValue( r, method, stmt );
 	}
-	stmtToReadSet.put( stmt, ret );
 	return ret;
     }
 
-    HashMap stmtToWriteSet = new HashMap();
     public RWSet writeSet( SootMethod method, Stmt stmt ) {
-	RWSet ret = (RWSet) stmtToWriteSet.get( stmt );
-	if( ret != null ) return ret;
+	RWSet ret = null;
 	if( stmt.containsInvokeExpr() ) {
-	    for( Iterator targets = ig.getTargetsOf( stmt ).iterator();
+	    for( Iterator targets = ig.mcg.getMethodsReachableFrom(
+			ig.getTargetsOf( stmt ) ).iterator();
 		    targets.hasNext(); ) {
 		SootMethod target = (SootMethod) targets.next();
-		if( ret == null ) ret = new MethodRWSet();
-		if( !target.isConcrete() ) continue;
-		findRWSetsForMethod( target );
-		ret.union( (RWSet) methodToWriteSet.get( target ) );
+		if( target.isNative() ) {
+		    if( ret == null ) ret = new MethodRWSet();
+		    ret.setCallsNative();
+		} else if( target.isConcrete() ) {
+		    if( ret == null ) ret = new MethodRWSet();
+		    ret.union( nonTransitiveWriteSet( target ) );
+		}
 	    }
-	}
-	if( stmt instanceof AssignStmt ) {
+	} else if( stmt instanceof AssignStmt ) {
 	    AssignStmt a = (AssignStmt) stmt;
 	    Value l = a.getLeftOp();
 	    ret = addValue( l, method, stmt );
 	}
-	stmtToWriteSet.put( stmt, ret );
 	return ret;
     }
 

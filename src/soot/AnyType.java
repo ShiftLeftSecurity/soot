@@ -25,26 +25,46 @@
 
 
 
+
+
 package soot;
 
-/** Describes a switch on internal types. */
-interface ITypeSwitch extends soot.util.Switch
+import soot.util.*;
+import java.util.*;
+
+
+public class AnyType extends Type
 {
-    void caseArrayType(ArrayType t);
-    void caseBooleanType(BooleanType t);
-    void caseByteType(ByteType t);
-    void caseCharType(CharType t);
-    void caseDoubleType(DoubleType t);
-    void caseFloatType(FloatType t);
-    void caseIntType(IntType t);
-    void caseLongType(LongType t);
-    void caseRefType(RefType t);
-    void caseShortType(ShortType t);
-    void caseStmtAddressType(StmtAddressType t);
-    void caseUnknownType(UnknownType t);
-    void caseVoidType(VoidType t);
-    void caseAnyType(AnyType t);
-    void caseNullType(NullType t);
-    void caseErroneousType(ErroneousType t);
-    void caseDefault(Type t);
+    private static AnyType constant = new AnyType();
+
+    private AnyType()
+    {
+    }
+    
+    /** @return this class's singleton object */
+    public static AnyType v()
+    {
+        return constant;
+    }
+
+    
+    public int hashCode()
+    {
+        return 0x9891DFE1;
+    }
+    
+    public boolean equals(Object t)
+    {
+        return this == t;
+    }
+
+    public String toString()
+    {
+        return "any_type";
+    }
+
+    public void apply(Switch sw)
+    {
+        ((TypeSwitch) sw).caseAnyType(this);
+    }
 }

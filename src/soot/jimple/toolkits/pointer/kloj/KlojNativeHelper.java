@@ -59,7 +59,7 @@ class KlojNativeHelper extends NativeHelper {
 	return source;
     }
     protected ReferenceVariable newInstanceOfImpl(ReferenceVariable cls) {
-	AllocNode site = AllocNode.v( cls, NullType.v(), currentMethod );
+	AllocNode site = AllocNode.v( cls, AnyType.v(), currentMethod );
 	VarNode local = VarNode.v( site, RefType.v( "java.lang.Object" ),
 		currentMethod );
 	graph.addNewEdge( site, local );
@@ -71,7 +71,7 @@ class KlojNativeHelper extends NativeHelper {
 	return VarNode.v( f, f.getType(), currentMethod );
     }
     protected ReferenceVariable tempFieldImpl(String fieldsig) {
-	return VarNode.v( new Pair( "tempField", fieldsig ), NullType.v(), currentMethod );
+	return VarNode.v( new Pair( "tempField", fieldsig ), AnyType.v(), currentMethod );
     }
     static int tempVar = 0;
     protected ReferenceVariable tempVariableImpl() {

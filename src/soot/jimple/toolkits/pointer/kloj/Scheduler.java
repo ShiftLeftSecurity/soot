@@ -1,6 +1,7 @@
 package soot.jimple.toolkits.pointer.kloj;
 import soot.jimple.toolkits.pointer.*;
 import java.util.*;
+import soot.util.*;
 
 abstract class Scheduler {
     protected Base b;

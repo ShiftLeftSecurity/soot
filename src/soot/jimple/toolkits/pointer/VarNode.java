@@ -13,6 +13,15 @@ public class VarNode extends ValNode
     public static VarNode v( Object val, Type t, SootMethod m ) {
 	VarNode ret = (VarNode) nodeMap.get( val );
 	if( ret == null ) {
+	    if( val instanceof Pair ) {
+		Pair p = (Pair) val;
+		if( p.o1 instanceof SootMethod && p.o2 instanceof Integer ) {
+		    SootMethod meth = (SootMethod) p.o1;
+		    if( meth.isStatic() && p.o2.equals( PointerAnalysis.THIS_NODE ) ) {
+			throw new RuntimeException( "Attempt to create this node for static method "+meth );
+		    }
+		}
+	    }
 	    nodeMap.put( val, ret = new VarNode( val, t, m ) );
 	} else {
 	    if( !ret.getType().equals( t ) ) {
