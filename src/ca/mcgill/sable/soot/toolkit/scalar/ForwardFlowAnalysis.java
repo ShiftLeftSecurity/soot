@@ -1,10 +1,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Baf, a Java(TM) bytecode analyzer framework.                      *
+ * Jimple, a 3-address code Java(TM) bytecode representation.        *
  * Copyright (C) 1997, 1998 Raja Vallee-Rai (kor@sable.mcgill.ca)    *
  * All rights reserved.                                              *
- *                                                                   *
- * Modifications by Patrick Lam (plam@sable.mcgill.ca) are           *
- * Copyright (C) 1999 Patrick Lam.  All rights reserved.             *
  *                                                                   *
  * This work was done as a project of the Sable Research Group,      *
  * School of Computer Science, McGill University, Canada             *
@@ -64,10 +61,6 @@
 
  B) Changes:
 
- - Modified on February 3, 1999 by Patrick Lam (plam@sable.mcgill.ca) (*)
-   Added changes in support of the Grimp intermediate
-   representation (with aggregated-expressions).
-
  - Modified on November 2, 1998 by Raja Vallee-Rai (kor@sable.mcgill.ca) (*)
    Repackaged all source files and performed extensive modifications.
    First initial release of Soot.
@@ -76,112 +69,120 @@
    First internal release (Version 0.1).
 */
 
-package ca.mcgill.sable.soot.baf;
+package ca.mcgill.sable.soot.toolkit.scalar;
 
 import ca.mcgill.sable.soot.*;
 import ca.mcgill.sable.util.*;
 import java.util.*;
 
-public abstract class AbstractOpTypeInst extends AbstractInst
+
+
+public abstract class ForwardFlowAnalysis extends FlowAnalysis
 {
-    protected Type opType;
-
-    protected AbstractOpTypeInst(Type opType)
+    public ForwardFlowAnalysis(UnitGraph graph)
     {
-        if(opType instanceof NullType || opType instanceof ArrayType || opType instanceof RefType)
-            opType = RefType.v();
+        super(graph);
+    }
+
+    protected boolean isForward()
+    {
+        return true;
+    }
+    protected void doAnalysis()
+    {
+        LinkedList changedUnits = new LinkedList();
+        HashSet changedUnitsSet = new HashSet();
+
+        int numNodes = graph.size();
+        int numComputations = 0;
         
-        this.opType = opType;
-    }
-    
-    public Type getOpType()
-    {
-        return opType;
-    }
-    
-    public void setOpType(Type t)
-    {
-        opType = t;
-        if(opType instanceof NullType || opType instanceof ArrayType || opType instanceof RefType)
-            opType = RefType.v();
-    }
-
-    private static String bafDescriptorOf(Type type)
-    {
-        TypeSwitch sw;
-
-        type.apply(sw = new TypeSwitch()
+        // Set initial values and nodes to visit.
         {
-            public void caseBooleanType(BooleanType t)
+            Iterator it = graph.iterator();
+
+            while(it.hasNext())
             {
-                setResult("b");
-            }
+                Unit s = (Unit) it.next();
 
-            public void caseByteType(ByteType t)
+                changedUnits.addLast(s);
+                changedUnitsSet.add(s);
+
+                unitToBeforeFlow.put(s, newInitialFlow());
+                unitToAfterFlow.put(s, newInitialFlow());
+            }
+        }
+
+        // Perform fixed point flow analysis
+        {
+            Object previousAfterFlow = newInitialFlow();
+
+            while(!changedUnits.isEmpty())
             {
-                setResult("b");
+                Object beforeFlow;
+                Object afterFlow;
+
+                Unit s = (Unit) changedUnits.removeFirst();
+
+                changedUnitsSet.remove(s);
+
+                copy(unitToAfterFlow.get(s), previousAfterFlow);
+
+                // Compute and store beforeFlow
+                {
+                    List preds = graph.getPredsOf(s);
+
+                    beforeFlow = unitToBeforeFlow.get(s);
+
+                    if(preds.size() == 1)
+                        copy(unitToAfterFlow.get(preds.get(0)), beforeFlow);
+                    else if(preds.size() != 0)
+                    {
+                        Iterator predIt = preds.iterator();
+
+                        copy(unitToAfterFlow.get(predIt.next()), beforeFlow);
+
+                        while(predIt.hasNext())
+                        {
+                            Object otherBranchFlow = unitToAfterFlow.get(predIt.
+next());
+                            merge(beforeFlow, otherBranchFlow, beforeFlow);
+                        }
+                    }
+                }
+
+                // Compute afterFlow and store it.
+                {
+                    afterFlow = unitToAfterFlow.get(s);
+                    flowThrough(beforeFlow, s, afterFlow);
+                    numComputations++;
+                }
+
+                // Update queue appropriately
+                    if(!afterFlow.equals(previousAfterFlow))
+                    {
+                        Iterator succIt = graph.getSuccsOf(s).iterator();
+
+                        while(succIt.hasNext())
+                        {
+                            Unit succ = (Unit) succIt.next();
+                            
+                            if(!changedUnitsSet.contains(succ))
+                            {
+                                changedUnits.addLast(succ);
+                                changedUnitsSet.add(succ);
+                            }
+                        }
+                    }
             }
-
-            public void caseCharType(CharType t)
-            {
-                setResult("c");
-            }
-
-            public void caseDoubleType(DoubleType t)
-            {
-                setResult("d");
-            }
-
-            public void caseFloatType(FloatType t)
-            {
-                setResult("f");
-            }
-
-            public void caseIntType(IntType t)
-            {
-                setResult("i");
-            }
-
-            public void caseLongType(LongType t)
-            {
-                setResult("l");
-            }
-
-            public void caseShortType(ShortType t)
-            {
-                setResult("s");
-            }
-
-            
-            public void defaultCase(Type t)
-            {
-                throw new RuntimeException("Invalid type: " + t);
-            }
-
-            public void caseRefType(RefType t)
-            {
-                setResult("r");
-            }
-
-
-        });
-
-        return (String) sw.getResult();
-
+        }
+        
+        // System.out.println(graph.getBody().getMethod().getSignature() + " numNodes: " + numNodes + 
+        //    " numComputations: " + numComputations + " avg: " + Main.truncatedOf((double) numComputations / numNodes, 2));
+        
+        Main.totalFlowNodes += numNodes;
+        Main.totalFlowComputations += numComputations;
     }
-
-    /* override AbstractInst's toString with our own, including types */
-    protected String toString(boolean isBrief, Map unitToName, String indentation)
-    {
-        return indentation + getName() + "." + 
-          Baf.bafDescriptorOf(opType) + getParameters(isBrief, unitToName);
-    }
-
-    public int getOutMachineCount()
-    {
-        return JasminClass.sizeOfType(getOpType());
-    } 
-
-
 
 }
+
+

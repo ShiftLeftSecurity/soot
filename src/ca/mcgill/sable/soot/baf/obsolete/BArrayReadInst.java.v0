@@ -1,7 +1,10 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Jimple, a 3-address code Java(TM) bytecode representation.        *
+ * Baf, a Java(TM) bytecode analyzer framework.                      *
  * Copyright (C) 1997, 1998 Raja Vallee-Rai (kor@sable.mcgill.ca)    *
  * All rights reserved.                                              *
+ *                                                                   *
+ * Modifications by Patrick Lam (plam@sable.mcgill.ca) are           *
+ * Copyright (C) 1999 Patrick Lam.  All rights reserved.             *
  *                                                                   *
  * This work was done as a project of the Sable Research Group,      *
  * School of Computer Science, McGill University, Canada             *
@@ -61,31 +64,65 @@
 
  B) Changes:
 
- - Modified on February 4, 1998 by Raja Vallee-Rai (kor@sable.mcgill.ca) (*)
-   Added getLiveLocalsAfter();
+ - Modified on February 3, 1999 by Patrick Lam (plam@sable.mcgill.ca) (*)
+   Added changes in support of the Grimp intermediate
+   representation (with aggregated-expressions).
 
  - Modified on November 2, 1998 by Raja Vallee-Rai (kor@sable.mcgill.ca) (*)
    Repackaged all source files and performed extensive modifications.
    First initial release of Soot.
 
- - Modified on 23-Jul-1998 by Raja Vallee-Rai (kor@sable.mcgill.ca). (*)
-   Renamed the uses of Hashtable to HashMap.
-
  - Modified on 15-Jun-1998 by Raja Vallee-Rai (kor@sable.mcgill.ca). (*)
    First internal release (Version 0.1).
 */
 
-package ca.mcgill.sable.soot.toolkit.scalar;
+package ca.mcgill.sable.soot.baf;
 
 import ca.mcgill.sable.soot.*;
+import ca.mcgill.sable.soot.jimple.*;
 import ca.mcgill.sable.util.*;
 import java.util.*;
 
-public interface UnitLiveLocals
+public class BArrayReadInst extends AbstractOpTypeInst implements ArrayReadInst
 {
-    public List getLiveLocalsAfter(Unit s);
-    public List getLiveLocalsBefore(Unit s);
+    BArrayReadInst(Type opType)
+    {
+        super(opType);
+    }
+
+
+    public int getInCount()
+    {
+        return 2;
+    }
+
+    
+    public Object clone() 
+    {
+        return new BArrayReadInst(getOpType());
+    }
+
+    public int getInMachineCount()
+    {
+        return 2;
+    }
+    
+    public int getOutCount()
+    {
+        return 1;
+    }
+
+    public int getOutMachineCount()
+    {
+        return 1;
+    }
+    
+
+    final String getName() { return "arrayread"; }
+
+    
+    public void apply(Switch sw)
+    {
+        ((InstSwitch) sw).caseArrayReadInst(this);
+    }   
 }
-
-
-

@@ -221,7 +221,7 @@ class VTA {
             // declaredtypesHT.put("this_"+currmethod.getSignature(), new TypeNode("this_"+currmethod.getSignature(), bitMap, inversebitMap ));
 
             JimpleBody body = Jimplifier.getJimpleBody( currmethod );
-            List locals = body.getLocals();
+            Chain locals = body.getLocals();
             Iterator localIt = locals.iterator();
             // ADD FULL VARIABLE NAME OF EACH REFTYPE LOCAL IN EACH METHOD
 

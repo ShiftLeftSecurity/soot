@@ -10,20 +10,19 @@ import ca.mcgill.sable.soot.baf.*;
 
 class LoopDetector 
 {
+    // Modifies MethodNode's ImportantInvokeExprs and loopCount fields!
    void setLoopCountFor (MethodNode me) 
    {
       int loopCount = 0;
 
       SootMethod m = me.getMethod();
-      //      System.out.println ( "TRYING LOOPS FOR : "+m.getSignature() );
 
-      JimpleBody jb = Jimplifier.getJimpleBody ( m );
-      //  JimpleBody jb = (JimpleBody) new BuildAndStoreBody(Jimple.v(), new StoredBody(ClassFile.v())).resolveFor(m);
+      JimpleBody jb = Jimplifier.getJimpleBody (m);
 
       Chain units = jb.getUnits();
       HashSet alreadyVisitedUnits = new HashSet(units.size() * 2 + 1, 0.7f);
 
-      CompleteStmtGraph g = new CompleteStmtGraph(jb);
+      CompleteUnitGraph g = new CompleteUnitGraph(jb);
       Iterator stmtIt = units.iterator();
       while (stmtIt.hasNext())
       {
@@ -32,8 +31,6 @@ class LoopDetector
 
           if (s instanceof IfStmt)
           {
-               //       System.out.println ( "IF STMT "+s );
-
               List list = g.getSuccsOf( s );
               Iterator listIt = list.iterator();
               while (listIt.hasNext())
@@ -73,7 +70,3 @@ class LoopDetector
       me.numloops = loopCount;
    }
 }
-
-
-
-

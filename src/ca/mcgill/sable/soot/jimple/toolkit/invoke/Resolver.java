@@ -174,70 +174,57 @@ class Resolver {
 
       SootClass currclass = scm.getClass ( method.getDeclaringClass().getName() );
       String currname = currclass.getName();
-      String currpackagename = getPackageName ( currname );
+      String currpackagename = WholeProgramUtil.getPackageName ( currname );
       /*
          BuildAndStoreBody buildAndStoreBody = new BuildAndStoreBody(Jimple.v() , new StoredBody(ClassFile.v()));
 
          JimpleBody body = (JimpleBody) buildAndStoreBody.resolveFor(method);
       */
-      try {
-         JimpleBody body = Jimplifier.getJimpleBody ( method );
-         List localslist = body.getLocals();
-         Iterator localsit = localslist.iterator();
-         while ( localsit.hasNext() )
-         {
-            ref = false;
-            samepackage = false;
-            Local loc = ( Local ) localsit.next();
-            if ( loc.getType() instanceof RefType )
-            {
-               ref = true;
-               String locName = loc.getType().toString();
-               //     System.out.println ("----"+locName);
 
-               sc = scm.getClass ( locName );
-               samepackage = isSamePackage ( getPackageName ( locName ), currpackagename );
-            }
+      JimpleBody body = Jimplifier.getJimpleBody ( method );
+      Chain localslist = body.getLocals();
+      Iterator localsit = localslist.iterator();
+      while ( localsit.hasNext() )
+      {
+          ref = false;
+          samepackage = false;
+          Local loc = ( Local ) localsit.next();
 
-            else if ( loc.getType() instanceof ArrayType )
-            {
-               Type t = ( ( ArrayType ) loc.getType() ).baseType;
-               if ( t instanceof RefType )
-               {
+          if ( loc.getType() instanceof RefType )
+          {
+              ref = true;
+              String locName = loc.getType().toString();
+
+              sc = scm.getClass ( locName );
+              samepackage = WholeProgramUtil.isSamePackage ( WholeProgramUtil.getPackageName ( locName ), currpackagename );
+          }
+          else if ( loc.getType() instanceof ArrayType )
+          {
+              Type t = ( ( ArrayType ) loc.getType() ).baseType;
+              if ( t instanceof RefType )
+              {
                   ref = true;
                   String locName = t.toString();
-                  //      System.out.println ("----"+locName);
-
+                  
                   sc = scm.getClass( locName );
-                  samepackage = isSamePackage ( getPackageName ( locName ), currpackagename );
-               }
+                  samepackage = WholeProgramUtil.isSamePackage ( WholeProgramUtil.getPackageName ( locName ), currpackagename );
+              }
+          }
 
-            }
+          if ( ref )
+          {
+              if ( ( ( Integer ) classesHT.get ( sc.getName() ) ) == null )
+                  classesHT.put ( sc.getName(), pub );
 
-            //    System.out.println ("---------------------------");
-
-            if ( ref )
-            {
-               if ( ( ( Integer ) classesHT.get ( sc.getName() ) ) == null )
-               classesHT.put ( sc.getName(), pub );
-               //     System.out.println ( " MODS : "+Modifier.toString( sc.getModifiers() )+sc );
-
-               if ( ! ( ( ( Modifier.isPublic ( sc.getModifiers() ) ) || samepackage ) ) )
-               {
-                  // System.out.println ( " MODIFIERS : "+ Modifier.toString ( sc.getModifiers() ) );
-
-                  // System.out.println ( " ILLEGAL ERROR ( LOCAL DECLARATION ) WHEN TRYING TO ACCESS CLASS : "+sc.getName()+" FROM METHOD : "+method.getSignature() );
-
+              if ( ! ( ( ( Modifier.isPublic ( sc.getModifiers() ) ) || samepackage ) ) )
+              {
                   classesHT.put ( sc.getName(), def );
                   errormethods.add ( method.getSignature() );
-               }
+              }
+          }
+      }
 
-            }
-
-         }
-
-         StmtList l = body.getUnits();
-         Iterator it = l.iterator();
+         Iterator it = body.getUnits().iterator();
          while ( it.hasNext() )
          {
             Stmt s = ( Stmt ) it.next();
@@ -266,7 +253,7 @@ class Resolver {
                   dec = scm.getClass ( field.getDeclaringClass().getName() );
                   if ( currclass.getName().equals ( dec.getName() ) )
                   sameclass = true;
-                  samepackage = isSamePackage ( getPackageName ( dec.getName() ), currpackagename );
+                  samepackage = WholeProgramUtil.isSamePackage ( WholeProgramUtil.getPackageName ( dec.getName() ), currpackagename );
                   if ( ( ( Integer ) classesHT.get ( dec.getName() ) ) == null )
                   classesHT.put ( dec.getName(), pub );
                   if ( ! ( ( ( Modifier.isPublic ( dec.getModifiers() ) ) || samepackage ) ) )
@@ -324,7 +311,7 @@ class Resolver {
                   dec = scm.getClass ( field.getDeclaringClass().getName() );
                   if ( currclass.getName().equals ( dec.getName() ) )
                   sameclass = true;
-                  samepackage = isSamePackage ( getPackageName( dec.getName() ), currpackagename );
+                  samepackage = WholeProgramUtil.isSamePackage ( WholeProgramUtil.getPackageName( dec.getName() ), currpackagename );
                   if ( ( ( Integer ) classesHT.get ( dec.getName() ) ) == null )
                   classesHT.put ( dec.getName(), pub );
                   if ( ! ( ( ( Modifier.isPublic ( dec.getModifiers() ) ) || samepackage ) ) )
@@ -382,7 +369,7 @@ class Resolver {
                      ref = true;
                      String locName = t.toString();
                      sc = scm.getClass ( locName );
-                     samepackage = isSamePackage ( getPackageName ( locName ), currpackagename );
+                     samepackage = WholeProgramUtil.isSamePackage ( WholeProgramUtil.getPackageName ( locName ), currpackagename );
                   }
 
                   else if ( t instanceof ArrayType )
@@ -393,7 +380,7 @@ class Resolver {
                         ref = true;
                         String locName = ty.toString();
                         sc = scm.getClass ( locName );
-                        samepackage = isSamePackage ( getPackageName ( locName ), currpackagename );
+                        samepackage = WholeProgramUtil.isSamePackage ( WholeProgramUtil.getPackageName ( locName ), currpackagename );
                      }
 
                   }
@@ -426,7 +413,7 @@ class Resolver {
                      ref = true;
                      String locName = t.toString();
                      sc = scm.getClass( locName );
-                     samepackage = isSamePackage ( getPackageName ( locName ), currpackagename );
+                     samepackage = WholeProgramUtil.isSamePackage ( WholeProgramUtil.getPackageName ( locName ), currpackagename );
                   }
 
                   else if ( t instanceof ArrayType )
@@ -437,7 +424,7 @@ class Resolver {
                         ref = true;
                         String locName = ty.toString();
                         sc = scm.getClass( locName );
-                        samepackage = isSamePackage ( getPackageName ( locName ), currpackagename );
+                        samepackage = WholeProgramUtil.isSamePackage ( WholeProgramUtil.getPackageName ( locName ), currpackagename );
                      }
 
                   }
@@ -466,7 +453,7 @@ class Resolver {
                   RefType t = newexpr.getBaseType();
                   String locName = t.toString();
                   sc = scm.getClass ( locName );
-                  samepackage = isSamePackage ( getPackageName ( locName ), currpackagename );
+                  samepackage = WholeProgramUtil.isSamePackage ( WholeProgramUtil.getPackageName ( locName ), currpackagename );
                   if ( ( ( Integer ) classesHT.get ( sc.getName() ) ) == null )
                   classesHT.put ( sc.getName(), pub );
                   if ( ! ( ( ( Modifier.isPublic ( sc.getModifiers() ) ) || samepackage ) ) )
@@ -491,7 +478,7 @@ class Resolver {
                      ref = true;
                      String locName = t.toString();
                      sc = scm.getClass( locName );
-                     samepackage = isSamePackage ( getPackageName ( locName ), currpackagename );
+                     samepackage = WholeProgramUtil.isSamePackage ( WholeProgramUtil.getPackageName ( locName ), currpackagename );
                   }
 
                   else if ( t instanceof ArrayType )
@@ -502,7 +489,7 @@ class Resolver {
                         ref = true;
                         String locName = ty.toString();
                         sc = scm.getClass( locName );
-                        samepackage = isSamePackage ( getPackageName ( locName ), currpackagename );
+                        samepackage = WholeProgramUtil.isSamePackage ( WholeProgramUtil.getPackageName ( locName ), currpackagename );
                      }
 
                   }
@@ -535,7 +522,7 @@ class Resolver {
                      ref = true;
                      String locName = t.toString();
                      sc = scm.getClass ( locName );
-                     samepackage = isSamePackage ( getPackageName ( locName ), currpackagename );
+                     samepackage = WholeProgramUtil.isSamePackage ( WholeProgramUtil.getPackageName ( locName ), currpackagename );
                   }
 
                   else if ( t instanceof ArrayType )
@@ -546,7 +533,7 @@ class Resolver {
                         ref = true;
                         String locName = ty.toString();
                         sc = scm.getClass ( locName );
-                        samepackage = isSamePackage ( getPackageName ( locName ), currpackagename );
+                        samepackage = WholeProgramUtil.isSamePackage ( WholeProgramUtil.getPackageName ( locName ), currpackagename );
                      }
 
                   }
@@ -583,7 +570,7 @@ class Resolver {
                         ref = true;
                         String argtype = stinvexpr.getMethod().getParameterType( counter ).toString();
                         sc = scm.getClass ( argtype );
-                        samepackage = isSamePackage ( getPackageName ( argtype ), currpackagename );
+                        samepackage = WholeProgramUtil.isSamePackage ( WholeProgramUtil.getPackageName ( argtype ), currpackagename );
                      }
 
                      else if ( stinvexpr.getMethod().getParameterType( counter ) instanceof ArrayType )
@@ -594,7 +581,7 @@ class Resolver {
                            ref = true;
                            String argtype = t.toString();
                            sc = scm.getClass ( argtype );
-                           samepackage = isSamePackage ( getPackageName ( argtype ), currpackagename );
+                           samepackage = WholeProgramUtil.isSamePackage ( WholeProgramUtil.getPackageName ( argtype ), currpackagename );
                         }
 
                      }
@@ -623,7 +610,7 @@ class Resolver {
                   dec = scm.getClass ( meth.getDeclaringClass().getName() );
                   if ( currclass.getName().equals ( dec.getName() ) )
                   sameclass = true;
-                  samepackage = isSamePackage ( getPackageName ( dec.getName() ), currpackagename );
+                  samepackage = WholeProgramUtil.isSamePackage ( WholeProgramUtil.getPackageName ( dec.getName() ), currpackagename );
                   if ( ( ( Integer ) methodsHT.get ( meth.getSignature() ) ) == null )
                   methodsHT.put ( meth.getSignature(), pub );
                   if ( ( ( Integer ) classesHT.get ( dec.getName() ) ) == null )
@@ -691,7 +678,7 @@ class Resolver {
                         ref = true;
                         String argtype = invexpr.getMethod().getParameterType( counter ).toString();
                         sc = scm.getClass ( argtype );
-                        samepackage = isSamePackage ( getPackageName ( argtype ), currpackagename );
+                        samepackage = WholeProgramUtil.isSamePackage ( WholeProgramUtil.getPackageName ( argtype ), currpackagename );
                      }
 
                      else if ( invexpr.getMethod().getParameterType( counter ) instanceof ArrayType )
@@ -702,7 +689,7 @@ class Resolver {
                            ref = true;
                            String argtype = t.toString();
                            sc = scm.getClass ( argtype );
-                           samepackage = isSamePackage ( getPackageName ( argtype ), currpackagename );
+                           samepackage = WholeProgramUtil.isSamePackage ( WholeProgramUtil.getPackageName ( argtype ), currpackagename );
                         }
 
                      }
@@ -738,7 +725,7 @@ class Resolver {
                   dec = scm.getClass ( meth.getDeclaringClass().getName() );
                   if ( currclass.getName().equals ( dec.getName() ) )
                   sameclass = true;
-                  samepackage = isSamePackage ( getPackageName ( dec.getName() ), currpackagename );
+                  samepackage = WholeProgramUtil.isSamePackage ( WholeProgramUtil.getPackageName ( dec.getName() ), currpackagename );
                   if ( ( ( Integer ) methodsHT.get ( meth.getSignature() ) ) == null )
                   methodsHT.put ( meth.getSignature(), pub );
                   if ( ( ( Integer ) classesHT.get ( dec.getName() ) ) == null )
@@ -800,12 +787,6 @@ class Resolver {
          }
 
       }
-      catch ( java.lang.RuntimeException e ) { /* System.err.println ( "Jimple cannot handle : "+method.getSignature() ); */ }
-
-      //   body = null;
-
-   }
-
 
    void adjustSuperMethods ( SootMethod m, Integer integer ) {
       SootClass sc = scm.getClass ( m.getDeclaringClass().getName() );
@@ -830,31 +811,9 @@ class Resolver {
    }
 
 
-   String getPackageName ( String classname ) {
-      int index = classname.lastIndexOf ( '.' );
-      String packagename = null;
-      if ( index > -1 )
-      packagename = classname.substring ( 0, index );
-      return packagename;
-   }
-
-
-   boolean isSamePackage ( String s1, String s2 ) {
-      if ( ( s1 == null ) && ( s2 == null ) )
-      return true;
-      else if ( ( s1 != null ) && ( s2 != null ) )
-      {
-         if ( ( s1.compareTo ( s2 ) ) == 0 )
-         return true;
-      }
-
-      return false;
-   }
-
-
    boolean isSameProtected ( SootClass declaringclass, SootClass currclass, String baseType, String currpackage ) {
       boolean answer = false;
-      if ( isSamePackage ( getPackageName ( declaringclass.getName() ), currpackage ) )
+      if ( WholeProgramUtil.isSamePackage ( WholeProgramUtil.getPackageName ( declaringclass.getName() ), currpackage ) )
       return true;
       else
       {
@@ -897,7 +856,7 @@ class Resolver {
 
    boolean isSameStaticProtected ( SootClass declaringclass, SootClass currclass, String currpackage ) {
       boolean answer = false;
-      if ( isSamePackage ( getPackageName ( declaringclass.getName() ), currpackage ) )
+      if ( WholeProgramUtil.isSamePackage ( WholeProgramUtil.getPackageName ( declaringclass.getName() ), currpackage ) )
       return true;
       else
       {
@@ -925,80 +884,6 @@ class Resolver {
       return uninlinableexprs;
    }
 
-
-   /*
-
-      public void setUnInlinableInvokeExprs ( SootMethod method ) {
-
-       try {
-
-        JimpleBody body = Jimplifier.getJimpleBody ( method );
-     
-        StmtList l = body.getUnits();
-
-        Iterator it = l.iterator();
-
-        while ( it.hasNext() ) 
-        {
-
-         try {
-
-         Stmt s = ( Stmt ) it.next();
-
-         if ( s instanceof AssignStmt ) 
-         {
-           
-          AssignStmt as = ( AssignStmt ) s;
-
-          if ( as.getRightOp() instanceof InvokeExpr )
-          {
-
-           InvokeExpr ie = ( InvokeExpr ) as.getRightOp();
-
-           if ( uninitialised > 0 )
-           uninlinableexprs.add( ie );
-
-          }
-          else if ( as.getRightOp() instanceof NewExpr )
-          {
-
-           uninitialised++;
-
-          } 
-            
-         }
-         else if ( s instanceof InvokeStmt )
-         {
-
-          InvokeStmt is = ( InvokeStmt ) s;
-
-          InvokeExpr ie = is.getInvokeExpr();
-
-          SootMethod meth = ie.getMethod();
-
-          if ( uninitialised > 0 )
-          {
-
-           if ( meth.getName().equals ( "<init>" ) )
-           uninitialised--;
-
-           if ( uninitialised > 0 )
-           uninlinableexprs.add ( ie );
-
-          }
-
-        }
-
-       } catch ( java.lang.RuntimeException e ) { }
-
-      }     
-
-     } catch ( java.lang.RuntimeException e1 ) { }
-    
-    }
-
-
-   */
 }
 
 

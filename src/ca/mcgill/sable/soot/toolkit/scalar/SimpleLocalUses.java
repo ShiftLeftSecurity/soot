@@ -1,10 +1,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Baf, a Java(TM) bytecode analyzer framework.                      *
+ * Jimple, a 3-address code Java(TM) bytecode representation.        *
  * Copyright (C) 1997, 1998 Raja Vallee-Rai (kor@sable.mcgill.ca)    *
  * All rights reserved.                                              *
- *                                                                   *
- * Modifications by Patrick Lam (plam@sable.mcgill.ca) are           *
- * Copyright (C) 1999 Patrick Lam.  All rights reserved.             *
  *                                                                   *
  * This work was done as a project of the Sable Research Group,      *
  * School of Computer Science, McGill University, Canada             *
@@ -64,124 +61,125 @@
 
  B) Changes:
 
- - Modified on February 3, 1999 by Patrick Lam (plam@sable.mcgill.ca) (*)
-   Added changes in support of the Grimp intermediate
-   representation (with aggregated-expressions).
+ - Modified on March 17, 1999 by Raja Vallee-Rai (rvalleerai@sable.mcgill.ca) (*)
+   Optimized the code a tad.
+   
+ - Modified on March 13, 1999 by Raja Vallee-Rai (rvalleerai@sable.mcgill.ca) (*)
+   Re-organized the timers.
 
  - Modified on November 2, 1998 by Raja Vallee-Rai (kor@sable.mcgill.ca) (*)
    Repackaged all source files and performed extensive modifications.
    First initial release of Soot.
 
+ - Modified on 23-Jul-1998 by Raja Vallee-Rai (kor@sable.mcgill.ca). (*)
+   Renamed the uses of Hashtable to HashMap.
+
  - Modified on 15-Jun-1998 by Raja Vallee-Rai (kor@sable.mcgill.ca). (*)
    First internal release (Version 0.1).
 */
 
-package ca.mcgill.sable.soot.baf;
+package ca.mcgill.sable.soot.toolkit.scalar;
 
 import ca.mcgill.sable.soot.*;
 import ca.mcgill.sable.util.*;
 import java.util.*;
 
-public abstract class AbstractOpTypeInst extends AbstractInst
+public class SimpleLocalUses implements LocalUses
 {
-    protected Type opType;
+    Map unitToUses;
 
-    protected AbstractOpTypeInst(Type opType)
+    public SimpleLocalUses(CompleteUnitGraph graph, LocalDefs localDefs)
     {
-        if(opType instanceof NullType || opType instanceof ArrayType || opType instanceof RefType)
-            opType = RefType.v();
+        if(Main.isProfilingOptimization)
+           Main.usesTimer.start();
+    
+        if(Main.isProfilingOptimization)
+           Main.usePhase1Timer.start();
         
-        this.opType = opType;
-    }
+        if(Main.isVerbose)
+            System.out.println("[" + graph.getBody().getMethod().getName() +
+                "]     Constructing SimpleLocalUses...");
     
-    public Type getOpType()
-    {
-        return opType;
-    }
+        unitToUses = new HashMap(graph.size() * 2 + 1, 0.7f);
     
-    public void setOpType(Type t)
-    {
-        opType = t;
-        if(opType instanceof NullType || opType instanceof ArrayType || opType instanceof RefType)
-            opType = RefType.v();
-    }
-
-    private static String bafDescriptorOf(Type type)
-    {
-        TypeSwitch sw;
-
-        type.apply(sw = new TypeSwitch()
+        // Initialize this map to empty sets
         {
-            public void caseBooleanType(BooleanType t)
-            {
-                setResult("b");
-            }
+            Iterator it = graph.iterator();
 
-            public void caseByteType(ByteType t)
+            while(it.hasNext())
             {
-                setResult("b");
+                Unit s = (Unit) it.next();
+                unitToUses.put(s, new ArrayList());
             }
+        }
 
-            public void caseCharType(CharType t)
+        if(Main.isProfilingOptimization)
+           Main.usePhase1Timer.end();
+    
+        if(Main.isProfilingOptimization)
+           Main.usePhase2Timer.start();
+    
+        // Traverse units and associate uses with definitions
+        {
+            Iterator it = graph.iterator();
+
+            while(it.hasNext())
             {
-                setResult("c");
-            }
+                Unit s = (Unit) it.next();
 
-            public void caseDoubleType(DoubleType t)
-            {
-                setResult("d");
-            }
+                Iterator boxIt = s.getUseBoxes().iterator();
 
-            public void caseFloatType(FloatType t)
-            {
-                setResult("f");
-            }
+                while(boxIt.hasNext())
+                {
+                    ValueBox useBox = (ValueBox) boxIt.next();
 
-            public void caseIntType(IntType t)
-            {
-                setResult("i");
-            }
+                    if(useBox.getValue() instanceof Local)
+                    {
+                        // Add this statement to the uses of the definition of the local
 
-            public void caseLongType(LongType t)
-            {
-                setResult("l");
-            }
+                        Local l = (Local) useBox.getValue();
 
-            public void caseShortType(ShortType t)
-            {
-                setResult("s");
-            }
+                        List possibleDefs = localDefs.getDefsOfAt(l, s);
+                        Iterator defIt = possibleDefs.iterator();
 
+                        while(defIt.hasNext())
+                        {
+                            List useList = (List) unitToUses.get(defIt.next());
+                            useList.add(new UnitValueBoxPair(s, useBox));
+                        }
+                    }
+                }
+            }
+        }
+
+        if(Main.isProfilingOptimization)
+           Main.usePhase2Timer.end();
+    
+        if(Main.isProfilingOptimization)
+           Main.usePhase3Timer.start();
+    
+        // Store the map as a bunch of unmodifiable lists.
+        {
+            Iterator it = graph.iterator();
             
-            public void defaultCase(Type t)
+            while(it.hasNext())
             {
-                throw new RuntimeException("Invalid type: " + t);
+                Unit s = (Unit) it.next();
+
+                unitToUses.put(s, Collections.unmodifiableList(((List) unitToUses.get(s))));
             }
-
-            public void caseRefType(RefType t)
-            {
-                setResult("r");
-            }
-
-
-        });
-
-        return (String) sw.getResult();
-
+            
+        }
+        
+        if(Main.isProfilingOptimization)
+           Main.usePhase3Timer.end();
+    
+        if(Main.isProfilingOptimization)
+            Main.usesTimer.end();
     }
 
-    /* override AbstractInst's toString with our own, including types */
-    protected String toString(boolean isBrief, Map unitToName, String indentation)
+    public List getUsesOf(Unit s)
     {
-        return indentation + getName() + "." + 
-          Baf.bafDescriptorOf(opType) + getParameters(isBrief, unitToName);
+        return (List) unitToUses.get(s);
     }
-
-    public int getOutMachineCount()
-    {
-        return JasminClass.sizeOfType(getOpType());
-    } 
-
-
-
 }
