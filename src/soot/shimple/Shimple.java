@@ -99,6 +99,8 @@ public class Shimple
     /**
      * Create a trivial Phi expression, where preds are an ordered
      * list of the control predecessor Blocks of the Phi expression.
+     * Instead of a list of blocks, you may provide a list of the tail
+     * Units from the corresponding blocks.
      **/
     public PhiExpr newPhiExpr(Local leftLocal, List preds)
     {
@@ -108,7 +110,9 @@ public class Shimple
     /**
      * Create a Phi expression with the provided list of Values
      * (Locals or Constants) and the corresponding control flow
-     * predecessors.
+     * predecessor Blocks.  Instead of a list of predecessor blocks,
+     * you may provide a list of the tail Units from the corresponding
+     * blocks.
      **/
     public PhiExpr newPhiExpr(List args, List preds)
     {
@@ -228,7 +232,7 @@ public class Shimple
                     else{
                         PhiExpr phiExpr = getPhiExpr(unit);
                         if(phiExpr != null)
-                            phis.add(unit);
+                            phis.add(phiExpr);
                     }
                 }
             }

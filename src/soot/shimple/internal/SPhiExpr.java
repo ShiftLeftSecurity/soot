@@ -52,8 +52,14 @@ public class SPhiExpr implements PhiExpr
         
         while(predsIt.hasNext())
         {
-            Block block = (Block) predsIt.next();
-            addArg(leftLocal, block);
+            Object pred = predsIt.next();
+
+            if(pred instanceof Block)
+                addArg(leftLocal, (Block)pred);
+            else if(pred instanceof Unit)
+                addArg(leftLocal, (Unit)pred);
+            else
+                throw new RuntimeException("Must be a CFG block or tail unit.");
         }
     }
 
@@ -76,9 +82,14 @@ public class SPhiExpr implements PhiExpr
 
         while(argsIt.hasNext()){
             Value arg = (Value) argsIt.next();
-            Block block = (Block) predsIt.next();
+            Object pred = predsIt.next();
 
-            addArg(arg, block);
+            if(pred instanceof Block)
+                addArg(arg, (Block)pred);
+            else if(pred instanceof Unit)
+                addArg(arg, (Unit)pred);
+            else
+                throw new RuntimeException("Must be a CFG block or tail unit.");
         }
     }
 
@@ -288,6 +299,11 @@ public class SPhiExpr implements PhiExpr
     {
         ValueUnitPair vup = new ValueUnitPair(arg, predTailUnit);
         vup.setBranchTarget(false);
+
+        // there is no possible use for duplicate arguments
+        if(argPairs.contains(vup))
+            return;
+            
         predTailUnit.addBoxPointingToThis(vup);
         argPairs.add(vup);
     }
@@ -418,6 +434,6 @@ public class SPhiExpr implements PhiExpr
 
     public Object clone()
     {
-        return new SPhiExpr(getValueArgs(), getPredArgs(), 0);
+        return new SPhiExpr(getValueArgs(), getPredArgs());
     }
 }

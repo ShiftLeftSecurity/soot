@@ -140,10 +140,10 @@ public class PatchingChain extends AbstractCollection implements Chain
             if((successor = (Unit)getSuccOf(obj)) == null)
                 successor = (Unit)getPredOf(obj);
             
-            res = innerChain.remove(obj);
-
             // Fix up any PhiExpr's first if necessary.
             soot.shimple.Shimple.redirectToPreds((Unit)obj, this);
+
+            res = innerChain.remove(obj);
 
             ((Unit)obj).redirectJumpsToThisTo(successor);
         }

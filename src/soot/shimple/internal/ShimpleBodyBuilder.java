@@ -39,12 +39,12 @@ import soot.toolkits.scalar.*;
  * <p> The work is done in two main steps:
  *
  * <ol>
- * <li> Trivial PHI-functions are added.
+ * <li> Trivial Phi nodes are added.
  * <li> A renaming algorithm is executed.
  * </ol>
  *
  * <p> This class can also translate out of Shimple by producing an
- * equivalent Jimple body with all PHI-functions removed.
+ * equivalent Jimple body with all Phi nodes removed.
  *
  * <p> Note that this is an internal class, understanding it should
  * not be necessary from a user point-of-view and relying on it
@@ -71,7 +71,7 @@ public class ShimpleBodyBuilder
     /**
      * An analysis class that allows us to verify that a variable is
      * guaranteed to be defined at program point P.  Used as an
-     * accessory to tweaking our PHI-function insertion algorithm.
+     * accessory to tweaking our Phi node insertion algorithm.
      **/
     protected GuaranteedDefs gd;
 
@@ -83,8 +83,8 @@ public class ShimpleBodyBuilder
         this.body = body;
 
         // our SSA building algorithm currently assumes there are no
-        // foreign PHI nodes in the given body, therefore, any such
-	// PHI nodes must be eliminated first. The results may not 
+        // foreign Phi nodes in the given body, therefore, any such
+	// Phi nodes must be eliminated first. The results may not 
 	// be as pretty as expected and it's possible that as part of 
 	// the process of eliminating and subsequent recomputation of 
 	// SSA form, minimality (to the original source) is not 
@@ -106,15 +106,15 @@ public class ShimpleBodyBuilder
     }
 
     /**
-     * PHI-function Insertion Algorithm from Cytron et al 91, P24-5,
+     * Phi node Insertion Algorithm from Cytron et al 91, P24-5,
      * implemented in various bits and pieces by the next functions.
      *
      * <p> For each definition of variable V, find the iterated
      * dominance frontier.  Each block in the iterated dominance
-     * frontier is prepended with a trivial PHI-function.
+     * frontier is prepended with a trivial Phi node.
      *
      * <p> We found out the hard way that this isn't the ideal
-     * solution for Jimple because a lot of redundant PHI functions
+     * solution for Jimple because a lot of redundant Phi nodes
      * get inserted probably due to the fact that the algorithm
      * assumes all variables have an initial definition on entry.
      *
@@ -123,9 +123,9 @@ public class ShimpleBodyBuilder
      *
      * <p> Our quick solution was to ensure that a variable was
      * defined along all paths to the block where we were considering
-     * insertion of a PHI-function.  If the variable was not defined
+     * insertion of a Phi node.  If the variable was not defined
      * along at least one path (isLocalDefinedOnEntry()), then
-     * certainly a PHI-function was superfluous and meaningless.  Our
+     * certainly a Phi node was superfluous and meaningless.  Our
      * GuaranteedDefs flow analysis provided us with the necessary
      * information.
      *
@@ -133,7 +133,7 @@ public class ShimpleBodyBuilder
      * We later found this formulation from IBM's Jikes RVM:
      *
      * <p><i> Special Java case: if node N dominates all defs of V,
-     * then N does not need a PHI-function for V. </i>
+     * then N does not need a Phi node for V. </i>
      **/
     public void insertTrivialPhiNodes()
     {
@@ -207,7 +207,7 @@ public class ShimpleBodyBuilder
                         int fBIndex = frontierBlock.getIndexInMethod();
                         
                         if(hasAlreadyFlags[fBIndex] < iterCount){
-                            // Make sure we don't add useless PHI-functions
+                            // Make sure we don't add useless Phi nodes
                             if(isLocalDefinedOnEntry(local, frontierBlock))
                                 prependTrivialPhiNode(local, frontierBlock);
 
@@ -225,7 +225,7 @@ public class ShimpleBodyBuilder
     }
 
     /**
-     * Inserts a trivial PHI-function with the appropriate number of
+     * Inserts a trivial Phi node with the appropriate number of
      * arguments.
      **/
     public void prependTrivialPhiNode(Local local, Block frontierBlock)
@@ -243,7 +243,7 @@ public class ShimpleBodyBuilder
 
     /**
      * Function that allows us to weed out special cases where
-     * we do not require PHI-functions.
+     * we do not require Phi nodes.
      *
      * <p> Temporary implementation, with much room for improvement.
      **/
@@ -256,7 +256,7 @@ public class ShimpleBodyBuilder
 
         Unit unit = (Unit) unitsIt.next();
         
-        // this will return null if the head unit is an inserted PHI statement
+        // this will return null if the head unit is an inserted Phi statement
         List definedLocals = gd.getGuaranteedDefs(unit);
 
         // this should not fail
@@ -286,7 +286,7 @@ public class ShimpleBodyBuilder
     /**
      * Variable Renaming Algorithm from Cytron et al 91, P26-8,
      * implemented in various bits and pieces by the next functions.
-     * Must be called after trivial PHI-functions have been added.
+     * Must be called after trivial Phi nodes have been added.
      *
      * <pre>
      *  call search(entry)
@@ -307,7 +307,7 @@ public class ShimpleBodyBuilder
      *  done (end of first loop)
      *  for each Y in succ(X) do
      *      j <- whichPred(Y, X)
-     *      for each PHI-function F in Y do
+     *      for each Phi-function F in Y do
      *       replace the j-th operand V in RHS(F) by V_i with i = TOP(S(V))
      *     done
      *  done (end of second loop)
@@ -435,7 +435,7 @@ public class ShimpleBodyBuilder
             }
         }
 
-        // Step 2 of 4 -- Rename PHI-function uses in Successors
+        // Step 2 of 4 -- Rename Phi node uses in Successors
         {
             Iterator succsIt = block.getSuccs().iterator();
 
@@ -454,7 +454,7 @@ public class ShimpleBodyBuilder
 
                     Value rhsRValue = assignStmt.getRightOp();
 
-                    // only interested in PHI expressions
+                    // only interested in Phi expressions
                     if(!(rhsRValue instanceof PhiExpr))
                         continue;
 
@@ -733,8 +733,8 @@ public class ShimpleBodyBuilder
     }
 
     /**
-     * Remove PHI-functions from current body, high probablity this destroys
-     * SSA form.
+     * Remove Phi nodes from current body, high probablity this
+     * destroys SSA form.
      *
      * <p> Dead code elimination + register aggregation are performed
      * as recommended by Cytron.  The Aggregator looks like it could
@@ -767,7 +767,7 @@ public class ShimpleBodyBuilder
     }
     
     /**
-     * Eliminate PHI-functions in block by naively replacing them with
+     * Eliminate Phi nodes in block by naively replacing them with
      * shimple assignment statements in the control flow predecessors.
      **/
     public static void doEliminatePhiNodes(ShimpleBody body)
