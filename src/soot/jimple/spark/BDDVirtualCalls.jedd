@@ -1,0 +1,131 @@
+/* Soot - a J*va Optimization Framework
+ * Copyright (C) 2003 Ondrej Lhotak
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the
+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ * Boston, MA 02111-1307, USA.
+ */
+
+package soot.jimple.spark;
+import soot.*;
+import soot.jimple.spark.queue.*;
+import soot.jimple.spark.bdddomains.*;
+import soot.jimple.toolkits.callgraph.*;
+import java.util.*;
+
+/** Resolves virtual calls based on the actual type of the receiver.
+ * @author Ondrej Lhotak
+ */
+public class BDDVirtualCalls extends AbsVirtualCalls
+{ 
+    BDDVirtualCalls( Rvar_obj pt,
+            Rlocal_srcm_stmt_signature_kind receivers,
+            Rlocal_srcm_stmt_tgtm specials,
+            Qctxt_local_obj_srcm_stmt_kind_tgtm out
+        ) {
+        super( pt, receivers, specials, out );
+        for( Iterator clIt = Scene.v().getClasses().iterator(); clIt.hasNext(); ) {
+            final SootClass cl = (SootClass) clIt.next();
+            for( Iterator mIt = cl.getMethods().iterator(); mIt.hasNext(); ) {
+                final SootMethod m = (SootMethod) mIt.next();
+                if( m.isAbstract() ) continue;
+                declaresMethod |= new {
+                        m.getDeclaringClass().getType() => type,
+                        m.getNumberedSubSignature() => signature,
+                        m => method };
+            }
+        }
+    }
+
+    private int lastVarNode = 1;
+    private int lastAllocNode = 1;
+    private <ctxt, local, var> varNodes;
+    private <obj, type> allocNodes;
+    private <local, srcm, stmt, signature, kind> rcv;
+    private <kind> virtual = new {Kind.VIRTUAL=>kind} | new {Kind.INTERFACE=>kind};
+    private void updateNodes() {
+        // update varnodes
+        for( ; lastVarNode < SparkNumberers.v().varNodeNumberer().size();
+            lastVarNode++ ) {
+            VarNode vn = (VarNode) SparkNumberers.v().varNodeNumberer().get(lastVarNode);
+            if( vn.getVariable() instanceof Local ) {
+                varNodes |= 
+                    new { vn.context()=>ctxt, vn.getVariable()=>local, vn=>var };
+            }
+        }
+
+        for( ; lastAllocNode < SparkNumberers.v().allocNodeNumberer().size();
+            lastAllocNode++ ) {
+            AllocNode an = (AllocNode) SparkNumberers.v().allocNodeNumberer().get(lastVarNode);
+            allocNodes |= new { an=>obj, an.getType()=>type };
+        }
+    }
+    
+    private <type, signature, method> targets = 0B;
+    private <type, signature, method:T3> declaresMethod = 0B;
+    private BDDHierarchy hier = new BDDHierarchy();
+    public void update() {
+        updateNodes();
+
+        // update receivers
+        <local, srcm, stmt, signature, kind> newRcv = receivers.get();
+        rcv |= newRcv{kind} >< virtual{kind};
+
+        // resolve new points-to sets
+        <var, obj> newPt = pt.get();
+        <type, signature> newTypes =
+               (   (allocNodes{obj} <> newPt{obj}){var}
+                <> (ctxt=>)varNodes{var}){local} 
+            <> (stmt=>,srcm=>,kind=>)rcv{local};
+
+        // if we've resolved them already, don't resolve them again
+        newTypes -= (method=>) targets;
+
+        // for each tuple [t, s], make it [t, s, t].
+        <subt, signature, supt:T2> toResolve = (type=>subt, type=>supt) newTypes;
+
+        hier.update();
+
+        // close under AnySubType; that is, if the receiver is AnySubType(t),
+        // replace it with all subtypes of t
+        toResolve |=
+            toResolve{subt} <> (type=>subt)(type=>T3) hier.anySub(){anyst};
+
+
+        do {
+            // figure out which receivers are already resolved (if the
+            // corresponding class already declares the method)
+            <subt, signature, supt, method> resolved =
+                toResolve {supt, signature} >< declaresMethod {type, signature};
+
+            // remove resolved ones
+            toResolve -= (method=>) resolved;
+
+            // add resolved ones to targets
+            targets |= (subt=>type, supt=>) resolved;
+
+            // move one step up the hierarchy for the other receiver types
+            toResolve = toResolve {supt} <> (supt=>T3) hier.extend() {subt};
+        } while( toResolve != 0B );
+
+        out.add( (type=>) (
+                   allocNodes     {obj} 
+                >< (var=>V3)newPt {obj}{var}
+                <> varNodes            {var}            {type, local}
+                >< (rcv                     {signature}
+                   <> (method=>tgtm)targets {signature}){type, local}));
+    }
+}
+     
+

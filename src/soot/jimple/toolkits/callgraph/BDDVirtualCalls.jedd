@@ -21,7 +21,7 @@ package soot.jimple.toolkits.callgraph;
 import soot.*;
 import soot.util.*;
 import soot.jimple.spark.bdddomains.*;
-import soot.jimple.spark.internal.*;
+import soot.jimple.spark.*;
 import java.util.*;
 
 /** A BDD implementation of a virtual call resolver.

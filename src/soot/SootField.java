@@ -30,7 +30,7 @@ import soot.tagkit.*;
 import soot.jimple.*;
 import java.util.*;
 import soot.util.*;
-import soot.jimple.spark.pag.SparkField;
+import soot.jimple.spark.SparkField;
 
 /**
     Soot representation of a Java field.  Can be declared to belong to a SootClass.

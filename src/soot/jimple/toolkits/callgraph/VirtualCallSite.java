@@ -34,10 +34,10 @@ public class VirtualCallSite
     private Stmt stmt;
     private SootMethod container;
     private NumberedString subSig;
-    int kind;
+    Kind kind;
 
     public VirtualCallSite( Stmt stmt, SootMethod container,
-            InstanceInvokeExpr iie, NumberedString subSig, int kind ) {
+            InstanceInvokeExpr iie, NumberedString subSig, Kind kind ) {
         this.stmt = stmt;
         this.container = container;
         this.iie = iie;
@@ -48,7 +48,7 @@ public class VirtualCallSite
     public SootMethod container() { return container; }
     public InstanceInvokeExpr iie() { return iie; }
     public NumberedString subSig() { return subSig; }
-    public int kind() { return kind; }
+    public Kind kind() { return kind; }
 }
 
 

@@ -1,0 +1,10 @@
+package soot.jimple.spark.bdddomains;
+import jedd.*;
+import soot.jimple.spark.pag.*;
+import soot.*;
+
+public class KIND(4) extends Domain {
+    public Numberer numberer() {
+        return Scene.v().kindNumberer();
+    }
+}

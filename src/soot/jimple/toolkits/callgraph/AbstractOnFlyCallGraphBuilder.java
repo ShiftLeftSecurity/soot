@@ -69,11 +69,11 @@ public abstract class AbstractOnFlyCallGraphBuilder
         }
     }
     public abstract boolean wantTypes( Local receiver );
-    public abstract void addType( Local receiver, Object srcContext, Type type, Object typeContext );
+    public abstract void addType( Local receiver, Context srcContext, Type type, Context typeContext );
     public boolean wantStringConstants( Local stringConst ) {
         return stringConstToSites.get(stringConst) != null;
     }
-    public abstract void addStringConstant( Local l, Object srcContext, String constant );
+    public abstract void addStringConstant( Local l, Context srcContext, String constant );
 
     /* End of public methods. */
 
@@ -86,7 +86,7 @@ public abstract class AbstractOnFlyCallGraphBuilder
         getImplicitTargets( m );
         findReceivers(m, b);
     }
-    protected abstract void addVirtualCallSite( Stmt s, SootMethod m, Local receiver, InstanceInvokeExpr iie, NumberedString subSig, int kind );
+    protected abstract void addVirtualCallSite( Stmt s, SootMethod m, Local receiver, InstanceInvokeExpr iie, NumberedString subSig, Kind kind );
     protected void findReceivers(SootMethod m, Body b) {
         for( Iterator sIt = b.getUnits().iterator(); sIt.hasNext(); ) {
             final Stmt s = (Stmt) sIt.next();
@@ -102,7 +102,7 @@ public abstract class AbstractOnFlyCallGraphBuilder
                             Edge.ieToKind(iie) );
                     if( subSig == sigStart ) {
                         addVirtualCallSite( s, m, receiver, iie, sigRun,
-                                Edge.THREAD );
+                                Kind.THREAD );
                     }
                 } else {
                     SootMethod tgt = ((StaticInvokeExpr) ie).getMethod();
@@ -114,7 +114,7 @@ public abstract class AbstractOnFlyCallGraphBuilder
 
                         Local receiver = (Local) ie.getArg(0);
                         addVirtualCallSite( s, m, receiver, null, sigObjRun,
-                                Edge.PRIVILEGED );
+                                Kind.PRIVILEGED );
                     }
                 }
             }
@@ -150,7 +150,7 @@ public abstract class AbstractOnFlyCallGraphBuilder
                     if( options.safe_newinstance() ) {
                         for( Iterator tgtIt = EntryPoints.v().inits().iterator(); tgtIt.hasNext(); ) {
                             final SootMethod tgt = (SootMethod) tgtIt.next();
-                            addEdge( source, s, tgt, Edge.NEWINSTANCE );
+                            addEdge( source, s, tgt, Kind.NEWINSTANCE );
                         }
                     } else {
                         if( options.verbose() ) {
@@ -163,7 +163,7 @@ public abstract class AbstractOnFlyCallGraphBuilder
                 }
                 if( ie instanceof StaticInvokeExpr ) {
                     addEdge( source, s, ie.getMethod().getDeclaringClass(),
-                        sigClinit, Edge.CLINIT );
+                        sigClinit, Kind.CLINIT );
                 }
                 if( ie.getMethod().getNumberedSubSignature() == sigForName ) {
                     Value className = ie.getArg(0);
@@ -175,10 +175,10 @@ public abstract class AbstractOnFlyCallGraphBuilder
                         if( options.safe_forname() ) {
                             for( Iterator tgtIt = EntryPoints.v().clinits().iterator(); tgtIt.hasNext(); ) {
                                 final SootMethod tgt = (SootMethod) tgtIt.next();
-                                addEdge( source, s, tgt, Edge.CLINIT );
+                                addEdge( source, s, tgt, Kind.CLINIT );
                             }
                         } else {
-                            VirtualCallSite site = new VirtualCallSite( s, source, null, null, Edge.CLINIT );
+                            VirtualCallSite site = new VirtualCallSite( s, source, null, null, Kind.CLINIT );
                             List sites = (List) stringConstToSites.get(constant);
                             if (sites == null) {
                                 stringConstToSites.put(constant, sites = new ArrayList());
@@ -193,7 +193,7 @@ public abstract class AbstractOnFlyCallGraphBuilder
                 FieldRef fr = (FieldRef) s.getFieldRef();
                 if( fr instanceof StaticFieldRef ) {
                     SootClass cl = fr.getField().getDeclaringClass();
-                    addEdge( source, s, cl, sigClinit, Edge.CLINIT );
+                    addEdge( source, s, cl, sigClinit, Kind.CLINIT );
                 }
             }
             if( s instanceof AssignStmt ) {
@@ -201,13 +201,13 @@ public abstract class AbstractOnFlyCallGraphBuilder
                 if( rhs instanceof NewExpr ) {
                     NewExpr r = (NewExpr) rhs;
                     addEdge( source, s, r.getBaseType().getSootClass(),
-                            sigClinit, Edge.CLINIT );
+                            sigClinit, Kind.CLINIT );
                 } else if( rhs instanceof NewArrayExpr || rhs instanceof NewMultiArrayExpr ) {
                     Type t = rhs.getType();
                     if( t instanceof ArrayType ) t = ((ArrayType)t).baseType;
                     if( t instanceof RefType ) {
                         addEdge( source, s, ((RefType) t).getSootClass(),
-                                sigClinit, Edge.CLINIT );
+                                sigClinit, Kind.CLINIT );
                     }
                 }
             }
@@ -217,11 +217,8 @@ public abstract class AbstractOnFlyCallGraphBuilder
     protected abstract void processNewMethodContext( MethodOrMethodContext momc );
 
     protected void handleInit(SootMethod source, final SootClass scl) {
-        addEdge( source, null, scl, sigFinalize, Edge.FINALIZE );
+        addEdge( source, null, scl, sigFinalize, Kind.FINALIZE );
         FastHierarchy fh = Scene.v().getOrMakeFastHierarchy();
-        if( fh.canStoreType( scl.getType(), clRunnable ) ) {
-            addEdge( source, null, scl, sigExit, Edge.EXIT );
-        }
     }
     protected void constantForName( String cls, SootMethod src, Stmt srcUnit ) {
         if( cls.charAt(0) == '[' ) {
@@ -241,19 +238,19 @@ public abstract class AbstractOnFlyCallGraphBuilder
                 if( !sootcls.isApplicationClass() ) {
                     sootcls.setLibraryClass();
                 }
-                addEdge( src, srcUnit, sootcls, sigClinit, Edge.CLINIT );
+                addEdge( src, srcUnit, sootcls, sigClinit, Kind.CLINIT );
             }
         }
     }
 
     protected abstract void addEdge( SootMethod src, Stmt stmt, SootMethod tgt,
-            int kind );
-    protected void addEdge(  SootMethod src, Stmt stmt, SootClass cls, NumberedString methodSubSig, int kind ) {
+            Kind kind );
+    protected void addEdge(  SootMethod src, Stmt stmt, SootClass cls, NumberedString methodSubSig, Kind kind ) {
         if( cls.declaresMethod( methodSubSig ) ) {
             addEdge( src, stmt, cls.getMethod( methodSubSig ), kind );
         }
     }
-    protected void addEdge( SootMethod src, Stmt stmt, String methodSig, int kind ) {
+    protected void addEdge( SootMethod src, Stmt stmt, String methodSig, Kind kind ) {
         if( Scene.v().containsMethod( methodSig ) ) {
             addEdge( src, stmt, Scene.v().getMethod( methodSig ), kind );
         }
@@ -280,6 +277,6 @@ public abstract class AbstractOnFlyCallGraphBuilder
     protected final NumberedString sigForName = Scene.v().getSubSigNumberer().
         findOrAdd( "java.lang.Class forName(java.lang.String)" );
     protected final RefType clRunnable = RefType.v("java.lang.Runnable");
-
+    
 }
 

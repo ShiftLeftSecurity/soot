@@ -3,7 +3,7 @@ package soot.jimple.toolkits.callgraph;
 import soot.*;
 import soot.util.*;
 import soot.jimple.spark.bdddomains.*;
-import soot.jimple.spark.internal.*;
+import soot.jimple.spark.*;
 import java.util.*;
 
 public final class BDDVirtualCalls {
@@ -23,16 +23,12 @@ public final class BDDVirtualCalls {
                                                "ins.T1, soot.jimple.spark.bdddomains.signature:soot.jimple.s" +
                                                "park.bdddomains.H1, soot.jimple.spark.bdddomains.supt:soot.j" +
                                                "imple.spark.bdddomains.T2> toResolve = jedd.internal.Jedd.v(" +
-                                               ").copy(jedd.internal.Jedd.v().replace(newTypes, new jedd.Phy" +
-                                               "sicalDomain[...], new jedd.PhysicalDomain[...]), new jedd.Ph" +
-                                               "ysicalDomain[...], new jedd.PhysicalDomain[...]); at /home/o" +
-                                               "lhotak/soot-2-jedd/src/soot/jimple/toolkits/callgraph/BDDVir" +
-                                               "tualCalls.jedd:47,8"),
-                                              jedd.internal.Jedd.v().copy(jedd.internal.Jedd.v().replace(newTypes,
-                                                                                                         new jedd.PhysicalDomain[] { T1.v() },
-                                                                                                         new jedd.PhysicalDomain[] { T2.v() }),
-                                                                          new jedd.PhysicalDomain[] { T2.v() },
-                                                                          new jedd.PhysicalDomain[] { T1.v() }));
+                                               ").copy(newTypes, new jedd.PhysicalDomain[...], new jedd.Phys" +
+                                               "icalDomain[...]); at /home/olhotak/soot-2-jedd/src/soot/jimp" +
+                                               "le/toolkits/callgraph/BDDVirtualCalls.jedd:47,8"),
+                                              jedd.internal.Jedd.v().copy(newTypes,
+                                                                          new jedd.PhysicalDomain[] { T1.v() },
+                                                                          new jedd.PhysicalDomain[] { T2.v() }));
         toResolve.eqUnion(jedd.internal.Jedd.v().replace(jedd.internal.Jedd.v().compose(jedd.internal.Jedd.v().read(toResolve),
                                                                                         jedd.internal.Jedd.v().replace(hier.anySub(),
                                                                                                                        new jedd.PhysicalDomain[] { T2.v() },
@@ -59,9 +55,11 @@ public final class BDDVirtualCalls {
             toResolve.eqMinus(jedd.internal.Jedd.v().project(resolved, new jedd.PhysicalDomain[] { V2.v() }));
             answer.eqUnion(jedd.internal.Jedd.v().project(resolved, new jedd.PhysicalDomain[] { T2.v() }));
             toResolve.eq(jedd.internal.Jedd.v().replace(jedd.internal.Jedd.v().compose(jedd.internal.Jedd.v().read(toResolve),
-                                                                                       jedd.internal.Jedd.v().replace(hier.extend(),
-                                                                                                                      new jedd.PhysicalDomain[] { T1.v(), T2.v() },
-                                                                                                                      new jedd.PhysicalDomain[] { T2.v(), T3.v() }),
+                                                                                       jedd.internal.Jedd.v().replace(jedd.internal.Jedd.v().replace(hier.extend(),
+                                                                                                                                                     new jedd.PhysicalDomain[] { T2.v() },
+                                                                                                                                                     new jedd.PhysicalDomain[] { T3.v() }),
+                                                                                                                      new jedd.PhysicalDomain[] { T1.v() },
+                                                                                                                      new jedd.PhysicalDomain[] { T2.v() }),
                                                                                        new jedd.PhysicalDomain[] { T2.v() }),
                                                         new jedd.PhysicalDomain[] { T3.v() },
                                                         new jedd.PhysicalDomain[] { T2.v() }));
@@ -70,8 +68,8 @@ public final class BDDVirtualCalls {
     }
     
     public jedd.internal.RelationContainer answer() {
-        return new jedd.internal.RelationContainer(new jedd.Attribute[] { type.v(), method.v(), signature.v() },
-                                                   new jedd.PhysicalDomain[] { T1.v(), V2.v(), H1.v() },
+        return new jedd.internal.RelationContainer(new jedd.Attribute[] { signature.v(), type.v(), method.v() },
+                                                   new jedd.PhysicalDomain[] { H1.v(), T1.v(), V2.v() },
                                                    ("return answer; at /home/olhotak/soot-2-jedd/src/soot/jimple/" +
                                                     "toolkits/callgraph/BDDVirtualCalls.jedd:73,8"),
                                                    answer);

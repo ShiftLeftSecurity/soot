@@ -56,32 +56,17 @@ public class ArrayNumberer implements Numberer {
     public int size() { return lastNumber; }
 
     public NumbererIterator iterator() {
-        return new NumbererIterator( this );
+        return new NumbererIterator();
     }
 
     final class NumbererIterator implements Iterator {
-        int cur = 0;
-        ArrayNumberer numb;
-        NumbererIterator( ArrayNumberer numb ) {
-            this.numb = numb;
-            seekNext();
+        int cur = 1;
+        public final boolean hasNext() {
+            return cur < numberToObj.length && numberToObj[cur] != null;
         }
-        private final void seekNext() {
-            while(true) {
-                if( cur >= numb.numberToObj.length ) {
-                    cur = -1;
-                    break;
-                }
-                if( numb.numberToObj[cur] != null ) break;
-                cur++;
-            }
-        }
-        public final boolean hasNext() { return cur != -1; }
         public final Object next() { 
-            Numberable ret = numb.numberToObj[cur];
-            cur++;
-            seekNext();
-            return ret;
+            if( !hasNext() ) throw new NoSuchElementException();
+            return numberToObj[cur++];
         }
         public final void remove() {
             throw new RuntimeException( "Not implemented" );

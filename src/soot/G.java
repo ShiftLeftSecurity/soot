@@ -28,7 +28,6 @@ import soot.coffi.*;
 import java.io.PrintStream;
 import java.util.*;
 import soot.jimple.toolkits.pointer.util.NativeHelper;
-import soot.jimple.spark.sets.P2SetFactory;
 import soot.jimple.toolkits.invoke.*;
 import soot.jimple.toolkits.pointer.UnionFactory;
 
@@ -51,8 +50,6 @@ public class G extends Singletons
     public HashMap SETBasicBlock_binding = new HashMap();
     public boolean ASTAnalysis_modified;
     public NativeHelper NativeHelper_helper = null;
-    public P2SetFactory newSetFactory;
-    public P2SetFactory oldSetFactory;
     public HashMap Parm_pairToElement = new HashMap();
     public int SparkNativeHelper_tempVar = 0;
     public boolean PointsToSetInternal_warnedAlready = false;

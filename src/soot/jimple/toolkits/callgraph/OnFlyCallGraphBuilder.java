@@ -54,20 +54,27 @@ public final class OnFlyCallGraphBuilder extends AbstractOnFlyCallGraphBuilder
     }
     protected Iterator newReachables() { return worklist; }
     protected void updateReachables() { rm.update(); }
-    public void addType( Local receiver, Object srcContext, Type type, Object typeContext ) {
+    public void addType( Local receiver, Context srcContext, Type type, Context typeContext ) {
         FastHierarchy fh = Scene.v().getOrMakeFastHierarchy();
         for( Iterator siteIt = ((Collection) receiverToSites.get( receiver )).iterator(); siteIt.hasNext(); ) {
             final VirtualCallSite site = (VirtualCallSite) siteIt.next();
             InstanceInvokeExpr iie = site.iie();
-            if( site.kind() == Edge.THREAD 
+            if( site.kind() == Kind.THREAD 
             && !fh.canStoreType( type, clRunnable ) )
                 continue;
 
-            VirtualCalls.v().resolve( type,
-                    site.iie(),
-                    site.subSig(),
-                    site.container(), 
-                    targetsQueue );
+            if( site.iie() instanceof SpecialInvokeExpr ) {
+                targetsQueue.add( VirtualCalls.v().resolveSpecial( 
+                            (SpecialInvokeExpr) site.iie(),
+                            site.subSig(),
+                            site.container() ) );
+            } else {
+                VirtualCalls.v().resolve( type,
+                        receiver.getType(),
+                        site.subSig(),
+                        site.container(), 
+                        targetsQueue );
+            }
             while(true) {
                 SootMethod target = (SootMethod) targets.next();
                 if( target == null ) break;
@@ -80,7 +87,7 @@ public final class OnFlyCallGraphBuilder extends AbstractOnFlyCallGraphBuilder
             }
         }
     }
-    public void addStringConstant( Local l, Object srcContext, String constant ) {
+    public void addStringConstant( Local l, Context srcContext, String constant ) {
         for( Iterator siteIt = ((Collection) stringConstToSites.get( l )).iterator(); siteIt.hasNext(); ) {
             final VirtualCallSite site = (VirtualCallSite) siteIt.next();
             if( constant == null ) {
@@ -113,7 +120,7 @@ public final class OnFlyCallGraphBuilder extends AbstractOnFlyCallGraphBuilder
                                 MethodContext.v( site.container(), srcContext ),
                                 site.stmt(),
                                 sootcls.getMethod(sigClinit),
-                                Edge.CLINIT );
+                                Kind.CLINIT );
                     }
                 }
             }
@@ -137,12 +144,12 @@ public final class OnFlyCallGraphBuilder extends AbstractOnFlyCallGraphBuilder
     }
 
     protected void addEdge( SootMethod src, Stmt stmt, SootMethod tgt,
-            int kind ) {
+            Kind kind ) {
         cicg.addEdge( new Edge( src, stmt, tgt, kind ) );
     }
 
     protected void addVirtualCallSite( Stmt s, SootMethod m, Local receiver,
-            InstanceInvokeExpr iie, NumberedString subSig, int kind ) {
+            InstanceInvokeExpr iie, NumberedString subSig, Kind kind ) {
         List sites = (List) receiverToSites.get(receiver);
         if (sites == null) {
             receiverToSites.put(receiver, sites = new ArrayList());

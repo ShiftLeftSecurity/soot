@@ -19,10 +19,7 @@
 
 package soot.jimple.spark;
 import soot.*;
-import soot.jimple.spark.builder.*;
 import soot.jimple.spark.pag.*;
-import soot.jimple.spark.solver.*;
-import soot.jimple.spark.sets.*;
 import soot.jimple.toolkits.callgraph.*;
 import soot.jimple.*;
 import java.util.*;
@@ -54,6 +51,7 @@ public abstract class AbstractSparkTransformer extends SceneTransformer
         else h.addTag( unknown );
     }
 
+    /*
     protected void findSetMass( AbstractPAG pag ) {
         int mass = 0;
         int varMass = 0;
@@ -175,8 +173,8 @@ public abstract class AbstractSparkTransformer extends SceneTransformer
                 G.v().out.println( ""+i+" "+deRefCounts[i]+" "+(deRefCounts[i]*100.0/total)+"%" );
             }
         }
-        */
     }
+    */
 }
 
 

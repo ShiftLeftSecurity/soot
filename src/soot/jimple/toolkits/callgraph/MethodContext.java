@@ -29,9 +29,9 @@ public final class MethodContext implements MethodOrMethodContext
 { 
     private SootMethod method;
     public SootMethod method() { return method; }
-    private Object context;
-    public Object context() { return context; }
-    private MethodContext( SootMethod method, Object context ) {
+    private Context context;
+    public Context context() { return context; }
+    private MethodContext( SootMethod method, Context context ) {
         this.method = method;
         this.context = context;
     }
@@ -45,7 +45,7 @@ public final class MethodContext implements MethodOrMethodContext
         }
         return false;
     }
-    public static MethodOrMethodContext v( SootMethod method, Object context ) {
+    public static MethodOrMethodContext v( SootMethod method, Context context ) {
         if( context == null ) return method;
         MethodContext probe = new MethodContext( method, context );
         Map map = G.v().MethodContext_map;

@@ -362,9 +362,10 @@
   
     <target name="jedd" depends="settings,jedd-uptodate,options,sablecc,singletons,jflex-lexer,ppg-parser" unless="jedd-uptodate">
         <apply executable="java" failonerror="true" parallel="true">
+            <arg value="-Xincgc"/>
             <arg value="-cp"/>
             <arg path="${jedd.translator.jar}:${polyglot.jar}"/>
-            <arg value="-Xmx350m"/>
+            <arg value="-Xmx800m"/>
             <arg value="jedd.Main"/>
             <arg value="-sourcepath"/>
             <arg path="src:generated/options:generated/sablecc:generated/singletons:generated/jj"/>

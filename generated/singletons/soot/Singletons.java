@@ -46,11 +46,7 @@ import soot.jimple.parser.lexer.*;
 import soot.jimple.parser.node.*;
 import soot.jimple.parser.parser.*;
 import soot.jimple.spark.*;
-import soot.jimple.spark.builder.*;
-import soot.jimple.spark.internal.*;
 import soot.jimple.spark.pag.*;
-import soot.jimple.spark.sets.*;
-import soot.jimple.spark.solver.*;
 import soot.jimple.spark.fieldrw.*;
 import soot.jimple.toolkits.annotation.arraycheck.*;
 import soot.jimple.toolkits.annotation.nullcheck.*;
@@ -1041,16 +1037,22 @@ public class Singletons {
         return instanceParameterAliasTagger;
     }
 
-    private KindNumberer instanceKindNumberer;
-    public KindNumberer KindNumberer() {
-        if( instanceKindNumberer == null ) instanceKindNumberer = new KindNumberer( g );
-        return instanceKindNumberer;
-    }
-
     private ReachingDefsTagger instanceReachingDefsTagger;
     public ReachingDefsTagger ReachingDefsTagger() {
         if( instanceReachingDefsTagger == null ) instanceReachingDefsTagger = new ReachingDefsTagger( g );
         return instanceReachingDefsTagger;
+    }
+
+    private SparkNumberers instanceSparkNumberers;
+    public SparkNumberers SparkNumberers() {
+        if( instanceSparkNumberers == null ) instanceSparkNumberers = new SparkNumberers( g );
+        return instanceSparkNumberers;
+    }
+
+    private SparkScene instanceSparkScene;
+    public SparkScene SparkScene() {
+        if( instanceSparkScene == null ) instanceSparkScene = new SparkScene( g );
+        return instanceSparkScene;
     }
 
     private LiveVarsTagger instanceLiveVarsTagger;

@@ -34,7 +34,7 @@ import java.util.*;
 import soot.jimple.toolkits.invoke.*;
 import soot.jimple.toolkits.callgraph.*;
 import soot.jimple.toolkits.pointer.*;
-import soot.jimple.spark.internal.BDDHierarchy;
+import soot.jimple.spark.*;
 import jedd.*;
 import soot.toolkits.exceptions.ThrowAnalysis;
 import soot.toolkits.exceptions.PedanticThrowAnalysis;
@@ -52,6 +52,17 @@ public class Scene  //extends AbstractHost
 
         if (scp != null)
             setSootClassPath(scp);
+
+        kindNumberer.add( Kind.INVALID );
+        kindNumberer.add( Kind.STATIC );
+        kindNumberer.add( Kind.VIRTUAL );
+        kindNumberer.add( Kind.INTERFACE );
+        kindNumberer.add( Kind.SPECIAL );
+        kindNumberer.add( Kind.CLINIT );
+        kindNumberer.add( Kind.THREAD );
+        kindNumberer.add( Kind.FINALIZE );
+        kindNumberer.add( Kind.PRIVILEGED );
+        kindNumberer.add( Kind.NEWINSTANCE );
     }
     public static Scene  v() { return G.v().Scene (); }
 
@@ -62,6 +73,7 @@ public class Scene  //extends AbstractHost
     
     private Map nameToClass = new HashMap();
 
+    ArrayNumberer kindNumberer = new ArrayNumberer();
     ArrayNumberer typeNumberer = new ArrayNumberer();
     ArrayNumberer methodNumberer = new ArrayNumberer();
     Numberer unitNumberer = new MapNumberer();
@@ -584,6 +596,7 @@ public class Scene  //extends AbstractHost
     {
         return getPhantomRefs();
     }
+    public Numberer kindNumberer() { return kindNumberer; }
     public ArrayNumberer getTypeNumberer() { return typeNumberer; }
     public ArrayNumberer getMethodNumberer() { return methodNumberer; }
     public Numberer getContextNumberer() { return contextNumberer; }
