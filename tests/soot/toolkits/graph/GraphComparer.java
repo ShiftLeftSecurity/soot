@@ -76,7 +76,7 @@ public class GraphComparer {
 	 * Create an {@link EquivalentBlockRegistry} which records the
 	 * equivalent blocks in two graphs whose nodes are blocks.  To
 	 * allow the use of graphs that are loaded from alternate
-	 * class paths, the parameters do not have to be instances of
+	 * class paths, the parameters are not required to be instances of
 	 * {@link BlockGraph}.  They just have to be {@link
 	 * DirectedGraph}s whose nodes are instances of some class
 	 * that has an <tt>iterator()</tt> method that iterates over
