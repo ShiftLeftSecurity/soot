@@ -10,15 +10,14 @@ public class BSpecialInvokeInst extends AbstractInvokeInst implements SpecialInv
 
     public int getInCount()
     {
-        return getMethod().getParameterCount() +1;
         
+	return getMethod().getParameterCount() +1;
     }
 
 
     public int getInMachineCount()
     {
-        return getMethod().getParameterCount() +1;
-        
+	return super.getInMachineCount() +1;        
     }
 
 
@@ -37,13 +36,7 @@ public class BSpecialInvokeInst extends AbstractInvokeInst implements SpecialInv
             return 1;
     }
 
-    public int getOutMachineCount()
-    {
-        if(getMethod().getReturnType() instanceof VoidType)
-            return 0;
-        else
-            return 1;
-    }
+    
 
     public String getName() { return "specialinvoke"; }
 

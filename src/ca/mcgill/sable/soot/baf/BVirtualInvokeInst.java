@@ -17,7 +17,7 @@ public class BVirtualInvokeInst extends AbstractInvokeInst implements VirtualInv
 
     public int getInMachineCount()
     {
-        return getMethod().getParameterCount() + 1;
+        return super.getInMachineCount() + 1;
         
     }
 
@@ -41,10 +41,12 @@ public class BVirtualInvokeInst extends AbstractInvokeInst implements VirtualInv
         if(getMethod().getReturnType() instanceof VoidType) 
             return 0;
         else
-            return 1;
-    }
+	    return JasminClass.sizeOfType(getMethod().getReturnType());
+    } 
 
-    final String getName() { return "virtualinvoke"; }
+    
+
+final String getName() { return "virtualinvoke"; }
 
     public void apply(Switch sw)
     {

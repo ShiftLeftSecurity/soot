@@ -176,4 +176,12 @@ public abstract class AbstractOpTypeInst extends AbstractInst
         return indentation + getName() + "." + 
           Baf.bafDescriptorOf(opType) + getParameters(isBrief, unitToName);
     }
+
+    public int getOutMachineCount()
+    {
+        return JasminClass.sizeOfType(getOpType());
+    } 
+
+
+
 }

@@ -662,7 +662,7 @@ public class LoadStoreOptimizer
 
 
         
-  if(debug) { System.out.println("xxx: end of method faillure ");}
+	if(debug) { System.out.println("xxx: end of method faillure ");}
         return res;
     }
 

@@ -24,12 +24,7 @@ public class BStaticInvokeInst extends AbstractInvokeInst implements StaticInvok
     }
 
 
-    public int getInMachineCount()
-    {
-        return getMethod().getParameterCount();
-        
-    }
-    
+   
     public int getOutCount()
     {
         if(getMethod().getReturnType() instanceof VoidType)
@@ -38,13 +33,7 @@ public class BStaticInvokeInst extends AbstractInvokeInst implements StaticInvok
             return 1;
     }
 
-    public int getOutMachineCount()
-    {
-        if(getMethod().getReturnType() instanceof VoidType)
-            return 0;
-        else
-            return 1;
-    }
+   
 
     public String getName() { return "staticinvoke"; }
 
