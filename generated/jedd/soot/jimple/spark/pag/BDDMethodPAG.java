@@ -58,7 +58,7 @@ public final class BDDMethodPAG extends AbstractMethodPAG {
     public void addInternalEdge(Node srcN, Node dstN) {
         this.internalEdgeSet.eq(this.addEdge(srcN,
                                              dstN,
-                                             new jedd.Relation(new jedd.Domain[] { src.v(), dst.v() },
+                                             new jedd.Relation(new jedd.Attribute[] { src.v(), dst.v() },
                                                                new jedd.PhysicalDomain[] { V1.v(), V2.v() },
                                                                this.internalEdgeSet)));
     }
@@ -66,7 +66,7 @@ public final class BDDMethodPAG extends AbstractMethodPAG {
     public void addInEdge(Node srcN, Node dstN) {
         this.inEdgeSet.eq(this.addEdge(srcN,
                                        dstN,
-                                       new jedd.Relation(new jedd.Domain[] { src.v(), dst.v() },
+                                       new jedd.Relation(new jedd.Attribute[] { src.v(), dst.v() },
                                                          new jedd.PhysicalDomain[] { V1.v(), V2.v() },
                                                          this.inEdgeSet)));
     }
@@ -74,60 +74,60 @@ public final class BDDMethodPAG extends AbstractMethodPAG {
     public void addOutEdge(Node srcN, Node dstN) {
         this.outEdgeSet.eq(this.addEdge(srcN,
                                         dstN,
-                                        new jedd.Relation(new jedd.Domain[] { src.v(), dst.v() },
+                                        new jedd.Relation(new jedd.Attribute[] { src.v(), dst.v() },
                                                           new jedd.PhysicalDomain[] { V1.v(), V2.v() },
                                                           this.outEdgeSet)));
     }
     
     private jedd.Relation addEdge(Node srcN, Node dstN, final jedd.Relation edgeSet) {
         if (srcN == null)
-            return new jedd.Relation(new jedd.Domain[] { src.v(), dst.v() },
+            return new jedd.Relation(new jedd.Attribute[] { src.v(), dst.v() },
                                      new jedd.PhysicalDomain[] { V1.v(), V2.v() },
                                      edgeSet);
         if (srcN instanceof VarNode) {
             if (dstN instanceof VarNode) {
                 edgeSet.eqUnion(jedd.Jedd.v().literal(new Object[] { srcN, dstN },
-                                                      new jedd.Domain[] { src.v(), dst.v() },
+                                                      new jedd.Attribute[] { src.v(), dst.v() },
                                                       new jedd.PhysicalDomain[] { V1.v(), V2.v() }));
             } else {
                 FieldRefNode fdst = (FieldRefNode) dstN;
                 this.stores.eqUnion(jedd.Jedd.v().literal(new Object[] { srcN, fdst.getBase(), fdst.getField() },
-                                                          new jedd.Domain[] { src.v(), dst.v(), fld.v() },
+                                                          new jedd.Attribute[] { src.v(), dst.v(), fld.v() },
                                                           new jedd.PhysicalDomain[] { V1.v(), V2.v(), FD.v() }));
             }
         } else
             if (srcN instanceof FieldRefNode) {
                 FieldRefNode fsrc = (FieldRefNode) srcN;
                 this.loads.eqUnion(jedd.Jedd.v().literal(new Object[] { fsrc.getBase(), fsrc.getField(), dstN },
-                                                         new jedd.Domain[] { src.v(), fld.v(), dst.v() },
+                                                         new jedd.Attribute[] { src.v(), fld.v(), dst.v() },
                                                          new jedd.PhysicalDomain[] { V1.v(), FD.v(), V2.v() }));
             } else {
                 this.alloc.eqUnion(jedd.Jedd.v().literal(new Object[] { srcN, dstN },
-                                                         new jedd.Domain[] { obj.v(), var.v() },
+                                                         new jedd.Attribute[] { obj.v(), var.v() },
                                                          new jedd.PhysicalDomain[] { H1.v(), V1.v() }));
             }
-        return new jedd.Relation(new jedd.Domain[] { src.v(), dst.v() },
+        return new jedd.Relation(new jedd.Attribute[] { src.v(), dst.v() },
                                  new jedd.PhysicalDomain[] { V1.v(), V2.v() },
                                  edgeSet);
     }
     
     public final jedd.Relation internalEdgeSet =
-      new jedd.Relation(new jedd.Domain[] { src.v(), dst.v() }, new jedd.PhysicalDomain[] { V1.v(), V2.v() });
+      new jedd.Relation(new jedd.Attribute[] { src.v(), dst.v() }, new jedd.PhysicalDomain[] { V1.v(), V2.v() });
     
     public final jedd.Relation inEdgeSet =
-      new jedd.Relation(new jedd.Domain[] { src.v(), dst.v() }, new jedd.PhysicalDomain[] { V1.v(), V2.v() });
+      new jedd.Relation(new jedd.Attribute[] { src.v(), dst.v() }, new jedd.PhysicalDomain[] { V1.v(), V2.v() });
     
     public final jedd.Relation outEdgeSet =
-      new jedd.Relation(new jedd.Domain[] { src.v(), dst.v() }, new jedd.PhysicalDomain[] { V1.v(), V2.v() });
+      new jedd.Relation(new jedd.Attribute[] { src.v(), dst.v() }, new jedd.PhysicalDomain[] { V1.v(), V2.v() });
     
     public final jedd.Relation stores =
-      new jedd.Relation(new jedd.Domain[] { src.v(), dst.v(), fld.v() },
+      new jedd.Relation(new jedd.Attribute[] { src.v(), dst.v(), fld.v() },
                         new jedd.PhysicalDomain[] { V1.v(), V2.v(), FD.v() });
     
     public final jedd.Relation loads =
-      new jedd.Relation(new jedd.Domain[] { src.v(), fld.v(), dst.v() },
+      new jedd.Relation(new jedd.Attribute[] { src.v(), fld.v(), dst.v() },
                         new jedd.PhysicalDomain[] { V1.v(), FD.v(), V2.v() });
     
     public final jedd.Relation alloc =
-      new jedd.Relation(new jedd.Domain[] { obj.v(), var.v() }, new jedd.PhysicalDomain[] { H1.v(), V1.v() });
+      new jedd.Relation(new jedd.Attribute[] { obj.v(), var.v() }, new jedd.PhysicalDomain[] { H1.v(), V1.v() });
 }

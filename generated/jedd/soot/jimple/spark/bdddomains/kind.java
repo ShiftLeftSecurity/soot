@@ -4,12 +4,12 @@ import jedd.*;
 import soot.*;
 import soot.jimple.spark.pag.*;
 
-public class kind extends Domain {
+public class kind extends Attribute {
     public Numberer numberer() { return soot.jimple.toolkits.callgraph.KindNumberer.v(); }
     
-    public static Domain v() { return kind.instance; }
+    public static Attribute v() { return kind.instance; }
     
-    private static Domain instance = new kind();
+    private static Attribute instance = new kind();
     
     public kind() { super(); }
 }

@@ -8,7 +8,7 @@ import soot.jimple.spark.bdddomains.*;
 
 public class BDDPointsToSet implements PointsToSet {
     private final jedd.Relation bdd =
-      new jedd.Relation(new jedd.Domain[] { obj.v() }, new jedd.PhysicalDomain[] { H1.v() });
+      new jedd.Relation(new jedd.Attribute[] { obj.v() }, new jedd.PhysicalDomain[] { H1.v() });
     
     public BDDPointsToSet(final jedd.Relation bdd) {
         super();
@@ -26,7 +26,9 @@ public class BDDPointsToSet implements PointsToSet {
     public Set possibleTypes() {
         final HashSet ret = new HashSet();
         Iterator it =
-          new jedd.Relation(new jedd.Domain[] { obj.v() }, new jedd.PhysicalDomain[] { H1.v() }, this.bdd).iterator();
+          new jedd.Relation(new jedd.Attribute[] { obj.v() },
+                            new jedd.PhysicalDomain[] { H1.v() },
+                            this.bdd).iterator();
         while (it.hasNext()) {
             AllocNode an = (AllocNode) it.next();
             ret.add(an.getType());
@@ -37,7 +39,9 @@ public class BDDPointsToSet implements PointsToSet {
     public Set possibleStringConstants() {
         final HashSet ret = new HashSet();
         Iterator it =
-          new jedd.Relation(new jedd.Domain[] { obj.v() }, new jedd.PhysicalDomain[] { H1.v() }, this.bdd).iterator();
+          new jedd.Relation(new jedd.Attribute[] { obj.v() },
+                            new jedd.PhysicalDomain[] { H1.v() },
+                            this.bdd).iterator();
         while (it.hasNext()) {
             AllocNode an = (AllocNode) it.next();
             if (!(an instanceof StringConstantNode)) return null;
@@ -50,7 +54,9 @@ public class BDDPointsToSet implements PointsToSet {
     public Set possibleClassConstants() {
         final HashSet ret = new HashSet();
         Iterator it =
-          new jedd.Relation(new jedd.Domain[] { obj.v() }, new jedd.PhysicalDomain[] { H1.v() }, this.bdd).iterator();
+          new jedd.Relation(new jedd.Attribute[] { obj.v() },
+                            new jedd.PhysicalDomain[] { H1.v() },
+                            this.bdd).iterator();
         while (it.hasNext()) {
             AllocNode an = (AllocNode) it.next();
             if (!(an instanceof ClassConstantNode)) return null;

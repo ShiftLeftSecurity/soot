@@ -8,7 +8,7 @@ import java.util.*;
 public final class BDDHierarchy {
     public jedd.Relation subtypeRelation() {
         this.update();
-        return new jedd.Relation(new jedd.Domain[] { supt.v(), subt.v() },
+        return new jedd.Relation(new jedd.Attribute[] { supt.v(), subt.v() },
                                  new jedd.PhysicalDomain[] { T2.v(), T1.v() },
                                  this.closure);
     }
@@ -20,44 +20,44 @@ public final class BDDHierarchy {
     }
     
     private final jedd.Relation identity =
-      new jedd.Relation(new jedd.Domain[] { subt.v(), supt.v() },
+      new jedd.Relation(new jedd.Attribute[] { subt.v(), supt.v() },
                         new jedd.PhysicalDomain[] { T1.v(), T2.v() },
                         jedd.Jedd.v().falseBDD());
     
     private final jedd.Relation extend =
-      new jedd.Relation(new jedd.Domain[] { subt.v(), supt.v() },
+      new jedd.Relation(new jedd.Attribute[] { subt.v(), supt.v() },
                         new jedd.PhysicalDomain[] { T1.v(), T2.v() },
                         jedd.Jedd.v().falseBDD());
     
     public jedd.Relation extend() {
-        return new jedd.Relation(new jedd.Domain[] { supt.v(), subt.v() },
+        return new jedd.Relation(new jedd.Attribute[] { supt.v(), subt.v() },
                                  new jedd.PhysicalDomain[] { T2.v(), T1.v() },
                                  this.extend);
     }
     
     private final jedd.Relation implement =
-      new jedd.Relation(new jedd.Domain[] { subt.v(), supt.v() },
+      new jedd.Relation(new jedd.Attribute[] { subt.v(), supt.v() },
                         new jedd.PhysicalDomain[] { T1.v(), T2.v() },
                         jedd.Jedd.v().falseBDD());
     
     private final jedd.Relation array =
-      new jedd.Relation(new jedd.Domain[] { subt.v(), supt.v() },
+      new jedd.Relation(new jedd.Attribute[] { subt.v(), supt.v() },
                         new jedd.PhysicalDomain[] { T1.v(), T2.v() },
                         jedd.Jedd.v().falseBDD());
     
     private final jedd.Relation anySub =
-      new jedd.Relation(new jedd.Domain[] { anyst.v(), type.v() },
+      new jedd.Relation(new jedd.Attribute[] { anyst.v(), type.v() },
                         new jedd.PhysicalDomain[] { T1.v(), T2.v() },
                         jedd.Jedd.v().falseBDD());
     
     public jedd.Relation anySub() {
-        return new jedd.Relation(new jedd.Domain[] { anyst.v(), type.v() },
+        return new jedd.Relation(new jedd.Attribute[] { anyst.v(), type.v() },
                                  new jedd.PhysicalDomain[] { T1.v(), T2.v() },
                                  this.anySub);
     }
     
     private final jedd.Relation closure =
-      new jedd.Relation(new jedd.Domain[] { subt.v(), supt.v() },
+      new jedd.Relation(new jedd.Attribute[] { subt.v(), supt.v() },
                         new jedd.PhysicalDomain[] { T1.v(), T2.v() },
                         jedd.Jedd.v().falseBDD());
     
@@ -76,28 +76,28 @@ public final class BDDHierarchy {
             SootClass sc = rt.getSootClass();
             if (sc == null) return;
             this.identity.eqUnion(jedd.Jedd.v().literal(new Object[] { rt, rt },
-                                                        new jedd.Domain[] { subt.v(), supt.v() },
+                                                        new jedd.Attribute[] { subt.v(), supt.v() },
                                                         new jedd.PhysicalDomain[] { T1.v(), T2.v() }));
             if (sc.hasSuperclass()) {
                 this.extend.eqUnion(jedd.Jedd.v().literal(new Object[] { rt, sc.getSuperclass().getType() },
-                                                          new jedd.Domain[] { subt.v(), supt.v() },
+                                                          new jedd.Attribute[] { subt.v(), supt.v() },
                                                           new jedd.PhysicalDomain[] { T1.v(), T2.v() }));
             }
             for (Iterator ifaceIt = sc.getInterfaces().iterator(); ifaceIt.hasNext(); ) {
                 final SootClass iface = (SootClass) ifaceIt.next();
                 this.implement.eqUnion(jedd.Jedd.v().literal(new Object[] { rt, iface.getType() },
-                                                             new jedd.Domain[] { subt.v(), supt.v() },
+                                                             new jedd.Attribute[] { subt.v(), supt.v() },
                                                              new jedd.PhysicalDomain[] { T1.v(), T2.v() }));
             }
         } else
             if (t instanceof ArrayType) {
                 this.identity.eqUnion(jedd.Jedd.v().literal(new Object[] { t, t },
-                                                            new jedd.Domain[] { subt.v(), supt.v() },
+                                                            new jedd.Attribute[] { subt.v(), supt.v() },
                                                             new jedd.PhysicalDomain[] { T1.v(), T2.v() }));
                 ArrayType at = (ArrayType) t;
                 if (at.baseType instanceof PrimType) {
                     this.array.eqUnion(jedd.Jedd.v().literal(new Object[] { at, this.jloArray(at.numDimensions - 1) },
-                                                             new jedd.Domain[] { subt.v(), supt.v() },
+                                                             new jedd.Attribute[] { subt.v(), supt.v() },
                                                              new jedd.PhysicalDomain[] { T1.v(), T2.v() }));
                 } else
                     if (at.baseType instanceof RefType) {
@@ -105,11 +105,11 @@ public final class BDDHierarchy {
                         if (rt.equals(this.jlo)) {
                             this.array.eqUnion(jedd.Jedd.v().literal(new Object[] { at, this.jloArray(at.numDimensions -
                                                                                                         1) },
-                                                                     new jedd.Domain[] { subt.v(), supt.v() },
+                                                                     new jedd.Attribute[] { subt.v(), supt.v() },
                                                                      new jedd.PhysicalDomain[] { T1.v(), T2.v() }));
                         } else {
                             this.array.eqUnion(jedd.Jedd.v().literal(new Object[] { at, this.jloArray(at.numDimensions) },
-                                                                     new jedd.Domain[] { subt.v(), supt.v() },
+                                                                     new jedd.Attribute[] { subt.v(), supt.v() },
                                                                      new jedd.PhysicalDomain[] { T1.v(), T2.v() }));
                         }
                     } else
@@ -118,15 +118,15 @@ public final class BDDHierarchy {
                 if (t instanceof AnySubType) {
                     AnySubType as = (AnySubType) t;
                     this.anySub.eqUnion(jedd.Jedd.v().literal(new Object[] { as, as.getBase() },
-                                                              new jedd.Domain[] { anyst.v(), type.v() },
+                                                              new jedd.Attribute[] { anyst.v(), type.v() },
                                                               new jedd.PhysicalDomain[] { T1.v(), T2.v() }));
                     this.anySub.eqUnion(jedd.Jedd.v().literal(new Object[] { as, NullType.v() },
-                                                              new jedd.Domain[] { anyst.v(), type.v() },
+                                                              new jedd.Attribute[] { anyst.v(), type.v() },
                                                               new jedd.PhysicalDomain[] { T1.v(), T2.v() }));
                 } else
                     if (t instanceof NullType) {
                         this.identity.eqUnion(jedd.Jedd.v().literal(new Object[] { t, t },
-                                                                    new jedd.Domain[] { subt.v(), supt.v() },
+                                                                    new jedd.Attribute[] { subt.v(), supt.v() },
                                                                     new jedd.PhysicalDomain[] { T1.v(), T2.v() }));
                     }
         if (t.getNumber() > this.maxType) this.maxType = t.getNumber();
@@ -139,9 +139,11 @@ public final class BDDHierarchy {
                                                  this.identity));
         while (!jedd.Jedd.v().equals(jedd.Jedd.v().read(this.closure),
                                      this.closure.eqUnion(jedd.Jedd.v().replace(jedd.Jedd.v().compose(jedd.Jedd.v().read(this.closure),
-                                                                                                      jedd.Jedd.v().replace(this.closure,
-                                                                                                                            new jedd.PhysicalDomain[] { T2.v(), T1.v() },
-                                                                                                                            new jedd.PhysicalDomain[] { T1.v(), T3.v() }),
+                                                                                                      jedd.Jedd.v().replace(jedd.Jedd.v().replace(this.closure,
+                                                                                                                                                  new jedd.PhysicalDomain[] { T1.v() },
+                                                                                                                                                  new jedd.PhysicalDomain[] { T3.v() }),
+                                                                                                                            new jedd.PhysicalDomain[] { T2.v() },
+                                                                                                                            new jedd.PhysicalDomain[] { T1.v() }),
                                                                                                       new jedd.PhysicalDomain[] { T1.v() }),
                                                                                 new jedd.PhysicalDomain[] { T3.v() },
                                                                                 new jedd.PhysicalDomain[] { T1.v() }))))

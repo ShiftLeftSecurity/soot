@@ -94,7 +94,7 @@ public class BDDOnFlyCallGraph {
             <method, ctxt> mc = 
                 (srcm=>, srcc=>, stmt=>, kind=>, tgtm=>method, tgtc=>ctxt) e;
             addToPAG( mc );
-            Iterator it = e.iterator( new Domain[] { srcm.v(), srcc.v(), stmt.v(),
+            Iterator it = e.iterator( new Attribute[] { srcm.v(), srcc.v(), stmt.v(),
                 kind.v(), tgtm.v(), tgtc.v()} );
             while( it.hasNext() ) {
                 Object[] edge = (Object[]) it.next();

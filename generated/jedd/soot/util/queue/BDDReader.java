@@ -12,13 +12,13 @@ public class BDDReader implements Cloneable {
     }
     
     public jedd.Relation next() {
-        final jedd.Relation ret = new jedd.Relation(new jedd.Domain[] {  }, new jedd.PhysicalDomain[] {  });
+        final jedd.Relation ret = new jedd.Relation(new jedd.Attribute[] {  }, new jedd.PhysicalDomain[] {  });
         do  {
             ret.eq(this.chunk.bdd);
             this.chunk = this.chunk.next;
             if (this.chunk == null) this.chunk = this.q.newChunk();
         }while(jedd.Jedd.v().equals(jedd.Jedd.v().read(ret), jedd.Jedd.v().falseBDD()) && this.chunk.next != null); 
-        return new jedd.Relation(new jedd.Domain[] {  }, new jedd.PhysicalDomain[] {  }, ret);
+        return new jedd.Relation(new jedd.Attribute[] {  }, new jedd.PhysicalDomain[] {  }, ret);
     }
     
     public boolean hasNext() {

@@ -36,10 +36,10 @@ public final class BDDTypeManager extends AbstractTypeManager {
         this.update();
         this.bddhier.update();
         final jedd.Relation hier =
-          new jedd.Relation(new jedd.Domain[] { subt.v(), supt.v() },
+          new jedd.Relation(new jedd.Attribute[] { subt.v(), supt.v() },
                             new jedd.PhysicalDomain[] { T1.v(), T2.v() },
                             this.bddhier.subtypeRelation());
-        return new jedd.Relation(new jedd.Domain[] { var.v(), obj.v() },
+        return new jedd.Relation(new jedd.Attribute[] { var.v(), obj.v() },
                                  new jedd.PhysicalDomain[] { V1.v(), H1.v() },
                                  jedd.Jedd.v().compose(jedd.Jedd.v().read(jedd.Jedd.v().compose(jedd.Jedd.v().read(jedd.Jedd.v().replace(this.varNodeType,
                                                                                                                                          new jedd.PhysicalDomain[] { T1.v() },
@@ -64,7 +64,7 @@ public final class BDDTypeManager extends AbstractTypeManager {
             AllocNode an = (AllocNode) anNumb.get(j);
             Type antype = an.getType();
             this.newAnType.eqUnion(jedd.Jedd.v().literal(new Object[] { an, antype },
-                                                         new jedd.Domain[] { obj.v(), type.v() },
+                                                         new jedd.Attribute[] { obj.v(), type.v() },
                                                          new jedd.PhysicalDomain[] { H1.v(), T1.v() }));
             if (!this.seenATypes.contains(antype)) newSeenATypes.add(antype);
         }
@@ -72,7 +72,7 @@ public final class BDDTypeManager extends AbstractTypeManager {
             VarNode vn = (VarNode) vnNumb.get(i);
             Type vntype = vn.getType();
             this.newVnType.eqUnion(jedd.Jedd.v().literal(new Object[] { vn, vntype },
-                                                         new jedd.Domain[] { var.v(), type.v() },
+                                                         new jedd.Attribute[] { var.v(), type.v() },
                                                          new jedd.PhysicalDomain[] { V1.v(), T1.v() }));
             if (!this.seenVTypes.contains(vntype)) newSeenVTypes.add(vntype);
         }
@@ -83,7 +83,7 @@ public final class BDDTypeManager extends AbstractTypeManager {
                 final Type vntype = (Type) vntypeIt.next();
                 if (this.castNeverFails(antype, vntype)) {
                     this.typeSubtype.eqUnion(jedd.Jedd.v().literal(new Object[] { antype, vntype },
-                                                                   new jedd.Domain[] { subt.v(), supt.v() },
+                                                                   new jedd.Attribute[] { subt.v(), supt.v() },
                                                                    new jedd.PhysicalDomain[] { T1.v(), T2.v() }));
                 }
             }
@@ -94,7 +94,7 @@ public final class BDDTypeManager extends AbstractTypeManager {
                 final Type vntype = (Type) vntypeIt.next();
                 if (this.castNeverFails(antype, vntype)) {
                     this.typeSubtype.eqUnion(jedd.Jedd.v().literal(new Object[] { antype, vntype },
-                                                                   new jedd.Domain[] { subt.v(), supt.v() },
+                                                                   new jedd.Attribute[] { subt.v(), supt.v() },
                                                                    new jedd.PhysicalDomain[] { T1.v(), T2.v() }));
                 }
             }
@@ -103,9 +103,9 @@ public final class BDDTypeManager extends AbstractTypeManager {
         this.varNodeType.eqUnion(this.newVnType);
         this.allocNodeType.eqUnion(this.newAnType);
         final jedd.Relation tmp =
-          new jedd.Relation(new jedd.Domain[] { var.v(), subt.v() }, new jedd.PhysicalDomain[] { V1.v(), T1.v() });
+          new jedd.Relation(new jedd.Attribute[] { var.v(), subt.v() }, new jedd.PhysicalDomain[] { V1.v(), T1.v() });
         final jedd.Relation tmp2 =
-          new jedd.Relation(new jedd.Domain[] { var.v(), obj.v() }, new jedd.PhysicalDomain[] { V1.v(), H1.v() });
+          new jedd.Relation(new jedd.Attribute[] { var.v(), obj.v() }, new jedd.PhysicalDomain[] { V1.v(), H1.v() });
         tmp.eq(jedd.Jedd.v().compose(jedd.Jedd.v().read(this.typeSubtype),
                                      jedd.Jedd.v().replace(this.newVnType,
                                                            new jedd.PhysicalDomain[] { T1.v() },
@@ -130,7 +130,7 @@ public final class BDDTypeManager extends AbstractTypeManager {
         tmp2.eq(jedd.Jedd.v().falseBDD());
         this.bddhier.update();
         final jedd.Relation bddts =
-          new jedd.Relation(new jedd.Domain[] { subt.v(), supt.v() },
+          new jedd.Relation(new jedd.Attribute[] { subt.v(), supt.v() },
                             new jedd.PhysicalDomain[] { T1.v(), T2.v() },
                             this.bddhier.subtypeRelation());
         bddts.eq(jedd.Jedd.v().intersect(jedd.Jedd.v().read(bddts),
@@ -146,15 +146,15 @@ public final class BDDTypeManager extends AbstractTypeManager {
         } else {
             System.out.println("bdd and non-bdd hierarchy don\'t match");
             System.out.println("size of bdd: " +
-                               new jedd.Relation(new jedd.Domain[] { supt.v(), subt.v() },
+                               new jedd.Relation(new jedd.Attribute[] { supt.v(), subt.v() },
                                                  new jedd.PhysicalDomain[] { T2.v(), T1.v() },
                                                  bddts).size() +
                                " size of non-bdd: " +
-                               new jedd.Relation(new jedd.Domain[] { supt.v(), subt.v() },
+                               new jedd.Relation(new jedd.Attribute[] { supt.v(), subt.v() },
                                                  new jedd.PhysicalDomain[] { T2.v(), T1.v() },
                                                  this.typeSubtype).size());
             System.out.println("missing pairs: ");
-            System.out.println(new jedd.Relation(new jedd.Domain[] { supt.v(), subt.v() },
+            System.out.println(new jedd.Relation(new jedd.Attribute[] { supt.v(), subt.v() },
                                                  new jedd.PhysicalDomain[] { T2.v(), T1.v() },
                                                  jedd.Jedd.v().minus(jedd.Jedd.v().read(bddts),
                                                                      this.typeSubtype)).toString());
@@ -162,28 +162,28 @@ public final class BDDTypeManager extends AbstractTypeManager {
     }
     
     final jedd.Relation typeSubtype =
-      new jedd.Relation(new jedd.Domain[] { subt.v(), supt.v() }, new jedd.PhysicalDomain[] { T1.v(), T2.v() });
+      new jedd.Relation(new jedd.Attribute[] { subt.v(), supt.v() }, new jedd.PhysicalDomain[] { T1.v(), T2.v() });
     
     final jedd.Relation varNodeType =
-      new jedd.Relation(new jedd.Domain[] { var.v(), type.v() }, new jedd.PhysicalDomain[] { V1.v(), T1.v() });
+      new jedd.Relation(new jedd.Attribute[] { var.v(), type.v() }, new jedd.PhysicalDomain[] { V1.v(), T1.v() });
     
     final jedd.Relation newVnType =
-      new jedd.Relation(new jedd.Domain[] { var.v(), type.v() }, new jedd.PhysicalDomain[] { V1.v(), T1.v() });
+      new jedd.Relation(new jedd.Attribute[] { var.v(), type.v() }, new jedd.PhysicalDomain[] { V1.v(), T1.v() });
     
     final jedd.Relation allocNodeType =
-      new jedd.Relation(new jedd.Domain[] { obj.v(), type.v() }, new jedd.PhysicalDomain[] { H1.v(), T1.v() });
+      new jedd.Relation(new jedd.Attribute[] { obj.v(), type.v() }, new jedd.PhysicalDomain[] { H1.v(), T1.v() });
     
     public jedd.Relation allocNodeType() {
-        return new jedd.Relation(new jedd.Domain[] { obj.v(), type.v() },
-                                 new jedd.PhysicalDomain[] { H1.v(), T1.v() },
+        return new jedd.Relation(new jedd.Attribute[] { type.v(), obj.v() },
+                                 new jedd.PhysicalDomain[] { T1.v(), H1.v() },
                                  this.allocNodeType);
     }
     
     final jedd.Relation newAnType =
-      new jedd.Relation(new jedd.Domain[] { obj.v(), type.v() }, new jedd.PhysicalDomain[] { H1.v(), T1.v() });
+      new jedd.Relation(new jedd.Attribute[] { obj.v(), type.v() }, new jedd.PhysicalDomain[] { H1.v(), T1.v() });
     
     final jedd.Relation typeMask =
-      new jedd.Relation(new jedd.Domain[] { var.v(), obj.v() }, new jedd.PhysicalDomain[] { V1.v(), H1.v() });
+      new jedd.Relation(new jedd.Attribute[] { var.v(), obj.v() }, new jedd.PhysicalDomain[] { V1.v(), H1.v() });
     
     HashSet seenVTypes = new HashSet();
     

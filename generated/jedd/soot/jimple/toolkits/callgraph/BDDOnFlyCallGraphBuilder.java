@@ -50,13 +50,13 @@ public final class BDDOnFlyCallGraphBuilder extends AbstractOnFlyCallGraphBuilde
         this.rm.update();
         while (this.worklist.hasNext()) {
             final Relation methodContext =
-              new Relation(new Domain[] { method.v(), ctxt.v() },
+              new Relation(new Attribute[] { method.v(), ctxt.v() },
                            new PhysicalDomain[] { V1.v(), T1.v() },
                            this.worklist.next());
             Iterator it =
-              new Relation(new Domain[] { method.v(), ctxt.v() },
+              new Relation(new Attribute[] { method.v(), ctxt.v() },
                            new PhysicalDomain[] { V1.v(), T1.v() },
-                           methodContext).iterator(new Domain[] { method.v(), ctxt.v() });
+                           methodContext).iterator(new Attribute[] { method.v(), ctxt.v() });
             while (it.hasNext()) {
                 Object[] pair = (Object[]) it.next();
                 this.reachablesQueue.add(MethodContext.v((SootMethod) pair[0], pair[1]));
@@ -66,22 +66,22 @@ public final class BDDOnFlyCallGraphBuilder extends AbstractOnFlyCallGraphBuilde
     
     public void addTypes(final Relation types) {
         final Relation signatures =
-          new Relation(new Domain[] { type.v(), stmt.v(), method.v(), signature.v(), kind.v() },
+          new Relation(new Attribute[] { type.v(), stmt.v(), method.v(), signature.v(), kind.v() },
                        new PhysicalDomain[] { T2.v(), ST.v(), V1.v(), H1.v(), H2.v() },
                        Jedd.v().compose(Jedd.v().read(this.virtualCallSites), types, new PhysicalDomain[] { V3.v() }));
-        this.virtualCalls.addTypes(new Relation(new Domain[] { signature.v(), type.v() },
+        this.virtualCalls.addTypes(new Relation(new Attribute[] { signature.v(), type.v() },
                                                 new PhysicalDomain[] { H1.v(), T2.v() },
                                                 Jedd.v().project(signatures,
                                                                  new PhysicalDomain[] { V1.v(), ST.v(), H2.v() })));
         final Relation edges =
-          new Relation(new Domain[] { srcm.v(), stmt.v(), kind.v(), tgtm.v() },
+          new Relation(new Attribute[] { srcm.v(), stmt.v(), kind.v(), tgtm.v() },
                        new PhysicalDomain[] { V1.v(), ST.v(), H2.v(), V2.v() },
                        Jedd.v().compose(Jedd.v().read(Jedd.v().replace(signatures,
                                                                        new PhysicalDomain[] { T2.v() },
                                                                        new PhysicalDomain[] { T1.v() })),
                                         this.virtualCalls.answer(),
                                         new PhysicalDomain[] { T1.v(), H1.v() }));
-        this.cm.addVirtualEdges(new Relation(new Domain[] { tgtm.v(), stmt.v(), srcm.v(), kind.v() },
+        this.cm.addVirtualEdges(new Relation(new Attribute[] { tgtm.v(), stmt.v(), srcm.v(), kind.v() },
                                              new PhysicalDomain[] { V2.v(), ST.v(), V1.v(), H2.v() },
                                              edges));
     }
@@ -95,7 +95,7 @@ public final class BDDOnFlyCallGraphBuilder extends AbstractOnFlyCallGraphBuilde
         Scene.v().getUnitNumberer().add(s);
         LocalVarNode rvn = this.pag.makeLocalVarNode(receiver, receiver.getType(), m);
         this.virtualCallSites.eqUnion(Jedd.v().literal(new Object[] { rvn, s, m, subSig, KindNumberer.v().get(_kind) },
-                                                       new Domain[] { var.v(), stmt.v(), method.v(), signature.v(), kind.v() },
+                                                       new Attribute[] { var.v(), stmt.v(), method.v(), signature.v(), kind.v() },
                                                        new PhysicalDomain[] { V3.v(), ST.v(), V1.v(), H1.v(), H2.v() }));
     }
     
@@ -145,7 +145,7 @@ public final class BDDOnFlyCallGraphBuilder extends AbstractOnFlyCallGraphBuilde
     
     protected void processNewMethodContext(MethodOrMethodContext momc) {
         this.cm.addStaticEdges(momc.context(),
-                               new Relation(new Domain[] { srcm.v(), stmt.v(), kind.v(), tgtm.v() },
+                               new Relation(new Attribute[] { srcm.v(), stmt.v(), kind.v(), tgtm.v() },
                                             new PhysicalDomain[] { V1.v(), ST.v(), H2.v(), V2.v() },
                                             Jedd.v().project(this.cicg.edgesOutOf(momc.method()),
                                                              new PhysicalDomain[] { T1.v(), T2.v() })));
@@ -156,7 +156,7 @@ public final class BDDOnFlyCallGraphBuilder extends AbstractOnFlyCallGraphBuilde
     }
     
     private final Relation virtualCallSites =
-      new Relation(new Domain[] { var.v(), stmt.v(), method.v(), signature.v(), kind.v() },
+      new Relation(new Attribute[] { var.v(), stmt.v(), method.v(), signature.v(), kind.v() },
                    new PhysicalDomain[] { V3.v(), ST.v(), V1.v(), H1.v(), H2.v() },
                    Jedd.v().falseBDD());
 }

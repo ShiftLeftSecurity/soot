@@ -4,12 +4,12 @@ import jedd.*;
 import soot.*;
 import soot.jimple.spark.pag.*;
 
-public class anyst extends Domain {
+public class anyst extends Attribute {
     public Numberer numberer() { return Scene.v().getTypeNumberer(); }
     
-    public static Domain v() { return anyst.instance; }
+    public static Attribute v() { return anyst.instance; }
     
-    private static Domain instance = new anyst();
+    private static Attribute instance = new anyst();
     
     public anyst() { super(); }
 }

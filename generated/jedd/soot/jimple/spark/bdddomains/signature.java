@@ -4,12 +4,12 @@ import jedd.*;
 import soot.*;
 import soot.jimple.spark.pag.*;
 
-public class signature extends Domain {
+public class signature extends Attribute {
     public Numberer numberer() { return Scene.v().getSubSigNumberer(); }
     
-    public static Domain v() { return signature.instance; }
+    public static Attribute v() { return signature.instance; }
     
-    private static Domain instance = new signature();
+    private static Attribute instance = new signature();
     
     public signature() { super(); }
 }

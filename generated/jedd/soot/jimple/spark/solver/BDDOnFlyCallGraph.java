@@ -51,11 +51,11 @@ public class BDDOnFlyCallGraph {
         this.reachableMethods.update();
         while (true) {
             final Relation methodContexts =
-              new Relation(new Domain[] { method.v(), ctxt.v() },
+              new Relation(new Attribute[] { method.v(), ctxt.v() },
                            new PhysicalDomain[] { V1.v(), T1.v() },
                            this.reachablesReader.next());
             if (Jedd.v().equals(Jedd.v().read(methodContexts), Jedd.v().falseBDD())) return;
-            this.addToPAG(new Relation(new Domain[] { method.v(), ctxt.v() },
+            this.addToPAG(new Relation(new Attribute[] { method.v(), ctxt.v() },
                                        new PhysicalDomain[] { V2.v(), T2.v() },
                                        Jedd.v().replace(methodContexts,
                                                         new PhysicalDomain[] { V1.v(), T1.v() },
@@ -65,26 +65,26 @@ public class BDDOnFlyCallGraph {
     
     private void addToPAG(final Relation methodContexts) {
         final Relation methods =
-          new Relation(new Domain[] { method.v() },
+          new Relation(new Attribute[] { method.v() },
                        new PhysicalDomain[] { V2.v() },
                        Jedd.v().project(methodContexts, new PhysicalDomain[] { T2.v() }));
         for (Iterator methIt =
-               new Relation(new Domain[] { method.v() }, new PhysicalDomain[] { V2.v() }, methods).iterator();
+               new Relation(new Attribute[] { method.v() }, new PhysicalDomain[] { V2.v() }, methods).iterator();
              methIt.hasNext();
              ) {
             final SootMethod meth = (SootMethod) methIt.next();
             AbstractMethodPAG mpag = AbstractMethodPAG.v(this.pag, meth);
             mpag.build();
             final Relation contexts =
-              new Relation(new Domain[] { ctxt.v() },
+              new Relation(new Attribute[] { ctxt.v() },
                            new PhysicalDomain[] { T2.v() },
                            Jedd.v().compose(Jedd.v().read(methodContexts),
                                             Jedd.v().literal(new Object[] { meth },
-                                                             new Domain[] { method.v() },
+                                                             new Attribute[] { method.v() },
                                                              new PhysicalDomain[] { V2.v() }),
                                             new PhysicalDomain[] { V2.v() }));
             for (Iterator contextIt =
-                   new Relation(new Domain[] { ctxt.v() }, new PhysicalDomain[] { T2.v() }, contexts).iterator();
+                   new Relation(new Attribute[] { ctxt.v() }, new PhysicalDomain[] { T2.v() }, contexts).iterator();
                  contextIt.hasNext();
                  ) {
                 final Object context = (Object) contextIt.next();
@@ -97,21 +97,21 @@ public class BDDOnFlyCallGraph {
         Stmt s = null;
         while (true) {
             final Relation e =
-              new Relation(new Domain[] { srcm.v(), srcc.v(), stmt.v(), kind.v(), tgtm.v(), tgtc.v() },
+              new Relation(new Attribute[] { srcm.v(), srcc.v(), stmt.v(), kind.v(), tgtm.v(), tgtc.v() },
                            new PhysicalDomain[] { V1.v(), T1.v(), ST.v(), H2.v(), V2.v(), T2.v() },
                            this.callEdges.next());
             if (Jedd.v().equals(Jedd.v().read(e), Jedd.v().falseBDD())) break;
             final Relation mc =
-              new Relation(new Domain[] { method.v(), ctxt.v() },
+              new Relation(new Attribute[] { method.v(), ctxt.v() },
                            new PhysicalDomain[] { V2.v(), T2.v() },
                            Jedd.v().project(e, new PhysicalDomain[] { T1.v(), ST.v(), V1.v(), H2.v() }));
-            this.addToPAG(new Relation(new Domain[] { method.v(), ctxt.v() },
+            this.addToPAG(new Relation(new Attribute[] { method.v(), ctxt.v() },
                                        new PhysicalDomain[] { V2.v(), T2.v() },
                                        mc));
             Iterator it =
-              new Relation(new Domain[] { srcc.v(), tgtm.v(), stmt.v(), srcm.v(), kind.v(), tgtc.v() },
+              new Relation(new Attribute[] { srcc.v(), tgtm.v(), stmt.v(), srcm.v(), kind.v(), tgtc.v() },
                            new PhysicalDomain[] { T1.v(), V2.v(), ST.v(), V1.v(), H2.v(), T2.v() },
-                           e).iterator(new Domain[] { srcm.v(), srcc.v(), stmt.v(), kind.v(), tgtm.v(), tgtc.v() });
+                           e).iterator(new Attribute[] { srcm.v(), srcc.v(), stmt.v(), kind.v(), tgtm.v(), tgtc.v() });
             while (it.hasNext()) {
                 Object[] edge = (Object[]) it.next();
                 this.pag.addCallTarget(new Edge(MethodContext.v((SootMethod) edge[0], edge[1]),
@@ -125,11 +125,11 @@ public class BDDOnFlyCallGraph {
     public BDDOnFlyCallGraphBuilder ofcgb() { return this.ofcgb; }
     
     public void updatedNodes(final Relation types) {
-        this.ofcgb.addTypes(new Relation(new Domain[] { var.v(), type.v() },
+        this.ofcgb.addTypes(new Relation(new Attribute[] { var.v(), type.v() },
                                          new PhysicalDomain[] { V3.v(), T2.v() },
                                          Jedd.v().replace(types,
-                                                          new PhysicalDomain[] { V1.v(), T1.v() },
-                                                          new PhysicalDomain[] { V3.v(), T2.v() })));
+                                                          new PhysicalDomain[] { T1.v() },
+                                                          new PhysicalDomain[] { T2.v() })));
     }
     
     public void mergedWith(Node n1, Node n2) {  }

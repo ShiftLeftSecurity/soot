@@ -71,7 +71,7 @@ public final class BDDOnFlyCallGraphBuilder extends AbstractOnFlyCallGraphBuilde
         rm.update();
         while( worklist.hasNext() ) {
             <method:V1, ctxt:T1> methodContext = worklist.next();
-            Iterator it = methodContext.iterator( new Domain[] { method.v(), ctxt.v() } );
+            Iterator it = methodContext.iterator( new Attribute[] { method.v(), ctxt.v() } );
             while( it.hasNext() ) {
                 Object[] pair = (Object[]) it.next();
                 reachablesQueue.add( MethodContext.v( (SootMethod) pair[0], pair[1] ) ); 

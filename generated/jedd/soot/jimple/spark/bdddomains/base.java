@@ -4,12 +4,12 @@ import jedd.*;
 import soot.*;
 import soot.jimple.spark.pag.*;
 
-public class base extends Domain {
+public class base extends Attribute {
     public Numberer numberer() { return ((BDDPAG) Scene.v().getPointsToAnalysis()).getVarNodeNumberer(); }
     
-    public static Domain v() { return base.instance; }
+    public static Attribute v() { return base.instance; }
     
-    private static Domain instance = new base();
+    private static Attribute instance = new base();
     
     public base() { super(); }
 }

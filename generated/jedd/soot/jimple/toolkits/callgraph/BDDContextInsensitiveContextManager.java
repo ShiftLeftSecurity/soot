@@ -23,10 +23,10 @@ public class BDDContextInsensitiveContextManager implements BDDContextManager {
     }
     
     public void addStaticEdges(Object sourceContext, final jedd.Relation edges) {
-        this.cg.addEdges(new jedd.Relation(new jedd.Domain[] { srcc.v(), tgtc.v(), stmt.v(), tgtm.v(), srcm.v(), kind.v() },
+        this.cg.addEdges(new jedd.Relation(new jedd.Attribute[] { srcc.v(), tgtc.v(), stmt.v(), tgtm.v(), srcm.v(), kind.v() },
                                            new jedd.PhysicalDomain[] { T1.v(), T2.v(), ST.v(), V2.v(), V1.v(), H2.v() },
                                            jedd.Jedd.v().join(jedd.Jedd.v().read(jedd.Jedd.v().literal(new Object[] { null, null },
-                                                                                                       new jedd.Domain[] { srcc.v(), tgtc.v() },
+                                                                                                       new jedd.Attribute[] { srcc.v(), tgtc.v() },
                                                                                                        new jedd.PhysicalDomain[] { T1.v(), T2.v() })),
                                                               edges,
                                                               new jedd.PhysicalDomain[] {  })));
@@ -41,10 +41,10 @@ public class BDDContextInsensitiveContextManager implements BDDContextManager {
     }
     
     public void addVirtualEdges(final jedd.Relation edges) {
-        this.cg.addEdges(new jedd.Relation(new jedd.Domain[] { srcc.v(), tgtc.v(), stmt.v(), tgtm.v(), srcm.v(), kind.v() },
+        this.cg.addEdges(new jedd.Relation(new jedd.Attribute[] { srcc.v(), tgtc.v(), stmt.v(), tgtm.v(), srcm.v(), kind.v() },
                                            new jedd.PhysicalDomain[] { T1.v(), T2.v(), ST.v(), V2.v(), V1.v(), H2.v() },
                                            jedd.Jedd.v().join(jedd.Jedd.v().read(jedd.Jedd.v().literal(new Object[] { null, null },
-                                                                                                       new jedd.Domain[] { srcc.v(), tgtc.v() },
+                                                                                                       new jedd.Attribute[] { srcc.v(), tgtc.v() },
                                                                                                        new jedd.PhysicalDomain[] { T1.v(), T2.v() })),
                                                               edges,
                                                               new jedd.PhysicalDomain[] {  })));

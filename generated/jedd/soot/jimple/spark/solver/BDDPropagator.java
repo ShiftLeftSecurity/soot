@@ -19,42 +19,42 @@ public final class BDDPropagator extends Propagator {
     public final void propagate() {
         final BDDOnFlyCallGraph ofcg = this.pag.getOnFlyCallGraph();
         final jedd.Relation oldPointsTo =
-          new jedd.Relation(new jedd.Domain[] { var.v(), obj.v() },
+          new jedd.Relation(new jedd.Attribute[] { var.v(), obj.v() },
                             new jedd.PhysicalDomain[] { V1.v(), H1.v() },
                             jedd.Jedd.v().falseBDD());
         final jedd.Relation newPointsTo =
-          new jedd.Relation(new jedd.Domain[] { var.v(), obj.v() },
+          new jedd.Relation(new jedd.Attribute[] { var.v(), obj.v() },
                             new jedd.PhysicalDomain[] { V1.v(), H1.v() },
                             jedd.Jedd.v().falseBDD());
         final jedd.Relation tmpPointsTo =
-          new jedd.Relation(new jedd.Domain[] { var.v(), obj.v() },
+          new jedd.Relation(new jedd.Attribute[] { var.v(), obj.v() },
                             new jedd.PhysicalDomain[] { V1.v(), H1.v() },
                             jedd.Jedd.v().falseBDD());
         final jedd.Relation objectsBeingStored =
-          new jedd.Relation(new jedd.Domain[] { obj.v(), var.v(), fld.v() },
+          new jedd.Relation(new jedd.Attribute[] { obj.v(), var.v(), fld.v() },
                             new jedd.PhysicalDomain[] { H2.v(), V1.v(), FD.v() });
         final jedd.Relation oldStorePt =
-          new jedd.Relation(new jedd.Domain[] { obj.v(), var.v(), fld.v() },
+          new jedd.Relation(new jedd.Attribute[] { obj.v(), var.v(), fld.v() },
                             new jedd.PhysicalDomain[] { H2.v(), V1.v(), FD.v() },
                             jedd.Jedd.v().falseBDD());
         final jedd.Relation newStorePt =
-          new jedd.Relation(new jedd.Domain[] { obj.v(), var.v(), fld.v() },
+          new jedd.Relation(new jedd.Attribute[] { obj.v(), var.v(), fld.v() },
                             new jedd.PhysicalDomain[] { H2.v(), V1.v(), FD.v() },
                             jedd.Jedd.v().falseBDD());
         final jedd.Relation newFieldPt =
-          new jedd.Relation(new jedd.Domain[] { base.v(), fld.v(), obj.v() },
+          new jedd.Relation(new jedd.Attribute[] { base.v(), fld.v(), obj.v() },
                             new jedd.PhysicalDomain[] { H1.v(), FD.v(), H2.v() },
                             jedd.Jedd.v().falseBDD());
         final jedd.Relation tmpFieldPt =
-          new jedd.Relation(new jedd.Domain[] { base.v(), fld.v(), obj.v() },
+          new jedd.Relation(new jedd.Attribute[] { base.v(), fld.v(), obj.v() },
                             new jedd.PhysicalDomain[] { H1.v(), FD.v(), H2.v() },
                             jedd.Jedd.v().falseBDD());
         final jedd.Relation loadsFromHeap =
-          new jedd.Relation(new jedd.Domain[] { base.v(), fld.v(), dst.v() },
+          new jedd.Relation(new jedd.Attribute[] { base.v(), fld.v(), dst.v() },
                             new jedd.PhysicalDomain[] { H1.v(), FD.v(), V2.v() },
                             jedd.Jedd.v().falseBDD());
         final jedd.Relation loadAss =
-          new jedd.Relation(new jedd.Domain[] { base.v(), fld.v(), dst.v() },
+          new jedd.Relation(new jedd.Attribute[] { base.v(), fld.v(), dst.v() },
                             new jedd.PhysicalDomain[] { H1.v(), FD.v(), V2.v() },
                             jedd.Jedd.v().falseBDD());
         final BDDTypeManager typeManager = (BDDTypeManager) this.pag.getTypeManager();
@@ -73,7 +73,7 @@ public final class BDDPropagator extends Propagator {
                 this.pag.pointsTo.eqUnion(newPointsTo);
                 if (this.pag.getOpts().verbose()) {
                     G.v().out.println("Minor iteration: " +
-                                      new jedd.Relation(new jedd.Domain[] { var.v() },
+                                      new jedd.Relation(new jedd.Attribute[] { var.v() },
                                                         new jedd.PhysicalDomain[] { V1.v() },
                                                         jedd.Jedd.v().project(newPointsTo,
                                                                               new jedd.PhysicalDomain[] { H1.v() })).size() +
@@ -82,9 +82,11 @@ public final class BDDPropagator extends Propagator {
             }while(!jedd.Jedd.v().equals(jedd.Jedd.v().read(newPointsTo), jedd.Jedd.v().falseBDD())); 
             newPointsTo.eq(jedd.Jedd.v().minus(jedd.Jedd.v().read(this.pag.pointsTo), oldPointsTo));
             if (ofcg != null) {
-                ofcg.updatedNodes(new jedd.Relation(new jedd.Domain[] { var.v(), type.v() },
-                                                    new jedd.PhysicalDomain[] { V1.v(), T1.v() },
-                                                    jedd.Jedd.v().compose(jedd.Jedd.v().read(newPointsTo),
+                ofcg.updatedNodes(new jedd.Relation(new jedd.Attribute[] { var.v(), type.v() },
+                                                    new jedd.PhysicalDomain[] { V3.v(), T1.v() },
+                                                    jedd.Jedd.v().compose(jedd.Jedd.v().read(jedd.Jedd.v().replace(newPointsTo,
+                                                                                                                   new jedd.PhysicalDomain[] { V1.v() },
+                                                                                                                   new jedd.PhysicalDomain[] { V3.v() })),
                                                                           typeManager.allocNodeType(),
                                                                           new jedd.PhysicalDomain[] { H1.v() })));
                 ofcg.build();
@@ -133,7 +135,7 @@ public final class BDDPropagator extends Propagator {
             this.pag.pointsTo.eqUnion(newPointsTo);
             if (this.pag.getOpts().verbose()) {
                 G.v().out.println("Major iteration: " +
-                                  new jedd.Relation(new jedd.Domain[] { var.v() },
+                                  new jedd.Relation(new jedd.Attribute[] { var.v() },
                                                     new jedd.PhysicalDomain[] { V1.v() },
                                                     jedd.Jedd.v().project(newPointsTo,
                                                                           new jedd.PhysicalDomain[] { H1.v() })).size() +
