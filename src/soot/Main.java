@@ -446,7 +446,7 @@ public class Main implements Runnable, ICompilationListener
     private static void printHelp()
     {
          // $Format: "            System.out.println(\"Soot version $ProjectVersion$\");"$
-            System.out.println("Soot version 1.beta.6.dev.46");
+            System.out.println("Soot version 1.beta.6.dev.46.kor.1");
             System.out.println("Copyright (C) 1997-1999 Raja Vallee-Rai (rvalleerai@sable.mcgill.ca).");
             System.out.println("All rights reserved.");
             System.out.println("");
@@ -774,7 +774,7 @@ public class Main implements Runnable, ICompilationListener
             Iterator it = cmdLineClasses.iterator();
         
             while(it.hasNext())
-                {
+            {
                 String name = (String) it.next();
                 SootClass c;
                             
@@ -784,9 +784,9 @@ public class Main implements Runnable, ICompilationListener
                 {
                     mainClass = c;
                     Scene.v().setMainClass(c);
-                            }   
+                }   
                 c.setApplicationClass();
-                    }
+            }
         
                
             // Dynamic & process classes
@@ -860,41 +860,14 @@ public class Main implements Runnable, ICompilationListener
             }
         }
 
-    // Jimplify all needed bodies.
-        Iterator classIt = Scene.v().getApplicationClasses().iterator();
-
-        while(classIt.hasNext())
-            {
-            SootClass s = (SootClass) classIt.next();
-                
-            System.out.print("Jimplifying " + s.getName() + "... " );
-            System.out.flush();
-            
-            if(!isInDebugMode)
-                 {
-                    try 
-                    {
-                        attachJimpleBodiesFor(s);
-                    }
-                    catch(RuntimeException e)
-                    {
-                        System.out.println("failed due to: " + e);
-                    }
-                }
-                else {
-                    attachJimpleBodiesFor(s);
-                }
-                
-                System.out.println();
-            }
-
     // Run the whole-program packs.
         Scene.v().getPack("wjtp").apply();
         if(isOptimizingWhole)
             Scene.v().getPack("wjop").apply();
     
     // Handle each class individually
-        classIt = Scene.v().getApplicationClasses().iterator();
+    {
+        Iterator classIt = Scene.v().getApplicationClasses().iterator();
 
         while(classIt.hasNext())
             {
@@ -920,7 +893,7 @@ public class Main implements Runnable, ICompilationListener
                 
                 System.out.println();
             }
-
+    }
         totalTimer.end();            
 
         // Print out time stats.
@@ -1129,7 +1102,6 @@ public class Main implements Runnable, ICompilationListener
         }
 
         // Build all necessary bodies
-        // At this point, JimpleBodies should be active.
         {
             Iterator methodIt = c.getMethods().iterator();
            
@@ -1139,7 +1111,17 @@ public class Main implements Runnable, ICompilationListener
         
                 if(!m.isConcrete())
                     continue;
-                                                
+                                
+                // Build Jimple body and transform it.
+                {
+                    JimpleBody body = (JimpleBody) m.retrieveActiveBody();
+                    
+                    Scene.v().getPack("jtp").apply(body);
+                    
+                    if(isOptimizing) 
+                        Scene.v().getPack("jop").apply(body);
+                }
+                
                 if(produceGrimp)
                 {
                     if(isOptimizing)
