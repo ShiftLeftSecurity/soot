@@ -26,6 +26,10 @@ Patrick Lam (plam@sable.mcgill.ca)
     - Aggregation
     - second implementation of inlining and devirtualization
 
+Ondrej Lhotak
+    - general Soot hacker
+    - Spark
+
 Feng Qian (fqian@sable.mcgill.ca)
     - array bounds check and annotation
     - contributed to documentation writing
@@ -64,6 +68,9 @@ Funding support provided by:
     - Natural Sciences and Engineering Research Council of 
       Canada (NSERC)
       http://www.nserc.ca
+
+    - Richard H. Tomlinson Fellowship
+      
 
 
 ------------------------- Special Thanks -----------------------

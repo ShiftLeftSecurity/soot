@@ -791,18 +791,6 @@ public class Jimple
         return new ParameterRef(paramType, number);
     }
 
-
-    /**
-        Constructs a NextNextStmtRef() grammar chunk.
-     */
-
-     /*
-    public NextNextStmtRef newNextNextStmtRef()
-    {
-        return new NextNextStmtRef();
-    }
-*/
-
     /**
         Constructs a InstanceFieldRef(Local, SootField) grammar chunk.
      */

@@ -120,6 +120,9 @@ public class ArrayType extends Type implements RefLikeType
     }
 
     public Type getArrayBaseType() {
+	return getElementType();
+    }
+    public Type getElementType() {
 	if( numDimensions > 1 ) {
 	    return ArrayType.v( baseType, numDimensions-1 );
 	} else {

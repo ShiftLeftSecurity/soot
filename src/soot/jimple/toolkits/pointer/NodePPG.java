@@ -267,7 +267,7 @@ public class NodePPG extends PointerPropagationGraph
 	    }
 	}
 
-	out.println( "Simple Assignments:" );
+	out.println( "Assignments:" );
 	for( Iterator it = simple.keySet().iterator(); it.hasNext(); ) {
 	    VarNode src = (VarNode) it.next();
 	    for( Iterator it2 = simple.get(src).iterator(); it2.hasNext(); ) {

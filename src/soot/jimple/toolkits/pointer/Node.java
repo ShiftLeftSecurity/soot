@@ -5,7 +5,6 @@ import soot.*;
 public class Node
 {
     static int nextNodeId = 1;
-    static Map nodeMap = new HashMap(4);
     int id;
     public int topoSortIndex;
     protected void assignId() {

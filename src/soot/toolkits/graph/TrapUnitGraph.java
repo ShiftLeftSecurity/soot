@@ -1,5 +1,5 @@
 /* Soot - a J*va Optimization Framework
- * Copyright (C) 1997-1999 Raja Vallee-Rai
+ * Copyright (C) 1999 Patrice Pominville, Raja Vallee-Rai
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -24,56 +24,40 @@
  */
 
 
-package soot.jimple;
+ 
+
+
+
+package soot.toolkits.graph;
 
 import soot.*;
 import soot.util.*;
 import java.util.*;
 
-public class NextNextStmtRef implements ConcreteRef, ToBriefString
+
+
+/**
+ *  Represents a CFG for a Body instance where the nodes are Unit
+ *  instances, and where edges are added from statements inside an
+ *  area of protection to the handler.
+ *
+ *  The difference between a TrapUnitGraph and a CompleteUnitGraph
+ *  is that a CompleteUnitGraph has edges from the statement before
+ *  the beginning of a try block to the handler, while a TrapUnitGraph
+ *  does not.
+ */
+public class TrapUnitGraph extends UnitGraph
 {
-    NextNextStmtRef()
+
+    /**
+     *  Constructs the graph from a given Body instance.
+     *  @param the Body instance from which the graph is built.
+     */
+    public TrapUnitGraph(Body body)
     {
+        super(body, true, true);
     }
 
-    public boolean equivTo(Object c)
-    {
-        return c instanceof NextNextStmtRef;
-    }
-
-    /** Returns a hash code for this object, consistent with structural equality. */
-    public int equivHashCode() 
-    {
-        return 513;
-    }
-
-    public Object clone() 
-    {
-        return new NextNextStmtRef();
-    }
-
-    public String toString()
-    {
-        return "&nextnextstmt";
-    }
-
-    public String toBriefString()
-    {
-        return toString();
-    }
-    
-    public List getUseBoxes()
-    {
-        return AbstractUnit.emptyList;
-    }
-
-    public Type getType()
-    {
-        return StmtAddressType.v();
-    }
-
-    public void apply(Switch sw)
-    {
-        ((RefSwitch) sw).caseNextNextStmtRef(this);
-    }
 }
+
+

@@ -154,7 +154,7 @@ class FastAvailableExpressionsAnalysis extends ForwardFlowAnalysis
             // iterate over things (avail) in out set.
             while (it.hasNext())
 	    {
-                Value avail = (Value)it.next();
+                Value avail = (Value) it.next();
                 if (avail instanceof FieldRef)
                 {
                     if (st.unitCanWriteTo(u, avail)) {
