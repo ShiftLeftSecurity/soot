@@ -23,6 +23,7 @@
  * contributors.  (Soot is distributed at http://www.sable.mcgill.ca/soot)
  */
 
+/* Reference Version: $SootVersion: 1.2.5.dev.5 $ */
 
 package soot.jimple.toolkits.base;
 
@@ -310,13 +311,18 @@ public class Aggregator extends BodyTransformer
           
           if (usepair.valueBox.canContainValue(aggregatee))
             {
+              boolean wasSimpleCopy = isSimpleCopy( usepair.unit );
               usepair.valueBox.setValue(aggregatee);
               units.remove(s);
               hadAggregation = true;
               aggrCount++;
               // clean up the tags. If s was not a simple copy, the new statement should get
               // the tags of s.
-              if( !( aggregatee instanceof Local ) ) {
+              // OK, this fix was wrong. The condition should not be
+              // "If s was not a simple copy", but rather "If usepair.unit
+              // was a simple copy". This way, when there's a load of a constant
+              // followed by an invoke, the invoke gets the tags.
+              if( wasSimpleCopy ) {
                   usepair.unit.removeAllTags();
                   usepair.unit.addAllTagsOf( s );
               }
@@ -336,6 +342,13 @@ public class Aggregator extends BodyTransformer
         }
       return hadAggregation;
     }
+  private static boolean isSimpleCopy( Unit u ) {
+      if( !(u instanceof DefinitionStmt) ) return false;
+      DefinitionStmt defstmt = (DefinitionStmt) u;
+      if( !( defstmt.getRightOp() instanceof Local ) ) return false;
+      if( !( defstmt.getLeftOp() instanceof Local ) ) return false;
+      return true;
+  }
         
 }
 
