@@ -403,7 +403,7 @@ public class SootMethod extends AbstractHost implements ClassMember
     }
 
     /** Returns the Jimple-style signature of this method (for Jimple output). */
-    public String getJimpleStyleSignature()
+    /*    public String getJimpleStyleSignature()
     {
         StringBuffer buffer = new StringBuffer();
         
@@ -438,7 +438,7 @@ public class SootMethod extends AbstractHost implements ClassMember
         buffer.append(")>");
         
         return buffer.toString();
-    }
+	}*/
     
     /**
         Returns the Soot subsignature of this method.  Used to refer to methods unambiguously.
