@@ -153,15 +153,15 @@ public class ExceptionalUnitGraph extends UnitGraph
 
 
     /**
-     *  Constructs the graph from a given Body instance, using 
-     *  {@link UnitThrowAnalysis} to estimate the set of exceptions
-     *  that each {@link Unit} might throw.
+     *  Constructs the graph from a given Body instance, using the
+     *  {@link Scene}'s default {@link ThrowAnalysis} to estimate the
+     *  set of exceptions that each {@link Unit} might throw.
      *
      *  @param body the <tt>Body</tt> from which to build a graph.
      *
      */
     public ExceptionalUnitGraph(Body body) {
-	this(body, UnitThrowAnalysis.v());
+	this(body, Scene.v().getDefaultThrowAnalysis());
     }
 
 
@@ -423,15 +423,15 @@ public class ExceptionalUnitGraph extends UnitGraph
 			    addEdge(unitToSuccs, unitToPreds, pred, catcher);
 			}
 		    }
-		    if (mightHaveSideEffects(thrower)) {
-			addEdge(unitToSuccs, unitToPreds, thrower, catcher);
-		    }
-		    if (thrower instanceof ThrowInst ||
-			thrower instanceof ThrowStmt) {
-			// An athrow actually completes when it throws
-			// an exception. We better include an edge here
-			// to avoid the throw being removed by dead code
-			// elimination. 
+		    if (Options.v().always_add_edges_from_excepting_units() ||
+			thrower instanceof ThrowInst ||
+			thrower instanceof ThrowStmt || 
+			mightHaveSideEffects(thrower)) {
+			// An athrow instruction actually completes when
+			// it throws its argument exception, so we
+			// need to include an edge from it to avoid
+			// the throw being removed by dead code
+			// elimination.
 			addEdge(unitToSuccs, unitToPreds, thrower, catcher);
 		    }
 		}

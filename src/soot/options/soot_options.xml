@@ -545,7 +545,7 @@ produce multiple <code>CompleteUnitGraph</code>s).</p>
 	  <long_desc>
 Indicate whether to show exception destination edges as
 well as control flow edges in
-dumps of pruned control flow graphs.
+dumps of exceptional control flow graphs.
 </long_desc>
 	</boolopt>
 	</section>
@@ -903,7 +903,7 @@ as a byproduct of pruning exceptional control flow within CFGs.
 					<boolopt>
 						<name>Enabled</name>
 						<alias>enabled</alias>
-                                                <default>true</default>
+                                                <default>false</default>
 					</boolopt>
 				</sub_phase>
 			</phase>
@@ -3773,13 +3773,13 @@ see the documentation for the <tt>shimp</tt>, <tt>stp</tt>, and
 							<name>Default ThrowAnalysis</name>
 							<alias>throw-analysis</alias>
 							<long_desc>
-This option specifies how CFGs with pruned exceptional control
-flow edges are to estimate the exceptions which each statement
-may throw.
+This option specifies how to estimate the exceptions which each statement
+may throw when constructing exceptional CFGs.
         </long_desc>
 							<value>
 								<name>Pedantic</name>
 								<alias>pedantic</alias>
+								<default/>
 								<short_desc>Pedantically conservative throw analysis</short_desc>
 								<long_desc>
 Says that any instruction may throw any
@@ -3793,7 +3793,6 @@ to occur at arbitrary points in the execution of a victim thread.
 							<value>
 								<name>Unit</name>
 								<alias>unit</alias>
-								<default/>
 								<short_desc>Unit Throw Analysis</short_desc>
 								<long_desc>
 Says that each statement in the intermediate representation
@@ -3805,20 +3804,35 @@ to the surrounding program.
 							</value>
 						</multiopt>
 		<boolopt>
-			<name>Exeption Edges from Predecessors Only</name>
-			<alias>exception-edges-from-preds-only</alias>
-			<short_desc>Add exceptional edges from only the predecessors of excepting statements without side effects</short_desc>
+			<name>Always Add Edges from Excepting Units</name>
+			<alias>always-add-edges-from-excepting-units</alias>
+			<short_desc>Always add CFG edges from an exceptioning unit itself as well as its predecessors.</short_desc>
 			<long_desc>
+<p>
 If this option is true, then when an instruction may throw an
-exception that would be caught by an exception handler, the CFGs
-produced by Soot's <code>PrunedUnitGraph</code> and
-<code>PrunedBlockGraph</code> classes will include edges from the
-predecessors of the excepting instruction, but not from the
-excepting instruction itself, unless the excepting instruction has
-potential side-effects. If the option is false, the CFGs
-include edges to the handler from the excepting instruction itself, as well as
-from its predecessors, even if the excepting instruction
-has no potential side effects.
+exception that would be caught by a handler in the
+same method, the CFGs produced by Soot's
+<code>ExceptionalUnitGraph</code> and
+<code>ExceptionalBlockGraph</code> classes will always include an
+edge to the handler from the excepting instruction itself, as
+well as from the instruction's predecessors.  If this option is
+false, the exceptional CFGs will include an edge to the handler
+from the excepting unit itself only if that unit has potential
+side effects.</p>
+<p>
+Omitting edges from excepting units allows more accurate flow
+analyses (since if an instruction without side effects throws an
+exception, it has not changed the state of the computation). This
+accuracy, though, could cause optimizations to generate
+unverifiable code, since the dataflow analyses performed by
+bytecode verifiers might include paths to exception handlers from
+all protected instructions, regardless of whether the
+instructions have side effects.  (In practice, the pedantic throw
+analysis suffices to pass verification in all VMs we have tested,
+but the JVM specification does allow for less discriminating
+verifiers which would reject some code that could be generated using the
+pedantic throw analysis without also adding edges from
+all excepting units.)</p>
 </long_desc>
 			<default>true</default>
 		</boolopt>

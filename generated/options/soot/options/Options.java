@@ -574,9 +574,9 @@ public class Options extends OptionsBase {
            }
   
             else if( false 
-            || option.equals( "exception-edges-from-preds-only" )
+            || option.equals( "always-add-edges-from-excepting-units" )
             )
-                exception_edges_from_preds_only = true;
+                always_add_edges_from_excepting_units = true;
   
             else if( false
             || option.equals( "i" )
@@ -861,14 +861,14 @@ public class Options extends OptionsBase {
     public void set_via_shimple( boolean setting ) { via_shimple = setting; }
   
     public int throw_analysis() {
-        if( throw_analysis == 0 ) return throw_analysis_unit;
+        if( throw_analysis == 0 ) return throw_analysis_pedantic;
         return throw_analysis; 
     }
     public void set_throw_analysis( int setting ) { throw_analysis = setting; }
     private int throw_analysis = 0;
-    public boolean exception_edges_from_preds_only() { return exception_edges_from_preds_only; }
-    private boolean exception_edges_from_preds_only = false;
-    public void set_exception_edges_from_preds_only( boolean setting ) { exception_edges_from_preds_only = setting; }
+    public boolean always_add_edges_from_excepting_units() { return always_add_edges_from_excepting_units; }
+    private boolean always_add_edges_from_excepting_units = false;
+    public void set_always_add_edges_from_excepting_units( boolean setting ) { always_add_edges_from_excepting_units = setting; }
   
     public List include() { 
         if( include == null )
@@ -983,9 +983,9 @@ public class Options extends OptionsBase {
 +padOpt(" -via-grimp", "Convert to bytecode via Grimp instead of via Baf" )
 +padOpt(" -via-shimple", "Enable Shimple SSA representation" )
 +padOpt(" -throw-analysis ARG", "" )
-+padVal(" pedantic", "Pedantically conservative throw analysis" )
-+padVal(" unit (default)", "Unit Throw Analysis" )
-+padOpt(" -exception-edges-from-preds-only", "Add exceptional edges from only the predecessors of excepting statements without side effects" )
++padVal(" pedantic (default)", "Pedantically conservative throw analysis" )
++padVal(" unit", "Unit Throw Analysis" )
++padOpt(" -always-add-edges-from-excepting-units", "Always add CFG edges from an exceptioning unit itself as well as its predecessors." )
 +"\nApplication Mode Options:\n"
       
 +padOpt(" -i PKG -include PKG", "Include classes in PKG as application classes" )
@@ -1184,7 +1184,7 @@ public class Options extends OptionsBase {
             return "Phase "+phaseName+":\n"+
                 "\nThe Trap Tightener changes the area protected by each exception \nhandler, so that it begins with the first instruction in the old \nprotected area which is actually capable of throwing the \nexception caught by the handler, and ends just after the last \ninstruction in the old protected area which can throw an \nexception caught by the handler. This reduces the chance of \nproducing unverifiable code as a byproduct of pruning \nexceptional control flow within CFGs. "
                 +"\n\nRecognized options (with default values):\n"
-                +padOpt( "enabled (true)", "" );
+                +padOpt( "enabled (false)", "" );
     
         if( phaseName.equals( "cg" ) )
             return "Phase "+phaseName+":\n"+
@@ -2224,7 +2224,7 @@ public class Options extends OptionsBase {
     
         if( phaseName.equals( "jb.tt" ) )
             return ""
-              +"enabled:true ";
+              +"enabled:false ";
     
         if( phaseName.equals( "cg" ) )
             return ""
