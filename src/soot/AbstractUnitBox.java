@@ -38,7 +38,9 @@ public abstract class AbstractUnitBox implements UnitBox
 {
     protected Unit unit;
 
-    // assumes the common case by default
+    /**
+     * Assumes common case (true) by default.
+     **/
     protected boolean branchTarget = true;  
     
     public abstract boolean canContainUnit(Unit u);

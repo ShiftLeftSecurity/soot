@@ -336,22 +336,21 @@ public abstract class Body extends AbstractHost implements Serializable
     }
 
     /**
-     *   Returns the result of iterating through all Units in this
-     *   body and querying them for their UnitBoxes.  All UnitBoxes
-     *   thus found are returned. Branching Units and statements which
-     *   use PhiExpr will have UnitBoxes; a UnitBox contains a Unit
-     *   that is either a target of a branch or is being used as a
-     *   pointer to the end of a CFG block.
-     *   <p>
-     *   This method is typically used for pointer patching, eg when
-     *   the unit chain is cloned.
-     *   <p>
-     *   @return a list of all the UnitBoxes held by this body's units.
-     *     
-     *   @see UnitBox
-     *   @see #getUnitBoxes(boolean)
-     *   @see Unit#getUnitBoxes()
-     *   @see soot.shimple.PhiExpr#getUnitBoxes()
+     * Returns the result of iterating through all Units in this body
+     * and querying them for their UnitBoxes.  All UnitBoxes thus
+     * found are returned.  Branching Units and statements which use
+     * PhiExpr will have UnitBoxes; a UnitBox contains a Unit that is
+     * either a target of a branch or is being used as a pointer to
+     * the end of a CFG block.
+     *
+     * <p> This method is typically used for pointer patching, eg when
+     * the unit chain is cloned.
+     *
+     * @return A list of all the UnitBoxes held by this body's units.
+     * @see UnitBox
+     * @see #getUnitBoxes(boolean)
+     * @see Unit#getUnitBoxes()
+     * @see soot.shimple.PhiExpr#getUnitBoxes()
      **/
     public List getAllUnitBoxes() 
     {
@@ -363,7 +362,6 @@ public abstract class Body extends AbstractHost implements Serializable
 		unitBoxList.addAll(item.getUnitBoxes());  
 	    }
 	}
-
         
 	{
 	    Iterator it = trapChain.iterator();
@@ -372,7 +370,6 @@ public abstract class Body extends AbstractHost implements Serializable
 		unitBoxList.addAll(item.getUnitBoxes());  
 	    }
         }
-
 
 	{
 	    Iterator it = getTags().iterator();
@@ -387,25 +384,25 @@ public abstract class Body extends AbstractHost implements Serializable
     }
 
     /**
-     *   If branchTarget is true, returns the result of iterating
-     *   through all branching Units in this body and querying them
-     *   for their UnitBoxes. These UnitBoxes contains a Unit that is
-     *   the target of a branch.  This is typically used for labeling
-     *   blocks or updating the targets of branching statements.
-     *   <p>
-     *   If branchTarget is false, returns the result of iterating
-     *   through the non-branching Units in this body and querying them
-     *   for their UnitBoxes.  Any such UnitBoxes (typically from PhiExpr)
-     *   contain a Unit that indicates the end of a CFG block.
-     *   <p>
-     *   @return a list of all the UnitBoxes held by this body's
-     *   branching units.
+     * If branchTarget is true, returns the result of iterating
+     * through all branching Units in this body and querying them for
+     * their UnitBoxes. These UnitBoxes contain Units that are the
+     * target of a branch.  This is useful for, say, labeling blocks
+     * or updating the targets of branching statements.
+     *
+     * <p> If branchTarget is false, returns the result of iterating
+     * through the non-branching Units in this body and querying them
+     * for their UnitBoxes.  Any such UnitBoxes (typically from
+     * PhiExpr) contain a Unit that indicates the end of a CFG block.
+     *   
+     * @return a list of all the UnitBoxes held by this body's
+     * branching units.
      *     
-     *   @see UnitBox
-     *   @see #getAllUnitBoxes()
-     *   @see Unit#getUnitBoxes()
-     *   @see soot.shimple.PhiExpr#getUnitBoxes()
-    **/
+     * @see UnitBox
+     * @see #getAllUnitBoxes()
+     * @see Unit#getUnitBoxes()
+     * @see soot.shimple.PhiExpr#getUnitBoxes()
+     **/
     public List getUnitBoxes(boolean branchTarget) 
     {
         ArrayList unitBoxList = new ArrayList();
@@ -424,7 +421,6 @@ public abstract class Body extends AbstractHost implements Serializable
 	    }
 	}
 
-        
 	{
 	    Iterator it = trapChain.iterator();
 	    while(it.hasNext()) {
@@ -432,7 +428,6 @@ public abstract class Body extends AbstractHost implements Serializable
 		unitBoxList.addAll(item.getUnitBoxes());  
 	    }
         }
-
 
 	{
 	    Iterator it = getTags().iterator();

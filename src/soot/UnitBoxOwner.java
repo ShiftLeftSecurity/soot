@@ -25,9 +25,11 @@ import java.util.*;
  * An implementor of this interface indicates that it may contain
  * UnitBoxes and provides appropriate methods to print itself,
  * including information on the contained Units.
- * <p>
- * Currently this is implemented by soot.shimple.PhiExpr and used by
+ * 
+ * <p> Currently this is implemented by soot.shimple.PhiExpr and used by
  * soot.jimple.internal.JAssignStmt.
+ *
+ * @author Navindra Umanee
  **/
 public interface UnitBoxOwner
 {

@@ -1,4 +1,4 @@
-/* Soot - a J*va Optimization Framework
+2/* Soot - a J*va Optimization Framework
  * Copyright (C) 1997-1999 Raja Vallee-Rai
  *
  * This library is free software; you can redistribute it and/or
@@ -49,14 +49,16 @@ public interface UnitBox extends Serializable
 
     /**
      * Returns true if the UnitBox is holding a Unit that is the
-     * target of a branch, hence a Unit at the beginning of a CFG
-     * block.  Returns false if the UnitBox is holding a Unit that
-     * indicates the end of a CFG block (currently used for SSA).
-     * Otherwise ignored.
+     * target of a branch (ie a Unit at the beginning of a CFG block).
+     * Returns false if the UnitBox is holding a Unit that indicates
+     * the end of a CFG block (used by SSA to locate CFG
+     * predecessors).
      **/
     public boolean isBranchTarget();
 
     /**
+     * If not set, this is normally assumed to be true by default.
+     *
      * @see #isBranchTarget()
      **/
     public void setBranchTarget(boolean branchTarget);

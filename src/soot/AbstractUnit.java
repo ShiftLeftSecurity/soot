@@ -253,11 +253,10 @@ public abstract class AbstractUnit extends AbstractHost implements Unit
         
         List boxesPointing = this.getBoxesPointingToThis();
 
-        Object[] boxes = boxesPointing.toArray();
         // important to change this to an array to have a static copy
+        Object[] boxes = boxesPointing.toArray();
         
-        for(int i = 0; i < boxes.length; i++)
-        {
+        for(int i = 0; i < boxes.length; i++){
             UnitBox box = (UnitBox) boxes[i];
 
             if(box.getUnit() != this)
