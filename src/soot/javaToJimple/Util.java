@@ -2,6 +2,23 @@ package soot.javaToJimple;
 
 public class Util {
     
+    public static void addLnPosTags(soot.tagkit.Host host, polyglot.util.Position pos) {
+        if (pos != null) {
+            if (pos instanceof soot.javaToJimple.jj.DPosition){
+                soot.javaToJimple.jj.DPosition dpos = (soot.javaToJimple.jj.DPosition)pos;
+                addLnPosTags(host, dpos.line(), dpos.endLine(), dpos.column(), dpos.endCol()); 
+            }
+        }
+    }
+    
+    public static void addLnPosTags(soot.tagkit.Host host, int sline, int eline, int spos, int epos) {
+        if (soot.options.Options.v().keep_line_number()){
+            host.addTag(new soot.tagkit.SourceLnPosTag(sline, eline, spos, epos));
+        }
+        //host.addTag(new soot.tagkit.SourceLineNumberTag(sline, eline));
+        //host.addTag(new soot.tagkit.SourcePositionTag(spos, epos));
+    }
+    
     /**
      * Position Tag Adder
      */
@@ -35,7 +52,9 @@ public class Util {
     }
 
     public static void addMethodLineTag(soot.tagkit.Host host, int sline, int eline){
-        host.addTag(new soot.tagkit.SourceLineNumberTag(sline, eline));    
+        if (soot.options.Options.v().keep_line_number()){
+            host.addTag(new soot.tagkit.SourceLineNumberTag(sline, eline));    
+        }
     }
     
     /**

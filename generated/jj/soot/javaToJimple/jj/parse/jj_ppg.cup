@@ -25,7 +25,8 @@ parser Grm extends polyglot.ext.jl.parse.Grm {:
     }
 
     public static Position pos(Object first, Object last){
-       
+      
+        System.out.println("first: "+first+" class: "+first.getClass()+" last: "+last+" class: "+last.getClass());
         Position fpos = null;
         Position epos = null;
         if (first instanceof Node) {
@@ -1194,11 +1195,11 @@ argument_list ::=
 
 array_creation_expression ::=
     NEW:n primitive_type:a dim_exprs:b dims_opt:c {:
-                                                  RESULT = parser.nf.NewArray(parser.pos(n, c), a, b,
+                                                  RESULT = parser.nf.NewArray(parser.pos(n, b), a, b,
                 c.intValue()); 
                                                   :}
  |  NEW:n class_or_interface_type:a dim_exprs:b dims_opt:c {:
-                                                           RESULT = parser.nf.NewArray(parser.pos(n, c), a, b, 
+                                                           RESULT = parser.nf.NewArray(parser.pos(n, b), a, b, 
                 c.intValue()); 
                                                            :}
  |  NEW:n primitive_type:a dims:b array_initializer:c {:
@@ -1450,7 +1451,7 @@ conditional_or_expression ::=
 conditional_expression ::=
     conditional_or_expression:a {:  RESULT = a;  :}
  |  conditional_or_expression:a QUESTION expression:b COLON conditional_expression:c {:
-                                                                                     RESULT = parser.nf.Conditional(parser.pos(a, b), a, 
+                                                                                     RESULT = parser.nf.Conditional(parser.pos(a, c), a, 
                 b, c); 
                                                                                      :};
 

@@ -1,4 +1,4 @@
-package soot.xml;
+package ca.mcgill.sable.soot.attributes;
 
 import soot.*;
 
