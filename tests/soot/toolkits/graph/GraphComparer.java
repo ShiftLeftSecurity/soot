@@ -16,17 +16,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import soot.Body;
-import soot.util.Chain;
 import soot.BriefUnitPrinter;
 import soot.CompilationDeathException;
+import soot.G;
 import soot.LabeledUnitPrinter;
 import soot.SootMethod;
 import soot.Trap;
 import soot.Unit;
+import soot.options.Options;
 import soot.toolkits.graph.CompleteUnitGraph.ExceptionDest;
 import soot.util.ArraySet;
+import soot.util.Chain;
 
 public class GraphComparer {
+
+    DirectedGraph g1;
+    DirectedGraph g2;
 
     /**
      * Utility interface for keeping track of graph nodes which
@@ -41,16 +46,17 @@ public class GraphComparer {
 	Object getEquiv(Object node);
     }
 
+    EquivalenceRegistry equivalences = null;
 
     /**
      * {@link EquivalenceRegistry} for comparing two {@link UnitGraph}s
-     * Since the same {@ Unit}s are stored as nodes in both graphs,
+     * Since the same {@link Unit}s are stored as nodes in both graphs,
      * equivalence is the same as object equality.
      */
     class EquivalentUnitRegistry implements EquivalenceRegistry {
 	/**
 	 * @param node a graph node that represents a {@link Unit}.
-	 * @return <tt>node</tt>
+	 * @return <tt>node</tt>.
 	 */
 	public Object getEquiv(Object node) {
 	    return node;
@@ -124,7 +130,7 @@ public class GraphComparer {
 	 *          node.
 	 * @return a {@link Map} from {@link Unit}s to {@link Object}s 
 	 *          that are the graph nodes containing those {@link Unit}s.
-	 * @throws IllegalArgumentException should the any node of <tt>t</tt>
+	 * @throws IllegalArgumentException should any node of <tt>t</tt>
 	 *         lack an <tt>iterator()</tt> method or should
 	 *         any {@link Unit} appear in
 	 *         more than one node of the graph.
@@ -179,9 +185,116 @@ public class GraphComparer {
 	}
     }
 
-    DirectedGraph g1;
-    DirectedGraph g2;
-    EquivalenceRegistry equivalences = null;
+
+
+    /**
+     * Utility interface for checking whether two graphs of particular types
+     * differ only in the ways that we would expect from two graphs
+     * of those types that represent the same {@link Body}.
+     */
+    interface TypedGraphComparer {
+	/**
+	 * @return true if the two graphs represented by this comparer
+	 * differ only in expected ways.
+	 */
+	boolean onlyExpectedDiffs();
+    }
+
+    TypedGraphComparer subcomparer = null;
+
+    /**
+     * Return a class that implements <tt>TypedGraphComparer</tt> for
+     * the two graphs being compared by this <tt>GraphComparer</tt>,
+     * or <tt>null</tt>, if there is no comparer available to compare
+     * their types.
+     */
+    TypedGraphComparer TypedGraphComparerFactory() {
+	class TypeAssignments {
+	    // Note that "Alt" graphs are loaded from an alternate
+	    // class path, so we need ugly, fragile, special-purpose
+	    // hacks to recognize them.
+	    CompleteUnitGraph completeUnitGraph = null;
+	    ClassicCompleteUnitGraph classicCompleteUnitGraph = null;
+	    TrapUnitGraph trapUnitGraph = null;
+	    BriefBlockGraph briefBlockGraph = null;
+	    DirectedGraph altBriefBlockGraph = null;
+	    ClassicCompleteBlockGraph classicCompleteBlockGraph = null;
+	    DirectedGraph altCompleteBlockGraph = null;
+	    ArrayRefBlockGraph arrayRefBlockGraph = null;
+	    DirectedGraph altArrayRefBlockGraph = null;
+	    ZonedBlockGraph zonedBlockGraph = null;
+	    DirectedGraph altZonedBlockGraph = null;
+
+	    TypeAssignments(DirectedGraph g1, DirectedGraph g2) {
+		this.add(g1);
+		this.add(g2);
+	    }
+
+	    void add(DirectedGraph g) {
+		if (g instanceof CompleteUnitGraph) {
+		    completeUnitGraph = (CompleteUnitGraph) g;
+		} else	if (g instanceof ClassicCompleteUnitGraph) {
+		    classicCompleteUnitGraph = (ClassicCompleteUnitGraph) g;
+		} else if (g instanceof TrapUnitGraph) {
+		    trapUnitGraph = (TrapUnitGraph) g;
+		} else if (g instanceof BriefBlockGraph) {
+		    briefBlockGraph = (BriefBlockGraph) g;
+		} else if (g.getClass().getName().endsWith(".BriefBlockGraph")) {
+		    altBriefBlockGraph = g;
+		} else if (g instanceof ClassicCompleteBlockGraph) {
+		    classicCompleteBlockGraph = (ClassicCompleteBlockGraph) g;
+		} else if (g.getClass().getName().endsWith(".CompleteBlockGraph")) {
+		    altCompleteBlockGraph = g;
+		} else if (g instanceof ArrayRefBlockGraph) {
+		    arrayRefBlockGraph = (ArrayRefBlockGraph) g;
+		} else if (g.getClass().getName().endsWith(".ArrayRefBlockGraph")) {
+		    altArrayRefBlockGraph = g;
+		} else if (g instanceof ZonedBlockGraph) {
+		    zonedBlockGraph = (ZonedBlockGraph) g;
+		} else if (g.getClass().getName().endsWith(".ZonedBlockGraph")) {
+		    altZonedBlockGraph = g;
+		} 
+	    }
+	}
+	TypeAssignments subtypes = new TypeAssignments(g1, g2);
+
+	if (subtypes.completeUnitGraph != null && 
+	    subtypes.classicCompleteUnitGraph != null) {
+	    return new CompleteToClassicCompleteUnitGraphComparer(
+		 subtypes.completeUnitGraph, subtypes.classicCompleteUnitGraph);
+	}
+
+	if (subtypes.completeUnitGraph != null && 
+	    subtypes.trapUnitGraph != null) {
+	    return new CompleteToTrapUnitGraphComparer(subtypes.completeUnitGraph, 
+						       subtypes.trapUnitGraph);
+	}
+
+	if (subtypes.briefBlockGraph != null && 
+	    subtypes.altBriefBlockGraph != null) {
+	    return new BlockToAltBlockGraphComparer(subtypes.briefBlockGraph, 
+						    subtypes.altBriefBlockGraph);
+	}
+
+	if (subtypes.classicCompleteBlockGraph != null && 
+	    subtypes.altCompleteBlockGraph != null) {
+	    return new BlockToAltBlockGraphComparer(subtypes.classicCompleteBlockGraph, 
+						    subtypes.altCompleteBlockGraph);
+	}
+
+	if (subtypes.arrayRefBlockGraph != null && 
+	    subtypes.altArrayRefBlockGraph != null) {
+	    return new BlockToAltBlockGraphComparer(subtypes.arrayRefBlockGraph, 
+						    subtypes.altArrayRefBlockGraph);
+	}
+
+	if (subtypes.zonedBlockGraph != null && 
+	    subtypes.altZonedBlockGraph != null) {
+	    return new BlockToAltBlockGraphComparer(subtypes.zonedBlockGraph, 
+						    subtypes.altZonedBlockGraph);
+	}
+	return null;
+    }
 
 
     public GraphComparer(DirectedGraph g1, DirectedGraph g2) {
@@ -198,8 +311,24 @@ public class GraphComparer {
 	} else {
 	    equivalences = new EquivalentUnitRegistry();
 	}
+	subcomparer = TypedGraphComparerFactory();
     }
 
+
+    /**
+     * Checks of the two graphs in the GraphComparer differ only in 
+     * ways that the GraphComparer expects that they should differ,
+     * given the types of graphs they are, assuming that the two
+     * graphs represent the same body.
+     */
+    public boolean onlyExpectedDiffs() {
+	if (subcomparer == null) {
+	    return equal();
+	} else {
+	    return subcomparer.onlyExpectedDiffs();
+	}
+    }
+    
 
     /**
      * Checks if a graph's edge set is consistent.
@@ -246,22 +375,41 @@ public class GraphComparer {
 		CompilationDeathException.COMPILATION_ABORTED,
 		"Cannot compare inconsistent graphs");
 	}
-	if (g1.size() != g2.size()) {
-	    return false;
-	}
 	if (! equivLists(g1.getHeads(), g2.getHeads())) {
 	    return false;
 	}
 	if (! equivLists(g1.getTails(), g2.getTails())) {
 	    return false;
 	}
+	return equivPredsAndSuccs();
+    }
+
+
+    /**
+     * <p>Compares the predecessors and successors of corresponding
+     * nodes of this {@link GraphComparer}'s two {@link
+     * DirectedGraph}s.  This is factored out for sharing by {@link
+     * #equal()} and {@link BlockToAltBlockGraphComparer#onlyExpectedDiffs}.
+     *
+     * @return <tt>true</tt> if the two graphs have
+     * the same nodes, the same lists of heads and tails, and the
+     * same sets of edges, <tt>false</tt> otherwise.
+     */
+    protected boolean equivPredsAndSuccs() {
+	if (g1.size() != g2.size()) {
+	    return false;
+	}
+	// We know the two graphs have the same size, so we only need
+	// to iterate through one's nodes to see if the two match.
 	for (Iterator g1it = g1.iterator(); g1it.hasNext(); ) {
 	    Object g1node = g1it.next();
 	    try {
-		if (! equivLists(g1.getSuccsOf(g1node), g2.getSuccsOf(g1node))) {
+		if (! equivLists(g1.getSuccsOf(g1node), 
+				 g2.getSuccsOf(equivalences.getEquiv(g1node)))) {
 		    return false;
 		}
-		if (! equivLists(g1.getPredsOf(g1node), g2.getPredsOf(g1node))) {
+		if (! equivLists(g1.getPredsOf(g1node), 
+				 g2.getPredsOf(equivalences.getEquiv(g1node)))) {
 		    return false;
 		}
 	    } catch (RuntimeException e) {
@@ -409,237 +557,393 @@ public class GraphComparer {
 
 
     /**
-     * Compare a {@link ClassicCompleteUnitGraph} to a {@link
-     * CompleteUnitGraph}.
-     *
-     * @param classic the {@link ClassicCompleteUnitGraph} to compare.
-     *
-     * @param complete the {@link CompleteUnitGraph} to compare.
-     *
-     * @return <tt>true</tt> if <tt>classic</tt> and <tt>complete</tt>
-     * differ only in the ways that we would expect a {@link
-     * ClassicCompleteUnitGraph} to differ from a {@link
-     * CompleteUnitGraph} for the same {@link Body}.
+     * Class for comparing a {@link TrapUnitGraph} to an {@link
+     * CompleteUnitGraph}. 
      */
-    public static boolean onlyExpectedDiffs(ClassicCompleteUnitGraph classic, 
-					    CompleteUnitGraph complete) {
-System.err.println("onlyExpectedDiffs(): called");
-	if (classic.size() != complete.size()) {
-System.err.println("onlyExpectedDiffs(): sizes differ" + classic.size() + " " + complete.size());
-	    return false;
+    class CompleteToTrapUnitGraphComparer implements TypedGraphComparer {
+	CompleteUnitGraph complete;
+	TrapUnitGraph cOrT;	// ClassicCompleteUnitGraph Or TrapUnitGraph.
+
+	/**
+	 * Indicates whether {@link #predOfTrappedThrower()} should return
+	 * false for edges from head to tail when the only one of head's
+	 * successors which throws an exception caught by tail is the first
+	 * unit trapped by tail.
+	 */
+	protected boolean predOfTrappedThrowerScreensFirstTrappedUnit; 
+
+	CompleteToTrapUnitGraphComparer(CompleteUnitGraph complete, 
+					TrapUnitGraph cOrT) {
+	    this.complete = complete;
+	    this.cOrT = cOrT;
+	    this.predOfTrappedThrowerScreensFirstTrappedUnit = false;
 	}
-	// Could amend heads comparison to allow ClassicCompleteUnitGraph
-	// to have unreachable handlers in its heads, but let's see if 
-	// there are any.
-	Set onlyClassic = new ArraySet();
-	
-	if (! (classic.getHeads().containsAll(complete.getHeads())
-	       && complete.getHeads().containsAll(classic.getHeads())) ) {
-System.err.println("onlyExpectedDiffs(): heads differ");
-	    return false;
-	}
-	if (! (complete.getTails().containsAll(classic.getTails()))) {
-	    return false;
-	}
-	for (Iterator tailIt = complete.getTails().iterator(); 
-	     tailIt.hasNext(); ) {
-	    Object tail = tailIt.next();
-	    if ((! classic.getTails().contains(tail)) &&
-		(! trappedReturn(complete, classic, tail))) {
-System.err.println("onlyExpectedDiffs(): " + tail.toString() + " is not a tail in classic, but not a trapped Return either");
+
+	public boolean onlyExpectedDiffs() {
+            if (cOrT.size() != complete.size()) {
+		if (Options.v().verbose()) 
+		    G.v().out.println("CompleteToTrapUnitComparer.onlyExpectedDiffs(): sizes differ" + cOrT.size() + " " + complete.size());
+	        return false;
+	    }
+
+	    if (! (cOrT.getHeads().containsAll(complete.getHeads())
+		   && complete.getHeads().containsAll(cOrT.getHeads())) ) {
+		if (Options.v().verbose()) 
+		    G.v().out.println("CompleteToTrapUnitComparer.onlyExpectedDiffs(): heads differ");
 		return false;
 	    }
-	}
 
-	// Since we've already confirmed that the two graphs have
-	// the same number of nodes, we only need to iterate through
-	// the nodes of one of them --- if they don't have exactly the same
-	// set of nodes, this single iteration will reveal some
-	// node in classic that is not in complete.
-	for (Iterator nodeIt = classic.iterator(); nodeIt.hasNext(); ) {
-	    Unit node = (Unit) nodeIt.next();
-	    try {
-		List classicSuccs = classic.getSuccsOf(node);
-		List completeSuccs = complete.getSuccsOf(node);
-		for (Iterator it = classicSuccs.iterator(); it.hasNext(); ) {
-		    Unit classicSucc = (Unit) it.next();
-		    if ((! completeSuccs.contains(classicSucc)) &&
-			(! cannotReallyThrowTo(complete, node, classicSucc))) {
-System.err.println("onlyExpectedDiffs(): " + classicSucc.toString() + " is not CompletueUnitGraph successor of " + node.toString() + " even though " + node.toString() + " can throw to it");
-			return false;
-		    }
-		}
-		for (Iterator it = completeSuccs.iterator(); it.hasNext(); ) {
-		    Unit completeSucc = (Unit) it.next();
-		    if ((! classicSuccs.contains(completeSucc)) &&
-			(! predOfMidTrapThrower(complete, node, completeSucc))) {
-System.err.println("onlyExpectedDiffs(): " + completeSucc.toString() + " is not ClassicUnitGraph successor of " + node.toString() + " even though " + node.toString() + " is not a predOfMidTrapThrower");
-			return false;
-		    }
-		}
-		List classicPreds = classic.getPredsOf(node);
-		List completePreds = complete.getPredsOf(node);
-		for (Iterator it = classicPreds.iterator(); it.hasNext(); ) {
-		    Unit classicPred = (Unit) it.next();
-		    if ((! completePreds.contains(classicPred)) &&
-			(! cannotReallyThrowTo(complete, classicPred, node))) {
-System.err.println("onlyExpectedDiffs(): " + classicPred.toString() + " is not CompletueUnitGraph predecessor of " + node.toString() + " even though " + classicPred.toString() + " can throw to " + node.toString());
-			return false;
-		    }
-		}
-		for (Iterator it = completePreds.iterator(); it.hasNext(); ) {
-		    Unit completePred = (Unit) it.next();
-		    if ((! classicPreds.contains(completePred)) &&
-			(! predOfMidTrapThrower(complete, completePred, node))) {
-System.err.println("onlyExpectedDiffs(): " + completePred.toString() + " is not ClassicUnitGraph predecessor of " + node.toString() + " even though " + completePred.toString() + " is not a predOfMidTrapThrower");
-			return false;
-		    }
-		}
-			
-	    } catch (RuntimeException e) {
-e.printStackTrace(System.err);
-		if (e.getMessage() != null && 
-		    e.getMessage().startsWith("Invalid unit ")) {
-System.err.println("onlyExpectedDiffs(): " + node.toString() + " is not in CompleteUnitGraph at all");
-		    // node is not in complete graph.
+	    if (! (complete.getTails().containsAll(cOrT.getTails()))) {
+		return false;
+	    }
+
+	    for (Iterator tailIt = complete.getTails().iterator(); 
+		 tailIt.hasNext(); ) {
+		Object tail = tailIt.next();
+		if ((! cOrT.getTails().contains(tail)) &&
+		    (! trappedReturnOrThrow(tail))) {
+		    if (Options.v().verbose()) 
+			G.v().out.println("CompleteToTrapUnitComparer.onlyExpectedDiffs(): " + tail.toString() + " is not a tail in cOrT, but not a trapped Return or Throw either");
 		    return false;
-		} else {
-		    throw e;
 		}
 	    }
-	}
-	return true;
-    }
 
+	    // Since we've already confirmed that the two graphs have
+	    // the same number of nodes, we only need to iterate through
+	    // the nodes of one of them --- if they don't have exactly the same
+	    // set of nodes, this single iteration will reveal some
+	    // node in cOrT that is not in complete.
+	    for (Iterator nodeIt = cOrT.iterator(); nodeIt.hasNext(); ) {
+		Unit node = (Unit) nodeIt.next();
+		try {
+		    List cOrTSuccs = cOrT.getSuccsOf(node);
+		    List completeSuccs = complete.getSuccsOf(node);
+		    for (Iterator it = cOrTSuccs.iterator(); it.hasNext(); ) {
+			Unit cOrTSucc = (Unit) it.next();
+			if ((! completeSuccs.contains(cOrTSucc)) &&
+			    (! cannotReallyThrowTo(node, cOrTSucc))) {
+			    if (Options.v().verbose()) 
+				G.v().out.println("CompleteToTrapUnitComparer.onlyExpectedDiffs(): " + cOrTSucc.toString() + " is not complete successor of " + node.toString() + " even though " + node.toString() + " can throw to it");
+			    return false;
+			}
+		    }
+		    for (Iterator it = completeSuccs.iterator(); it.hasNext(); ) {
+			Unit completeSucc = (Unit) it.next();
+			if ((! cOrTSuccs.contains(completeSucc)) &&
+			    (! predOfTrappedThrower(node, completeSucc))) {
+			    if (Options.v().verbose()) 
+				G.v().out.println("CompleteToTrapUnitComparer.onlyExpectedDiffs(): " + completeSucc.toString() + " is not TrapUnitGraph successor of " + node.toString() + " even though " + node.toString() + " is not a predOfTrappedThrower or predOfTrapBegin");
+			    return false;
+			}
+		    }
 
-    /**
-     * A utility method for confirming that a node which is considered
-     * a tail by a {@link CompleteUnitGraph} but not by the 
-     * corresponding {@link ClassicCompleteUnitGraph} is a return instruction
-     * with a {@link Trap} handler as its successor in the
-     * {@link ClassicCompleteUnitGraph}.
-     *
-     * @param complete the {@link CompleteUnitGraph}
-     *
-     * @param classic the {@link ClassicCompleteUnitGraph}
-     *
-     * @param node the node which is considered a tail by <tt>complete</tt>
-     * but not by <tt>classic</tt>.
-     *
-     * @return <tt>true</tt> if <tt>node</tt> is a return instruction
-     * which has a trap handler as its successor in <tt>classic</tt>.\
-     */
-    private static boolean trappedReturn(CompleteUnitGraph complete, 
-					 ClassicCompleteUnitGraph classic, 
-					 Object node) {
-	if (! ((node instanceof soot.jimple.ReturnStmt) ||
-	       (node instanceof soot.jimple.ReturnVoidStmt) ||
-	       (node instanceof soot.baf.ReturnInst) ||
-	       (node instanceof soot.baf.ReturnVoidInst))) {
-	    return false;
-	}
-	List succsUnaccountedFor = new ArrayList(classic.getSuccsOf(node));
-	if (succsUnaccountedFor.size() <= 0) {
-	    return false;
-	}
-	for (Iterator trapIt = classic.getBody().getTraps().iterator();
-	     trapIt.hasNext(); ) {
-	    Trap trap = (Trap) trapIt.next();
-	    succsUnaccountedFor.remove(trap.getHandlerUnit());
-	}
-	return (succsUnaccountedFor.size() == 0);
-    }
-
-
-    /**
-     * A utility method for confirming that an edge which is in a 
-     * {@link ClassicCompleteUnitGraph} but not the corresponding
-     * {@link CompleteUnitGraph} satisfies the criterion we would
-     * expect of such an edge: that it leads from a unit to a handler, 
-     * that the unit might be expected to trap to the handler based
-     * solely on the range of Units trapped by the handler, but that there
-     * is no way for the particular exception that the handler catches
-     * to be thrown at this point.
-     *
-     * @param g the CompleteUnitGraph associated with the units.
-     * @param head the graph node that the edge leaves.
-     * @param tail the graph node that the edge leads to.
-     * @return true if <tt>head</tt> cannot really be associated with
-     * an exception that <tt>tail</tt> catches, false otherwise.
-     */
-    private static boolean cannotReallyThrowTo(CompleteUnitGraph g,
-					       Unit head, Unit tail) {
-	// First, ensure that tail is a handler.
-	Trap tailsTrap = null;
-	for (Iterator it = g.getBody().getTraps().iterator(); it.hasNext(); ) {
-	    Trap trap = (Trap) it.next();
-	    if (trap.getHandlerUnit() == tail) {
-		tailsTrap = trap;
-		break;
+		    List cOrTPreds = cOrT.getPredsOf(node);
+		    List completePreds = complete.getPredsOf(node);
+		    for (Iterator it = cOrTPreds.iterator(); it.hasNext(); ) {
+			Unit cOrTPred = (Unit) it.next();
+			if ((! completePreds.contains(cOrTPred)) &&
+			    (! cannotReallyThrowTo(cOrTPred, node))) {
+			    if (Options.v().verbose())
+				G.v().out.println("CompleteToTrapUnitComparer.onlyExpectedDiffs(): " + cOrTPred.toString() + " is not CompleteUnitGraph predecessor of " + node.toString() + " even though " + cOrTPred.toString() + " can throw to " + node.toString());
+			    return false;
+			}
+		    }
+		    for (Iterator it = completePreds.iterator(); it.hasNext(); ) {
+			Unit completePred = (Unit) it.next();
+			if ((! cOrTPreds.contains(completePred)) &&
+			    (! predOfTrappedThrower(completePred, node))) {
+			    if (Options.v().verbose()) 
+				G.v().out.println("CompleteToTrapUnitComparer.onlyExpectedDiffs(): " + completePred.toString() + " is not COrTUnitGraph predecessor of " + node.toString() + " even though " + completePred.toString() + " is not a predOfTrappedThrower");
+			    return false;
+			}
+		    }
+			
+		} catch (RuntimeException e) {
+		    e.printStackTrace(System.err);
+		    if (e.getMessage() != null && 
+			e.getMessage().startsWith("Invalid unit ")) {
+			if (Options.v().verbose()) 
+			    G.v().out.println("CompleteToTrapUnitComparer.onlyExpectedDiffs(): " + node.toString() + " is not in CompleteUnitGraph at all");
+			// node is not in complete graph.
+			return false;
+		    } else {
+			throw e;
+		    }
+		}
 	    }
-	}
-	if (tailsTrap == null) {
-System.err.println("cannotReallyThrowTo(" +
-		   head.toString() + "," +
-		   tail.toString() + ") tail is not a handler");
-	    return false;
-	}
-
-	// Next check if head is in the trap's protected area, but
-	// either cannot throw an exception that the trap catches, or
-	// is not included in CompleteUnitGraph because it has no
-	// side-effects:
-	Collection headsDests = g.getExceptionDests(head);
-	if (amongTrappedUnits(head, tailsTrap, g.getBody()) &&
-	    ((! destCollectionIncludes(headsDests, tailsTrap)) ||
-	     (! CompleteUnitGraph.mightHaveSideEffects(head)))) {
 	    return true;
 	}
 
-	// Finally, check if one of head's successors is the
-	// first unit in tail's protected area, but that 
-	// unit does not throw an exception to tail.
-	List headsSuccs = g.getSuccsOf(head);
-	Unit tailsFirstTrappedUnit = tailsTrap.getBeginUnit();
-	if (headsSuccs.contains(tailsFirstTrappedUnit)) {
-	    Collection succsDests = g.getExceptionDests(tailsFirstTrappedUnit);
-	    if (! destCollectionIncludes(succsDests, tailsTrap)) {
+
+	/**
+	 * <p>A utility method for confirming that a node which is
+	 * considered a tail by a {@link CompleteUnitGraph} but not by the
+	 * corresponding {@link TrapUnitGraph} or {@link
+	 * ClassicCompleteUnitGraph} is a return instruction or throw
+	 * instruction with a {@link Trap} handler as its successor in the
+	 * {@link TrapUnitGraph} or {@link ClassicCompleteUnitGraph}.</p>
+	 *
+	 * @param node the node which is considered a tail by <tt>complete</tt>
+	 * but not by <tt>cOrT</tt>.
+	 *
+	 * @return <tt>true</tt> if <tt>node</tt> is a return instruction
+	 * which has a trap handler as its successor in <tt>cOrT</tt>.\
+	 */
+	protected boolean trappedReturnOrThrow(Object node) {
+	    if (! ((node instanceof soot.jimple.ReturnStmt) ||
+		   (node instanceof soot.jimple.ReturnVoidStmt) ||
+		   (node instanceof soot.baf.ReturnInst) ||
+		   (node instanceof soot.baf.ReturnVoidInst) ||
+		   (node instanceof soot.jimple.ThrowStmt) ||
+		   (node instanceof soot.baf.ThrowInst))) {
+		return false;
+	    }
+	    List succsUnaccountedFor = new ArrayList(cOrT.getSuccsOf(node));
+	    if (succsUnaccountedFor.size() <= 0) {
+		return false;
+	    }
+	    for (Iterator trapIt = cOrT.getBody().getTraps().iterator();
+		 trapIt.hasNext(); ) {
+		Trap trap = (Trap) trapIt.next();
+		succsUnaccountedFor.remove(trap.getHandlerUnit());
+	    }
+	    return (succsUnaccountedFor.size() == 0);
+	}
+
+
+	/**
+	 * A utility method for confirming that an edge which is in a
+	 * {@link TrapUnitGraph} or {@link ClassicCompleteUnitGraph} but
+	 * not the corresponding {@link CompleteUnitGraph} satisfies the
+	 * criterion we would expect of such an edge: that it leads from a
+	 * unit to a handler, that the unit might be expected to trap to
+	 * the handler based solely on the range of Units trapped by the
+	 * handler, but that there is no way for the particular exception
+	 * that the handler catches to be thrown at this point.
+	 *
+	 * @param head the graph node that the edge leaves.
+	 * @param tail the graph node that the edge leads to.
+	 * @return true if <tt>head</tt> cannot really be associated with
+	 * an exception that <tt>tail</tt> catches, false otherwise.
+	 */
+	protected boolean cannotReallyThrowTo(Unit head, Unit tail) {
+	    List tailsTraps = returnHandlersTraps(tail);
+
+	    // Check if head is in one of the traps' protected
+	    // area, but either cannot throw an exception that the
+	    // trap catches, or is not included in CompleteUnitGraph
+	    // because it has no side-effects:
+	    Collection headsDests = complete.getExceptionDests(head);
+	    for (Iterator it = tailsTraps.iterator(); it.hasNext(); ) {
+		Trap tailsTrap = (Trap) it.next();
+		if (amongTrappedUnits(head, tailsTrap) &&
+		    ((! destCollectionIncludes(headsDests, tailsTrap)) ||
+		     (! CompleteUnitGraph.mightHaveSideEffects(head)))) {
+		    return true;
+		}
+		
+	    }
+	    return false;
+	}
+
+
+	/**
+	 * A utility method for determining if a {@link Unit} is among
+	 * those protected by a particular {@link Trap}..
+	 *
+	 * @param unit the {@link Unit} being asked about.
+	 *
+	 * @param trap the {@link Trap} being asked about.
+	 *
+	 * @return <tt>true</tt> if <tt>unit</tt> is protected by
+	 * <tt>trap</tt>, false otherwise.
+	 */
+	protected boolean amongTrappedUnits(Unit unit, Trap trap) {
+	    Chain units = complete.getBody().getUnits();
+	    for (Iterator it = units.iterator(trap.getBeginUnit(),
+					      units.getPredOf(trap.getEndUnit()));
+		 it.hasNext(); ) {
+		Unit u = (Unit) it.next();
+		if (u == unit) {
+		    return true;
+		}
+	    }
+	    return false;
+	}
+
+
+	/**
+	 * A utility method for confirming that an edge which is in a
+	 * {@link CompleteUnitGraph} but not the corresponding {@link
+	 * TrapUnitGraph} satisfies the criteria we would expect of such
+	 * an edge: that the tail of the edge is a {@link Trap} handler,
+	 * and that the head of the edge is not itself in the
+	 * <tt>Trap</tt>'s protected area, but is the predecessor of a
+	 * {@link Unit}, call it <tt>u</tt>, such that <tt>u</tt> is a
+	 * <tt>Unit</tt> in the <tt>Trap</tt>'s protected area and
+	 * <tt>u</tt> might throw an exception that the <tt>Trap</tt>
+	 * catches.
+	 *
+	 * @param head the graph node that the edge leaves.
+	 * @param tail the graph node that the edge leads to.
+	 * @return a {@link List} of {@link Trap}s such that <tt>head</tt> is
+	 * a predecessor of a {@link Unit} that might throw an exception
+	 * caught by {@link Trap}.
+	 */
+	protected boolean predOfTrappedThrower(Unit head, Unit tail) {
+	    // First, ensure that tail is a handler.
+	    List tailsTraps = returnHandlersTraps(tail);
+	    if (tailsTraps.size() == 0) {
+		if (Options.v().verbose()) 
+		    G.v().out.println("trapsReachedViaEdge(): " + tail.toString() + " is not a trap handler");
+		return false;
+	    }
+
+	    // Build a list of Units, other than head itself, which, if
+	    // they threw a caught exception, would cause
+	    // CompleteUnitGraph to add an edge from head to the tail:
+	    List possibleThrowers = new ArrayList(complete.getSuccsOf(head));
+	    possibleThrowers.remove(tail); // This method wouldn't have been
+	    possibleThrowers.remove(head); // called if tail was not in
+	    // g.getSuccsOf(head).
+	    
+	    // We need to screen out Traps that catch exceptions from
+	    // head itself, since they should be in both CompleteUnitGraph
+	    // and TrapUnitGraph.
+	    List headsCatchers = new ArrayList();
+	    for (Iterator it = complete.getExceptionDests(head).iterator(); 
+		 it.hasNext(); ) {
+		ExceptionDest dest = (ExceptionDest) it.next();
+		headsCatchers.add(dest.trap());
+	    }
+
+	    // Now ensure that one of the possibleThrowers might throw
+	    // an exception caught by one of tail's Traps,
+	    // screening out combinations where possibleThrower is the
+	    // first trapped Unit, if screenFirstTrappedUnit is true.
+	    for (Iterator throwerIt = possibleThrowers.iterator(); 
+		 throwerIt.hasNext(); ) {
+		Unit thrower = (Unit) throwerIt.next();
+		Collection dests = complete.getExceptionDests(thrower);
+		for (Iterator destIt = dests.iterator(); destIt.hasNext(); ) {
+		    ExceptionDest dest = (ExceptionDest) destIt.next();
+		    Trap trap = dest.trap();
+		    if (tailsTraps.contains(trap)) {
+			if (headsCatchers.contains(trap)) {
+			    throw new RuntimeException("trapsReachedViaEdge(): somehow there is no TrapUnitGraph edge from " + head + " to " + tail + " even though the former throws an exception caught by the latter!");
+			} else if ((! predOfTrappedThrowerScreensFirstTrappedUnit) ||
+				   (thrower != trap.getBeginUnit())) {
+			    return true;
+			}
+		    }
+		}
+	    }
+	    return false;
+	}
+
+
+	/**
+	 * Utility method that returns all the {@link Trap}s whose
+	 * handlers begin with a particular {@link Unit}.
+	 *
+	 * @param body, the {@link Body} in which to search for {@link Trap}s.
+	 * @param handler the handler {@link Unit} whose {@link Trap}s are
+	 * to be returned.
+	 * @return a {@link List} of {@link Trap}s with <code>handler</code>
+	 * as their handler's first {@link Unit}. The list may be empty.
+	 */
+	protected List returnHandlersTraps(Unit handler) {
+	    Body body = complete.getBody();
+	    List result = null;
+	    for (Iterator it = body.getTraps().iterator(); it.hasNext(); ) {
+		Trap trap = (Trap) it.next();
+		if (trap.getHandlerUnit() == handler) {
+		    if (result == null) {
+			result = new ArrayList();
+		    }
+		    result.add(trap);
+		}
+	    }
+	    if (result == null) {
+		result = Collections.EMPTY_LIST;
+	    }
+	    return result;
+	}
+    }
+
+    /**
+     * Class for comparing a {@link ClassicCompleteUnitGraph} to an {@link
+     * CompleteUnitGraph}. Since {@link ClassicCompleteUnitGraph} is
+     * a subclass of {@link TrapUnitGraph}, this class makes only
+     * minor adjustments to its parent.
+     */
+    class CompleteToClassicCompleteUnitGraphComparer 
+	extends CompleteToTrapUnitGraphComparer  {
+
+	CompleteToClassicCompleteUnitGraphComparer(CompleteUnitGraph complete, 
+					ClassicCompleteUnitGraph trap) {
+	    super(complete, trap);
+	    this.predOfTrappedThrowerScreensFirstTrappedUnit = true;
+	}
+
+	protected boolean cannotReallyThrowTo(Unit head, Unit tail) {
+	    if (Options.v().verbose()) 
+		G.v().out.println("CompleteToClassicCompleteUnitGraphComparer.cannotReallyThrowTo() called.");
+	    if (super.cannotReallyThrowTo(head, tail)) {
 		return true;
+	    } else {
+		// A ClassicCompleteUnitGraph will consider the predecessors
+		// of the first trapped Unit as predecessors of the Trap's
+		// handler.
+		List headsSuccs = complete.getSuccsOf(head);
+		List tailsTraps = returnHandlersTraps(tail);
+		for (Iterator it = tailsTraps.iterator(); it.hasNext(); ) {
+		    Trap tailsTrap = (Trap) it.next();
+		    Unit tailsFirstTrappedUnit = tailsTrap.getBeginUnit();
+		    if (headsSuccs.contains(tailsFirstTrappedUnit)) {
+			Collection succsDests = complete.getExceptionDests(tailsFirstTrappedUnit);
+			if ((! destCollectionIncludes(succsDests, tailsTrap)) ||
+			    (! CompleteUnitGraph.mightHaveSideEffects(tailsFirstTrappedUnit))) {
+			    return true;
+			}
+		    }
+		}
+		return false;
 	    }
 	}
-System.err.println("cannotReallyThrowTo(" +
-		   head.toString() + "," +
-		   tail.toString() + ") returns false");
-	return false;
     }
 
 
     /**
-     * A utility method for determining if a {@link Unit} is among
-     * those protected by a particular {@link Trap}..
-     *
-     * @param unit the {@link Unit} being asked about.
-     *
-     * @param trap the {@link Trap} being asked about.
-     *
-     * @param body the {@link Body} containing <tt>unit</tt> and
-     * <tt>trap</tt>
-     *
-     * @return <tt>true</tt> if <tt>unit</tt> is protected by
-     * <tt>trap</tt>, false otherwise.
+     * Class for Comparing a {@link BriefBlockGraph}, {@link
+     * ArrayRefBlockGraph}, or {@link ZonedBlockGraph} to an {@link
+     * AltBriefBlockGraph}, {@link AltArrayRefBlockGraph}, or {@link
+     * AltZonedBlockGraph}, respectively. The two should differ only
+     * in that the <tt>Alt</tt> variants have empty tail lists.
      */
-    private static boolean amongTrappedUnits(Unit unit, Trap trap, Body body) {
-	Chain units = body.getUnits();
-	for (Iterator it = units.iterator(trap.getBeginUnit(),
-					  units.getPredOf(trap.getEndUnit()));
-	     it.hasNext(); ) {
-	    Unit u = (Unit) it.next();
-	    if (u == unit) {
-		return true;
-	    }
+    class BlockToAltBlockGraphComparer implements TypedGraphComparer {
+	DirectedGraph reg;	// The regular BlockGraph.
+	DirectedGraph alt;	// The Alt BlockGraph.
+
+	BlockToAltBlockGraphComparer(DirectedGraph reg, DirectedGraph alt) {
+	    this.reg = reg;
+	    this.alt = alt;
 	}
-	return false;
+
+	public boolean onlyExpectedDiffs() {
+	    if (reg.size() != alt.size()) {
+		return false;
+	    }
+	    if (! equivLists(reg.getHeads(), alt.getHeads())) {
+		return false;
+	    }
+	    if (alt.getTails().size() != 0) {
+		return false;
+	    }	
+	    return equivPredsAndSuccs();
+	}
     }
+
 
     /**
      * A utility method for determining if a {@link Collection}
@@ -664,68 +968,6 @@ System.err.println("cannotReallyThrowTo(" +
 	return false;
     }
 	    
-
-    /**
-     * A utility method for confirming that an edge which is in a
-     * {@link CompleteUnitGraph} but not the corresponding {@link
-     * ClassicCompleteUnitGraph} satisfies the criterion we would
-     * expect of such an edge: that tail of the edge is a {@link Trap}
-     * handler, and that the head of the edge is not itself in the
-     * <tt>Trap</tt>'s protected area, but is the predecessor of a
-     * {@link Unit}, call it <tt>u</tt>, such that <tt>u</tt> is a
-     * <tt>Unit</tt> in the <tt>Trap</tt>'s protected area, but not
-     * the first one, and <tt>u</tt> might throw an exception that the
-     * <tt>Trap</tt> catches.
-     *
-     * @param g the CompleteUnitGraph associated with the units.
-     * @param head the graph node that the edge leaves.
-     * @param tail the graph node that the edge leads to.
-     * @return true if <tt>head</tt> is an untrapped predecessor of
-     * a unit protected by <tt>tail</tt>, other than the first one,
-     * which might throw an exception caught by <tt>tail</tt>
-     */
-    private static boolean predOfMidTrapThrower(CompleteUnitGraph g,
-						Unit head, Unit tail) {
-	// First, ensure that tail is a handler.
-	Trap tailsTrap = null;
-	for (Iterator it = g.getBody().getTraps().iterator(); it.hasNext(); ) {
-	    Trap trap = (Trap) it.next();
-	    if (trap.getHandlerUnit() == tail) {
-		tailsTrap = trap;
-		break;
-	    }
-	}
-	if (tailsTrap == null) {
-System.err.println("predOfMidTrapThrower(): " + tail.toString() + " is not a trap handler");
-	    return false;
-	}
-
-	// Build a list of Units, other than head itself, which, if
-	// they threw a caught exception, would cause
-	// CompleteUnitGraph to add an edge from head to the catcher:
-	List possibleThrowers = new ArrayList(g.getSuccsOf(head));
-	possibleThrowers.remove(tail); // This method wouldn't have been
-	possibleThrowers.remove(head); // called if tail was not in
-				       // g.getSuccsOf(head).
-	
-	// Now ensure that one of those possibleThrowers might throw
-	// an exception caught by tailsTrap.
-	for (Iterator throwerIt = possibleThrowers.iterator(); 
-	     throwerIt.hasNext(); ) {
-	    Unit thrower = (Unit) throwerIt.next();
-	    Collection dests = g.getExceptionDests(thrower);
-	    for (Iterator destIt = dests.iterator(); destIt.hasNext(); ) {
-		ExceptionDest dest = (ExceptionDest) destIt.next();
-		if (dest.trap() == tailsTrap) {
-		    return true;
-		}
-	    }
-	}
-System.err.println("predOfMidTrapThrower(): " + head.toString() + "'s successors do not trap to " + tail.toString());
-	return false;
-    }
-	
-
     private final static String diffMarker = " ***";
 
 
