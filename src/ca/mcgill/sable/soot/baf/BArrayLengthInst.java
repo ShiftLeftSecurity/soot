@@ -82,11 +82,10 @@ import ca.mcgill.sable.soot.*;
 import ca.mcgill.sable.util.*;
 import java.util.*;
 
-public class BArrayLengthInst extends AbstractOpTypeInst implements ArrayLengthInst
+public class BArrayLengthInst extends AbstractInst implements ArrayLengthInst
 {
-    public BArrayLengthInst(Type opType)
+    public BArrayLengthInst()
     {
-        super(opType);
     }
 
     public int getInCount()
@@ -115,5 +114,11 @@ public class BArrayLengthInst extends AbstractOpTypeInst implements ArrayLengthI
     {
         ((InstSwitch) sw).caseArrayLengthInst(this);
     }   
+
+    public Object clone() 
+    {
+       return new BArrayLengthInst();
+    }
+
 }
 

@@ -84,35 +84,121 @@ import java.util.*;
 
 public class BDupInst extends AbstractInst implements DupInst
 {
+
+    protected List underTypes, opTypes;
+
     // Creates a dup instruction that will duplicate opTypes under all of underTypes.
     BDupInst(List underTypes, List opTypes)
     {
+	this.underTypes = new ArrayList();
+	this.underTypes.addAll(underTypes);
+	this.opTypes = new ArrayList();
+	this.opTypes.addAll(opTypes);
     }
+
+    /* DupInst interface fns */
+    public List getOpTypes()
+    {
+	return opTypes;
+    }
+    public void  setOpTypes(List opTypes)
+    {
+	this.opTypes = opTypes;
+    }
+    public List getUnderTypes()
+    {
+	return underTypes;
+    }
+    public void  setUnderTypes(List underTypes)
+    {
+	this.underTypes = underTypes;
+    }
+    
+
+
+
+
+
 
     public int getInCount()
     {
-        return 0;
+        return underTypes.size() + opTypes.size();
     }
 
     public int getInMachineCount()
     {
-        return 0;
+	int count = 0;
+
+	Iterator underTypesIt = underTypes.iterator();
+	while(underTypesIt.hasNext()) {
+	    count += JasminClass.sizeOfType(((Type) underTypesIt.next()));
+	}
+
+	Iterator opTypesIt = opTypes.iterator();
+	while(opTypesIt.hasNext()) {
+	    count += JasminClass.sizeOfType(((Type) underTypesIt.next()));
+	}
+	
+	
+        return count;
     }
     
     public int getOutCount()
     {
-        return 0;
-    }
+        return  underTypes.size() + 2*opTypes.size(); 
+    } 
+
+    
 
     public int getOutMachineCount()
     {
-        return 0;
+	int count = 0;
+
+	Iterator underTypesIt = underTypes.iterator();
+	while(underTypesIt.hasNext()) {
+	    count += JasminClass.sizeOfType(((Type) underTypesIt.next()));
+	}
+
+	Iterator opTypesIt = opTypes.iterator();
+	while(opTypesIt.hasNext()) {
+	    count += 2*JasminClass.sizeOfType(((Type) underTypesIt.next()));
+	}
+	
+	
+        return count;
+
     }
     
     final String getName() { return "dup"; }
+
 
     public void apply(Switch sw)
     {
         ((InstSwitch) sw).caseDupInst(this);
     }   
+
+
+
+    protected String toString(boolean isBrief, Map unitToName, String indentation)
+    {
+	StringBuffer buf = new StringBuffer("dup.");
+	
+	Iterator opTypesIt = opTypes.iterator();
+	while(opTypesIt.hasNext()) {
+	    buf.append( Baf.bafDescriptorOf(((Type) opTypesIt.next())));
+	}
+	
+	if(underTypes.size() != 0 ) {
+	    buf.append("_");
+	    Iterator underTypesIt = underTypes.iterator();
+	    while(underTypesIt.hasNext()) {
+		buf.append(Baf.bafDescriptorOf(((Type) underTypesIt.next())));
+	    }
+	}
+	return buf.toString();
+    }
+
 }
+
+
+

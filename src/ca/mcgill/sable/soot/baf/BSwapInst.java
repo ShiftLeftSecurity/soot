@@ -1,5 +1,8 @@
+
+
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Jimple, a 3-address code Java(TM) bytecode representation.        *
+ * Baf, a Java(TM) bytecode analyzer framework.                      *
  * Copyright (C) 1997, 1998 Raja Vallee-Rai (kor@sable.mcgill.ca)    *
  * All rights reserved.                                              *
  *                                                                   *
@@ -82,135 +85,80 @@ import ca.mcgill.sable.soot.*;
 import ca.mcgill.sable.util.*;
 import java.util.*;
 
-public class InstList extends ArrayList
+public class BSwapInst extends AbstractInst implements SwapInst
 {
-    BafBody body;
 
-    public InstList(BafBody body)
+    protected Type mFromType, mToType;
+    
+
+    BSwapInst(Type fromType, Type toType)
     {
-        super();
 
-        this.body = body;
+	if(fromType instanceof LongType || fromType instanceof DoubleType)
+	    throw  new RuntimeException("fromType is LongType or DoubleType !");
+	if(toType instanceof LongType || toType instanceof DoubleType)
+	    throw  new RuntimeException("toType is LongType or DoubleType !");
+	
+	mFromType = fromType;
+	mToType = toType;
     }
 
-    public BafBody getBody()
+    public Type getFromType()
     {
-        return body;
+	return mFromType;
+    }
+    public void setFromType(Type fromType)
+    {
+	mFromType = fromType;
+    }
+    
+    public Type getToType()
+    {
+	return mToType;
+    }
+    
+    public void setToType(Type toType)
+    {
+	mToType = toType;
     }
 
-    public boolean remove(Object obj)
+
+
+    public int getInCount()
     {
-        boolean toReturn = false;
-
-        if(contains(obj))
-        {
-            int index = indexOf(obj);
-            Inst successor;
-
-            if(index + 1 < size())
-                successor = (Inst) get(index + 1);
-            else if(size() >= 2)
-                successor = (Inst) get(index - 1);
-            else
-                successor = null;
-
-            toReturn = super.remove(obj);
-//              body.redirectJumps((Inst) obj, successor);
-//              body.eliminateBackPointersTo((Inst) obj);
-        }
-
-        return toReturn;
+        return 2;
     }
 
-    public Object remove(int index)
+    public int getInMachineCount()
     {
-        Object obj = get(index);
-        Object toReturn = null;
-
-        if(contains(obj))
-        {
-            Inst successor;
-
-            if(index + 1 < size())
-                successor = (Inst) get(index + 1);
-            else if(size() >= 2)
-                successor = (Inst) get(index - 1);
-            else
-                successor = null;
-
-            toReturn = super.remove(index);
-
-//              body.redirectJumps((Inst) obj, successor);
-//              body.eliminateBackPointersTo((Inst) obj);
-
-        }
-
-        return toReturn;
+        return 2;
+    }
+    
+    public int getOutCount()
+    {
+        return 2;
     }
 
-    public boolean removeAll(Collection c)
+    public int getOutMachineCount()
     {
-        throw new UnsupportedOperationException();
+        return 2;
     }
-
-    public void testIntegrity(String message)
+    
+    public void apply(Switch sw)
     {
-        Iterator instIt = iterator();
-
-        while(instIt.hasNext())
-        {
-            Inst s = (Inst) instIt.next();
-            Iterator boxIt = s.getUnitBoxes().iterator();
-
-            while(boxIt.hasNext())
-            {
-                InstBox box = (InstBox) boxIt.next();
-                Inst pointed = (Inst) box.getUnit();
-
-                if(!contains(pointed))
-                    throw new RuntimeException(message + "Statement no longer contained");
-
-                if(!pointed.getBoxesPointingToThis().contains(box))
-                    throw new RuntimeException(message + "back pointer not set");
-            }
-        }
-
-        instIt = iterator();
-
-        while(instIt.hasNext())
-        {
-            Inst s = (Inst) instIt.next();
-            List boxes = s.getBoxesPointingToThis();
-
-            Iterator it = boxes.iterator();
-
-            while(it.hasNext())
-            {
-                InstBox box = (InstBox) it.next();
-
-                if(box.getUnit() != s)
-                    throw new RuntimeException(message + "back pointer still set");
-            }
-        }
-
-        instIt = iterator();
-
-        while(instIt.hasNext())
-        {
-            Inst s = (Inst) instIt.next();
-            Iterator boxIt = s.getUnitBoxes().iterator();
-
-            while(boxIt.hasNext())
-            {
-                InstBox box = (InstBox) boxIt.next();
-
-                if(indexOf(box.getUnit()) == -1)
-                {
-                    System.out.println("looking for: " + box.getUnit());
-                    throw new RuntimeException(message + "[failed integrity test for: " + s + "]");
-                }
-            }
-        }
+        ((InstSwitch) sw).caseSwapInst(this);
+    }   
+    
+    protected String toString(boolean isBrief, Map unitToName, String indentation)
+    {
+	return indentation + "swap." + Baf.bafDescriptorOf(mFromType)  + Baf.bafDescriptorOf(mToType);
     }
+    
+    
+    public String getName() {return "swap";}
+ 
+    
+
 }
+
 

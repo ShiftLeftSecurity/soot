@@ -93,14 +93,14 @@ public abstract class AbstractInst extends AbstractUnit implements Inst
 
     public int getInCount()
     {
-        throw new RuntimeException("undefined"+ toString() + "!" );
+	throw new RuntimeException("undefined "+ toString() + "!" );
     }
     
     public int getOutCount()
     {
-        throw new RuntimeException("undefined" + toString() + "!");
+        throw new RuntimeException("undefined " + toString() + "!");
     }
-
+    
     public int getNetCount()
     {
         return getOutCount() - getInCount();
@@ -138,7 +138,7 @@ public abstract class AbstractInst extends AbstractUnit implements Inst
     
     public  Object clone()
     {
-	throw new RuntimeException();
+	throw new RuntimeException("undefined clone for: " + this.toString());
     }
    
     

@@ -1,7 +1,10 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Soot, a Java(TM) classfile optimization framework.                *
- * Copyright (C) 1997-1999 Raja Vallee-Rai (kor@sable.mcgill.ca)     *
+ * Baf, a Java(TM) bytecode analyzer framework.                      *
+ * Copyright (C) 1997, 1998 Raja Vallee-Rai (kor@sable.mcgill.ca)    *
  * All rights reserved.                                              *
+ *                                                                   *
+ * Modifications by Patrick Lam (plam@sable.mcgill.ca) are           *
+ * Copyright (C) 1999 Patrick Lam.  All rights reserved.             *
  *                                                                   *
  * This work was done as a project of the Sable Research Group,      *
  * School of Computer Science, McGill University, Canada             *
@@ -61,6 +64,10 @@
 
  B) Changes:
 
+ - Modified on February 3, 1999 by Patrick Lam (plam@sable.mcgill.ca) (*)
+   Added changes in support of the Grimp intermediate
+   representation (with aggregated-expressions).
+
  - Modified on November 2, 1998 by Raja Vallee-Rai (kor@sable.mcgill.ca) (*)
    Repackaged all source files and performed extensive modifications.
    First initial release of Soot.
@@ -69,27 +76,97 @@
    First internal release (Version 0.1).
 */
 
-package ca.mcgill.sable.soot;
+package ca.mcgill.sable.soot.baf;
 
+import ca.mcgill.sable.soot.*;
+import ca.mcgill.sable.soot.jimple.*;
 import ca.mcgill.sable.util.*;
 import java.util.*;
 
-public interface Unit extends Switchable
+public class BIncInst extends AbstractInst implements IncInst
 {
-    public List getUseBoxes();
-    public List getDefBoxes();
-    public List getUnitBoxes();
-    public List getBoxesPointingToThis();
-    public List getUseAndDefBoxes();
-    public Object clone();
-
-    public boolean fallsThrough();	
-    public boolean branches();	
+  ValueBox localBox;
+  List useBoxes;
+  Constant mConstant;
     
-    public String toBriefString();
-    public String toBriefString(Map stmtToName, String indentation);
-    public String toString(Map stmtToName, String indentation);
+       
+    BIncInst(Local local, Constant constant)
+    {
+      mConstant = constant;
+      localBox = new BafLocalBox(local);
+      useBoxes = new ArrayList();
+      useBoxes.add(localBox);
+      useBoxes = Collections.unmodifiableList(useBoxes);
+    }
 
-    public void redirectJumpsToThisTo(Unit newLocation);
+    public int getInCount()
+    {
+        return 0;
+    }
 
+    public Object clone() 
+    {
+      return new  BIncInst( getLocal(), getConstant());
+    }
+
+  public int getInMachineCount()
+  {
+    return 0;
+  }
+    
+  public int getOutCount()
+  {
+    return 0;
+  }
+
+    public int getOutMachineCount()
+    {
+        return 0;
+    }
+    
+   
+
+  
+  public Constant getConstant() 
+  {
+    return mConstant;
+  }
+  
+  public void setConstant(Constant aConstant) 
+  {
+    mConstant = aConstant;
+  }
+
+
+
+  final String getName() { return "inc.i"; }
+    final String getParameters(boolean isBrief, Map unitToName) 
+    { return " "+ localBox.getValue().toString(); }
+    
+    public void apply(Switch sw)
+    {
+        ((InstSwitch) sw).caseIncInst(this);
+    }   
+ 
+    public void setLocal(Local l)
+    {
+        localBox.setValue(l);
+    }   
+    
+    public Local getLocal()
+    {
+        return (Local) localBox.getValue();
+    }
+
+    public List getUseBoxes() 
+    {
+	return useBoxes;
+    }
+  
+  protected String toString(boolean isBrief, Map unitToName, String indentation)
+  {
+    return indentation + "inc.i" + " " +getLocal() + " " + getConstant() ;
+  }
+
+    
 }

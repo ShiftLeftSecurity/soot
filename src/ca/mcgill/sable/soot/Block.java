@@ -6,7 +6,7 @@ import ca.mcgill.sable.soot.*;
 import java.io.*;
 
 
-class Block 
+public class Block 
 {
     private Unit mHead, mTail;
     private UnitBody mBody;
@@ -29,163 +29,7 @@ class Block
 	return mIndexInMethod;
     }
 
-    public void optimize()
-    {
-	// TODO
-    }
-    /*
-    public void loadStoreElimination() 
-    {
-	changed = false;
-	while(!changed && it.hasNext()) {
-	    Inst u = (Inst) it.next();
-	    topo.setElementAt(u, stackHeight);
-	    stackHeight += (u.getOutCount() - u.getInCount());
-			
-	    if(u instanceof StoreInst ) {
-		storeInstList.add(u);
-	    } else if(u instanceof LoadInst) {
-			   
-		Iterator storeIt = storeInstList.iterator();
-		while(storeIt.hasNext()) {
-		    StoreInst inst = (StoreInst) storeIt.next();
-		    
-		    if(((LoadInst)u).getLocal() == inst.getLocal()) {
-				    
-			/	int isUnique = 0;
-			Iterator loadIt = c.iterator();
-			while(loadIt.hasNext()) {
-			    Inst i = (Inst) loadIt.next();
-			    if(i instanceof LoadInst) {
-				if(((LoadInst) i).getLocal() == ((LoadInst)u).getLocal())
-				    isUnique++;
-			    }
-			    }/
-				    
-					
-			//if((isUnique<2) && stackIndependent(inst,u, c)) {
-			  
-			if( !isLive(((LoadInst)u).getLocal()) && stackIndependent(inst, u, c)) {
-			    changed = true;
-			    c.remove(u);
-			    c.remove(inst);
-			    
-			    // temporary while both HashChain and Lists are used 
-			    unitList.remove(u);
-			    unitList.remove(inst);
-			    
-			    // debug
-			    System.out.println("Store/Load elimination occurred.");
-			}
-			
-		    }
-							 
-		}
-			    
-			    
-	    }
-			
-	}
-	}*/
-    /*
-    public static boolean stackIndependent(Inst from, Inst to) 
-    {
-	HashChain c = mUnitBody;
-	int stackHeight = 0;
-	Iterator it = c.iterator(from);
-	Inst currentInst;
-	Vector loads = new Vector(8);
-
-	if(from == to) 
-	    return true;
-	
-	currentInst = (Inst) it.next();
-	currentInst = (Inst) it.next();
-	if(currentInst == to)
-	    return true;
-	
-	while(currentInst != to) {
-	    stackHeight -= currentInst.getInCount();
-	    if(stackHeight < 0)
-		return false;
-	    else
-		stackHeight += currentInst.getOutCount();
-
-	    currentInst = (Inst) it.next();
-	}
-	if(stackHeight == 0)
-	    return true;     
-	else {
-	    boolean result = false;
-	    if(stackHeight == 1)
-		stackHeight -= reorderInstructions(loads);
-	    if(stackHeight != 0)
-		result = true;
-	    return result;
-	}
-    }
-
-    */
-    Unit getHead() 
-    {
-	return mHead;
-    }
-    
-    Unit getTail()
-    {
-	return mTail;
-    }
-
-
-    void setPreds(List preds)
-    {
-	mPreds = preds;
-	return;
-    }
-
-    List getPreds()
-    {
-	return mPreds;
-    }
-
-
-    void setSuccessors(List successors)
-    {
-	mSuccessors = successors;
-    }
-
-    List getSuccessors()
-    {
-	return mSuccessors;
-    }
-
-    /*
-    public String toBriefString() 
-    {
-	return "block #" + mIndexInMethod ;
-    }
-    
-    public String toString() 
-    {
-	StringBuffer strBuf = new StringBuffer();
-	
-	strBuf.append(toBriefString() + " of method " + mBody.getMethod().getName() + ".\n");
-	strBuf.append("Head: " + mHead.toBriefString() + '\n');
-	strBuf.append("Tail: " + mTail.toBriefString() + '\n');
-	strBuf.append("Predecessors: \n");
-	
-	// print out predecessors.
-	int count = 0;
-	if(mPreds != null) {
-	    Iterator it = mPreds.iterator();
-	    while(it.hasNext()) {
-		
-		strBuf.append(((Block) it.next()).toBriefString() + '\n');
-	    }
-	}
-	return strBuf.toString();
-    }
-    */
+   
     
     public String toBriefString()
     {
@@ -271,27 +115,104 @@ class Block
 
 	Chain methodUnits = mBody.getUnits();
 	Iterator basicBlockIt = methodUnits.iterator(mHead);
-	Unit someUnit = (Unit) basicBlockIt.next();
-	strBuf.append(someUnit.toBriefString(stmtToName, indentation) + ";\n");
-	if(!isBrief) {
-	    while(basicBlockIt.hasNext()){
-		someUnit = (Unit) basicBlockIt.next();
-		if(someUnit == mTail)
-		    break;
-		strBuf.append(someUnit.toBriefString(stmtToName, indentation) + ";\n");	
-	    }
-	} else {
-	    if(mBlockLength > 1)
-		strBuf.append("          ...\n");
+	
+	if(basicBlockIt.hasNext()) {
+	    Unit someUnit = (Unit) basicBlockIt.next();
+	    strBuf.append(someUnit.toBriefString(stmtToName, indentation) + ";\n");
+	    if(!isBrief) {
+		while(basicBlockIt.hasNext()){
+		    someUnit = (Unit) basicBlockIt.next();
+		    if(someUnit == mTail)
+			break;
+		    strBuf.append(someUnit.toBriefString(stmtToName, indentation) + ";\n");	
+		}
+	    } else {
+		if(mBlockLength > 1)
+		    strBuf.append("          ...\n");
 	}
-	someUnit = mTail;
-	if(mHead != mTail)
-	    strBuf.append(someUnit.toBriefString(stmtToName, indentation) + ";\n");	
+	    someUnit = mTail;
+	    if(mTail == null) 
+		strBuf.append("error: null tail found; block length: " + mBlockLength +"\n");
+	    else if(mHead != mTail)
+		strBuf.append(someUnit.toBriefString(stmtToName, indentation) + ";\n");	
 	
 
-	
+	}  else 
+	    System.out.println("No basic blocks found; must be interface class.");
+    
 	return strBuf.toString();
     }
+
+
+
+    public Unit getHead() 
+    {
+	return mHead;
+    }
+    
+    public Unit getTail()
+    {
+	return mTail;
+    }
+
+
+    void setPreds(List preds)
+    {
+	mPreds = preds;
+	return;
+    }
+
+    List getPreds()
+    {
+	return mPreds;
+    }
+
+
+    void setSuccessors(List successors)
+    {
+	mSuccessors = successors;
+    }
+
+
+    List getSuccessors()
+    {
+	return mSuccessors;
+    }
+
+    /*
+    public String toBriefString() 
+    {
+	return "block #" + mIndexInMethod ;
+    }
+    
+    public String toString() 
+    {
+	StringBuffer strBuf = new StringBuffer();
+	
+	strBuf.append(toBriefString() + " of method " + mBody.getMethod().getName() + ".\n");
+	strBuf.append("Head: " + mHead.toBriefString() + '\n');
+	strBuf.append("Tail: " + mTail.toBriefString() + '\n');
+	strBuf.append("Predecessors: \n");
+	
+	// print out predecessors.
+	int count = 0;
+	if(mPreds != null) {
+	    Iterator it = mPreds.iterator();
+	    while(it.hasNext()) {
+		
+		strBuf.append(((Block) it.next()).toBriefString() + '\n');
+	    }
+	}
+	return strBuf.toString();
+    }
+    */
+
+
+
+
+
+
+
 
     public String toShortString() {return "Block #" + mIndexInMethod; }
     

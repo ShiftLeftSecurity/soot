@@ -36,6 +36,19 @@ public class BLookupSwitchInst extends AbstractInst implements LookupSwitchInst
         }
     }
 
+    public Object clone() 
+    {	
+	List list = new ArrayList();
+	for(int i =0; i< targetBoxes.length; i++) {
+
+	    list.add(targetBoxes[i].getUnit());
+	}
+
+	
+	return new  BLookupSwitchInst(defaultTargetBox.getUnit(), lookupValues, list);
+    }
+
+
     public int getInCount()
     {
         return 1;
@@ -157,4 +170,15 @@ public class BLookupSwitchInst extends AbstractInst implements LookupSwitchInst
     {
         ((InstSwitch) sw).caseLookupSwitchInst(this);
     }
+
+    public boolean fallsThrough()
+    {
+	return false;
+    }
+    public boolean branches()
+    {
+	return true;
+    }
+
+
 }

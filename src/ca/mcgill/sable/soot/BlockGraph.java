@@ -244,7 +244,7 @@ public class BlockGraph
 	 */
 	{
 	    List basicBlockList = new ArrayList(16);
-	    Unit blockHead;    // points to first unit in block
+	    Unit blockHead, blockTail;    // points to first unit in block
 	    Block block;
 	    int indexInMethod = 0;
 
@@ -256,7 +256,12 @@ public class BlockGraph
 		Unit  unit = (Unit) it.next();
 		blockLength++;
 		if(leaders.containsKey(unit)){
-		    block = new Block(blockHead,(Unit) mUnits.getPredOf(unit), mBody, indexInMethod++, blockLength -1, this);
+
+		    // this happens if the first unit of the method is under an exception context.
+		    if((blockTail =(Unit) mUnits.getPredOf(unit)) == null)
+			blockTail = blockHead;
+		    
+		    block = new Block(blockHead, blockTail, mBody, indexInMethod++, blockLength -1, this);
 		    block.setPreds((List) leaders.get(blockHead));
 		    basicBlockList.add(block);
 		    blockHead = unit;
@@ -324,23 +329,64 @@ public class BlockGraph
 	    // check if block A  has a unique sucessor B, which itself 
 	    // has, as a unique predecessor, block A 
 	    // Can be deleted in time.
-	    it = basicBlockList.iterator();
+	    /*	    it = basicBlockList.iterator();
 	    while(it.hasNext()) {
 	    	Block currentBlock = (Block) it.next();
 		List blockSuccsList = currentBlock.getSuccessors();
 		if(blockSuccsList.size() == 1) {
 		    Block succBlock = (Block)  blockSuccsList.get(0);
 		    if(succBlock.getPreds().size() == 1) {
-			if(succBlock.getSuccessors().size() == 1 ) { 
-			    throw new RuntimeException("Code structure error");
+			if(succBlock.getSuccessors().size() == 1 || succBlock.getSuccessors().size()==0) { 
+
+			    if(succBlock.getSuccessors().size() == 1) {
+				Block succBlock2 = (Block)  blockSuccsList.get(0);
+				      if(mUnits.getSuccOf(currentBlock.getTail()) == succBlock2.getHead() ) {
+				    
+
+				      System.out.println("Code structure error dump:");
+				      System.out.println("Current block: " + currentBlock.toString());
+				      System.out.println("Succ block: " + succBlock.toString());
+				      System.out.println("pred: " + succBlock.getPreds().toString() + "succ  :" + succBlock.getSuccessors().toString());
+				
+				      mBlocks = basicBlockList;
+				      System.out.println("Printing basic blocks ...");
+				      it = basicBlockList.iterator();
+				      while(it.hasNext()) {
+				      System.out.println(((Block)it.next()).toBriefString());
+				      }
+				      throw new RuntimeException("Code structure error");
+				      }
+			    }
+			    System.out.println("Code structure error detected.");
+			    
 			}
+
+				
+			else { 
+
+			    System.out.println("Code structure error dump:");
+			    System.out.println("Current block: " + currentBlock.toString());
+			    System.out.println("Succ block: " + succBlock.toString());
+			    System.out.println("pred: " + succBlock.getPreds().toString() + "succ  :" + succBlock.getSuccessors().toString());
+			    
+			    mBlocks = basicBlockList;
+			    System.out.println("Printing basic blocks ...");
+			    it = basicBlockList.iterator();
+			    while(it.hasNext()) {
+				System.out.println(((Block)it.next()).toBriefString());
+			    }
+			    throw new RuntimeException("Code structure error (interesting case)");      
+			}
+
+
 		    }
 		}
 	    }
-		    
+	    */    
 	    mBlocks = basicBlockList;
 	    
 	   
+
 			
 	    System.out.println("Printing basic blocks ...");
 	    it = basicBlockList.iterator();

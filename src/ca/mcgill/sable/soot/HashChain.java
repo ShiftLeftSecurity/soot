@@ -86,7 +86,7 @@ public class HashChain extends AbstractCollection
   
 
     // temporary conversion methods
-    public static HashChain listToHashChain(List l)
+    public static Chain listToHashChain(List l)
     {
 	Iterator it = l.iterator();
 	HashChain chain = new HashChain();
@@ -100,13 +100,10 @@ public class HashChain extends AbstractCollection
 	    chain.addLast(copy);
 	}
 
-
-	
-
 	return chain;
     }
 
-    public static List hashChainToList(HashChain c)
+    public static List toList(Chain c)
     {
 	Iterator it = c.iterator();
 	List list = new ArrayList();
@@ -204,6 +201,8 @@ public class HashChain extends AbstractCollection
 	catch (NullPointerException e) {
 	    throw new NoSuchElementException();
 	}
+	if(link == null) 
+	    return null;
 	
 	return link.getItem();
     } 
@@ -222,15 +221,24 @@ public class HashChain extends AbstractCollection
 	    throw new NoSuchElementException();
 	}
 	
-	return link.getItem();
+	if(link == null) 
+	    return null;
+	else
+	    return link.getItem();
     } 
     
-    public Iterator iterator(){ return new LinkIterator(); }
-    
+   
+    public Iterator iterator(){ return new LinkIterator(firstItem); }
     public Iterator iterator(Object item) 
     {
 	return new LinkIterator(item);
     }
+
+    public Iterator iterator(Object head, Object tail)
+    {
+	return new LinkIterator(head, tail);
+    }
+
 
     public int size(){ return map.size(); }       	
 
@@ -321,7 +329,85 @@ public class HashChain extends AbstractCollection
 	}
     
     }
-    class LinkIterator implements Iterator 
+
+ class LinkIterator implements Iterator 
+    {
+	private Link currentLink;
+	boolean state;    // only when this is true can remove() be called 
+	                  // (in accordance w/ iterator semantics)
+	    
+	boolean stop;
+	private Object destination;
+
+
+
+	public LinkIterator(Object item) 
+	{
+	    currentLink = new Link(null);
+	    currentLink.setNext((Link) map.get(item));
+	    state = false;
+	    stop = false;
+	    destination = null;
+	}
+
+	public LinkIterator(Object from, Object to)
+	{
+	    this(from);
+	    destination = to;
+	}
+
+	    
+	public boolean hasNext() 
+	{
+	    if(currentLink.getNext() == null)
+		return false;
+	    else
+		return !stop;
+	}
+	    
+	public Object next()
+	    throws NoSuchElementException
+	{
+	    Link temp = currentLink.getNext();
+	    if(temp == null || stop)
+		throw new NoSuchElementException();
+
+	    currentLink = temp;
+
+	    if(destination != null)
+		if(destination == currentLink.getItem()) 
+		    stop = true;
+
+	    state = true;
+	    return currentLink.getItem();
+	}
+
+	public void remove()
+	    throws IllegalStateException
+	{
+	    if(!state)
+		throw new IllegalStateException();
+	    else {
+		    currentLink.unlinkSelf();
+		    map.remove(currentLink.getItem());
+		    state = false;
+		}
+
+	}
+	
+	    
+	public String toString() 
+	{
+	    if(currentLink == null) 
+		return  "Current object under iterator is null" + super.toString();
+	    else
+		return currentLink.toString();
+	}
+    }
+    
+
+
+    /* class LinkIterator implements Iterator 
     {
 	private Link currentLink;
 	boolean state;    // only when this is true can remove() be called 
@@ -383,7 +469,7 @@ public class HashChain extends AbstractCollection
 	    else
 		return currentLink.toString();
 	}
-    }
+	} */
     
 }
 

@@ -492,7 +492,7 @@ public class JasminClass
         if(ca.mcgill.sable.soot.Main.isProfilingOptimization)
             ca.mcgill.sable.soot.Main.buildJasminTimer.start();
         
-        InstList instList = (InstList)(body.getUnitList());
+        List instList = body.getUnitList();
 
         // let's create a u-d web for the ++ peephole optimization.
 
@@ -835,7 +835,7 @@ public class JasminClass
                         if(s.equals("-InfinityF"))
                             s="-FloatInfinity";
                         
-                        if(s.equals("NaN"))
+                        if(s.equals("NaNF"))
                             s="+FloatNaN";
                         
                         emit("ldc " + s, 1);
@@ -1762,7 +1762,7 @@ public class JasminClass
                 SootMethod m = i.getMethod();
 
                 emit("invokeinterface " + slashify(m.getDeclaringClass().getName()) + "/" +
-                    m.getName() + jasminDescriptorOf(m),
+                    m.getName() + jasminDescriptorOf(m) + " " + (argCountOf(m) + 1),
                     -(argCountOf(m) + 1) + sizeOfType(m.getReturnType()));
             }
 
@@ -1895,7 +1895,7 @@ public class JasminClass
 
             public void caseIncInst(IncInst i)
             {
-                emitOpTypeInst("inc", i);
+                emit("iinc " + ((Integer) localToSlot.get(i.getLocal())) + " " + i.getConstant());
             }
 
             public void caseArrayLengthInst(ArrayLengthInst i)
@@ -1939,7 +1939,7 @@ public class JasminClass
             }
 
             public void caseTableSwitchInst(TableSwitchInst i)
-            {
+		{
                 emit("tableswitch " + i.getLowIndex() + " ; high = " + i.getHighIndex(), -1);
 
                 List targets = i.getTargets();
@@ -1951,14 +1951,25 @@ public class JasminClass
             }
             
             public void caseDupInst(DupInst i)
-            {
-                throw new RuntimeException("not handled yet!");
-            }
-            
+	    {
+		Type firstOpType = (Type) i.getOpTypes().get(0);
+		if(firstOpType instanceof LongType || firstOpType instanceof DoubleType) 
+		    emit("dup2");
+		else
+		    emit("dup");		
+	    }
+	   
+	    
+
+
+
             public void caseSwapInst(SwapInst i)
-            {
-                throw new RuntimeException("not handled yet!");
-            }
+		{
+		    emit("swap");
+		}
+
+
+
         });
     }
 

@@ -265,9 +265,9 @@ public class Baf implements BodyRepresentation
         return new BAndInst(opType);
     }
 
-    public ArrayLengthInst newArrayLengthInst(Type opType)
+    public ArrayLengthInst newArrayLengthInst()
     {
-        return new BArrayLengthInst(opType);
+        return new BArrayLengthInst();
     }
 
     public NegInst newNegInst(Type opType)
@@ -289,6 +289,10 @@ public class Baf implements BodyRepresentation
     {
         return new BShlInst(opType);
     }
+
+
+
+
 
     public ShrInst newShrInst(Type opType)
     {
@@ -450,6 +454,24 @@ public class Baf implements BodyRepresentation
         return new BThrowInst();
     }
 
+    public SwapInst newSwapInst(Type fromType, Type toType)
+    {
+	return new BSwapInst(fromType, toType);
+    }
+  
+
+    public DupInst newDupInst(Type type)
+    {
+	return new BDupInst(new ArrayList(), Arrays.asList(new Type[] {type}));
+    }
+
+
+
+  public IncInst newIncInst(Local aLocal, Constant aConstant)
+  {
+       return new BIncInst(aLocal, aConstant);
+  }
+  
     public LookupSwitchInst newLookupSwitchInst(Unit defaultTarget, 
                              List lookupValues, List targets)
     {
@@ -462,4 +484,72 @@ public class Baf implements BodyRepresentation
         return new BTableSwitchInst(defaultTarget, lowIndex,
                                      highIndex, targets);
     }
+
+
+
+    public static String bafDescriptorOf(Type type)
+    {
+        TypeSwitch sw;
+
+        type.apply(sw = new TypeSwitch()
+        {
+            public void caseBooleanType(BooleanType t)
+            {
+                setResult("b");
+            }
+
+            public void caseByteType(ByteType t)
+            {
+                setResult("b");
+            }
+
+            public void caseCharType(CharType t)
+            {
+                setResult("c");
+            }
+
+            public void caseDoubleType(DoubleType t)
+            {
+                setResult("d");
+            }
+
+            public void caseFloatType(FloatType t)
+            {
+                setResult("f");
+            }
+
+            public void caseIntType(IntType t)
+            {
+                setResult("i");
+            }
+
+            public void caseLongType(LongType t)
+            {
+                setResult("l");
+            }
+
+            public void caseShortType(ShortType t)
+            {
+                setResult("s");
+            }
+
+	    
+	    public void defaultCase(Type t)
+	    {
+                throw new RuntimeException("Invalid type: " + t);
+	    }
+
+            public void caseRefType(RefType t)
+            {
+                setResult("r");
+            }
+
+
+        });
+
+        return (String) sw.getResult();
+
+    }
+
+
 }

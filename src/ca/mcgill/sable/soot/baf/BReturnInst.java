@@ -123,4 +123,13 @@ public class BReturnInst extends AbstractOpTypeInst implements ReturnInst
     {
         ((InstSwitch) sw).caseReturnInst(this);
     }   
+    
+    public boolean fallsThrough()
+    {
+	return false;
+    }
+
+
+
+    
 }

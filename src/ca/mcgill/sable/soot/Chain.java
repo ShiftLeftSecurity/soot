@@ -4,7 +4,7 @@ import java.util.*;
 import ca.mcgill.sable.soot.*;
 
 
-public interface Chain
+public interface Chain extends Collection
 {
     public void insertAfter(Object toInsert, Object point);
     public void insertBefore(Object toInsert, Object point);
@@ -22,6 +22,7 @@ public interface Chain
     public Object getPredOf(Object point);
     public Iterator iterator();
     public Iterator iterator(Object u);
+    public Iterator iterator(Object head, Object tail);
     public int size();       
 }
 
