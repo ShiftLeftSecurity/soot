@@ -4,7 +4,8 @@
  * All rights reserved.                                              *
  *                                                                   *
  * Modifications by Etienne Gagnon (gagnon@sable.mcgill.ca) are      *
- * Copyright (C) 1998 Etienne Gagnon.  All rights reserved.          *
+ * Copyright (C) 1998 Etienne Gagnon (gagnon@sable.mcgill.ca).  All  *
+ * rights reserved.                                                  *
  *                                                                   *
  * This work was done as a project of the Sable Research Group,      *
  * School of Computer Science, McGill University, Canada             *
@@ -521,12 +522,17 @@ public class JasminClass
 
                 if(subroutineToReturnAddressSlot.containsKey(s))
                 {
-                    AssignStmt assignStmt = (AssignStmt) s;
-                    
-                    emit("astore " + localToSlot.get(assignStmt.getLeftOp()));
+                    // AssignStmt assignStmt = (AssignStmt) s;
+
+                    // emit("astore " + localToSlot.get(assignStmt.getLeftOp()));
+
+                    emit("astore " + ( ( Integer ) subroutineToReturnAddressSlot.get( s ) ).intValue() );
+
                 }   
-                else 
-                    emitStmt(s);                
+
+//               else 
+
+                   emitStmt(s);                
             }
 
             isEmittingMethodCode = false;
@@ -701,6 +707,15 @@ public class JasminClass
                     {
                         isNextGotoAJsr = true;
                         returnAddressSlot = slot;
+
+/*
+                        if ( slot >= 0 && slot <= 3)
+                             emit("astore_" + slot );
+                        else
+                             emit("astore " + slot );
+
+*/
+                         
                     }
 
                     public void caseNullType(NullType t)

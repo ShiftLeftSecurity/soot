@@ -1,7 +1,10 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Soot, a Java(TM) classfile optimization framework.                *
+ * Jimple, a 3-address code Java(TM) bytecode representation.        *
  * Copyright (C) 1997, 1998 Raja Vallee-Rai (kor@sable.mcgill.ca)    *
  * All rights reserved.                                              *
+ *                                                                   *
+ * Modifications by Patrick Lam (plam@sable.mcgill.ca) are           *
+ * Copyright (C) 1999 Patrick Lam.  All rights reserved.             *
  *                                                                   *
  * This work was done as a project of the Sable Research Group,      *
  * School of Computer Science, McGill University, Canada             *
@@ -61,6 +64,10 @@
 
  B) Changes:
 
+ - Modified on February 3, 1999 by Patrick Lam (plam@sable.mcgill.ca) (*)
+   Added changes in support of the Grimp intermediate
+   representation (with aggregated-expressions).
+
  - Modified on November 2, 1998 by Raja Vallee-Rai (kor@sable.mcgill.ca) (*)
    Repackaged all source files and performed extensive modifications.
    First initial release of Soot.
@@ -69,17 +76,14 @@
    First internal release (Version 0.1).
 */
 
-package ca.mcgill.sable.soot;
+package ca.mcgill.sable.soot.jimple;
 
-public
-class AmbiguousMethodException extends RuntimeException
+import ca.mcgill.sable.soot.*;
+import ca.mcgill.sable.util.*;
+
+class JShlExpr extends AbstractJimpleIntLongBinopExpr implements ShlExpr
 {
-    public AmbiguousMethodException(String s)
-    {
-        super(s);
-    }
-
-    public AmbiguousMethodException()
-    {
-    }
+    JShlExpr(Value op1, Value op2) { super(op1, op2); }
+    public String getSymbol() { return " << "; }
+    public void apply(Switch sw) { ((ExprSwitch) sw).caseShlExpr(this); }
 }
