@@ -5,11 +5,15 @@
 
 package soot.toolkits.graph;
 
+import java.lang.Class;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import soot.Body;
 import soot.util.Chain;
@@ -25,10 +29,177 @@ import soot.util.ArraySet;
 public class GraphComparer {
 
     /**
-     * A utility class for keeping tracks of which nodes in the
-     * graphs being compared are the same.  For {@link Block} graphs
-     * we have to map from <tt>Block</tt>s containing a set of {@link Unit}s 
-     * in one 
+     * Utility interface for keeping track of graph nodes which
+     * are considered to represent the corresponding entity in
+     * the two graphs being compared.  
+     */
+    interface EquivalenceRegistry {
+	/**
+	 * @param node a node in one graph.
+	 * @return the equivalent node from the other graph.
+	 */
+	Object getEquiv(Object node);
+    }
+
+
+    /**
+     * {@link EquivalenceRegistry} for comparing two {@link UnitGraph}s
+     * Since the same {@ Unit}s are stored as nodes in both graphs,
+     * equivalence is the same as object equality.
+     */
+    class EquivalentUnitRegistry implements EquivalenceRegistry {
+	/**
+	 * @param node a graph node that represents a {@link Unit}.
+	 * @return <tt>node</tt>
+	 */
+	public Object getEquiv(Object node) {
+	    return node;
+	}
+    }
+
+    
+    /**
+     * {@link EquivalenceRegistry} for comparing two {@link BlockGraph}s.
+     * Two blocks are considered equivalent if they contain exactly the same
+     * list of {@link Unit}s, in the same order. 
+     */
+    static class EquivalentBlockRegistry implements EquivalenceRegistry {
+	private Map equivalenceMap = new HashMap();
+
+	/**
+	 * Create an {@link EquivalentBlockRegistry} which records the
+	 * equivalent blocks in two graphs whose nodes are blocks.  To
+	 * allow the use of graphs that are loaded from alternate
+	 * class paths, the parameters do not have to be instances of
+	 * {@link BlockGraph}.  They just have to be {@link
+	 * DirectedGraph}s whose nodes are instances of some class
+	 * that has an <tt>iterator()</tt> method that iterates over
+	 * the {@link Unit}s in that block.
+	 *
+	 * @param g1 The first graph to register.
+	 * @param g2 The second graph to register.
+	 * @throws IllegalArgumentException if a given {@link Unit} appears
+	 * in more than one block of either of the graphs.
+	 */
+	 
+	EquivalentBlockRegistry(DirectedGraph g1, DirectedGraph g2) {
+	    Map g1UnitToBlock = blockGraphToUnitMap(g1); // We don't need this
+							 // map, but we want
+							 // to confirm that no
+							 // Unit appears in
+							 // multiple Blocks.
+	    Map g2UnitToBlock = blockGraphToUnitMap(g2);
+	    for (Iterator g1it = g1.iterator(); g1it.hasNext(); ) {
+		Object g1Block = g1it.next();
+		List g1Units = getUnits(g1Block);
+		Object g2Block = g2UnitToBlock.get(g1Units.get(0));
+		List g2Units = getUnits(g2Block);
+		if (g1Units.equals(g2Units)) {
+		    equivalenceMap.put(g1Block, g2Block);
+		    equivalenceMap.put(g2Block, g1Block);
+		}
+	    }
+	}
+
+
+	/**
+	 * @param node a graph node that represents a {@link Block}.
+	 * @return the node from the other graph being compared which
+	 *         represents the same block, or <tt>null</tt> if there
+	 *         is no such node.
+	 */
+	public Object getEquiv(Object node) {
+	    return equivalenceMap.get(node);
+	}
+
+
+	/**
+	 * Return a map from the {@link Unit}s in the body represented by
+	 * a {@link BlockGraph} to the graph node representing the
+	 * block containing that {@link Unit}.
+	 *
+	 * @param g a graph whose nodes represent lists of {@link Unit}s. 
+	 *          The nodes must have an <tt>iterator()</tt> method which
+	 *          will iterate over the {@link Unit}s represented by the
+	 *          node.
+	 * @return a {@link Map} from {@link Unit}s to {@link Object}s 
+	 *          that are the graph nodes containing those {@link Unit}s.
+	 * @throws IllegalArgumentException should the any node of <tt>t</tt>
+	 *         lack an <tt>iterator()</tt> method or should
+	 *         any {@link Unit} appear in
+	 *         more than one node of the graph.
+	 */
+	private static Map blockGraphToUnitMap(DirectedGraph g) 
+	throws IllegalArgumentException {
+	    Map result = new HashMap();
+	    for (Iterator blockIt = g.iterator(); blockIt.hasNext(); ) {
+		Object block = blockIt.next();
+		List units = getUnits(block);
+		for (Iterator unitIt = units.iterator(); unitIt.hasNext(); ) {
+		    Unit unit = (Unit) unitIt.next();
+		    if (result.containsKey(unit)) {
+			throw new IllegalArgumentException("blockGraphToUnitMap(): adding " +
+							   unit.toString() +
+							   " twice");
+		    }
+		    result.put(unit, block);
+		}
+	    }
+	    return result;
+	}
+
+
+	/**
+	 * Return the {@link List} of {@link Unit}s represented by an
+	 * object which has an <tt>iterator()</tt> method which 
+	 * iterates over {@link Unit}s. 
+	 * 
+	 * @param block the object which contains a list of {@link Unit}s.
+	 * @return the list of {@link Unit}s.
+	 */
+	private static List getUnits(Object block) {
+	    Class blockClass = block.getClass();
+	    Class[] emptyParams = new Class[0];
+	    List result = new ArrayList();
+	    try {
+		Method iterMethod = blockClass.getMethod("iterator", emptyParams);
+		for (Iterator it = (Iterator) iterMethod.invoke(block, emptyParams); 
+		     it.hasNext(); ) {
+		    Unit unit = (Unit) it.next();
+		    result.add(unit);
+		}
+	    } catch (NoSuchMethodException e) {
+		throw new IllegalArgumentException("GraphComparer.getUnits(): node lacks iterator() method.");
+	    } catch (IllegalAccessException e) {
+		throw new IllegalArgumentException("GraphComparer.getUnits(): inaccessible iterator() method.");
+	    } catch (java.lang.reflect.InvocationTargetException e) {
+		throw new IllegalArgumentException("GraphComparer.getUnits(): failed iterator() invocation.");
+	    }
+	    return result;
+	}
+    }
+
+    DirectedGraph g1;
+    DirectedGraph g2;
+    EquivalenceRegistry equivalences = null;
+
+
+    public GraphComparer(DirectedGraph g1, DirectedGraph g2) {
+	// Since we may be comparing graphs of classes loaded
+	// from alternate class paths, we'll use conventions in
+	// the class names to recognize BlockGraphs.
+	this.g1 = g1;
+	this.g2 = g2;
+	String g1ClassName = g1.getClass().getName();
+	String g2ClassName = g2.getClass().getName();
+	if (g1ClassName.endsWith("BlockGraph") &&
+	    g2ClassName.endsWith("BlockGraph")) {
+	    equivalences = new EquivalentBlockRegistry(g1, g2);
+	} else {
+	    equivalences = new EquivalentUnitRegistry();
+	}
+    }
+
 
     /**
      * Checks if a graph's edge set is consistent.
@@ -63,17 +234,13 @@ public class GraphComparer {
 
 
     /**
-     * Compare two {@link DirectedGraph}s.
+     * Compares this {@link GraphComparer}'s two {@link DirectedGraph}s.
      *
-     * @param g1 the first graph to compare.
-     *
-     * @param g2 the second graph to compare.
-     *
-     * @return <tt>true</tt> if <tt>g1</tt> and <tt>g2</tt> have
+     * @return <tt>true</tt> if the two graphs have
      * the same nodes, the same lists of heads and tails, and the
-     * same sets of edges.
+     * same sets of edges, <tt>false</tt> otherwise.
      */
-    public static boolean equal(DirectedGraph g1, DirectedGraph g2) {
+    public boolean equal() {
 	if ((! consistentGraph(g1)) || (! consistentGraph(g2))) {
 	    throw new CompilationDeathException(
 		CompilationDeathException.COMPILATION_ABORTED,
@@ -82,23 +249,19 @@ public class GraphComparer {
 	if (g1.size() != g2.size()) {
 	    return false;
 	}
-	if (! (g1.getHeads().containsAll(g2.getHeads())
-	       && g2.getHeads().containsAll(g1.getHeads())) ) {
+	if (! equivLists(g1.getHeads(), g2.getHeads())) {
 	    return false;
 	}
-	if (! (g1.getTails().containsAll(g2.getTails())
-	       && g2.getTails().containsAll(g1.getTails())) ) {
+	if (! equivLists(g1.getTails(), g2.getTails())) {
 	    return false;
 	}
 	for (Iterator g1it = g1.iterator(); g1it.hasNext(); ) {
-	    Unit g1node = (Unit) g1it.next();
+	    Object g1node = g1it.next();
 	    try {
-		if (! (g1.getSuccsOf(g1node).containsAll(g2.getSuccsOf(g1node)) &&
-		       g2.getSuccsOf(g1node).containsAll(g1.getSuccsOf(g1node)))) {
+		if (! equivLists(g1.getSuccsOf(g1node), g2.getSuccsOf(g1node))) {
 		    return false;
 		}
-		if (! (g1.getPredsOf(g1node).containsAll(g2.getPredsOf(g1node)) &&
-		       g2.getPredsOf(g1node).containsAll(g1.getPredsOf(g1node)))) {
+		if (! equivLists(g1.getPredsOf(g1node), g2.getPredsOf(g1node))) {
 		    return false;
 		}
 	    } catch (RuntimeException e) {
@@ -111,6 +274,137 @@ public class GraphComparer {
 	    }
 	}
 	return true;
+    }
+
+
+    /**
+     * Report the differences between the two {@link DirectedGraph}s.
+     *
+     * @param graph1Label a string to be used to identify the first
+     * graph (<tt>g1</tt> in the call to {@link
+     * GraphComparer#GraphComparer()}) in the report of differences.
+     *
+     * @param graph2Label a string to be used to identify the second
+     * graph (<tt>g2</tt> in the call to {@link
+     * GraphComparer@GraphComparer()}) in the report of differences .
+     *
+     * @return a {@link String} summarizing the differences 
+     * between the two graphs.
+     */
+    public String diff(String graph1Label, String graph2Label) {
+	StringBuffer report = new StringBuffer();
+	LabeledUnitPrinter printer1 = makeUnitPrinter(g1);
+	LabeledUnitPrinter printer2 = makeUnitPrinter(g2);
+	diffList(report, printer1, printer2, "HEADS", 
+		 g1.getHeads(), g2.getHeads());
+	diffList(report, printer1, printer2, "TAILS", 
+		 g1.getTails(), g2.getTails());
+	       
+	for (Iterator g1it = g1.iterator(); g1it.hasNext(); ) {
+	    Object g1node = g1it.next();
+	    Object g2node = equivalences.getEquiv(g1node);
+	    String g1string = nodeToString(g1node, printer1);
+	    List g1succs = g1.getSuccsOf(g1node);
+	    List g1preds = g1.getPredsOf(g1node);
+	    List g2succs = null;
+	    List g2preds = null;
+
+	    try {
+		if (g2node != null) {
+		    g2preds = g2.getPredsOf(g2node);
+		}
+	    } catch (RuntimeException e) {
+		if (e.getMessage() != null && 
+		    e.getMessage().startsWith("Invalid unit ")) {
+		    // No preds entry for g1node in g2
+		} else {
+		    throw e;
+		}
+	    }
+	    diffList(report, printer1, printer2, g1string + " PREDS", 
+		     g1preds, g2preds);
+
+	    try {
+		if (g2node != null) {
+		    g2succs = g2.getSuccsOf(g2node);
+		}
+	    } catch (RuntimeException e) {
+		if (e.getMessage() != null && 
+		    e.getMessage().startsWith("Invalid unit ")) {
+		    // No succs entry for g1node in g2
+		} else {
+		    throw e;
+		}
+	    }
+	    diffList(report, printer1, printer2, g1string + " SUCCS", 
+		     g1succs, g2succs);
+
+	    
+	}
+
+	for (Iterator g2it = g2.iterator(); g2it.hasNext(); ) {
+	    // In this loop we Only need to report the cases where
+	    // there is no g1 entry at all, cases where there is an
+	    // entry in both graphs but with differing lists of preds
+	    // or succs will have already been reported by the loop over
+	    // g1's nodes.
+	    Object g2node = g2it.next();
+	    Object g1node = equivalences.getEquiv(g2node);
+	    String g2string = nodeToString(g2node, printer2);
+	    List g2succs = g2.getSuccsOf(g2node);
+	    List g2preds = g2.getPredsOf(g2node);
+
+	    try {
+		if (g1node != null) {
+		    g1.getPredsOf(g1node);
+		}
+	    } catch (RuntimeException e) {
+		if (e.getMessage() != null && 
+		    e.getMessage().startsWith("Invalid unit ")) {
+		    diffList(report, printer1, printer2, 
+			     g2string  + " PREDS",
+			     null, g2preds);
+		} else {
+		    throw e;
+		}
+	    }
+
+	    try {
+		if (g1node != null) {
+		    g1.getSuccsOf(g1node);
+		}
+	    } catch (RuntimeException e) {
+		if (e.getMessage() != null && 
+		    e.getMessage().startsWith("Invalid unit ")) {
+		    diffList(report, printer1, printer2, 
+			     g2string + " SUCCS" ,
+			     null, g2succs);
+		} else {
+		    throw e;
+		}
+	    }
+	}
+
+	if (report.length() > 0) {
+	    String leader1 = "*** ";
+	    String leader2 = "\n--- ";
+	    String leader3 = "\n";
+	    StringBuffer result = new StringBuffer(leader1.length() + 
+						   graph1Label.length() + 
+						   leader2.length() +
+						   graph2Label.length() +
+						   leader3.length() +
+						   report.length());
+	    result.append(leader1)
+		.append(graph1Label)
+		.append(leader2)
+		.append(graph2Label)
+		.append(leader3)
+		.append(report);
+	    return result.toString();
+	} else {
+	    return "";
+	}
     }
 
 
@@ -216,6 +510,7 @@ System.err.println("onlyExpectedDiffs(): " + node.toString() + " is not in Compl
 	}
 	return true;
     }
+
 
     /**
      * A utility method for confirming that a node which is considered
@@ -540,130 +835,6 @@ System.err.println("predOfMidTrapThrower(): " + head.toString() + "'s successors
 
 
     /**
-     * Report the differences between two {@link DirectedGraph}s.
-     *
-     * @param g1 the first graph to compare.
-     *
-     * @param label1 a string to be used to identify <tt>g1</tt> in the
-     * report of differences.
-     *
-     * @param g2 the second graph to compare.
-     *
-     * @param label2 a string to be used to identify <tt>g2</tt> in the
-     * report of differences.
-     *
-     * @return a {@link String} summarizing the differences 
-     * between the two graphs.
-     */
-    public static String diff(DirectedGraph g1, String label1,
-			      DirectedGraph g2, String label2) {
-	StringBuffer report = new StringBuffer();
-	LabeledUnitPrinter printer1 = makeUnitPrinter(g1);
-	LabeledUnitPrinter printer2 = makeUnitPrinter(g2);
-	diffList(report, printer1, printer2, "HEADS", 
-		 g1.getHeads(), g2.getHeads());
-	diffList(report, printer1, printer2, "TAILS", 
-		 g1.getTails(), g2.getTails());
-	       
-	for (Iterator g1it = g1.iterator(); g1it.hasNext(); ) {
-	    Object g1node = g1it.next();
-	    String g1string = nodeToString(g1node, printer1);
-	    List g1succs = g1.getSuccsOf(g1node);
-	    List g1preds = g1.getPredsOf(g1node);
-	    List g2succs = null;
-	    List g2preds = null;
-
-	    try {
-		g2preds = g2.getPredsOf(g1node);
-	    } catch (RuntimeException e) {
-		if (e.getMessage() != null && 
-		    e.getMessage().startsWith("Invalid unit ")) {
-		    // No preds entry for g1node in g2
-		} else {
-		    throw e;
-		}
-	    }
-	    diffList(report, printer1, printer2, g1string + " PREDS", 
-		     g1preds, g2preds);
-
-	    try {
-		g2succs = g2.getSuccsOf(g1node);
-	    } catch (RuntimeException e) {
-		if (e.getMessage() != null && 
-		    e.getMessage().startsWith("Invalid unit ")) {
-		    // No succs entry for g1node in g2
-		} else {
-		    throw e;
-		}
-	    }
-	    diffList(report, printer1, printer2, g1string + " SUCCS", 
-		     g1succs, g2succs);
-
-	    
-	}
-
-	for (Iterator g2it = g2.iterator(); g2it.hasNext(); ) {
-	    // In this loop we Only need to report the cases where
-	    // there is no g1 entry at all, cases where there is an
-	    // entry in both graphs but with differing lists of preds
-	    // or succs will have already been reported by the loop over
-	    // g1's nodes.
-	    Object g2node = g2it.next();
-	    String g2string = nodeToString(g2node, printer2);
-	    List g2succs = g2.getSuccsOf(g2node);
-	    List g2preds = g2.getPredsOf(g2node);
-
-	    try {
-		g1.getPredsOf(g2node);
-	    } catch (RuntimeException e) {
-		if (e.getMessage() != null && 
-		    e.getMessage().startsWith("Invalid unit ")) {
-		    diffList(report, printer1, printer2, 
-			     g2string  + " PREDS",
-			     null, g2preds);
-		} else {
-		    throw e;
-		}
-	    }
-
-	    try {
-		g1.getSuccsOf(g2node);
-	    } catch (RuntimeException e) {
-		if (e.getMessage() != null && 
-		    e.getMessage().startsWith("Invalid unit ")) {
-		    diffList(report, printer1, printer2, 
-			     g2string + " SUCCS" ,
-			     null, g2succs);
-		} else {
-		    throw e;
-		}
-	    }
-	}
-
-	if (report.length() > 0) {
-	    String leader1 = "*** ";
-	    String leader2 = "\n--- ";
-	    String leader3 = "\n";
-	    StringBuffer result = new StringBuffer(leader1.length() + 
-						   label1.length() + 
-						   leader2.length() +
-						   label2.length() +
-						   leader3.length() +
-						   report.length());
-	    result.append(leader1)
-		.append(label1)
-		.append(leader2)
-		.append(label2)
-		.append(leader3)
-		.append(report);
-	    return result.toString();
-	} else {
-	    return "";
-	}
-    }
-
-
-    /**
      * A utility method for reporting the differences between two lists 
      * of graph nodes. The lists are usually the result of calling
      * <tt>getHeads()</tt>, <tt>getTails()</tt>, <tt>getSuccsOf()</tt>
@@ -686,11 +857,11 @@ System.err.println("predOfMidTrapThrower(): " + head.toString() + "'s successors
      * @param list2 the list from the second graph, or <tt>null</tt> if
      * this list is missing in the second graph.
      */
-    private static void diffList(StringBuffer buffer, 
-				 LabeledUnitPrinter printer1, 
-				 LabeledUnitPrinter printer2,
-				 String label, List list1, List list2) {
-	if (! (list1.containsAll(list2) && list2.containsAll(list1))) {
+    private void diffList(StringBuffer buffer, 
+			  LabeledUnitPrinter printer1, 
+			  LabeledUnitPrinter printer2,
+			  String label, List list1, List list2) {
+	if (! equivLists(list1, list2)) {
 	    buffer.append("*********\n");
 	    if (list1 == null) {
 		buffer.append("+ ");
@@ -704,24 +875,64 @@ System.err.println("predOfMidTrapThrower(): " + head.toString() + "'s successors
 	    buffer.append(label)
 		.append(":\n");
 	    for (Iterator it = list1.iterator(); it.hasNext(); ) {
-		Object node = it.next();
-		if (list2.contains(node)) {
+		Object list1Node = it.next();
+		Object list2Node = equivalences.getEquiv(list1Node);
+		if (list2.contains(list2Node)) {
 		    buffer.append("      ");
 		} else {
 		    buffer.append("-     ");
 		}
-		buffer.append(nodeToString(node,printer1)).append("\n");
+		buffer.append(nodeToString(list1Node, printer1)).append("\n");
 	    }
 	    for (Iterator it = list2.iterator(); it.hasNext(); ) {
-		Object node = it.next();
-		if (! list1.contains(node)) {
+		Object list2Node = it.next();
+		Object list1Node = equivalences.getEquiv(list2Node);
+		if (! list1.contains(list1Node)) {
 		    buffer.append("+     ")
-			.append(nodeToString(node,printer2))
+			.append(nodeToString(list2Node,printer2))
 			.append("\n");
 		}
 	    }
 	    buffer.append("---------\n");
 	}
 
+    }
+
+
+    /**
+     * Utility method that determines if two lists of nodes are equivalent.
+     * 
+     * @param list1 The first list of nodes.
+     * @param list2 The second list of nodes.
+     * @return <tt>true</tt> if the equivalent of each node in <tt>list1</tt>
+     * is found in <tt>list2</tt>, and vice versa.
+     */
+    private boolean equivLists(List list1, List list2) {
+	if (list1 == null || list2 == null) {
+	    return (list1 == null && list2 == null);
+	}
+	    
+	if (list1.size() != list2.size()) {
+	    return false;
+	}
+	for (Iterator i = list1.iterator(); i.hasNext(); ) {
+	    if (! list2.contains(equivalences.getEquiv(i.next()))) {
+		return false;
+	    }
+	}
+	// Since getEquiv() should be symmetric, and we've confirmed that
+	// the lists are the same size, the next loop shouldn't really
+	// be necessary. But just in case something is fouled up, we 
+	// include this loop as an assertion check.
+	for (Iterator i = list1.iterator(); i.hasNext(); ) {
+	    if (! list2.contains(equivalences.getEquiv(i.next()))) {
+		throw new IllegalArgumentException("equivLists: " + 
+						   list2.toString() +
+						   " contains all the  equivalents of " +
+						   list1.toString() + 
+						   ", but the reverse is not true.");
+	    }
+	}
+	return true;
     }
 }
