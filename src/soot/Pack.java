@@ -44,6 +44,7 @@ public abstract class Pack implements HasPhaseOptions
     public Iterator iterator() { return opts.iterator(); }
 
     public void add(Transform t) { 
+        PhaseOptions.v().getPM().notifyAddPack();
         if( get( t.getPhaseName() ) != null ) {
             throw new RuntimeException( "Phase "+t.getPhaseName()+" already "
                     +"in pack" );
@@ -53,6 +54,7 @@ public abstract class Pack implements HasPhaseOptions
 
     public void insertAfter(Transform t, String phaseName) 
     {
+        PhaseOptions.v().getPM().notifyAddPack();
         Iterator it = opts.iterator();
         while (it.hasNext())
         {
@@ -68,6 +70,7 @@ public abstract class Pack implements HasPhaseOptions
 
     public void insertBefore(Transform t, String phaseName)
     {
+        PhaseOptions.v().getPM().notifyAddPack();
         Iterator it = opts.iterator();
         while (it.hasNext())
         {
