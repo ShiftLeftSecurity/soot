@@ -93,8 +93,18 @@ public class BIfNullInst extends AbstractBranchInst implements IfNullInst
     {
 	return 1;
     }
+
+    public int getInMachineCount()
+    {
+	return 1;
+    }
     
     public int getOutCount()
+    {
+	return 0;
+    }
+
+    public int getOutMachineCount()
     {
 	return 0;
     }

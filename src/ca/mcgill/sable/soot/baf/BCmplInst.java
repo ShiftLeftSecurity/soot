@@ -93,8 +93,18 @@ public class BCmplInst extends AbstractOpTypeInst implements CmplInst
     {
 	return 2;
     }
+
+    public int getInMachineCount()
+    {
+	return 2;
+    }
     
     public int getOutCount()
+    {
+	return 1;
+    }
+
+    public int getOutMachineCount()
     {
 	return 1;
     }

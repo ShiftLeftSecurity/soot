@@ -95,8 +95,18 @@ public class BArrayWriteInst extends AbstractOpTypeInst
     {
 	return 3;
     }
+
+    public int getInMachineCount()
+    {
+	return 3;
+    }
     
     public int getOutCount()
+    {
+	return 0;
+    }
+
+    public int getOutMachineCount()
     {
 	return 0;
     }

@@ -96,8 +96,18 @@ public class BStaticGetInst extends AbstractInst implements StaticGetInst
     {
 	return 0;
     }
+
+    public int getInMachineCount()
+    {
+	return 0;
+    }
     
     public int getOutCount()
+    {
+	return 1;
+    }
+
+    public int getOutMachineCount()
     {
 	return 1;
     }

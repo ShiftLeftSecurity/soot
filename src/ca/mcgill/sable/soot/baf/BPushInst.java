@@ -102,8 +102,18 @@ public class BPushInst extends AbstractInst implements PushInst
     {
 	return 0;
     }
+
+    public int getInMachineCount()
+    {
+	return 0;
+    }
     
     public int getOutCount()
+    {
+	return 1;
+    }
+
+    public int getOutMachineCount()
     {
 	return 1;
     }

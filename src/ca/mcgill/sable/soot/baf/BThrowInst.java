@@ -92,8 +92,18 @@ public class BThrowInst extends AbstractInst implements ThrowInst
     {
 	return 1;
     }
+
+    public int getInMachineCount()
+    {
+	return 1;
+    }
     
     public int getOutCount()
+    {
+	return 0;
+    }
+
+    public int getOutMachineCount()
     {
 	return 0;
     }

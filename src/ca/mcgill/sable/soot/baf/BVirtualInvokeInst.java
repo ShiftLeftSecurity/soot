@@ -13,8 +13,22 @@ public class BVirtualInvokeInst extends AbstractInvokeInst implements VirtualInv
 	return getMethod().getParameterCount() + 1;
 	
     }
+
+    public int getInMachineCount()
+    {
+	return getMethod().getParameterCount() + 1;
+	
+    }
     
     public int getOutCount()
+    {
+	if(getMethod().getReturnType() instanceof VoidType) 
+	    return 0;
+	else
+	    return 1;
+    }
+
+    public int getOutMachineCount()
     {
 	if(getMethod().getReturnType() instanceof VoidType) 
 	    return 0;

@@ -91,8 +91,18 @@ public class BPrimitiveCastInst extends AbstractOpTypeInst
     {
 	return JasminClass.sizeOfType(fromType);
     }
+
+    public int getInMachineCount()
+    {
+	return JasminClass.sizeOfType(fromType);
+    }
     
     public int getOutCount()
+    {
+	return 1;
+    }
+
+    public int getOutMachineCount()
     {
 	return JasminClass.sizeOfType(getOpType());
     }

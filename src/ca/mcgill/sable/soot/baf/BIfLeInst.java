@@ -93,8 +93,18 @@ public class BIfLeInst extends AbstractBranchInst implements IfLeInst
     {
 	return 2;
     }
+
+    public int getInMachineCount()
+    {
+	return 2;
+    }
     
     public int getOutCount()
+    {
+	return 0;
+    }
+
+    public int getOutMachineCount()
     {
 	return 0;
     }

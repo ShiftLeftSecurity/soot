@@ -98,8 +98,18 @@ public class BStoreInst extends AbstractOpTypeInst implements StoreInst
     {
 	return 1;
     }
+
+    public int getInMachineCount()
+    {
+	return 1;
+    }
     
     public int getOutCount()
+    {
+	return 0;
+    }
+
+    public int getOutMachineCount()
     {
 	return 0;
     }

@@ -96,8 +96,18 @@ public class BFieldPutInst extends AbstractInst implements FieldPutInst
     {
 	return 1;
     }
+
+    public int getInMachineCount()
+    {
+	return 1;
+    }
     
     public int getOutCount()
+    {
+	return 0;
+    }
+
+    public int getOutMachineCount()
     {
 	return 0;
     }

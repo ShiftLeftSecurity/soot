@@ -39,8 +39,18 @@ public class BTableSwitchInst extends AbstractInst implements TableSwitchInst
     {
 	return 1;
     }
+
+    public int getInMachineCount()
+    {
+	return 1;
+    }
     
     public int getOutCount()
+    {
+	return 0;
+    }
+
+    public int getOutMachineCount()
     {
 	return 0;
     }

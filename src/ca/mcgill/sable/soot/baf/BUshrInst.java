@@ -91,10 +91,20 @@ public class BUshrInst extends AbstractOpTypeInst implements UshrInst
 
     public int getInCount()
     {
+	return 2;
+    }
+
+    public int getInMachineCount()
+    {
 	return JasminClass.sizeOfType(getOpType()) + 1;
     }
     
     public int getOutCount()
+    {
+	return 1;
+    }
+
+    public int getOutMachineCount()
     {
 	return 1 * JasminClass.sizeOfType(getOpType());
     }

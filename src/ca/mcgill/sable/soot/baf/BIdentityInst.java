@@ -99,8 +99,18 @@ public class BIdentityInst extends AbstractInst
   {
 	return 0;
     }
+
+  public int getInMachineCount()
+  {
+	return 0;
+    }
     
     public int getOutCount()
+    {
+	return 0;
+    }
+
+    public int getOutMachineCount()
     {
 	return 0;
     }

@@ -93,8 +93,18 @@ public class BIfGtInst extends AbstractBranchInst implements IfGtInst
     {
 	return 2;
     }
+
+    public int getInMachineCount()
+    {
+	return 2;
+    }
     
     public int getOutCount()
+    {
+	return 0;
+    }
+
+    public int getOutMachineCount()
     {
 	return 0;
     }

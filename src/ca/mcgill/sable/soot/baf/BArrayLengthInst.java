@@ -93,8 +93,18 @@ public class BArrayLengthInst extends AbstractOpTypeInst implements ArrayLengthI
     {
 	return 1;
     }
+
+    public int getInMachineCount()
+    {
+	return 1;
+    }
     
     public int getOutCount()
+    {
+	return 1;
+    }
+
+    public int getOutMachineCount()
     {
 	return 1;
     }
