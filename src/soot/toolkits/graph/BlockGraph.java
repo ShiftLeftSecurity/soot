@@ -86,7 +86,7 @@ public class BlockGraph implements DirectedGraph
         Map trapBeginUnits = new HashMap(); // Maps a unit to a list of traps whose scopes start at that unit.
         List trapsInScope = null;           //  List of Traps that can catch an exception at a given unit.
         Chain traps = null;                 // All traps for this Body
-
+        List handlerList = new ArrayList(); // list of handler units
 
         /*
          *  Compute basic block leaders.
@@ -98,12 +98,14 @@ public class BlockGraph implements DirectedGraph
         traps = mBody.getTraps();
         trapsInScope = new ArrayList(traps.size());   // no more than traps.size() traps can be in scope for any given unit.
             
-        // Populate the trapBeginUnits Map
+        // Populate the trapBeginUnits Map and handler list
         Iterator trapIt = traps.iterator();
         while(trapIt.hasNext()) {
             Trap someTrap = (Trap) trapIt.next();
             Unit firstUnit = someTrap.getBeginUnit();
-                    
+
+            handlerList.add(someTrap.getHandlerUnit());
+
             List trapList = (List) trapBeginUnits.get(firstUnit);
             if(trapList == null) {
                 trapList = new ArrayList(4);
@@ -479,13 +481,6 @@ public class BlockGraph implements DirectedGraph
             
             // build head list
             {
-                List handlerList = new ArrayList();
-                Iterator trapIt2 = mBody.getTraps().iterator();
-                while(trapIt2.hasNext()) {
-                    Trap trap = (Trap) trapIt2.next();
-                    handlerList.add(trap.getHandlerUnit());    
-                }
-                
                 //                System.out.println("unit first " + mUnits.getFirst());
                 
                 Iterator blockIt =  mBlocks.iterator();
@@ -522,19 +517,14 @@ public class BlockGraph implements DirectedGraph
                 Unit head = block.getHead();
                 List preds;
                 
-                // are we in a catch block?  Should we give up?
-                {
-                    if(!(head instanceof IdentityUnit))
-                        continue;
-                    
-                    Value identityRef = ((IdentityUnit)head).getRightOp();
-                    if(!(identityRef instanceof CaughtExceptionRef))
-                        continue;
+                // are we in a catch block? 
+                if(!handlerList.contains(head))
+                    continue;
 
-                    preds = block.getPreds();
-                    if(preds == null || preds.isEmpty())
-                        continue;
-                }
+                // no preds to add
+                preds = block.getPreds();
+                if(preds == null || preds.isEmpty())
+                    continue;
                 
                 // need to clone preds since we are potentially
                 // modifying it
