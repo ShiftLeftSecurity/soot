@@ -169,9 +169,6 @@ public final class PropBDD extends AbsPropagator {
                 pointsTo |= typeManager.get() & (
                 (dst => var) pag.allSimple().get() {src} <> pointsTo {var} );
 
-                if( SparkScene.v().options().verbose() ) {
-                    G.v().out.println( "Minor iteration: " );
-                }
 
             } while( pointsTo != oldPointsTo );
 

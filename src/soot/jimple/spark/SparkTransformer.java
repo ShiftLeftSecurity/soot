@@ -209,6 +209,10 @@ public class SparkTransformer extends SceneTransformer
         if( opts.add_tags() ) {
             addTags();
         }
+
+        //BDDCflow bddcflow = new BDDCflow( SparkScene.v().cg );
+        //bddcflow.addEntryPoints( Scene.v().getEntryPoints() );
+        //bddcflow.update();
     }
     private void addTag( Host h, Node n, Map nodeToTag ) {
         Tag t = (Tag) nodeToTag.get(n);
