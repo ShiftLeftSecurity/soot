@@ -231,7 +231,7 @@ public abstract class Body extends AbstractHost implements Serializable
             if (!unitChain.contains(t.getBeginUnit()))
                 throw new RuntimeException("begin not in chain");
 
-            if (!unitChain.contains(t.getEndUnit()))
+            if ((t.getEndUnit() != null) && (!unitChain.contains(t.getEndUnit())))
                 throw new RuntimeException("end not in chain");
 
             if (!unitChain.contains(t.getHandlerUnit()))
