@@ -481,39 +481,26 @@ public class BlockGraph implements DirectedGraph
             
             // build head list
             {
-                Unit firstUnit = (Unit) mUnits.getFirst();
-                List firstUnitHandlers = new ArrayList(traps.size());
-                
-                // for a COMPLETE graph only, get the handler units
-                // for firstUnit
-                if(type == COMPLETE) {
-                    List trapsHere = (List) trapBeginUnits.get(firstUnit);
-                    if(trapsHere != null) {
-                        Iterator iter = trapsHere.iterator();
-                        while(iter.hasNext()) 
-                            firstUnitHandlers.add(((Trap)iter.next()).getHandlerUnit());
-                    }
-                }
+                //                System.out.println("unit first " + mUnits.getFirst());
                 
                 Iterator blockIt =  mBlocks.iterator();
                 while(blockIt.hasNext()) {
                     Block b = (Block) blockIt.next();
-                    Unit head = b.getHead();
-                    
-                    if(head == firstUnit){
+                    if(b.getHead() == mUnits.getFirst() ||
+                       (type != COMPLETE && handlerList.contains(b.getHead())))
+                    {
                         mHeads.add(b);
-                        continue;
-                    }
-
-                    if(type != COMPLETE){
-                        if(handlerList.contains(head))
-                            mHeads.add(b);
-                    }
-                    else{
-                        if(firstUnitHandlers.contains(head))
-                            mHeads.add(b);
                     }
                 }
+                /*
+                Iterator ittt = mHeads.iterator();
+                System.out.println("Heads are:");
+                while(ittt.hasNext()) {
+                    System.out.println("next head: ");
+                    System.out.println(ittt.next());
+                }
+                System.out.println("done heads");
+                */
             }
         }
 
