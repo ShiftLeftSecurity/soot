@@ -102,6 +102,7 @@ public class ShimpleBodyBuilder
         insertTrivialPhiNodes();
         renameLocals();
         trimExceptionalPhiNodes();
+        body.makeUniqueLocalNames();
     }
 
     /**
@@ -761,6 +762,8 @@ public class ShimpleBodyBuilder
             DeadAssignmentEliminator.v().transform(body);
             Aggregator.v().transform(body);
         }
+        
+        body.makeUniqueLocalNames();
     }
     
     /**

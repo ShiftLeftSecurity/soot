@@ -232,4 +232,42 @@ public class ShimpleBody extends StmtBody
     {
         return options;
     }
+
+    /**
+     * Make sure the locals in this body all have unique String names.
+     * Renaming is done if necessary.
+     **/
+    public void makeUniqueLocalNames()
+    {
+        Set localNames = new HashSet();
+        Iterator localsIt = getLocals().iterator();
+
+        while(localsIt.hasNext()){
+            Local local = (Local) localsIt.next();
+            String localName = local.getName();
+            
+            if(localNames.contains(localName)){
+                String uniqueName = makeUniqueLocalName(localName, localNames);
+                local.setName(uniqueName);
+                localNames.add(uniqueName);
+            }
+            else
+                localNames.add(localName);
+        }
+    }
+
+    /**
+     * Given a set of Strings, return a new name for dupName that is
+     * not currently in the set.
+     **/
+    public String makeUniqueLocalName(String dupName, Set localNames)
+    {
+        int counter = 1;
+        String newName = dupName;
+
+        while(localNames.contains(newName))
+            newName = dupName + "_" + counter++;
+
+        return newName;
+    }
 }
