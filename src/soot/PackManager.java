@@ -143,10 +143,6 @@ public class PackManager {
             p.add(new Transform("wjap.tqt", TightestQualifiersTagger.v()));
         }
 
-	// CFG control "pack" (not really a phase, just a place to collect
-	// options).
-	addPack(p = new BodyPack("cfgex"));
-
         // Shimple pack
         addPack(p = new BodyPack(Shimple.PHASE));
         
