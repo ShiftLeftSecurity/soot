@@ -23,7 +23,7 @@ public class TradTypeManager extends AbsTypeManager {
             typeMask.put(type, bv);
             for (Iterator anIt = allocNodes.iterator(); anIt.hasNext(); ) {
                 final AllocNode an = (AllocNode) anIt.next();
-                if (this.castNeverFails(an.getType(), type)) {
+                if (castNeverFails(an.getType(), type)) {
                     bv.set(an.getNumber());
                     change = true;
                 }
@@ -39,7 +39,7 @@ public class TradTypeManager extends AbsTypeManager {
                 if (type instanceof AnySubType) continue;
                 BitVector bv = (BitVector) typeMask.get(type);
                 if (bv == null) continue;
-                if (this.castNeverFails(an.getType(), type)) {
+                if (castNeverFails(an.getType(), type)) {
                     bv.set(an.getNumber());
                     change = true;
                 }
@@ -49,7 +49,7 @@ public class TradTypeManager extends AbsTypeManager {
     
     public BitVector get(Type type) {
         if (type == null) return null;
-        this.update();
+        update();
         BitVector ret = (BitVector) typeMask.get(type);
         if (ret == null && fh != null) throw new RuntimeException("oops" + type);
         return ret;
@@ -103,7 +103,7 @@ public class TradTypeManager extends AbsTypeManager {
                                               jedd.internal.Jedd.v().falseBDD());
         
         public jedd.internal.RelationContainer get() {
-            TradTypeManager.this.update();
+            update();
             if (change) {
                 for (Iterator tIt = Scene.v().getTypeNumberer().iterator(); tIt.hasNext(); ) {
                     final Type t = (Type) tIt.next();

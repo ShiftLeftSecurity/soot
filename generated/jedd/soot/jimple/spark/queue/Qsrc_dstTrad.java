@@ -26,7 +26,7 @@ public class Qsrc_dstTrad extends Qsrc_dst {
                                               in).iterator(new Attribute[] { src.v(), dst.v() });
         while (it.hasNext()) {
             Object[] tuple = (Object[]) it.next();
-            for (int i = 0; i < 2; i++) { this.add((VarNode) tuple[0], (VarNode) tuple[1]); }
+            for (int i = 0; i < 2; i++) { add((VarNode) tuple[0], (VarNode) tuple[1]); }
         }
     }
     

@@ -25,11 +25,11 @@ public final class Rlocal_srcm_stmt_tgtmBDD extends Rlocal_srcm_stmt_tgtm {
     
     public Rlocal_srcm_stmt_tgtmBDD(final jedd.internal.RelationContainer bdd) {
         this();
-        this.add(new jedd.internal.RelationContainer(new Attribute[] { stmt.v(), local.v(), srcm.v(), tgtm.v() },
-                                                     new PhysicalDomain[] { ST.v(), V1.v(), T1.v(), T2.v() },
-                                                     ("this.add(bdd) at /home/olhotak/soot-2-jedd/src/soot/jimple/s" +
-                                                      "park/queue/Rlocal_srcm_stmt_tgtmBDD.jedd:33,91-94"),
-                                                     bdd));
+        add(new jedd.internal.RelationContainer(new Attribute[] { stmt.v(), local.v(), srcm.v(), tgtm.v() },
+                                                new PhysicalDomain[] { ST.v(), V1.v(), T1.v(), T2.v() },
+                                                ("add(bdd) at /home/olhotak/soot-2-jedd/src/soot/jimple/spark/" +
+                                                 "queue/Rlocal_srcm_stmt_tgtmBDD.jedd:33,91-94"),
+                                                bdd));
     }
     
     Rlocal_srcm_stmt_tgtmBDD() {

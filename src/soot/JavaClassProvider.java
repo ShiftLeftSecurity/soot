@@ -29,31 +29,21 @@ public class JavaClassProvider implements ClassProvider
      * or null if it was not found. */
     public ClassSource find( String className ) {
 
-        String javaClassName = className;
-        if (className.indexOf("$") != -1) {
-            // class is an inner class and will be in
-            // Outer of Outer$Inner
-            javaClassName = className.substring(0, className.indexOf("$"));
-
-            
-            //System.out.println("java class name: "+javaClassName); 
+        if (soot.javaToJimple.InitialResolver.v().hasASTForSootName(className)){
+            soot.javaToJimple.InitialResolver.v().setASTForSootName(className);
+            return new JavaClassSource(className);
         }
-        // always do this because an inner class could be in a class
-        // thats in the map
-        if (SourceLocator.v().getSourceToClassMap() != null) {
-            if (SourceLocator.v().getSourceToClassMap().get(javaClassName) != null) {
-                javaClassName = (String)SourceLocator.v().getSourceToClassMap().get(javaClassName);
+        else {
+            String javaClassName = SourceLocator.v().getSourceForClass(className);
+            String fileName = javaClassName.replace('.', '/') + ".java";
+            SourceLocator.FoundFile file = 
+                SourceLocator.v().lookupInClassPath(fileName);
+            if( file == null ) return null;
+            if( file.file == null ) {
+                throw new RuntimeException( "Class "+className+" was found in a .jar, but Polyglot doesn't support reading source files out of a .jar" );
             }
+            return new JavaClassSource(className, file.file);
         }
-
-        String fileName = javaClassName.replace('.', '/') + ".java";
-        SourceLocator.FoundFile file = 
-            SourceLocator.v().lookupInClassPath(fileName);
-        if( file == null ) return null;
-        if( file.file == null ) {
-            throw new RuntimeException( "Class "+className+" was found in a .jar, but Polyglot doesn't support reading source files out of a .jar" );
-        }
-        return new JavaClassSource(className, file.file);
     }
 }
 

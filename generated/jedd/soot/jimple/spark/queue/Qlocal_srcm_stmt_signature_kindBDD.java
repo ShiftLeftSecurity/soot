@@ -13,22 +13,22 @@ public final class Qlocal_srcm_stmt_signature_kindBDD extends Qlocal_srcm_stmt_s
     private LinkedList readers = new LinkedList();
     
     public void add(Local _local, SootMethod _srcm, Unit _stmt, NumberedString _signature, Kind _kind) {
-        this.add(new jedd.internal.RelationContainer(new Attribute[] { local.v(), srcm.v(), stmt.v(), signature.v(), kind.v() },
-                                                     new PhysicalDomain[] { V1.v(), T1.v(), ST.v(), H2.v(), FD.v() },
-                                                     ("this.add(jedd.internal.Jedd.v().literal(new java.lang.Object" +
-                                                      "[...], new jedd.Attribute[...], new jedd.PhysicalDomain[...]" +
-                                                      ")) at /home/olhotak/soot-2-jedd/src/soot/jimple/spark/queue/" +
-                                                      "Qlocal_srcm_stmt_signature_kindBDD.jedd:33,8-11"),
-                                                     jedd.internal.Jedd.v().literal(new Object[] { _local, _srcm, _stmt, _signature, _kind },
-                                                                                    new Attribute[] { local.v(), srcm.v(), stmt.v(), signature.v(), kind.v() },
-                                                                                    new PhysicalDomain[] { V1.v(), T1.v(), ST.v(), H2.v(), FD.v() })));
+        add(new jedd.internal.RelationContainer(new Attribute[] { local.v(), srcm.v(), stmt.v(), signature.v(), kind.v() },
+                                                new PhysicalDomain[] { V1.v(), T1.v(), ST.v(), H2.v(), FD.v() },
+                                                ("add(jedd.internal.Jedd.v().literal(new java.lang.Object[...]" +
+                                                 ", new jedd.Attribute[...], new jedd.PhysicalDomain[...])) at" +
+                                                 " /home/olhotak/soot-2-jedd/src/soot/jimple/spark/queue/Qloca" +
+                                                 "l_srcm_stmt_signature_kindBDD.jedd:33,8-11"),
+                                                jedd.internal.Jedd.v().literal(new Object[] { _local, _srcm, _stmt, _signature, _kind },
+                                                                               new Attribute[] { local.v(), srcm.v(), stmt.v(), signature.v(), kind.v() },
+                                                                               new PhysicalDomain[] { V1.v(), T1.v(), ST.v(), H2.v(), FD.v() })));
     }
     
     public void add(final jedd.internal.RelationContainer in) {
         for (Iterator it = readers.iterator(); it.hasNext(); ) {
             Rlocal_srcm_stmt_signature_kindBDD reader = (Rlocal_srcm_stmt_signature_kindBDD) it.next();
-            reader.add(new jedd.internal.RelationContainer(new Attribute[] { stmt.v(), local.v(), srcm.v(), signature.v(), kind.v() },
-                                                           new PhysicalDomain[] { ST.v(), V1.v(), T1.v(), H2.v(), FD.v() },
+            reader.add(new jedd.internal.RelationContainer(new Attribute[] { stmt.v(), signature.v(), local.v(), kind.v(), srcm.v() },
+                                                           new PhysicalDomain[] { ST.v(), H2.v(), V1.v(), FD.v(), T1.v() },
                                                            ("reader.add(in) at /home/olhotak/soot-2-jedd/src/soot/jimple/" +
                                                             "spark/queue/Qlocal_srcm_stmt_signature_kindBDD.jedd:38,12-18"),
                                                            in));

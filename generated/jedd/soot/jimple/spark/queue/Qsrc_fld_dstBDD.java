@@ -13,22 +13,22 @@ public final class Qsrc_fld_dstBDD extends Qsrc_fld_dst {
     private LinkedList readers = new LinkedList();
     
     public void add(VarNode _src, SparkField _fld, VarNode _dst) {
-        this.add(new jedd.internal.RelationContainer(new Attribute[] { src.v(), fld.v(), dst.v() },
-                                                     new PhysicalDomain[] { V1.v(), FD.v(), V2.v() },
-                                                     ("this.add(jedd.internal.Jedd.v().literal(new java.lang.Object" +
-                                                      "[...], new jedd.Attribute[...], new jedd.PhysicalDomain[...]" +
-                                                      ")) at /home/olhotak/soot-2-jedd/src/soot/jimple/spark/queue/" +
-                                                      "Qsrc_fld_dstBDD.jedd:33,8-11"),
-                                                     jedd.internal.Jedd.v().literal(new Object[] { _src, _fld, _dst },
-                                                                                    new Attribute[] { src.v(), fld.v(), dst.v() },
-                                                                                    new PhysicalDomain[] { V1.v(), FD.v(), V2.v() })));
+        add(new jedd.internal.RelationContainer(new Attribute[] { src.v(), fld.v(), dst.v() },
+                                                new PhysicalDomain[] { V1.v(), FD.v(), V2.v() },
+                                                ("add(jedd.internal.Jedd.v().literal(new java.lang.Object[...]" +
+                                                 ", new jedd.Attribute[...], new jedd.PhysicalDomain[...])) at" +
+                                                 " /home/olhotak/soot-2-jedd/src/soot/jimple/spark/queue/Qsrc_" +
+                                                 "fld_dstBDD.jedd:33,8-11"),
+                                                jedd.internal.Jedd.v().literal(new Object[] { _src, _fld, _dst },
+                                                                               new Attribute[] { src.v(), fld.v(), dst.v() },
+                                                                               new PhysicalDomain[] { V1.v(), FD.v(), V2.v() })));
     }
     
     public void add(final jedd.internal.RelationContainer in) {
         for (Iterator it = readers.iterator(); it.hasNext(); ) {
             Rsrc_fld_dstBDD reader = (Rsrc_fld_dstBDD) it.next();
-            reader.add(new jedd.internal.RelationContainer(new Attribute[] { fld.v(), dst.v(), src.v() },
-                                                           new PhysicalDomain[] { FD.v(), V2.v(), V1.v() },
+            reader.add(new jedd.internal.RelationContainer(new Attribute[] { dst.v(), fld.v(), src.v() },
+                                                           new PhysicalDomain[] { V2.v(), FD.v(), V1.v() },
                                                            ("reader.add(in) at /home/olhotak/soot-2-jedd/src/soot/jimple/" +
                                                             "spark/queue/Qsrc_fld_dstBDD.jedd:38,12-18"),
                                                            in));

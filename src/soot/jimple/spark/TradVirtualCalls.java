@@ -148,21 +148,20 @@ public class TradVirtualCalls extends AbsVirtualCalls
                 if( !sootcls.isApplicationClass() ) {
                     sootcls.setLibraryClass();
                 }
-                if( sootcls.declaresMethod( sigClinit ) ) {
+                for( Iterator clinitIt = EntryPoints.v().clinitsOf(sootcls).iterator(); clinitIt.hasNext(); ) {
+                    final SootMethod clinit = (SootMethod) clinitIt.next();
                     statics.add(ptpair.var().context(),
                                 site.srcm(),
                                 site.stmt(),
                                 Kind.CLINIT,
                                 null,
-                                sootcls.getMethod(sigClinit) );
+                                clinit );
                 }
             }
         }
     }
 
     protected final RefType clRunnable = RefType.v("java.lang.Runnable");
-    private final NumberedString sigClinit = Scene.v().getSubSigNumberer().
-        findOrAdd( "void <clinit>()" );
 
 }
 

@@ -166,3 +166,4 @@ soot.jimple.toolkits.annotation.callgraph.CallGraphGrapher
 soot.SootResolver
 soot.jimple.spark.SparkNumberers
 soot.jimple.spark.SparkScene
+soot.javaToJimple.InitialResolver

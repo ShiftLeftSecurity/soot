@@ -22,11 +22,11 @@ public final class Robj_varBDD extends Robj_var {
     
     public Robj_varBDD(final jedd.internal.RelationContainer bdd) {
         this();
-        this.add(new jedd.internal.RelationContainer(new Attribute[] { var.v(), obj.v() },
-                                                     new PhysicalDomain[] { V1.v(), H1.v() },
-                                                     ("this.add(bdd) at /home/olhotak/soot-2-jedd/src/soot/jimple/s" +
-                                                      "park/queue/Robj_varBDD.jedd:33,57-60"),
-                                                     bdd));
+        add(new jedd.internal.RelationContainer(new Attribute[] { var.v(), obj.v() },
+                                                new PhysicalDomain[] { V1.v(), H1.v() },
+                                                ("add(bdd) at /home/olhotak/soot-2-jedd/src/soot/jimple/spark/" +
+                                                 "queue/Robj_varBDD.jedd:33,57-60"),
+                                                bdd));
     }
     
     Robj_varBDD() {

@@ -21,11 +21,11 @@ public final class RobjBDD extends Robj {
     
     public RobjBDD(final jedd.internal.RelationContainer bdd) {
         this();
-        this.add(new jedd.internal.RelationContainer(new Attribute[] { obj.v() },
-                                                     new PhysicalDomain[] { H1.v() },
-                                                     ("this.add(bdd) at /home/olhotak/soot-2-jedd/src/soot/jimple/s" +
-                                                      "park/queue/RobjBDD.jedd:33,45-48"),
-                                                     bdd));
+        add(new jedd.internal.RelationContainer(new Attribute[] { obj.v() },
+                                                new PhysicalDomain[] { H1.v() },
+                                                ("add(bdd) at /home/olhotak/soot-2-jedd/src/soot/jimple/spark/" +
+                                                 "queue/RobjBDD.jedd:33,45-48"),
+                                                bdd));
     }
     
     RobjBDD() {

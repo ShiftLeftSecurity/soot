@@ -22,11 +22,11 @@ public final class Rctxt_methodBDD extends Rctxt_method {
     
     public Rctxt_methodBDD(final jedd.internal.RelationContainer bdd) {
         this();
-        this.add(new jedd.internal.RelationContainer(new Attribute[] { ctxt.v(), method.v() },
-                                                     new PhysicalDomain[] { V1.v(), T1.v() },
-                                                     ("this.add(bdd) at /home/olhotak/soot-2-jedd/src/soot/jimple/s" +
-                                                      "park/queue/Rctxt_methodBDD.jedd:33,65-68"),
-                                                     bdd));
+        add(new jedd.internal.RelationContainer(new Attribute[] { method.v(), ctxt.v() },
+                                                new PhysicalDomain[] { T1.v(), V1.v() },
+                                                ("add(bdd) at /home/olhotak/soot-2-jedd/src/soot/jimple/spark/" +
+                                                 "queue/Rctxt_methodBDD.jedd:33,65-68"),
+                                                bdd));
     }
     
     Rctxt_methodBDD() {
@@ -49,8 +49,8 @@ public final class Rctxt_methodBDD extends Rctxt_method {
             public Object next() {
                 if (it == null || !it.hasNext()) {
                     it =
-                      new jedd.internal.RelationContainer(new Attribute[] { ctxt.v(), method.v() },
-                                                          new PhysicalDomain[] { V1.v(), T1.v() },
+                      new jedd.internal.RelationContainer(new Attribute[] { method.v(), ctxt.v() },
+                                                          new PhysicalDomain[] { T1.v(), V1.v() },
                                                           ("bdd.iterator(new jedd.Attribute[...]) at /home/olhotak/soot-" +
                                                            "2-jedd/src/soot/jimple/spark/queue/Rctxt_methodBDD.jedd:45,2" +
                                                            "5-28"),
@@ -75,8 +75,8 @@ public final class Rctxt_methodBDD extends Rctxt_method {
                                                "/soot/jimple/spark/queue/Rctxt_methodBDD.jedd:55,29-32"),
                                               bdd);
         bdd.eq(jedd.internal.Jedd.v().falseBDD());
-        return new jedd.internal.RelationContainer(new Attribute[] { ctxt.v(), method.v() },
-                                                   new PhysicalDomain[] { V1.v(), T1.v() },
+        return new jedd.internal.RelationContainer(new Attribute[] { method.v(), ctxt.v() },
+                                                   new PhysicalDomain[] { T1.v(), V1.v() },
                                                    ("return ret; at /home/olhotak/soot-2-jedd/src/soot/jimple/spa" +
                                                     "rk/queue/Rctxt_methodBDD.jedd:57,8-14"),
                                                    ret);

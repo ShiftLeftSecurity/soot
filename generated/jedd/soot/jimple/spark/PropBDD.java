@@ -102,14 +102,12 @@ public final class PropBDD extends AbsPropagator {
                                                               typeManager.get()));
             do  {
                 oldPointsTo.eq(pointsTo);
-                pointsTo.eqUnion(jedd.internal.Jedd.v().replace(jedd.internal.Jedd.v().intersect(jedd.internal.Jedd.v().read(jedd.internal.Jedd.v().replace(typeManager.get(),
-                                                                                                                                                            new PhysicalDomain[] { V1.v() },
-                                                                                                                                                            new PhysicalDomain[] { V2.v() })),
-                                                                                                 jedd.internal.Jedd.v().compose(jedd.internal.Jedd.v().read(pag.allSimple().get()),
+                pointsTo.eqUnion(jedd.internal.Jedd.v().intersect(jedd.internal.Jedd.v().read(typeManager.get()),
+                                                                  jedd.internal.Jedd.v().replace(jedd.internal.Jedd.v().compose(jedd.internal.Jedd.v().read(pag.allSimple().get()),
                                                                                                                                 pointsTo,
-                                                                                                                                new PhysicalDomain[] { V1.v() })),
-                                                                new PhysicalDomain[] { V2.v() },
-                                                                new PhysicalDomain[] { V1.v() }));
+                                                                                                                                new PhysicalDomain[] { V1.v() }),
+                                                                                                 new PhysicalDomain[] { V2.v() },
+                                                                                                 new PhysicalDomain[] { V1.v() })));
             }while(!jedd.internal.Jedd.v().equals(jedd.internal.Jedd.v().read(pointsTo), oldPointsTo)); 
             ptout.add(new jedd.internal.RelationContainer(new Attribute[] { var.v(), obj.v() },
                                                           new PhysicalDomain[] { V1.v(), H1.v() },

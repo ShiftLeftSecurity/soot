@@ -30,8 +30,8 @@ public class Qctxt_local_obj_srcm_stmt_kind_tgtmTrad extends Qctxt_local_obj_src
     
     public void add(final jedd.internal.RelationContainer in) {
         Iterator it =
-          new jedd.internal.RelationContainer(new Attribute[] { stmt.v(), local.v(), srcm.v(), obj.v(), tgtm.v(), ctxt.v(), kind.v() },
-                                              new PhysicalDomain[] { ST.v(), V1.v(), T1.v(), H1.v(), T2.v(), V2.v(), FD.v() },
+          new jedd.internal.RelationContainer(new Attribute[] { stmt.v(), local.v(), obj.v(), kind.v(), srcm.v(), tgtm.v(), ctxt.v() },
+                                              new PhysicalDomain[] { ST.v(), V1.v(), H1.v(), FD.v(), T1.v(), T2.v(), V2.v() },
                                               ("in.iterator(new jedd.Attribute[...]) at /home/olhotak/soot-2" +
                                                "-jedd/src/soot/jimple/spark/queue/Qctxt_local_obj_srcm_stmt_" +
                                                "kind_tgtmTrad.jedd:42,22-24"),
@@ -39,13 +39,13 @@ public class Qctxt_local_obj_srcm_stmt_kind_tgtmTrad extends Qctxt_local_obj_src
         while (it.hasNext()) {
             Object[] tuple = (Object[]) it.next();
             for (int i = 0; i < 7; i++) {
-                this.add((Context) tuple[0],
-                         (Local) tuple[1],
-                         (AllocNode) tuple[2],
-                         (SootMethod) tuple[3],
-                         (Unit) tuple[4],
-                         (Kind) tuple[5],
-                         (SootMethod) tuple[6]);
+                add((Context) tuple[0],
+                    (Local) tuple[1],
+                    (AllocNode) tuple[2],
+                    (SootMethod) tuple[3],
+                    (Unit) tuple[4],
+                    (Kind) tuple[5],
+                    (SootMethod) tuple[6]);
             }
         }
     }

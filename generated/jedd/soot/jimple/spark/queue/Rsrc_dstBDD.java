@@ -22,11 +22,11 @@ public final class Rsrc_dstBDD extends Rsrc_dst {
     
     public Rsrc_dstBDD(final jedd.internal.RelationContainer bdd) {
         this();
-        this.add(new jedd.internal.RelationContainer(new Attribute[] { dst.v(), src.v() },
-                                                     new PhysicalDomain[] { V2.v(), V1.v() },
-                                                     ("this.add(bdd) at /home/olhotak/soot-2-jedd/src/soot/jimple/s" +
-                                                      "park/queue/Rsrc_dstBDD.jedd:33,57-60"),
-                                                     bdd));
+        add(new jedd.internal.RelationContainer(new Attribute[] { dst.v(), src.v() },
+                                                new PhysicalDomain[] { V2.v(), V1.v() },
+                                                ("add(bdd) at /home/olhotak/soot-2-jedd/src/soot/jimple/spark/" +
+                                                 "queue/Rsrc_dstBDD.jedd:33,57-60"),
+                                                bdd));
     }
     
     Rsrc_dstBDD() {

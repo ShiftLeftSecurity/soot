@@ -13,15 +13,15 @@ public final class QvarBDD extends Qvar {
     private LinkedList readers = new LinkedList();
     
     public void add(VarNode _var) {
-        this.add(new jedd.internal.RelationContainer(new Attribute[] { var.v() },
-                                                     new PhysicalDomain[] { V1.v() },
-                                                     ("this.add(jedd.internal.Jedd.v().literal(new java.lang.Object" +
-                                                      "[...], new jedd.Attribute[...], new jedd.PhysicalDomain[...]" +
-                                                      ")) at /home/olhotak/soot-2-jedd/src/soot/jimple/spark/queue/" +
-                                                      "QvarBDD.jedd:33,8-11"),
-                                                     jedd.internal.Jedd.v().literal(new Object[] { _var },
-                                                                                    new Attribute[] { var.v() },
-                                                                                    new PhysicalDomain[] { V1.v() })));
+        add(new jedd.internal.RelationContainer(new Attribute[] { var.v() },
+                                                new PhysicalDomain[] { V1.v() },
+                                                ("add(jedd.internal.Jedd.v().literal(new java.lang.Object[...]" +
+                                                 ", new jedd.Attribute[...], new jedd.PhysicalDomain[...])) at" +
+                                                 " /home/olhotak/soot-2-jedd/src/soot/jimple/spark/queue/QvarB" +
+                                                 "DD.jedd:33,8-11"),
+                                                jedd.internal.Jedd.v().literal(new Object[] { _var },
+                                                                               new Attribute[] { var.v() },
+                                                                               new PhysicalDomain[] { V1.v() })));
     }
     
     public void add(final jedd.internal.RelationContainer in) {

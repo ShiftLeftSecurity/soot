@@ -26,7 +26,7 @@ public class Qvar_objTrad extends Qvar_obj {
                                               in).iterator(new Attribute[] { var.v(), obj.v() });
         while (it.hasNext()) {
             Object[] tuple = (Object[]) it.next();
-            for (int i = 0; i < 2; i++) { this.add((VarNode) tuple[0], (AllocNode) tuple[1]); }
+            for (int i = 0; i < 2; i++) { add((VarNode) tuple[0], (AllocNode) tuple[1]); }
         }
     }
     

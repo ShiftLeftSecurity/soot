@@ -115,11 +115,12 @@ public final class OnFlyCallGraphBuilder extends AbstractOnFlyCallGraphBuilder
                     if( !sootcls.isApplicationClass() ) {
                         sootcls.setLibraryClass();
                     }
-                    if( sootcls.declaresMethod( sigClinit ) ) {
+                    for( Iterator clinitIt = EntryPoints.v().clinitsOf(sootcls).iterator(); clinitIt.hasNext(); ) {
+                        final SootMethod clinit = (SootMethod) clinitIt.next();
                         cm.addStaticEdge(
                                 MethodContext.v( site.container(), srcContext ),
                                 site.stmt(),
-                                sootcls.getMethod(sigClinit),
+                                clinit,
                                 Kind.CLINIT );
                     }
                 }

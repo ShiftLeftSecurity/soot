@@ -16,6 +16,17 @@ public class AnonClassInitMethodSource implements soot.MethodSource {
     public void setFieldList(ArrayList list){
         fields = list;
     }
+
+    private soot.Type superOuterType = null;
+    private soot.Type thisOuterType = null;
+
+    public void superOuterType(soot.Type t){
+        superOuterType = t;
+    }
+
+    public void thisOuterType(soot.Type t){
+        thisOuterType = t;
+    }
     
     public soot.Body getBody(soot.SootMethod sootMethod, String phaseName){
         //System.out.println("getting method: "+sootMethod.getName()+" for class: "+sootMethod.getDeclaringClass());            
@@ -33,17 +44,18 @@ public class AnonClassInitMethodSource implements soot.MethodSource {
        
         ArrayList invokeList = new ArrayList();
         ArrayList invokeTypeList = new ArrayList();
-        soot.Local outerLocal = null;
         
         int numParams = sootMethod.getParameterCount();
         int numFinals = 0;
         if (fields != null){
             numFinals = fields.size();
         }
-
+        
+        //System.out.println("fields : "+fields);
         int startFinals = numParams - numFinals;
         ArrayList paramsForFinals = new ArrayList();
 
+        soot.Local outerLocal = null;
         
         // param
         Iterator fIt = sootMethod.getParameterTypes().iterator();
@@ -54,11 +66,16 @@ public class AnonClassInitMethodSource implements soot.MethodSource {
             body.getLocals().add(local);
             soot.jimple.ParameterRef paramRef = soot.jimple.Jimple.v().newParameterRef(fType, counter);
             soot.jimple.Stmt stmt = soot.jimple.Jimple.v().newIdentityStmt(local, paramRef);
+
+            if (fType.equals(thisOuterType)){
+                outerLocal = local;
+            }
+            //System.out.println("counter: "+counter+" startFinals: "+startFinals);
             if ((counter != 0) && (counter < startFinals)){
                 invokeTypeList.add(fType);
                 invokeList.add(local);
             }
-            else if (counter == 0) {
+            else if ((counter == 0) && (!inStaticMethod)) {
                 outerLocal = local;   
             }
             else {
@@ -77,7 +94,22 @@ public class AnonClassInitMethodSource implements soot.MethodSource {
         body.getUnits().add(stmt);*/
                    
         // invoke
-        soot.SootMethod callMethod = sootMethod.getDeclaringClass().getSuperclass().getMethod("<init>",  invokeTypeList, soot.VoidType.v());
+        //System.out.println("super class of anon: "+sootMethod.getDeclaringClass().getSuperclass());
+        //System.out.println("super class of anon meths: "+sootMethod.getDeclaringClass().getSuperclass().getMethods());
+        //System.out.println("invoke type list: "+invokeTypeList);
+        SootClass superClass = sootMethod.getDeclaringClass().getSuperclass();
+        if ((superClass.getName().indexOf("$") != -1) && !soot.Modifier.isStatic(superClass.getModifiers())){
+            invokeTypeList.add(0, superOuterType);
+        }
+        SootMethod callMethod = sootMethod.getDeclaringClass().getSuperclass().getMethod("<init>",  invokeTypeList, VoidType.v());
+        if ((superClass.getName().indexOf("$") != -1) && !soot.Modifier.isStatic(superClass.getModifiers())){
+            if (superOuterType.equals(thisOuterType)){
+                invokeList.add(0, outerLocal);
+            }
+            else {
+                invokeList.add(0, Util.getThisGivenOuter(superOuterType, new HashMap(), body, new LocalGenerator(body), outerLocal));
+            }
+        }
         soot.jimple.InvokeExpr invoke = soot.jimple.Jimple.v().newSpecialInvokeExpr(thisLocal, callMethod, invokeList);
 
         soot.jimple.Stmt invokeStmt = soot.jimple.Jimple.v().newInvokeStmt(invoke);
@@ -85,6 +117,7 @@ public class AnonClassInitMethodSource implements soot.MethodSource {
         
         // field assign
         if (!inStaticMethod){
+            //System.out.println("looking for field this$0 in "+sootMethod.getDeclaringClass().getName()+" with type: "+outerClassType);
             soot.SootField field = sootMethod.getDeclaringClass().getField("this$0", outerClassType);
             soot.jimple.InstanceFieldRef ref = soot.jimple.Jimple.v().newInstanceFieldRef(thisLocal, field);
             soot.jimple.AssignStmt assign = soot.jimple.Jimple.v().newAssignStmt(ref, outerLocal);

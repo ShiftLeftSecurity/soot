@@ -23,7 +23,7 @@ public class QobjTrad extends Qobj {
                                               in).iterator(new Attribute[] { obj.v() });
         while (it.hasNext()) {
             Object[] tuple = (Object[]) it.next();
-            for (int i = 0; i < 1; i++) { this.add((AllocNode) tuple[0]); }
+            for (int i = 0; i < 1; i++) { add((AllocNode) tuple[0]); }
         }
     }
     

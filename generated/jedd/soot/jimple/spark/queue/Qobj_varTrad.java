@@ -26,7 +26,7 @@ public class Qobj_varTrad extends Qobj_var {
                                               in).iterator(new Attribute[] { obj.v(), var.v() });
         while (it.hasNext()) {
             Object[] tuple = (Object[]) it.next();
-            for (int i = 0; i < 2; i++) { this.add((AllocNode) tuple[0], (VarNode) tuple[1]); }
+            for (int i = 0; i < 2; i++) { add((AllocNode) tuple[0], (VarNode) tuple[1]); }
         }
     }
     

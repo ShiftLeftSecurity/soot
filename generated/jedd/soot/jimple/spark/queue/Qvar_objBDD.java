@@ -13,15 +13,15 @@ public final class Qvar_objBDD extends Qvar_obj {
     private LinkedList readers = new LinkedList();
     
     public void add(VarNode _var, AllocNode _obj) {
-        this.add(new jedd.internal.RelationContainer(new Attribute[] { var.v(), obj.v() },
-                                                     new PhysicalDomain[] { V1.v(), H1.v() },
-                                                     ("this.add(jedd.internal.Jedd.v().literal(new java.lang.Object" +
-                                                      "[...], new jedd.Attribute[...], new jedd.PhysicalDomain[...]" +
-                                                      ")) at /home/olhotak/soot-2-jedd/src/soot/jimple/spark/queue/" +
-                                                      "Qvar_objBDD.jedd:33,8-11"),
-                                                     jedd.internal.Jedd.v().literal(new Object[] { _var, _obj },
-                                                                                    new Attribute[] { var.v(), obj.v() },
-                                                                                    new PhysicalDomain[] { V1.v(), H1.v() })));
+        add(new jedd.internal.RelationContainer(new Attribute[] { var.v(), obj.v() },
+                                                new PhysicalDomain[] { V1.v(), H1.v() },
+                                                ("add(jedd.internal.Jedd.v().literal(new java.lang.Object[...]" +
+                                                 ", new jedd.Attribute[...], new jedd.PhysicalDomain[...])) at" +
+                                                 " /home/olhotak/soot-2-jedd/src/soot/jimple/spark/queue/Qvar_" +
+                                                 "objBDD.jedd:33,8-11"),
+                                                jedd.internal.Jedd.v().literal(new Object[] { _var, _obj },
+                                                                               new Attribute[] { var.v(), obj.v() },
+                                                                               new PhysicalDomain[] { V1.v(), H1.v() })));
     }
     
     public void add(final jedd.internal.RelationContainer in) {

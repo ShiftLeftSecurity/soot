@@ -86,8 +86,8 @@ public class BDDVirtualCalls extends AbsVirtualCalls
                 }
                 if( constant != null && Scene.v().containsClass(constant)) {
                     SootClass cls = Scene.v().getSootClass(constant);
-                    if( cls.declaresMethod(sigClinit) ) {
-                        SootMethod method = cls.getMethod(sigClinit);
+                    for( Iterator methodIt = EntryPoints.v().clinitsOf(cls).iterator(); methodIt.hasNext(); ) {
+                        final SootMethod method = (SootMethod) methodIt.next();
                         stringConstants |= new { an=>obj, method=>tgtm };
                     }
                 }

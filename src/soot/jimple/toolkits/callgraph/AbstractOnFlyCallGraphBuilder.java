@@ -161,8 +161,11 @@ public abstract class AbstractOnFlyCallGraphBuilder
                     } 
                 }
                 if( ie instanceof StaticInvokeExpr ) {
-                    addEdge( source, s, ie.getMethod().getDeclaringClass(),
-                        sigClinit, Kind.CLINIT );
+                    SootClass cl = ie.getMethod().getDeclaringClass();
+                    for( Iterator clinitIt = EntryPoints.v().clinitsOf(cl).iterator(); clinitIt.hasNext(); ) {
+                        final SootMethod clinit = (SootMethod) clinitIt.next();
+                        addEdge( source, s, clinit, Kind.CLINIT );
+                    }
                 }
                 if( ie.getMethod().getNumberedSubSignature() == sigForName ) {
                     Value className = ie.getArg(0);
@@ -192,21 +195,30 @@ public abstract class AbstractOnFlyCallGraphBuilder
                 FieldRef fr = (FieldRef) s.getFieldRef();
                 if( fr instanceof StaticFieldRef ) {
                     SootClass cl = fr.getField().getDeclaringClass();
-                    addEdge( source, s, cl, sigClinit, Kind.CLINIT );
+                    for( Iterator clinitIt = EntryPoints.v().clinitsOf(cl).iterator(); clinitIt.hasNext(); ) {
+                        final SootMethod clinit = (SootMethod) clinitIt.next();
+                        addEdge( source, s, clinit, Kind.CLINIT );
+                    }
                 }
             }
             if( s instanceof AssignStmt ) {
                 Value rhs = ((AssignStmt)s).getRightOp();
                 if( rhs instanceof NewExpr ) {
                     NewExpr r = (NewExpr) rhs;
-                    addEdge( source, s, r.getBaseType().getSootClass(),
-                            sigClinit, Kind.CLINIT );
+                    SootClass cl = r.getBaseType().getSootClass();
+                    for( Iterator clinitIt = EntryPoints.v().clinitsOf(cl).iterator(); clinitIt.hasNext(); ) {
+                        final SootMethod clinit = (SootMethod) clinitIt.next();
+                        addEdge( source, s, clinit, Kind.CLINIT );
+                    }
                 } else if( rhs instanceof NewArrayExpr || rhs instanceof NewMultiArrayExpr ) {
                     Type t = rhs.getType();
                     if( t instanceof ArrayType ) t = ((ArrayType)t).baseType;
                     if( t instanceof RefType ) {
-                        addEdge( source, s, ((RefType) t).getSootClass(),
-                                sigClinit, Kind.CLINIT );
+                        SootClass cl = ((RefType) t).getSootClass();
+                        for( Iterator clinitIt = EntryPoints.v().clinitsOf(cl).iterator(); clinitIt.hasNext(); ) {
+                            final SootMethod clinit = (SootMethod) clinitIt.next();
+                            addEdge( source, s, clinit, Kind.CLINIT );
+                        }
                     }
                 }
             }
@@ -237,7 +249,11 @@ public abstract class AbstractOnFlyCallGraphBuilder
                 if( !sootcls.isApplicationClass() ) {
                     sootcls.setLibraryClass();
                 }
-                addEdge( src, srcUnit, sootcls, sigClinit, Kind.CLINIT );
+                for( Iterator clinitIt = EntryPoints.v().clinitsOf(sootcls).iterator(); clinitIt.hasNext(); ) {
+                    final SootMethod clinit = (SootMethod) clinitIt.next();
+                    addEdge( src, srcUnit, clinit, Kind.CLINIT );
+                }
+
             }
         }
     }
@@ -265,8 +281,6 @@ public abstract class AbstractOnFlyCallGraphBuilder
         findOrAdd( "void finalize()" );
     protected final NumberedString sigExit = Scene.v().getSubSigNumberer().
         findOrAdd( "void exit()" );
-    protected final NumberedString sigClinit = Scene.v().getSubSigNumberer().
-        findOrAdd( "void <clinit>()" );
     protected final NumberedString sigStart = Scene.v().getSubSigNumberer().
         findOrAdd( "void start()" );
     protected final NumberedString sigRun = Scene.v().getSubSigNumberer().

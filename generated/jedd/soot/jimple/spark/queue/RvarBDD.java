@@ -21,11 +21,11 @@ public final class RvarBDD extends Rvar {
     
     public RvarBDD(final jedd.internal.RelationContainer bdd) {
         this();
-        this.add(new jedd.internal.RelationContainer(new Attribute[] { var.v() },
-                                                     new PhysicalDomain[] { V1.v() },
-                                                     ("this.add(bdd) at /home/olhotak/soot-2-jedd/src/soot/jimple/s" +
-                                                      "park/queue/RvarBDD.jedd:33,45-48"),
-                                                     bdd));
+        add(new jedd.internal.RelationContainer(new Attribute[] { var.v() },
+                                                new PhysicalDomain[] { V1.v() },
+                                                ("add(bdd) at /home/olhotak/soot-2-jedd/src/soot/jimple/spark/" +
+                                                 "queue/RvarBDD.jedd:33,45-48"),
+                                                bdd));
     }
     
     RvarBDD() {

@@ -23,7 +23,7 @@ public class QvarTrad extends Qvar {
                                               in).iterator(new Attribute[] { var.v() });
         while (it.hasNext()) {
             Object[] tuple = (Object[]) it.next();
-            for (int i = 0; i < 1; i++) { this.add((VarNode) tuple[0]); }
+            for (int i = 0; i < 1; i++) { add((VarNode) tuple[0]); }
         }
     }
     

@@ -34,8 +34,8 @@ public class BDDCallGraph extends AbsCallGraph {
                                               in.get());
         newEdges.eqMinus(edges);
         edges.eqUnion(newEdges);
-        out.add(new jedd.internal.RelationContainer(new jedd.Attribute[] { tgtc.v(), stmt.v(), srcm.v(), tgtm.v(), kind.v(), srcc.v() },
-                                                    new jedd.PhysicalDomain[] { V2.v(), ST.v(), T1.v(), T2.v(), FD.v(), V1.v() },
+        out.add(new jedd.internal.RelationContainer(new jedd.Attribute[] { stmt.v(), tgtc.v(), kind.v(), srcm.v(), tgtm.v(), srcc.v() },
+                                                    new jedd.PhysicalDomain[] { ST.v(), V2.v(), FD.v(), T1.v(), T2.v(), V1.v() },
                                                     ("out.add(edges) at /home/olhotak/soot-2-jedd/src/soot/jimple/" +
                                                      "spark/BDDCallGraph.jedd:39,8-11"),
                                                     edges));
@@ -43,8 +43,8 @@ public class BDDCallGraph extends AbsCallGraph {
     }
     
     public Rsrcc_srcm_stmt_kind_tgtc_tgtm edgesOutOf(Rctxt_method methods) {
-        return new Rsrcc_srcm_stmt_kind_tgtc_tgtmBDD(new jedd.internal.RelationContainer(new jedd.Attribute[] { stmt.v(), tgtc.v(), srcm.v(), tgtm.v(), srcc.v(), kind.v() },
-                                                                                         new jedd.PhysicalDomain[] { ST.v(), V2.v(), T1.v(), T2.v(), V1.v(), FD.v() },
+        return new Rsrcc_srcm_stmt_kind_tgtc_tgtmBDD(new jedd.internal.RelationContainer(new jedd.Attribute[] { stmt.v(), tgtc.v(), kind.v(), srcm.v(), tgtm.v(), srcc.v() },
+                                                                                         new jedd.PhysicalDomain[] { ST.v(), V2.v(), FD.v(), T1.v(), T2.v(), V1.v() },
                                                                                          ("new soot.jimple.spark.queue.Rsrcc_srcm_stmt_kind_tgtc_tgtmBD" +
                                                                                           "D(...) at /home/olhotak/soot-2-jedd/src/soot/jimple/spark/BD" +
                                                                                           "DCallGraph.jedd:43,15-18"),
@@ -54,8 +54,8 @@ public class BDDCallGraph extends AbsCallGraph {
     }
     
     public Rsrcc_srcm_stmt_kind_tgtc_tgtm edgesOutOf(MethodOrMethodContext m) {
-        return new Rsrcc_srcm_stmt_kind_tgtc_tgtmBDD(new jedd.internal.RelationContainer(new jedd.Attribute[] { stmt.v(), tgtc.v(), srcm.v(), tgtm.v(), srcc.v(), kind.v() },
-                                                                                         new jedd.PhysicalDomain[] { ST.v(), V2.v(), T1.v(), T2.v(), V1.v(), FD.v() },
+        return new Rsrcc_srcm_stmt_kind_tgtc_tgtmBDD(new jedd.internal.RelationContainer(new jedd.Attribute[] { stmt.v(), tgtc.v(), kind.v(), srcm.v(), tgtm.v(), srcc.v() },
+                                                                                         new jedd.PhysicalDomain[] { ST.v(), V2.v(), FD.v(), T1.v(), T2.v(), V1.v() },
                                                                                          ("new soot.jimple.spark.queue.Rsrcc_srcm_stmt_kind_tgtc_tgtmBD" +
                                                                                           "D(...) at /home/olhotak/soot-2-jedd/src/soot/jimple/spark/BD" +
                                                                                           "DCallGraph.jedd:47,15-18"),
@@ -67,8 +67,8 @@ public class BDDCallGraph extends AbsCallGraph {
     }
     
     public Rsrcc_srcm_stmt_kind_tgtc_tgtm edges() {
-        return new Rsrcc_srcm_stmt_kind_tgtc_tgtmBDD(new jedd.internal.RelationContainer(new jedd.Attribute[] { tgtc.v(), stmt.v(), srcm.v(), tgtm.v(), kind.v(), srcc.v() },
-                                                                                         new jedd.PhysicalDomain[] { V2.v(), ST.v(), T1.v(), T2.v(), FD.v(), V1.v() },
+        return new Rsrcc_srcm_stmt_kind_tgtc_tgtmBDD(new jedd.internal.RelationContainer(new jedd.Attribute[] { stmt.v(), tgtc.v(), kind.v(), srcm.v(), tgtm.v(), srcc.v() },
+                                                                                         new jedd.PhysicalDomain[] { ST.v(), V2.v(), FD.v(), T1.v(), T2.v(), V1.v() },
                                                                                          ("new soot.jimple.spark.queue.Rsrcc_srcm_stmt_kind_tgtc_tgtmBD" +
                                                                                           "D(...) at /home/olhotak/soot-2-jedd/src/soot/jimple/spark/BD" +
                                                                                           "DCallGraph.jedd:53,15-18"),
