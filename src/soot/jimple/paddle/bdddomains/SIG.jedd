@@ -4,6 +4,6 @@ import soot.*;
 
 public class SIG(20) extends Domain {
     public Numberer numberer() {
-        return Scene.v().getSubSigNumberer();
+        return new soot.util.JeddNumberer( Scene.v().getSubSigNumberer() );
     }
 }

@@ -35,7 +35,6 @@ import java.io.*;
 import soot.jimple.toolkits.invoke.*;
 import soot.jimple.toolkits.callgraph.*;
 import soot.jimple.toolkits.pointer.*;
-import jedd.*;
 import soot.toolkits.exceptions.ThrowAnalysis;
 import soot.toolkits.exceptions.PedanticThrowAnalysis;
 import soot.toolkits.exceptions.UnitThrowAnalysis;

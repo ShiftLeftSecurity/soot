@@ -1,5 +1,6 @@
 soot.PhaseOptions
 soot.jimple.toolkits.callgraph.VirtualCalls
+soot.jimple.spark.fieldrw.FieldTagger
 soot.util.SharedBitSetCache
 soot.options.Options
 soot.jimple.toolkits.callgraph.CHATransformer
@@ -17,6 +18,7 @@ soot.coffi.CONSTANT_Utf8_collector
 soot.dava.toolkits.base.finders.AbruptEdgeFinder
 soot.jimple.toolkits.base.Aggregator
 soot.jimple.toolkits.annotation.arraycheck.ArrayBoundsChecker
+soot.jimple.spark.pag.ArrayElement
 soot.jimple.paddle.ArrayElement
 soot.jimple.toolkits.annotation.tags.ArrayNullTagAggregator
 soot.dava.toolkits.base.AST.ASTWalker
@@ -44,6 +46,7 @@ soot.coffi.Double2ndHalfType
 soot.DoubleType
 soot.baf.DoubleWordType
 soot.jimple.toolkits.pointer.DumbPointerAnalysis
+soot.jimple.spark.sets.EmptyPointsToSet
 soot.jimple.paddle.EmptyPointsToSet
 soot.ErroneousType
 soot.dava.toolkits.base.finders.ExceptionFinder
@@ -118,6 +121,7 @@ soot.shimple.ShimpleTransformer
 soot.shimple.toolkits.scalar.SConstantPropagatorAndFolder
 soot.ShortType
 soot.jimple.toolkits.pointer.SideEffectTagger
+soot.jimple.spark.SparkTransformer
 soot.jimple.paddle.PaddleTransformer
 soot.jimple.toolkits.invoke.StaticInliner
 soot.jimple.toolkits.invoke.StaticMethodBinder
@@ -139,6 +143,9 @@ soot.coffi.UnusuableType
 soot.dava.toolkits.base.AST.UselessTryRemover
 soot.VoidType
 soot.baf.WordType
+soot.jimple.spark.fieldrw.FieldReadTagAggregator
+soot.jimple.spark.fieldrw.FieldWriteTagAggregator
+soot.jimple.spark.fieldrw.FieldTagAggregator
 soot.EntryPoints
 soot.jimple.toolkits.annotation.callgraph.CallGraphTagger
 soot.jimple.toolkits.annotation.nullcheck.NullPointerColorer

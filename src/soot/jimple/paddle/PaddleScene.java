@@ -24,8 +24,8 @@ import soot.jimple.paddle.bdddomains.*;
 import soot.options.*;
 import java.util.*;
 import java.util.zip.*;
-import jedd.*;
 import java.io.*;
+import jedd.*;
 
 /** This class puts all of the pieces of Paddle together and connects them
  * with queues.

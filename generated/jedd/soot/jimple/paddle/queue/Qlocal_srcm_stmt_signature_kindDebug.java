@@ -21,8 +21,8 @@ public class Qlocal_srcm_stmt_signature_kindDebug extends Qlocal_srcm_stmt_signa
     
     public void add(final jedd.internal.RelationContainer in) {
         Iterator it =
-          new jedd.internal.RelationContainer(new Attribute[] { srcm.v(), local.v(), kind.v(), signature.v(), stmt.v() },
-                                              new PhysicalDomain[] { T1.v(), V1.v(), FD.v(), H2.v(), ST.v() },
+          new jedd.internal.RelationContainer(new Attribute[] { srcm.v(), local.v(), signature.v(), stmt.v(), kind.v() },
+                                              new PhysicalDomain[] { T1.v(), V1.v(), H2.v(), ST.v(), FD.v() },
                                               ("in.iterator(new jedd.Attribute[...]) at /home/olhotak/soot-2" +
                                                "-jedd/src/soot/jimple/paddle/queue/Qlocal_srcm_stmt_signatur" +
                                                "e_kindDebug.jedd:38,22-24"),

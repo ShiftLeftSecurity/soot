@@ -4,7 +4,7 @@ import jedd.*;
 import soot.*;
 
 public class STMT extends Domain {
-    public Numberer numberer() { return Scene.v().getUnitNumberer(); }
+    public Numberer numberer() { return new soot.util.JeddNumberer(Scene.v().getUnitNumberer()); }
     
     public final int bits = 20;
     

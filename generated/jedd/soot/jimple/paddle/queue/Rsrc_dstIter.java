@@ -45,8 +45,8 @@ public class Rsrc_dstIter extends Rsrc_dst {
                                                        new Attribute[] { src.v(), dst.v() },
                                                        new PhysicalDomain[] { V1.v(), V2.v() }));
         }
-        return new jedd.internal.RelationContainer(new Attribute[] { dst.v(), src.v() },
-                                                   new PhysicalDomain[] { V2.v(), V1.v() },
+        return new jedd.internal.RelationContainer(new Attribute[] { src.v(), dst.v() },
+                                                   new PhysicalDomain[] { V1.v(), V2.v() },
                                                    ("return ret; at /home/olhotak/soot-2-jedd/src/soot/jimple/pad" +
                                                     "dle/queue/Rsrc_dstIter.jedd:50,8-14"),
                                                    ret);

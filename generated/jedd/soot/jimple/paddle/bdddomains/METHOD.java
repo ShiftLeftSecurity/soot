@@ -4,7 +4,7 @@ import jedd.*;
 import soot.*;
 
 public class METHOD extends Domain {
-    public Numberer numberer() { return Scene.v().getMethodNumberer(); }
+    public Numberer numberer() { return new soot.util.JeddNumberer(Scene.v().getMethodNumberer()); }
     
     public final int bits = 20;
     

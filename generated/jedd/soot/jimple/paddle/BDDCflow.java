@@ -101,7 +101,7 @@ public class BDDCflow {
                                                "edd.PhysicalDomain[...]); at /home/olhotak/soot-2-jedd/src/s" +
                                                "oot/jimple/paddle/BDDCflow.jedd:61,27-38"),
                                               jedd.internal.Jedd.v().compose(jedd.internal.Jedd.v().read(jedd.internal.Jedd.v().project(edges,
-                                                                                                                                        new jedd.PhysicalDomain[] { V1.v(), V2.v(), ST.v() })),
+                                                                                                                                        new jedd.PhysicalDomain[] { V2.v(), ST.v(), V1.v() })),
                                                                              wantedKinds,
                                                                              new jedd.PhysicalDomain[] { FD.v() }));
         final jedd.internal.RelationContainer edgeClosure =
@@ -114,8 +114,8 @@ public class BDDCflow {
                                                "icalDomain[...]); at /home/olhotak/soot-2-jedd/src/soot/jimp" +
                                                "le/paddle/BDDCflow.jedd:64,27-38"),
                                               jedd.internal.Jedd.v().replace(wantedEdges,
-                                                                             new jedd.PhysicalDomain[] { T2.v(), T1.v() },
-                                                                             new jedd.PhysicalDomain[] { T3.v(), T2.v() }));
+                                                                             new jedd.PhysicalDomain[] { T1.v(), T2.v() },
+                                                                             new jedd.PhysicalDomain[] { T2.v(), T3.v() }));
         while (true) {
             final jedd.internal.RelationContainer oldClosure =
               new jedd.internal.RelationContainer(new jedd.Attribute[] { srcm.v(), tgtm.v() },
@@ -134,21 +134,21 @@ public class BDDCflow {
                                                                new jedd.PhysicalDomain[] { T1.v() }));
             if (jedd.internal.Jedd.v().equals(jedd.internal.Jedd.v().read(edgeClosure), oldClosure)) break;
             System.out.println("edgeClosure has size: " +
-                               new jedd.internal.RelationContainer(new jedd.Attribute[] { tgtm.v(), srcm.v() },
-                                                                   new jedd.PhysicalDomain[] { T3.v(), T2.v() },
+                               new jedd.internal.RelationContainer(new jedd.Attribute[] { srcm.v(), tgtm.v() },
+                                                                   new jedd.PhysicalDomain[] { T2.v(), T3.v() },
                                                                    ("edgeClosure.size() at /home/olhotak/soot-2-jedd/src/soot/jim" +
                                                                     "ple/paddle/BDDCflow.jedd:71,57-68"),
                                                                    edgeClosure).size());
             System.out.println("edgeClosure has nodes: " +
-                               new jedd.internal.RelationContainer(new jedd.Attribute[] { tgtm.v(), srcm.v() },
-                                                                   new jedd.PhysicalDomain[] { T3.v(), T2.v() },
+                               new jedd.internal.RelationContainer(new jedd.Attribute[] { srcm.v(), tgtm.v() },
+                                                                   new jedd.PhysicalDomain[] { T2.v(), T3.v() },
                                                                    ("edgeClosure.numNodes() at /home/olhotak/soot-2-jedd/src/soot" +
                                                                     "/jimple/paddle/BDDCflow.jedd:72,58-69"),
                                                                    edgeClosure).numNodes());
         }
         mayCflow.eqUnion(jedd.internal.Jedd.v().join(jedd.internal.Jedd.v().read(jedd.internal.Jedd.v().replace(edgeClosure,
-                                                                                                                new jedd.PhysicalDomain[] { T3.v(), T2.v() },
-                                                                                                                new jedd.PhysicalDomain[] { T2.v(), T1.v() })),
+                                                                                                                new jedd.PhysicalDomain[] { T2.v(), T3.v() },
+                                                                                                                new jedd.PhysicalDomain[] { T1.v(), T2.v() })),
                                                      entryPoints,
                                                      new jedd.PhysicalDomain[] { T1.v() }));
         while (true) {
@@ -160,33 +160,31 @@ public class BDDCflow {
                                                    "dle.bdddomains.T2> oldMayCflow = mayCflow; at /home/olhotak/" +
                                                    "soot-2-jedd/src/soot/jimple/paddle/BDDCflow.jedd:78,25-36"),
                                                   mayCflow);
-            mayCflow.eqUnion(jedd.internal.Jedd.v().join(jedd.internal.Jedd.v().read(jedd.internal.Jedd.v().replace(edgeClosure,
-                                                                                                                    new jedd.PhysicalDomain[] { T3.v(), T2.v() },
-                                                                                                                    new jedd.PhysicalDomain[] { T2.v(), T1.v() })),
-                                                         jedd.internal.Jedd.v().replace(jedd.internal.Jedd.v().project(mayCflow,
+            mayCflow.eqUnion(jedd.internal.Jedd.v().replace(jedd.internal.Jedd.v().join(jedd.internal.Jedd.v().read(edgeClosure),
+                                                                                        jedd.internal.Jedd.v().project(mayCflow,
                                                                                                                        new jedd.PhysicalDomain[] { T1.v() }),
-                                                                                        new jedd.PhysicalDomain[] { T2.v() },
-                                                                                        new jedd.PhysicalDomain[] { T1.v() }),
-                                                         new jedd.PhysicalDomain[] { T1.v() }));
+                                                                                        new jedd.PhysicalDomain[] { T2.v() }),
+                                                            new jedd.PhysicalDomain[] { T2.v(), T3.v() },
+                                                            new jedd.PhysicalDomain[] { T1.v(), T2.v() }));
             if (jedd.internal.Jedd.v().equals(jedd.internal.Jedd.v().read(mayCflow), oldMayCflow)) break;
             System.out.println("mayCflow has size: " +
-                               new jedd.internal.RelationContainer(new jedd.Attribute[] { tgtm.v(), srcm.v() },
-                                                                   new jedd.PhysicalDomain[] { T2.v(), T1.v() },
+                               new jedd.internal.RelationContainer(new jedd.Attribute[] { srcm.v(), tgtm.v() },
+                                                                   new jedd.PhysicalDomain[] { T1.v(), T2.v() },
                                                                    ("mayCflow.size() at /home/olhotak/soot-2-jedd/src/soot/jimple" +
                                                                     "/paddle/BDDCflow.jedd:81,54-62"),
                                                                    mayCflow).size());
             System.out.println("mayCflow has nodes: " +
-                               new jedd.internal.RelationContainer(new jedd.Attribute[] { tgtm.v(), srcm.v() },
-                                                                   new jedd.PhysicalDomain[] { T2.v(), T1.v() },
+                               new jedd.internal.RelationContainer(new jedd.Attribute[] { srcm.v(), tgtm.v() },
+                                                                   new jedd.PhysicalDomain[] { T1.v(), T2.v() },
                                                                    ("mayCflow.numNodes() at /home/olhotak/soot-2-jedd/src/soot/ji" +
                                                                     "mple/paddle/BDDCflow.jedd:82,55-63"),
                                                                    mayCflow).numNodes());
         }
         final jedd.internal.RelationContainer allSources =
           new jedd.internal.RelationContainer(new jedd.Attribute[] { srcm.v() },
-                                              new jedd.PhysicalDomain[] { T2.v() },
+                                              new jedd.PhysicalDomain[] { T1.v() },
                                               ("<soot.jimple.paddle.bdddomains.srcm:soot.jimple.paddle.bdddo" +
-                                               "mains.T2> allSources = jedd.internal.Jedd.v().trueBDD(); at " +
+                                               "mains.T1> allSources = jedd.internal.Jedd.v().trueBDD(); at " +
                                                "/home/olhotak/soot-2-jedd/src/soot/jimple/paddle/BDDCflow.je" +
                                                "dd:112,15-25"),
                                               jedd.internal.Jedd.v().trueBDD());
@@ -195,19 +193,20 @@ public class BDDCflow {
                                               new jedd.PhysicalDomain[] { T1.v(), T2.v() },
                                               ("<soot.jimple.paddle.bdddomains.srcm:soot.jimple.paddle.bdddo" +
                                                "mains.T1, soot.jimple.paddle.bdddomains.tgtm:soot.jimple.pad" +
-                                               "dle.bdddomains.T2> identity = jedd.internal.Jedd.v().copy(al" +
-                                               "lSources, new jedd.PhysicalDomain[...], new jedd.PhysicalDom" +
-                                               "ain[...]); at /home/olhotak/soot-2-jedd/src/soot/jimple/padd" +
-                                               "le/BDDCflow.jedd:113,21-29"),
-                                              jedd.internal.Jedd.v().copy(allSources,
+                                               "dle.bdddomains.T2> identity = jedd.internal.Jedd.v().copy(je" +
+                                               "dd.internal.Jedd.v().replace(allSources, new jedd.PhysicalDo" +
+                                               "main[...], new jedd.PhysicalDomain[...]), new jedd.PhysicalD" +
+                                               "omain[...], new jedd.PhysicalDomain[...]); at /home/olhotak/" +
+                                               "soot-2-jedd/src/soot/jimple/paddle/BDDCflow.jedd:113,21-29"),
+                                              jedd.internal.Jedd.v().copy(jedd.internal.Jedd.v().replace(allSources,
+                                                                                                         new jedd.PhysicalDomain[] { T1.v() },
+                                                                                                         new jedd.PhysicalDomain[] { T2.v() }),
                                                                           new jedd.PhysicalDomain[] { T2.v() },
                                                                           new jedd.PhysicalDomain[] { T1.v() }));
         notMustPreds.eqUnion(jedd.internal.Jedd.v().join(jedd.internal.Jedd.v().read(jedd.internal.Jedd.v().replace(entryPoints,
                                                                                                                     new jedd.PhysicalDomain[] { T1.v() },
                                                                                                                     new jedd.PhysicalDomain[] { T2.v() })),
-                                                         jedd.internal.Jedd.v().replace(allSources,
-                                                                                        new jedd.PhysicalDomain[] { T2.v() },
-                                                                                        new jedd.PhysicalDomain[] { T1.v() }),
+                                                         allSources,
                                                          new jedd.PhysicalDomain[] {  }));
         while (true) {
             final jedd.internal.RelationContainer oldNotMustPreds =
@@ -229,14 +228,14 @@ public class BDDCflow {
                                                                 new jedd.PhysicalDomain[] { T3.v() }));
             if (jedd.internal.Jedd.v().equals(jedd.internal.Jedd.v().read(oldNotMustPreds), notMustPreds)) break;
             System.out.println("notMustPreds has size: " +
-                               new jedd.internal.RelationContainer(new jedd.Attribute[] { tgtm.v(), srcm.v() },
-                                                                   new jedd.PhysicalDomain[] { T2.v(), T1.v() },
+                               new jedd.internal.RelationContainer(new jedd.Attribute[] { srcm.v(), tgtm.v() },
+                                                                   new jedd.PhysicalDomain[] { T1.v(), T2.v() },
                                                                    ("notMustPreds.size() at /home/olhotak/soot-2-jedd/src/soot/ji" +
                                                                     "mple/paddle/BDDCflow.jedd:120,58-70"),
                                                                    notMustPreds).size());
             System.out.println("notMustPreds has nodes: " +
-                               new jedd.internal.RelationContainer(new jedd.Attribute[] { tgtm.v(), srcm.v() },
-                                                                   new jedd.PhysicalDomain[] { T2.v(), T1.v() },
+                               new jedd.internal.RelationContainer(new jedd.Attribute[] { srcm.v(), tgtm.v() },
+                                                                   new jedd.PhysicalDomain[] { T1.v(), T2.v() },
                                                                    ("notMustPreds.numNodes() at /home/olhotak/soot-2-jedd/src/soo" +
                                                                     "t/jimple/paddle/BDDCflow.jedd:121,59-71"),
                                                                    notMustPreds).numNodes());
@@ -244,14 +243,14 @@ public class BDDCflow {
         mustCflow.eq(jedd.internal.Jedd.v().minus(jedd.internal.Jedd.v().read(jedd.internal.Jedd.v().trueBDD()),
                                                   notMustPreds));
         System.out.println("mustCflow has size: " +
-                           new jedd.internal.RelationContainer(new jedd.Attribute[] { tgtm.v(), srcm.v() },
-                                                               new jedd.PhysicalDomain[] { T2.v(), T1.v() },
+                           new jedd.internal.RelationContainer(new jedd.Attribute[] { srcm.v(), tgtm.v() },
+                                                               new jedd.PhysicalDomain[] { T1.v(), T2.v() },
                                                                ("mustCflow.size() at /home/olhotak/soot-2-jedd/src/soot/jimpl" +
                                                                 "e/paddle/BDDCflow.jedd:125,51-60"),
                                                                mustCflow).size());
         System.out.println("mustCflow has nodes: " +
-                           new jedd.internal.RelationContainer(new jedd.Attribute[] { tgtm.v(), srcm.v() },
-                                                               new jedd.PhysicalDomain[] { T2.v(), T1.v() },
+                           new jedd.internal.RelationContainer(new jedd.Attribute[] { srcm.v(), tgtm.v() },
+                                                               new jedd.PhysicalDomain[] { T1.v(), T2.v() },
                                                                ("mustCflow.numNodes() at /home/olhotak/soot-2-jedd/src/soot/j" +
                                                                 "imple/paddle/BDDCflow.jedd:126,52-61"),
                                                                mustCflow).numNodes());

@@ -5,6 +5,6 @@ import soot.*;
 
 public class VAR(20) extends Domain {
     public Numberer numberer() {
-        return PaddleNumberers.v().varNodeNumberer();
+        return new soot.util.JeddNumberer( PaddleNumberers.v().varNodeNumberer() );
     }
 }

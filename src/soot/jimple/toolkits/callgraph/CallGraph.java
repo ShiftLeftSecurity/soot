@@ -207,9 +207,8 @@ public class CallGraph
     public String toString() {
         QueueReader reader = listener();
         StringBuffer out = new StringBuffer();
-        while(true) {
+        while(reader.hasNext()) {
             Edge e = (Edge) reader.next();
-            if( e == null ) break;
             out.append( e.toString() + "\n" );
         }
         return out.toString();

@@ -5,6 +5,6 @@ import soot.*;
 
 public class OBJ(20) extends Domain {
     public Numberer numberer() {
-        return PaddleNumberers.v().allocNodeNumberer();
+        return new soot.util.JeddNumberer( PaddleNumberers.v().allocNodeNumberer() );
     }
 }

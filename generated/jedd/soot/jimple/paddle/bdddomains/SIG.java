@@ -4,7 +4,7 @@ import jedd.*;
 import soot.*;
 
 public class SIG extends Domain {
-    public Numberer numberer() { return Scene.v().getSubSigNumberer(); }
+    public Numberer numberer() { return new soot.util.JeddNumberer(Scene.v().getSubSigNumberer()); }
     
     public final int bits = 20;
     

@@ -4,6 +4,6 @@ import soot.*;
 
 public class KIND(4) extends Domain {
     public Numberer numberer() {
-        return Scene.v().kindNumberer();
+        return new soot.util.JeddNumberer( Scene.v().kindNumberer() );
     }
 }

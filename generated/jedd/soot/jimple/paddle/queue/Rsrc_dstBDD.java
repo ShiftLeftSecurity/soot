@@ -22,8 +22,8 @@ public final class Rsrc_dstBDD extends Rsrc_dst {
     
     public Rsrc_dstBDD(final jedd.internal.RelationContainer bdd) {
         this();
-        add(new jedd.internal.RelationContainer(new Attribute[] { dst.v(), src.v() },
-                                                new PhysicalDomain[] { V2.v(), V1.v() },
+        add(new jedd.internal.RelationContainer(new Attribute[] { src.v(), dst.v() },
+                                                new PhysicalDomain[] { V1.v(), V2.v() },
                                                 ("add(bdd) at /home/olhotak/soot-2-jedd/src/soot/jimple/paddle" +
                                                  "/queue/Rsrc_dstBDD.jedd:33,57-60"),
                                                 bdd));
@@ -49,8 +49,8 @@ public final class Rsrc_dstBDD extends Rsrc_dst {
             public Object next() {
                 if (it == null || !it.hasNext()) {
                     it =
-                      new jedd.internal.RelationContainer(new Attribute[] { dst.v(), src.v() },
-                                                          new PhysicalDomain[] { V2.v(), V1.v() },
+                      new jedd.internal.RelationContainer(new Attribute[] { src.v(), dst.v() },
+                                                          new PhysicalDomain[] { V1.v(), V2.v() },
                                                           ("bdd.iterator(new jedd.Attribute[...]) at /home/olhotak/soot-" +
                                                            "2-jedd/src/soot/jimple/paddle/queue/Rsrc_dstBDD.jedd:45,25-2" +
                                                            "8"),
@@ -75,8 +75,8 @@ public final class Rsrc_dstBDD extends Rsrc_dst {
                                                "/soot/jimple/paddle/queue/Rsrc_dstBDD.jedd:55,25-28"),
                                               bdd);
         bdd.eq(jedd.internal.Jedd.v().falseBDD());
-        return new jedd.internal.RelationContainer(new Attribute[] { dst.v(), src.v() },
-                                                   new PhysicalDomain[] { V2.v(), V1.v() },
+        return new jedd.internal.RelationContainer(new Attribute[] { src.v(), dst.v() },
+                                                   new PhysicalDomain[] { V1.v(), V2.v() },
                                                    ("return ret; at /home/olhotak/soot-2-jedd/src/soot/jimple/pad" +
                                                     "dle/queue/Rsrc_dstBDD.jedd:57,8-14"),
                                                    ret);

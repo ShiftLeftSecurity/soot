@@ -4,7 +4,7 @@ import jedd.*;
 import soot.*;
 
 public class KIND extends Domain {
-    public Numberer numberer() { return Scene.v().kindNumberer(); }
+    public Numberer numberer() { return new soot.util.JeddNumberer(Scene.v().kindNumberer()); }
     
     public final int bits = 4;
     

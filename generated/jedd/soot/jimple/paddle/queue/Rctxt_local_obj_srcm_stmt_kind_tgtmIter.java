@@ -59,8 +59,8 @@ public class Rctxt_local_obj_srcm_stmt_kind_tgtmIter extends Rctxt_local_obj_src
                                                        new Attribute[] { ctxt.v(), local.v(), obj.v(), srcm.v(), stmt.v(), kind.v(), tgtm.v() },
                                                        new PhysicalDomain[] { V2.v(), V1.v(), H1.v(), T1.v(), ST.v(), FD.v(), T2.v() }));
         }
-        return new jedd.internal.RelationContainer(new Attribute[] { obj.v(), tgtm.v(), srcm.v(), local.v(), kind.v(), stmt.v(), ctxt.v() },
-                                                   new PhysicalDomain[] { H1.v(), T2.v(), T1.v(), V1.v(), FD.v(), ST.v(), V2.v() },
+        return new jedd.internal.RelationContainer(new Attribute[] { srcm.v(), local.v(), ctxt.v(), tgtm.v(), obj.v(), stmt.v(), kind.v() },
+                                                   new PhysicalDomain[] { T1.v(), V1.v(), V2.v(), T2.v(), H1.v(), ST.v(), FD.v() },
                                                    ("return ret; at /home/olhotak/soot-2-jedd/src/soot/jimple/pad" +
                                                     "dle/queue/Rctxt_local_obj_srcm_stmt_kind_tgtmIter.jedd:50,8-" +
                                                     "14"),

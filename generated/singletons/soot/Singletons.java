@@ -40,6 +40,12 @@ public class Singletons {
         return instance_soot_jimple_toolkits_callgraph_VirtualCalls;
     }
 
+    private soot.jimple.spark.fieldrw.FieldTagger instance_soot_jimple_spark_fieldrw_FieldTagger;
+    public soot.jimple.spark.fieldrw.FieldTagger soot_jimple_spark_fieldrw_FieldTagger() {
+        if( instance_soot_jimple_spark_fieldrw_FieldTagger == null ) instance_soot_jimple_spark_fieldrw_FieldTagger = new soot.jimple.spark.fieldrw.FieldTagger( g );
+        return instance_soot_jimple_spark_fieldrw_FieldTagger;
+    }
+
     private soot.util.SharedBitSetCache instance_soot_util_SharedBitSetCache;
     public soot.util.SharedBitSetCache soot_util_SharedBitSetCache() {
         if( instance_soot_util_SharedBitSetCache == null ) instance_soot_util_SharedBitSetCache = new soot.util.SharedBitSetCache( g );
@@ -140,6 +146,12 @@ public class Singletons {
     public soot.jimple.toolkits.annotation.arraycheck.ArrayBoundsChecker soot_jimple_toolkits_annotation_arraycheck_ArrayBoundsChecker() {
         if( instance_soot_jimple_toolkits_annotation_arraycheck_ArrayBoundsChecker == null ) instance_soot_jimple_toolkits_annotation_arraycheck_ArrayBoundsChecker = new soot.jimple.toolkits.annotation.arraycheck.ArrayBoundsChecker( g );
         return instance_soot_jimple_toolkits_annotation_arraycheck_ArrayBoundsChecker;
+    }
+
+    private soot.jimple.spark.pag.ArrayElement instance_soot_jimple_spark_pag_ArrayElement;
+    public soot.jimple.spark.pag.ArrayElement soot_jimple_spark_pag_ArrayElement() {
+        if( instance_soot_jimple_spark_pag_ArrayElement == null ) instance_soot_jimple_spark_pag_ArrayElement = new soot.jimple.spark.pag.ArrayElement( g );
+        return instance_soot_jimple_spark_pag_ArrayElement;
     }
 
     private soot.jimple.paddle.ArrayElement instance_soot_jimple_paddle_ArrayElement;
@@ -302,6 +314,12 @@ public class Singletons {
     public soot.jimple.toolkits.pointer.DumbPointerAnalysis soot_jimple_toolkits_pointer_DumbPointerAnalysis() {
         if( instance_soot_jimple_toolkits_pointer_DumbPointerAnalysis == null ) instance_soot_jimple_toolkits_pointer_DumbPointerAnalysis = new soot.jimple.toolkits.pointer.DumbPointerAnalysis( g );
         return instance_soot_jimple_toolkits_pointer_DumbPointerAnalysis;
+    }
+
+    private soot.jimple.spark.sets.EmptyPointsToSet instance_soot_jimple_spark_sets_EmptyPointsToSet;
+    public soot.jimple.spark.sets.EmptyPointsToSet soot_jimple_spark_sets_EmptyPointsToSet() {
+        if( instance_soot_jimple_spark_sets_EmptyPointsToSet == null ) instance_soot_jimple_spark_sets_EmptyPointsToSet = new soot.jimple.spark.sets.EmptyPointsToSet( g );
+        return instance_soot_jimple_spark_sets_EmptyPointsToSet;
     }
 
     private soot.jimple.paddle.EmptyPointsToSet instance_soot_jimple_paddle_EmptyPointsToSet;
@@ -748,6 +766,12 @@ public class Singletons {
         return instance_soot_jimple_toolkits_pointer_SideEffectTagger;
     }
 
+    private soot.jimple.spark.SparkTransformer instance_soot_jimple_spark_SparkTransformer;
+    public soot.jimple.spark.SparkTransformer soot_jimple_spark_SparkTransformer() {
+        if( instance_soot_jimple_spark_SparkTransformer == null ) instance_soot_jimple_spark_SparkTransformer = new soot.jimple.spark.SparkTransformer( g );
+        return instance_soot_jimple_spark_SparkTransformer;
+    }
+
     private soot.jimple.paddle.PaddleTransformer instance_soot_jimple_paddle_PaddleTransformer;
     public soot.jimple.paddle.PaddleTransformer soot_jimple_paddle_PaddleTransformer() {
         if( instance_soot_jimple_paddle_PaddleTransformer == null ) instance_soot_jimple_paddle_PaddleTransformer = new soot.jimple.paddle.PaddleTransformer( g );
@@ -872,6 +896,24 @@ public class Singletons {
     public soot.baf.WordType soot_baf_WordType() {
         if( instance_soot_baf_WordType == null ) instance_soot_baf_WordType = new soot.baf.WordType( g );
         return instance_soot_baf_WordType;
+    }
+
+    private soot.jimple.spark.fieldrw.FieldReadTagAggregator instance_soot_jimple_spark_fieldrw_FieldReadTagAggregator;
+    public soot.jimple.spark.fieldrw.FieldReadTagAggregator soot_jimple_spark_fieldrw_FieldReadTagAggregator() {
+        if( instance_soot_jimple_spark_fieldrw_FieldReadTagAggregator == null ) instance_soot_jimple_spark_fieldrw_FieldReadTagAggregator = new soot.jimple.spark.fieldrw.FieldReadTagAggregator( g );
+        return instance_soot_jimple_spark_fieldrw_FieldReadTagAggregator;
+    }
+
+    private soot.jimple.spark.fieldrw.FieldWriteTagAggregator instance_soot_jimple_spark_fieldrw_FieldWriteTagAggregator;
+    public soot.jimple.spark.fieldrw.FieldWriteTagAggregator soot_jimple_spark_fieldrw_FieldWriteTagAggregator() {
+        if( instance_soot_jimple_spark_fieldrw_FieldWriteTagAggregator == null ) instance_soot_jimple_spark_fieldrw_FieldWriteTagAggregator = new soot.jimple.spark.fieldrw.FieldWriteTagAggregator( g );
+        return instance_soot_jimple_spark_fieldrw_FieldWriteTagAggregator;
+    }
+
+    private soot.jimple.spark.fieldrw.FieldTagAggregator instance_soot_jimple_spark_fieldrw_FieldTagAggregator;
+    public soot.jimple.spark.fieldrw.FieldTagAggregator soot_jimple_spark_fieldrw_FieldTagAggregator() {
+        if( instance_soot_jimple_spark_fieldrw_FieldTagAggregator == null ) instance_soot_jimple_spark_fieldrw_FieldTagAggregator = new soot.jimple.spark.fieldrw.FieldTagAggregator( g );
+        return instance_soot_jimple_spark_fieldrw_FieldTagAggregator;
     }
 
     private soot.EntryPoints instance_soot_EntryPoints;

@@ -5,6 +5,6 @@ import soot.*;
 
 public class LOCAL(20) extends Domain {
     public Numberer numberer() {
-        return Scene.v().getLocalNumberer();
+        return new soot.util.JeddNumberer( Scene.v().getLocalNumberer() );
     }
 }

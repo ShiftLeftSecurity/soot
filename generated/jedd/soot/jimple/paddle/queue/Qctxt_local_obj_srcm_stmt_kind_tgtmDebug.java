@@ -27,8 +27,8 @@ public class Qctxt_local_obj_srcm_stmt_kind_tgtmDebug extends Qctxt_local_obj_sr
     
     public void add(final jedd.internal.RelationContainer in) {
         Iterator it =
-          new jedd.internal.RelationContainer(new Attribute[] { obj.v(), tgtm.v(), srcm.v(), local.v(), kind.v(), stmt.v(), ctxt.v() },
-                                              new PhysicalDomain[] { H1.v(), T2.v(), T1.v(), V1.v(), FD.v(), ST.v(), V2.v() },
+          new jedd.internal.RelationContainer(new Attribute[] { srcm.v(), local.v(), ctxt.v(), tgtm.v(), obj.v(), stmt.v(), kind.v() },
+                                              new PhysicalDomain[] { T1.v(), V1.v(), V2.v(), T2.v(), H1.v(), ST.v(), FD.v() },
                                               ("in.iterator(new jedd.Attribute[...]) at /home/olhotak/soot-2" +
                                                "-jedd/src/soot/jimple/paddle/queue/Qctxt_local_obj_srcm_stmt" +
                                                "_kind_tgtmDebug.jedd:38,22-24"),

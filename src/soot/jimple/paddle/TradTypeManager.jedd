@@ -23,7 +23,6 @@ import soot.util.*;
 import soot.jimple.paddle.queue.*;
 import soot.jimple.paddle.bdddomains.*;
 import java.util.*;
-import jedd.*;
 
 /** Keeps track of subtype relationships between PAG nodes.
  * @author Ondrej Lhotak

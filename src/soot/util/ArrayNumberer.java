@@ -19,7 +19,6 @@
 
 package soot.util;
 import java.util.*;
-import jedd.*;
 
 /** A class that numbers objects, so they can be placed in bitsets.
  *

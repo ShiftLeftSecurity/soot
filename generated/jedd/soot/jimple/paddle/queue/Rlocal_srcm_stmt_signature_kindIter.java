@@ -55,8 +55,8 @@ public class Rlocal_srcm_stmt_signature_kindIter extends Rlocal_srcm_stmt_signat
                                                        new Attribute[] { local.v(), srcm.v(), stmt.v(), signature.v(), kind.v() },
                                                        new PhysicalDomain[] { V1.v(), T1.v(), ST.v(), H2.v(), FD.v() }));
         }
-        return new jedd.internal.RelationContainer(new Attribute[] { srcm.v(), local.v(), kind.v(), signature.v(), stmt.v() },
-                                                   new PhysicalDomain[] { T1.v(), V1.v(), FD.v(), H2.v(), ST.v() },
+        return new jedd.internal.RelationContainer(new Attribute[] { srcm.v(), local.v(), signature.v(), stmt.v(), kind.v() },
+                                                   new PhysicalDomain[] { T1.v(), V1.v(), H2.v(), ST.v(), FD.v() },
                                                    ("return ret; at /home/olhotak/soot-2-jedd/src/soot/jimple/pad" +
                                                     "dle/queue/Rlocal_srcm_stmt_signature_kindIter.jedd:50,8-14"),
                                                    ret);

@@ -1,5 +1,4 @@
 package soot.util;
-import jedd.*;
 import java.util.*;
 
 public class MapNumberer implements Numberer {

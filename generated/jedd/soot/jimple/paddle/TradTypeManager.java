@@ -5,7 +5,6 @@ import soot.util.*;
 import soot.jimple.paddle.queue.*;
 import soot.jimple.paddle.bdddomains.*;
 import java.util.*;
-import jedd.*;
 
 public class TradTypeManager extends AbsTypeManager {
     TradTypeManager(Rvar vars, Robj allocs, FastHierarchy fh) {
@@ -59,47 +58,47 @@ public class TradTypeManager extends AbsTypeManager {
     
     public jedd.internal.RelationContainer get() {
         if (fh == null)
-            return new jedd.internal.RelationContainer(new Attribute[] {  },
-                                                       new PhysicalDomain[] {  },
+            return new jedd.internal.RelationContainer(new jedd.Attribute[] {  },
+                                                       new jedd.PhysicalDomain[] {  },
                                                        ("return jedd.internal.Jedd.v().trueBDD(); at /home/olhotak/so" +
-                                                        "ot-2-jedd/src/soot/jimple/paddle/TradTypeManager.jedd:79,25-" +
+                                                        "ot-2-jedd/src/soot/jimple/paddle/TradTypeManager.jedd:78,25-" +
                                                         "31"),
                                                        jedd.internal.Jedd.v().trueBDD());
         if (bddGetter == null) bddGetter = this.new BDDGetter();
-        return new jedd.internal.RelationContainer(new Attribute[] { var.v(), obj.v() },
-                                                   new PhysicalDomain[] { V1.v(), H1.v() },
+        return new jedd.internal.RelationContainer(new jedd.Attribute[] { var.v(), obj.v() },
+                                                   new jedd.PhysicalDomain[] { V1.v(), H1.v() },
                                                    ("return bddGetter.get(); at /home/olhotak/soot-2-jedd/src/soo" +
-                                                    "t/jimple/paddle/TradTypeManager.jedd:81,8-14"),
+                                                    "t/jimple/paddle/TradTypeManager.jedd:80,8-14"),
                                                    bddGetter.get());
     }
     
     class BDDGetter {
         private final jedd.internal.RelationContainer cachedTypeMasks =
-          new jedd.internal.RelationContainer(new Attribute[] { type.v(), obj.v() },
-                                              new PhysicalDomain[] { T1.v(), H1.v() },
+          new jedd.internal.RelationContainer(new jedd.Attribute[] { type.v(), obj.v() },
+                                              new jedd.PhysicalDomain[] { T1.v(), H1.v() },
                                               ("private <soot.jimple.paddle.bdddomains.type:soot.jimple.padd" +
                                                "le.bdddomains.T1, soot.jimple.paddle.bdddomains.obj> cachedT" +
                                                "ypeMasks = jedd.internal.Jedd.v().falseBDD() at /home/olhota" +
-                                               "k/soot-2-jedd/src/soot/jimple/paddle/TradTypeManager.jedd:84" +
+                                               "k/soot-2-jedd/src/soot/jimple/paddle/TradTypeManager.jedd:83" +
                                                ",16-30"),
                                               jedd.internal.Jedd.v().falseBDD());
         
         private final jedd.internal.RelationContainer cachedVarNodes =
-          new jedd.internal.RelationContainer(new Attribute[] { var.v(), type.v() },
-                                              new PhysicalDomain[] { V1.v(), T1.v() },
+          new jedd.internal.RelationContainer(new jedd.Attribute[] { var.v(), type.v() },
+                                              new jedd.PhysicalDomain[] { V1.v(), T1.v() },
                                               ("private <soot.jimple.paddle.bdddomains.var, soot.jimple.padd" +
                                                "le.bdddomains.type> cachedVarNodes = jedd.internal.Jedd.v()." +
                                                "falseBDD() at /home/olhotak/soot-2-jedd/src/soot/jimple/padd" +
-                                               "le/TradTypeManager.jedd:85,16-27"),
+                                               "le/TradTypeManager.jedd:84,16-27"),
                                               jedd.internal.Jedd.v().falseBDD());
         
         private final jedd.internal.RelationContainer cachedVarObj =
-          new jedd.internal.RelationContainer(new Attribute[] { var.v(), obj.v() },
-                                              new PhysicalDomain[] { V1.v(), H1.v() },
+          new jedd.internal.RelationContainer(new jedd.Attribute[] { var.v(), obj.v() },
+                                              new jedd.PhysicalDomain[] { V1.v(), H1.v() },
                                               ("private <soot.jimple.paddle.bdddomains.var, soot.jimple.padd" +
                                                "le.bdddomains.obj> cachedVarObj = jedd.internal.Jedd.v().fal" +
                                                "seBDD() at /home/olhotak/soot-2-jedd/src/soot/jimple/paddle/" +
-                                               "TradTypeManager.jedd:86,16-26"),
+                                               "TradTypeManager.jedd:85,16-26"),
                                               jedd.internal.Jedd.v().falseBDD());
         
         public jedd.internal.RelationContainer get() {
@@ -114,38 +113,38 @@ public class TradTypeManager extends AbsTypeManager {
                     while (bsi.hasNext()) {
                         int objNum = bsi.next();
                         cachedTypeMasks.eqUnion(jedd.internal.Jedd.v().literal(new Object[] { t, objNumberer.get(objNum) },
-                                                                               new Attribute[] { type.v(), obj.v() },
-                                                                               new PhysicalDomain[] { T1.v(), H1.v() }));
+                                                                               new jedd.Attribute[] { type.v(), obj.v() },
+                                                                               new jedd.PhysicalDomain[] { T1.v(), H1.v() }));
                     }
                 }
                 cachedVarObj.eq(jedd.internal.Jedd.v().compose(jedd.internal.Jedd.v().read(cachedTypeMasks),
                                                                cachedVarNodes,
-                                                               new PhysicalDomain[] { T1.v() }));
+                                                               new jedd.PhysicalDomain[] { T1.v() }));
                 change = false;
             }
             final jedd.internal.RelationContainer varNodes =
-              new jedd.internal.RelationContainer(new Attribute[] { var.v(), type.v() },
-                                                  new PhysicalDomain[] { V1.v(), T1.v() },
+              new jedd.internal.RelationContainer(new jedd.Attribute[] { var.v(), type.v() },
+                                                  new jedd.PhysicalDomain[] { V1.v(), T1.v() },
                                                   ("<soot.jimple.paddle.bdddomains.var:soot.jimple.paddle.bdddom" +
                                                    "ains.V1, soot.jimple.paddle.bdddomains.type:soot.jimple.padd" +
                                                    "le.bdddomains.T1> varNodes = jedd.internal.Jedd.v().falseBDD" +
                                                    "(); at /home/olhotak/soot-2-jedd/src/soot/jimple/paddle/Trad" +
-                                                   "TypeManager.jedd:105,24-32"),
+                                                   "TypeManager.jedd:104,24-32"),
                                                   jedd.internal.Jedd.v().falseBDD());
             while (newVarNodes.hasNext()) {
                 VarNode vn = (VarNode) newVarNodes.next();
                 varNodes.eqUnion(jedd.internal.Jedd.v().literal(new Object[] { vn, vn.getType() },
-                                                                new Attribute[] { var.v(), type.v() },
-                                                                new PhysicalDomain[] { V1.v(), T1.v() }));
+                                                                new jedd.Attribute[] { var.v(), type.v() },
+                                                                new jedd.PhysicalDomain[] { V1.v(), T1.v() }));
             }
             cachedVarObj.eqUnion(jedd.internal.Jedd.v().compose(jedd.internal.Jedd.v().read(cachedTypeMasks),
                                                                 varNodes,
-                                                                new PhysicalDomain[] { T1.v() }));
+                                                                new jedd.PhysicalDomain[] { T1.v() }));
             cachedVarNodes.eqUnion(varNodes);
-            return new jedd.internal.RelationContainer(new Attribute[] { obj.v(), var.v() },
-                                                       new PhysicalDomain[] { H1.v(), V1.v() },
+            return new jedd.internal.RelationContainer(new jedd.Attribute[] { obj.v(), var.v() },
+                                                       new jedd.PhysicalDomain[] { H1.v(), V1.v() },
                                                        ("return cachedVarObj; at /home/olhotak/soot-2-jedd/src/soot/j" +
-                                                        "imple/paddle/TradTypeManager.jedd:112,12-18"),
+                                                        "imple/paddle/TradTypeManager.jedd:111,12-18"),
                                                        cachedVarObj);
         }
         

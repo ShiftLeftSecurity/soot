@@ -5,7 +5,7 @@ import soot.jimple.paddle.*;
 import soot.*;
 
 public class VAR extends Domain {
-    public Numberer numberer() { return PaddleNumberers.v().varNodeNumberer(); }
+    public Numberer numberer() { return new soot.util.JeddNumberer(PaddleNumberers.v().varNodeNumberer()); }
     
     public final int bits = 20;
     
