@@ -1187,7 +1187,11 @@ public class SootClass extends AbstractHost implements Numberable
             
             if(interfaceIt.hasNext())
             {
-                out.print(" implements ");
+                if( Main.getJavaStyle() && this.isInterface() ) {
+                    out.print(" extends ");
+                } else {
+                    out.print(" implements ");
+                }
                 
                 out.print("" + ((SootClass) interfaceIt.next()).getName() + "");
                 
