@@ -45,11 +45,6 @@ public final class VirtualCalls
     }
     */
     public SootMethod resolveSpecial( SpecialInvokeExpr iie, NumberedString subSig, SootMethod container ) {
-        SootMethod ret = resolveSpecialGuts( iie, subSig, container );
-        System.out.println( "resolve of "+iie+" and "+subSig+" in "+container+" is "+ret );
-        return ret;
-    }
-    private SootMethod resolveSpecialGuts( SpecialInvokeExpr iie, NumberedString subSig, SootMethod container ) {
         SootMethod target = iie.getMethod();
         /* cf. JVM spec, invokespecial instruction */
         if( Scene.v().getOrMakeFastHierarchy()
@@ -91,6 +86,8 @@ public final class VirtualCalls
         return ret;
     }
 
+    private Map baseToSubTypes = new HashMap();
+
     public void resolve( Type t, Type declaredType, NumberedString subSig, SootMethod container, ChunkedQueue targets ) {
         if( declaredType != null && !Scene.v().getOrMakeFastHierarchy()
                 .canStoreType( t, declaredType ) ) {
@@ -102,7 +99,20 @@ public final class VirtualCalls
             if( target != null ) targets.add( target );
         } else if( t instanceof AnySubType ) {
             RefType base = ((AnySubType)t).getBase();
+
+            List subTypes = (List) baseToSubTypes.get(base);
+            if( subTypes != null ) {
+                for( Iterator stIt = subTypes.iterator(); stIt.hasNext(); ) {
+                    final Type st = (Type) stIt.next();
+                    resolve( st, declaredType, subSig, container, targets );
+                }
+                return;
+            }
+
+            baseToSubTypes.put(base, subTypes = new ArrayList() );
+
             resolve( base, declaredType, subSig, container, targets );
+            subTypes.add(base);
 
             LinkedList worklist = new LinkedList();
             HashSet workset = new HashSet();
@@ -119,6 +129,7 @@ public final class VirtualCalls
                     }
                 } else {
                     resolve( cl.getType(), declaredType, subSig, container, targets );
+                    subTypes.add(cl.getType());
                     for( Iterator cIt = fh.getSubclassesOf( cl ).iterator(); cIt.hasNext(); ) {
                         final SootClass c = (SootClass) cIt.next();
                         if( workset.add( c ) ) worklist.add( c );

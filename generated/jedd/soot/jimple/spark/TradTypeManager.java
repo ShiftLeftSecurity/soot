@@ -18,33 +18,23 @@ public class TradTypeManager extends AbsTypeManager {
             VarNode vn = t.var();
             Type type = vn.getType();
             if (typeMask.get(type) != null) continue;
-            if (type.toString().indexOf("Entry") >= 0)
-                System.out.println("updating typemasks for " + type.getNumber() + ":" + type);
             BitVector bv = new BitVector(allocNodes.size());
             typeMask.put(type, bv);
             for (Iterator anIt = allocNodes.iterator(); anIt.hasNext(); ) {
                 final AllocNode an = (AllocNode) anIt.next();
-                if (type.toString().indexOf("Entry") >= 0)
-                    System.out.println("updating with an for " + an.getType().getNumber() + ":" + an);
                 if (this.castNeverFails(an.getType(), type)) { bv.set(an.getNumber()); }
             }
-            if (type.toString().indexOf("Entry") >= 0)
-                System.out.println("updating typemasks for " + type.getNumber() + ":" + type);
         }
         for (Iterator tIt = allocs.iterator(); tIt.hasNext(); ) {
             final soot.jimple.spark.queue.Robj.Tuple t = (soot.jimple.spark.queue.Robj.Tuple) tIt.next();
             AllocNode an = t.obj();
             allocNodes.add(an);
-            if (an.getType().toString().indexOf("Entry") >= 0)
-                System.out.println("updating typemasks for allocnode " + an);
             for (Iterator typeIt = Scene.v().getTypeNumberer().iterator(); typeIt.hasNext(); ) {
                 final Type type = (Type) typeIt.next();
                 if (!(type instanceof RefLikeType)) continue;
                 if (type instanceof AnySubType) continue;
                 BitVector bv = (BitVector) typeMask.get(type);
                 if (bv == null) continue;
-                if (an.getType().toString().indexOf("Entry") >= 0)
-                    System.out.println("updating typemasks for allocnode with type " + type.getNumber() + ":" + type);
                 if (this.castNeverFails(an.getType(), type)) { bv.set(an.getNumber()); }
             }
         }
@@ -55,19 +45,10 @@ public class TradTypeManager extends AbsTypeManager {
         this.update();
         BitVector ret = (BitVector) typeMask.get(type);
         if (ret == null && fh != null) throw new RuntimeException("oops" + type);
-        System.out.println("getting typemask for " + type);
         return ret;
     }
     
     public boolean castNeverFails(Type from, Type to) {
-        boolean ret = this.castNeverFailsGuts(from, to);
-        if (from != null && from.toString().indexOf("Entry") >= 0) {
-            System.out.println("castNeverFails from=" + from + " to=" + to + ":" + ret);
-        }
-        return ret;
-    }
-    
-    private boolean castNeverFailsGuts(Type from, Type to) {
         if (fh == null) return true;
         if (to == null) return true;
         if (to == from) return true;

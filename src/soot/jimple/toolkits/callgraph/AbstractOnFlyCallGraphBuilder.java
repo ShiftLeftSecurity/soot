@@ -81,7 +81,6 @@ public abstract class AbstractOnFlyCallGraphBuilder
         if( m.isNative() || m.isPhantom() ) {
             return;
         }
-        System.out.println( "processing method "+m );
         Body b = m.retrieveActiveBody();
         getImplicitTargets( m );
         findReceivers(m, b);

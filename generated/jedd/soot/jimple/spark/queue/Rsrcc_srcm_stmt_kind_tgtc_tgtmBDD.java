@@ -37,8 +37,8 @@ public final class Rsrcc_srcm_stmt_kind_tgtc_tgtmBDD extends Rsrcc_srcm_stmt_kin
     public Iterator iterator() {
         ;
         final Iterator it =
-          new jedd.internal.RelationContainer(new Attribute[] { tgtc.v(), tgtm.v(), kind.v(), stmt.v(), srcm.v(), srcc.v() },
-                                              new PhysicalDomain[] { V2.v(), T2.v(), FD.v(), ST.v(), T1.v(), V1.v() },
+          new jedd.internal.RelationContainer(new Attribute[] { srcc.v(), tgtc.v(), tgtm.v(), kind.v(), stmt.v(), srcm.v() },
+                                              new PhysicalDomain[] { V1.v(), V2.v(), T2.v(), FD.v(), ST.v(), T1.v() },
                                               ("bdd.iterator(new jedd.Attribute[...]) at /home/olhotak/soot-" +
                                                "2-jedd/src/soot/jimple/spark/queue/Rsrcc_srcm_stmt_kind_tgtc" +
                                                "_tgtmBDD.jedd:36,28"),
@@ -68,8 +68,8 @@ public final class Rsrcc_srcm_stmt_kind_tgtc_tgtmBDD extends Rsrcc_srcm_stmt_kin
                                                "m_stmt_kind_tgtc_tgtmBDD.jedd:47,8"),
                                               bdd);
         bdd.eq(jedd.internal.Jedd.v().falseBDD());
-        return new jedd.internal.RelationContainer(new Attribute[] { tgtc.v(), tgtm.v(), kind.v(), stmt.v(), srcm.v(), srcc.v() },
-                                                   new PhysicalDomain[] { V2.v(), T2.v(), FD.v(), ST.v(), T1.v(), V1.v() },
+        return new jedd.internal.RelationContainer(new Attribute[] { srcc.v(), tgtc.v(), tgtm.v(), kind.v(), stmt.v(), srcm.v() },
+                                                   new PhysicalDomain[] { V1.v(), V2.v(), T2.v(), FD.v(), ST.v(), T1.v() },
                                                    ("return ret; at /home/olhotak/soot-2-jedd/src/soot/jimple/spa" +
                                                     "rk/queue/Rsrcc_srcm_stmt_kind_tgtc_tgtmBDD.jedd:49,8"),
                                                    ret);

@@ -90,7 +90,6 @@ public class TradPAGBuilder extends AbsPAGBuilder
                     Node cls = srcmpag.nodeFactory().getNode( iie.getBase() );
                     cls = parm( cls, t.srcc() );
                     Node newObject = nf.caseNewInstance( (VarNode) cls );
-                    System.out.println( "made newInstance "+newObject );
 
                     Node initThis = tgtmpag.nodeFactory().caseThis();
                     initThis = parm( initThis, t.tgtc() );

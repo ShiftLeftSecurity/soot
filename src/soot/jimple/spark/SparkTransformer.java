@@ -34,7 +34,7 @@ import java.io.*;
 /** Main entry point for Spark.
  * @author Ondrej Lhotak
  */
-public class SparkTransformer extends AbstractSparkTransformer
+public class SparkTransformer extends SceneTransformer
 { 
     public SparkTransformer( Singletons.Global g ) {}
     public static SparkTransformer v() { return G.v().SparkTransformer(); }
@@ -49,9 +49,19 @@ public class SparkTransformer extends AbstractSparkTransformer
 
         SparkScene.v().setup( opts );
 
+        if( opts.pre_jimplify() ) preJimplify();
+
         Rctxt_method reachableMethods = SparkScene.v().rcout.reader();
 
+        Date startSolve = new Date();
+
         SparkScene.v().solve();
+
+        Date endSolve = new Date();
+        
+        if( opts.verbose() ) {
+            reportTime( "Propagation", startSolve, endSolve );
+        }
 
         /*
         for( Iterator tIt = reachableMethods.iterator(); tIt.hasNext(); ) {
@@ -253,6 +263,29 @@ public class SparkTransformer extends AbstractSparkTransformer
                 }
             }
         }
+    }
+    private void preJimplify() {
+        boolean change = true;
+        while( change ) {
+            change = false;
+            for( Iterator cIt = new ArrayList(Scene.v().getClasses()).iterator(); cIt.hasNext(); ) {
+                final SootClass c = (SootClass) cIt.next();
+                for( Iterator mIt = c.methodIterator(); mIt.hasNext(); ) {
+                    final SootMethod m = (SootMethod) mIt.next();
+                    if( !m.isConcrete() ) continue;
+                    if( m.isNative() ) continue;
+                    if( m.isPhantom() ) continue;
+                    if( !m.hasActiveBody() ) {
+                        change = true;
+                        m.retrieveActiveBody();
+                    }
+                }
+            }
+        }
+    }
+    private static void reportTime( String desc, Date start, Date end ) {
+        long time = end.getTime()-start.getTime();
+        G.v().out.println( "[Spark] "+desc+" in "+time/1000+"."+(time/100)%10+" seconds." );
     }
 }
 

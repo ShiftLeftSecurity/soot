@@ -23,12 +23,16 @@ public final class BDDVirtualCalls {
                                                "ins.T1, soot.jimple.spark.bdddomains.signature:soot.jimple.s" +
                                                "park.bdddomains.H1, soot.jimple.spark.bdddomains.supt:soot.j" +
                                                "imple.spark.bdddomains.T2> toResolve = jedd.internal.Jedd.v(" +
-                                               ").copy(newTypes, new jedd.PhysicalDomain[...], new jedd.Phys" +
-                                               "icalDomain[...]); at /home/olhotak/soot-2-jedd/src/soot/jimp" +
-                                               "le/toolkits/callgraph/BDDVirtualCalls.jedd:47,8"),
-                                              jedd.internal.Jedd.v().copy(newTypes,
-                                                                          new jedd.PhysicalDomain[] { T1.v() },
-                                                                          new jedd.PhysicalDomain[] { T2.v() }));
+                                               ").copy(jedd.internal.Jedd.v().replace(newTypes, new jedd.Phy" +
+                                               "sicalDomain[...], new jedd.PhysicalDomain[...]), new jedd.Ph" +
+                                               "ysicalDomain[...], new jedd.PhysicalDomain[...]); at /home/o" +
+                                               "lhotak/soot-2-jedd/src/soot/jimple/toolkits/callgraph/BDDVir" +
+                                               "tualCalls.jedd:47,8"),
+                                              jedd.internal.Jedd.v().copy(jedd.internal.Jedd.v().replace(newTypes,
+                                                                                                         new jedd.PhysicalDomain[] { T1.v() },
+                                                                                                         new jedd.PhysicalDomain[] { T2.v() }),
+                                                                          new jedd.PhysicalDomain[] { T2.v() },
+                                                                          new jedd.PhysicalDomain[] { T1.v() }));
         toResolve.eqUnion(jedd.internal.Jedd.v().replace(jedd.internal.Jedd.v().compose(jedd.internal.Jedd.v().read(toResolve),
                                                                                         jedd.internal.Jedd.v().replace(hier.anySub(),
                                                                                                                        new jedd.PhysicalDomain[] { T2.v() },

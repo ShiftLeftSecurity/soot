@@ -213,10 +213,8 @@ public abstract class MethodNodeFactory extends AbstractJimpleValueSwitch {
             addEdge( gnf.caseArgv(), caseParm(0) );
         }
 
-        System.out.println( "adding misc edges for "+method() );
         if( method().getSignature().equals(
                     "<java.lang.Thread: void <init>(java.lang.ThreadGroup,java.lang.String)>" ) ) {
-            System.out.println( "adding main thread stuff" );
             addEdge( gnf.caseMainThread(), caseThis() );
             addEdge( gnf.caseMainThreadGroup(), caseParm( 0 ) );
         }
