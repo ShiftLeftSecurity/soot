@@ -38,10 +38,12 @@ import soot.exceptions.ThrowAnalysis;
 import soot.exceptions.UnitThrowAnalysis;
 import soot.exceptions.ThrowableSet;
 import soot.baf.Inst;
+import soot.baf.NewInst;
 import soot.baf.StaticPutInst;
 import soot.baf.StaticGetInst;
-import soot.baf.NewInst;
+import soot.baf.ThrowInst;
 import soot.jimple.Stmt;
+import soot.jimple.ThrowStmt;
 import soot.jimple.StaticFieldRef;
 import soot.jimple.InvokeExpr;
 import soot.jimple.NewExpr;
@@ -65,7 +67,6 @@ import soot.jimple.NewExpr;
  */
 public class CompleteUnitGraph extends UnitGraph
 {
-
     protected Map unitToUnexceptionalSuccs; // If there are no Traps within
     protected Map unitToUnexceptionalPreds; // the method, these will be the
 					    // same maps as unitToSuccs and
@@ -96,10 +97,6 @@ public class CompleteUnitGraph extends UnitGraph
 	int size = unitChain.size();
 	Set trapsThatAreHeads = Collections.EMPTY_SET;
         
-        if(Options.v().verbose())
-            G.v().out.println("[" + method.getName() + 
-                               "]     Constructing CompleteUnitGraph...");
-      
         if(Options.v().time())
             Timers.v().graphTimer.start();
         
@@ -149,6 +146,9 @@ public class CompleteUnitGraph extends UnitGraph
 
         if(Options.v().time())
             Timers.v().graphTimer.end();        
+
+	if (DEBUG)
+	    soot.util.PhaseDumper.v().dumpGraph(this);
     }
 
 
@@ -161,7 +161,7 @@ public class CompleteUnitGraph extends UnitGraph
      *
      */
     public CompleteUnitGraph(Body body) {
-	this(body, new UnitThrowAnalysis());
+	this(body, UnitThrowAnalysis.v());
     }
 
 
@@ -220,14 +220,14 @@ public class CompleteUnitGraph extends UnitGraph
 
 	    // First, update the set of traps active for this Unit.
 	    for (int i = 0; i < trapTable.length; i++) {
-		if (trapTable[i].active) {
-		    if (trapTable[i].trap.getEndUnit() == u) {
-			trapTable[i].active = false;
-		    }
-		} else {
-		    if (trapTable[i].trap.getBeginUnit() == u) {
-			trapTable[i].active = true;
-		    }
+		// Be sure to turn on traps before turning them off, so
+		// that degenerate traps where getBeginUnit() == getEndUnit()
+		// are never active. Obviously, I learned this the hard way!
+		if (trapTable[i].trap.getBeginUnit() == u) {
+		    trapTable[i].active = true;
+		}
+		if (trapTable[i].trap.getEndUnit() == u) {
+		    trapTable[i].active = false;
 		}
 	    }
 
@@ -426,6 +426,14 @@ public class CompleteUnitGraph extends UnitGraph
 		    if (mightHaveSideEffects(thrower)) {
 			addEdge(unitToSuccs, unitToPreds, thrower, catcher);
 		    }
+		    if (thrower instanceof ThrowInst ||
+			thrower instanceof ThrowStmt) {
+			// An athrow actually completes when it throws
+			// an exception. We better include an edge here
+			// to avoid the throw being removed by dead code
+			// elimination. 
+			addEdge(unitToSuccs, unitToPreds, thrower, catcher);
+		    }
 		}
 	    }
 	}
@@ -451,7 +459,28 @@ public class CompleteUnitGraph extends UnitGraph
 		this.head = head;
 		this.tail = tail;
 	    }
+
+	    public boolean equals(Object rhs) {
+		if (rhs == this) {
+		    return true;
+		}
+		if (! (rhs instanceof CFGEdge)) {
+		    return false;
+		}
+		CFGEdge rhsEdge = (CFGEdge) rhs;
+		return ((this.head == rhsEdge.head) && 
+			(this.tail == rhsEdge.tail));
+	    }
+
+	    public int hashCode() {
+		// Following Joshua Bloch's recipe in "Effective Java", Item 8:
+		int result = 17;
+		result = 37 * result + this.head.hashCode();
+		result = 37 * result + this.tail.hashCode();
+		return result;
+	    }
 	}
+
 	LinkedList workList = new LinkedList();
 
 	for (Iterator trapIt = body.getTraps().iterator(); trapIt.hasNext(); ) {
@@ -487,12 +516,20 @@ public class CompleteUnitGraph extends UnitGraph
 		ExceptionDest dest = (ExceptionDest) i.next();
 		if (dest.trap() != null) {
 		    Unit handlerStart = dest.trap().getHandlerUnit();
+		    boolean edgeAdded = false;
 		    if (pred == null) {
-			trapsThatAreHeads.add(handlerStart);
+			if (! trapsThatAreHeads.contains(handlerStart)) {
+			    trapsThatAreHeads.add(handlerStart);
+			    edgeAdded = true;
+			}
 		    } else {
-			addEdge(unitToSuccs, unitToPreds, pred, handlerStart);
+			if (! getExceptionalSuccsOf(pred).contains(handlerStart)) {
+			    addEdge(unitToSuccs, unitToPreds, pred, handlerStart);
+			    edgeAdded = true;
+			}
 		    }
-		    if (mightThrowToIntraproceduralCatcher(handlerStart)) {
+		    if (edgeAdded && 
+			mightThrowToIntraproceduralCatcher(handlerStart)) {
 			workList.addLast(new CFGEdge(pred, handlerStart));
 		    }
 		}
@@ -566,7 +603,7 @@ public class CompleteUnitGraph extends UnitGraph
      * together with all the <tt>Unit</tt>s in
      * <tt>additionalHeads</tt>.  It defines the graph's set of tails
      * to include all <tt>Unit</tt>s which represent some sort of
-     * return bytecode.
+     * return bytecode or an athrow bytecode which may escape the method.
      */
     private void buildHeadsAndTails(Set additionalHeads) {
 	List headList = new ArrayList(additionalHeads.size() + 1);
@@ -584,6 +621,19 @@ public class CompleteUnitGraph extends UnitGraph
 		u instanceof soot.baf.ReturnInst ||
 		u instanceof soot.baf.ReturnVoidInst) {
 		tailList.add(u);
+	    } else if (u instanceof soot.jimple.ThrowStmt ||
+		       u instanceof soot.baf.ThrowInst) {
+		Collection dests = getExceptionDests(u);
+		int escapeMethodCount = 0;
+		for (Iterator destIt = dests.iterator(); destIt.hasNext(); ) {
+		    ExceptionDest dest = (ExceptionDest) destIt.next();
+		    if (dest.trap() == null) {
+			escapeMethodCount++;
+		    }
+		}
+		if (escapeMethodCount > 0) {
+		    tailList.add(u);
+		}
 	    }
 	}
 	tails = Collections.unmodifiableList(tailList);
