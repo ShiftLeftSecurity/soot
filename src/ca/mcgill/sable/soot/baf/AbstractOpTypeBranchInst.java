@@ -92,6 +92,19 @@ public abstract class AbstractOpTypeBranchInst extends AbstractBranchInst
         this.opType = opType;
     }
 
+    public int getInCount()
+    {
+	return 2;
+    }
+    
+    public int getOutCount()
+    {
+	return 0;
+    }
+
+    public int getStackChange()
+        { return 2*JasminClass.sizeOfType(getOpType()); }
+
     public Type getOpType()
     {
         return opType;

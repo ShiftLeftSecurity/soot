@@ -100,5 +100,11 @@ public class BCmplInst extends AbstractOpTypeInst implements CmplInst
     }
 
     public final String getName() { return "cmpl"; }
+
+
+    public void apply(Switch sw)
+    {
+        ((InstSwitch) sw).caseCmplInst(this);
+    }
 }
 

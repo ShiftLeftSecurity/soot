@@ -9,6 +9,9 @@ public interface Inst extends Unit
     public int getInCount();
     public int getOutCount();
 
+    // returns the stack change, in terms of machine words.
+    public int getStackChange();
+
     public String toBriefString();
     public String toBriefString(Map stmtToName);
     public String toBriefString(String indentation);

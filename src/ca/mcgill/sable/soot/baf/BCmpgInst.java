@@ -100,5 +100,10 @@ public class BCmpgInst extends AbstractOpTypeInst implements CmpgInst
     }
     
     public final String getName() { return "cmpg"; }
+
+    public void apply(Switch sw)
+    {
+        ((InstSwitch) sw).caseCmpgInst(this);
+    }
 }
 

@@ -100,7 +100,11 @@ public class BCmpInst extends AbstractOpTypeInst implements CmpInst
 	return 1;
     }
 
-    
     public final String getName() { return "cmp"; }
+
+    public void apply(Switch sw)
+    {
+        ((InstSwitch) sw).caseCmpInst(this);
+    }
 }
 

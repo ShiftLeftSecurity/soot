@@ -99,5 +99,10 @@ public class BNewInst extends AbstractRefTypeInst implements NewInst
     }
     
     final String getName() { return "new"; }
+
+    public void apply(Switch sw)
+    {
+        ((InstSwitch) sw).caseNewInst(this);
+    }
 }
 

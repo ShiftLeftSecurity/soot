@@ -91,14 +91,19 @@ public class BUshrInst extends AbstractOpTypeInst implements UshrInst
 
     public int getInCount()
     {
-	return 2;
+	return JasminClass.sizeOfType(getOpType()) + 1;
     }
     
     public int getOutCount()
     {
-	return 1;
+	return 1 * JasminClass.sizeOfType(getOpType());
     }
     
     public final String getName() { return "ushr"; }
+
+    public void apply(Switch sw)
+    {
+        ((InstSwitch) sw).caseUshrInst(this);
+    }
 }
 

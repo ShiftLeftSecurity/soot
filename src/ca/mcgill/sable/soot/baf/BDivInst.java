@@ -91,14 +91,19 @@ public class BDivInst extends AbstractOpTypeInst implements DivInst
 
     public int getInCount()
     {
-	return 2;
+	return 2 * JasminClass.sizeOfType(getOpType());
     }
     
     public int getOutCount()
     {
-	return 1;
+	return 1 * JasminClass.sizeOfType(getOpType());
     }
     
     public final String getName() { return "div"; }
+
+    public void apply(Switch sw)
+    {
+        ((InstSwitch) sw).caseDivInst(this);
+    }
 }
 

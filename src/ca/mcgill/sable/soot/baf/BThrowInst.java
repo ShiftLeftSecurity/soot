@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Jimple, a 3-address code Java(TM) bytecode representation.        *
+ * Baf, a Java(TM) bytecode analyzer framework.                      *
  * Copyright (C) 1997, 1998 Raja Vallee-Rai (kor@sable.mcgill.ca)    *
  * All rights reserved.                                              *
  *                                                                   *
@@ -76,63 +76,32 @@
    First internal release (Version 0.1).
 */
 
-package ca.mcgill.sable.soot.jimple;
+package ca.mcgill.sable.soot.baf;
 
 import ca.mcgill.sable.soot.*;
 import ca.mcgill.sable.util.*;
 import java.util.*;
 
-public class JGotoStmt extends AbstractStmt implements GotoStmt
+public class BThrowInst extends AbstractInst implements ThrowInst
 {
-    UnitBox targetBox;
-
-    List targetBoxes;
-
-    JGotoStmt(Unit target)
+    BThrowInst()
     {
-        this.targetBox = Jimple.v().newStmtBox(target);
-
-        targetBoxes = new ArrayList();
-        targetBoxes.add(this.targetBox);
-        targetBoxes = Collections.unmodifiableList(targetBoxes);
     }
 
-    protected String toString(boolean isBrief, Map stmtToName, String indentation)
+    public int getInCount()
     {
-        return indentation + "goto " + (String) stmtToName.get(getTarget());
+	return 1;
     }
     
-    public Unit getTarget()
+    public int getOutCount()
     {
-        return targetBox.getUnit();
+	return 0;
     }
-
-    public void setTarget(Unit target)
-    {
-        targetBox.setUnit(target);
-    }
-
-    public UnitBox getTargetBox()
-    {
-        return targetBox;
-    }
-
-    public List getUnitBoxes()
-    {
-        return targetBoxes;
-    }
+    
+    final String getName() { return "athrow"; }
 
     public void apply(Switch sw)
     {
-        ((StmtSwitch) sw).caseGotoStmt(this);
-    }    
+        ((InstSwitch) sw).caseThrowInst(this);
+    }   
 }
-
-
-
-
-
-
-
-
-

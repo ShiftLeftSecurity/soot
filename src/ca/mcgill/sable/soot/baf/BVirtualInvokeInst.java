@@ -1,6 +1,7 @@
 package ca.mcgill.sable.soot.baf;
 
 import ca.mcgill.sable.soot.*;
+import ca.mcgill.sable.util.*;
 import java.util.*;
 
 public class BVirtualInvokeInst extends AbstractInvokeInst implements VirtualInvokeInst
@@ -22,4 +23,9 @@ public class BVirtualInvokeInst extends AbstractInvokeInst implements VirtualInv
     }
 
     final String getName() { return "virtualinvoke"; }
+
+    public void apply(Switch sw)
+    {
+        ((InstSwitch) sw).caseVirtualInvokeInst(this);
+    }   
 }

@@ -91,14 +91,19 @@ public class BXorInst extends AbstractOpTypeInst implements XorInst
     
     public int getInCount()
     {
-	return 2;
+	return 2 * JasminClass.sizeOfType(getOpType());
     }
     
     public int getOutCount()
     {
-	return 1;
+	return 1 * JasminClass.sizeOfType(getOpType());
     }
     
     public final String getName() { return "xor"; }
+
+    public void apply(Switch sw)
+    {
+        ((InstSwitch) sw).caseXorInst(this);
+    }
 }
 

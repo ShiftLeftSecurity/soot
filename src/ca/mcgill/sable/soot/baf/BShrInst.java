@@ -88,17 +88,22 @@ public class BShrInst extends AbstractOpTypeInst implements ShrInst
     {
         super(opType);
     }
+
     public int getInCount()
     {
-	return 2;
+	return JasminClass.sizeOfType(getOpType()) + 1;
     }
     
     public int getOutCount()
     {
-	return 1;
+	return 1 * JasminClass.sizeOfType(getOpType());
     }
-
     
     public final String getName() { return "shr"; }
+
+    public void apply(Switch sw)
+    {
+        ((InstSwitch) sw).caseShrInst(this);
+    }
 }
 

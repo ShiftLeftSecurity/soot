@@ -1,6 +1,7 @@
 package ca.mcgill.sable.soot.baf;
 
 import ca.mcgill.sable.soot.*;
+import ca.mcgill.sable.util.*;
 import java.util.*;
 
 public class BInterfaceInvokeInst extends AbstractInvokeInst 
@@ -22,9 +23,6 @@ public class BInterfaceInvokeInst extends AbstractInvokeInst
 	    return 1;
     }
 
-    
-
-
     BInterfaceInvokeInst(SootMethod method, int argCount) 
         { setMethod(method); this.argCount = argCount; }
     final String getName() { return "interfaceinvoke"; }
@@ -33,4 +31,9 @@ public class BInterfaceInvokeInst extends AbstractInvokeInst
 
     public int getArgCount() { return argCount; }
     public void setArgCount(int x) { argCount = x; }
+
+    public void apply(Switch sw)
+    {
+        ((InstSwitch) sw).caseInterfaceInvokeInst(this);
+    }   
 }

@@ -812,7 +812,10 @@ public class SootClass
             FileOutputStream streamOut = new FileOutputStream(tempFile);
             PrintWriter writerOut = new PrintWriter(streamOut);
 
-            new ca.mcgill.sable.soot.jimple.JasminClass(this).print(writerOut);
+            if (Main.produceJasminFromBaf)
+                new ca.mcgill.sable.soot.baf.JasminClass(this).print(writerOut);
+            else
+                new ca.mcgill.sable.soot.jimple.JasminClass(this).print(writerOut);
 
             writerOut.close();
 

@@ -89,12 +89,12 @@ public class BPrimitiveCastInst extends AbstractOpTypeInst
     
     public int getInCount()
     {
-	return 1;
+	return JasminClass.sizeOfType(fromType);
     }
     
     public int getOutCount()
     {
-	return 1;
+	return JasminClass.sizeOfType(getOpType());
     }
 
     
@@ -210,5 +210,17 @@ public class BPrimitiveCastInst extends AbstractOpTypeInst
         });
         return (String)sw.getResult();
     }
+
+    /* override toString with our own, *not* including types */
+    protected String toString(boolean isBrief, Map unitToName, String indentation)
+    {
+        return indentation + getName() + 
+            getParameters(isBrief, unitToName);
+    }
+
+    public void apply(Switch sw)
+    {
+        ((InstSwitch) sw).casePrimitiveCastInst(this);
+    }   
 }
 

@@ -104,5 +104,11 @@ public class BNewArrayInst extends AbstractOpTypeInst implements NewArrayInst
 
     public Type getBaseType() { return opType; }
     public void setBaseType(Type type) { this.opType = type; }
+
+
+    public void apply(Switch sw)
+    {
+        ((InstSwitch) sw).caseNewArrayInst(this);
+    }
 }
 

@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Jimple, a 3-address code Java(TM) bytecode representation.        *
+ * Baf, a Java(TM) bytecode analyzer framework.                      *
  * Copyright (C) 1997, 1998 Raja Vallee-Rai (kor@sable.mcgill.ca)    *
  * All rights reserved.                                              *
  *                                                                   *
@@ -76,17 +76,40 @@
    First internal release (Version 0.1).
 */
 
-package ca.mcgill.sable.soot.jimple;
+package ca.mcgill.sable.soot.baf;
 
 import ca.mcgill.sable.soot.*;
-import ca.mcgill.sable.soot.baf.*;
 import ca.mcgill.sable.util.*;
 import java.util.*;
 
-class JUshrExpr extends AbstractJimpleIntLongBinopExpr implements UshrExpr
+public class BInstanceOfInst extends AbstractOpTypeInst 
+                            implements InstanceOfInst
 {
-    JUshrExpr(Value op1, Value op2) { super(op1, op2); }
-    public final String getSymbol() { return " >>> "; }
-    public void apply(Switch sw) { ((ExprSwitch) sw).caseUshrExpr(this); }
-    Object makeBafInst(Type opType) { return Baf.v().newUshrInst(this.getOp1().getType()); }
+    public BInstanceOfInst(Type opType) 
+    { 
+        super(opType); 
+        if (!(opType instanceof RefType) && !(opType instanceof ArrayType))
+            throw new RuntimeException("invalid InstanceOfInst: "+ opType);
+    }
+    
+    public int getInCount()
+    {
+	return 1;
+    }
+    
+    public int getOutCount()
+    {
+	return 1;
+    }
+    
+    final String getName() { return "instanceof"; }
+
+    public Type getCheckType() { return opType; }
+    public void setCheckType(Type t) { opType = t; }
+
+    public void apply(Switch sw)
+    {
+        ((InstSwitch) sw).caseInstanceOfInst(this);
+    }   
 }
+
