@@ -220,6 +220,7 @@ public class GraphComparer {
 	    ClassicCompleteUnitGraph classicCompleteUnitGraph = null;
 	    DirectedGraph altCompleteUnitGraph = null;
 	    TrapUnitGraph trapUnitGraph = null;
+	    DirectedGraph altTrapUnitGraph = null;
 	    BriefUnitGraph briefUnitGraph = null;
 	    DirectedGraph altBriefUnitGraph = null;
 	    BriefBlockGraph briefBlockGraph = null;
@@ -264,6 +265,8 @@ public class GraphComparer {
 		    classicCompleteUnitGraph = (ClassicCompleteUnitGraph) g;
 		} else if (g instanceof TrapUnitGraph) {
 		    trapUnitGraph = (TrapUnitGraph) g;
+		} else if (g.getClass().getName().endsWith(".TrapUnitGraph")) {
+		    altTrapUnitGraph = g;
 		} else if (g instanceof BriefUnitGraph) {
 		    briefUnitGraph = (BriefUnitGraph) g;
 		} else if (g.getClass().getName().endsWith(".BriefUnitGraph")) {
