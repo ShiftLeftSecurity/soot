@@ -53,6 +53,9 @@ public class AbstractSparkOptions
     public boolean merge_stringbuffer() {
         throw new RuntimeException( "This variation of Spark doesn't have that option" );
     }
+    public boolean string_constants() {
+        throw new RuntimeException( "This variation of Spark doesn't have that option" );
+    }
     public boolean simulate_natives() {
         throw new RuntimeException( "This variation of Spark doesn't have that option" );
     }
@@ -60,12 +63,6 @@ public class AbstractSparkOptions
         throw new RuntimeException( "This variation of Spark doesn't have that option" );
     }
     public boolean on_fly_cg() {
-        throw new RuntimeException( "This variation of Spark doesn't have that option" );
-    }
-    public boolean parms_as_fields() {
-        throw new RuntimeException( "This variation of Spark doesn't have that option" );
-    }
-    public boolean returns_as_fields() {
         throw new RuntimeException( "This variation of Spark doesn't have that option" );
     }
     public boolean dump_html() {

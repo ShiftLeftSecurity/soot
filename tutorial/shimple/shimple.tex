@@ -77,7 +77,8 @@ Soot option and phase documentation.
 \section{Command Line Walk Through}
 
 For fun, you may wish to run Shimple from the command-line and study
-its output.  Consider the following (compiled) Java code:
+its output.  Consider the following (compiled) Java code of the 
+{\tt ShimpleTest} class:
 
 \begin{verbatim}
 public int test()
@@ -263,8 +264,8 @@ So, what good is Shimple?
 If you were paying attention, you may have noticed that despite the
 control flow and different assignments to {\tt x}, {\tt x} is in fact
 a constant 100 and is only ever used by a single return statement.  In
-other words, {\tt x} all the computations are quite useless.  Obviously, 
-this needs to be optimized away.
+other words, all the computations are quite useless and need to be
+optimized away.
 
 Let's try to apply Jimple's Constant Propagator and Folder.  In fact,
 to be fair, let's try all the available  Jimple optimizations activated
@@ -443,7 +444,7 @@ label2:
        i0 = Phi(value #1, ...);
 \end{verbatim}
 
-In the above, it may be desireable to move the \#1 pointer down if a
+In the above, it may be desirable to move the \#1 pointer down if a
 Unit happens to be inserted after the if statement.  Although Shimple
 is smart enough to do this in most known cases, it currently misses
 the one case where control flows from an if statement in a

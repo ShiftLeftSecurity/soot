@@ -180,6 +180,25 @@ Note that the Whole-Jimple Optimization pack is normally disabled
 specify the Whole Program Optimize option.</p>
 </long_desc>
                 </boolopt>
+    <boolopt>
+      <name>Whole-Shimple Mode</name>
+      <alias>ws</alias>
+      <alias>whole-shimple</alias>
+      <short_desc>Run in whole-shimple mode</short_desc> 
+      <long_desc>
+<p>
+Run in whole shimple mode, taking into consideration the whole program
+when performing Shimple analyses and transformations. Soot uses the
+Call Graph Constructor to build a call graph for the program, then
+applies enabled transformations in the Whole-Shimple Transformation
+and Whole-Shimple Optimization before applying enabled intraprocedural
+transformations.</p>
+<p>
+Note that the Whole-Shimple Optimization pack is normally disabled
+(and thus not applied by whole shimple mode), unless you also
+specify the Whole Program Optimize option.</p>
+      </long_desc>
+    </boolopt>
                 <boolopt>
 			<name>Debug</name>
 			<alias>debug</alias>
@@ -269,6 +288,16 @@ only when unable to find a <tt>.class</tt> file.
 Try to resolve classes first from <tt>.jimple</tt> files found in
 the Soot classpath.  Fall back to <tt>.class</tt> files only when
 unable to find a <tt>.jimple</tt> file.
+</long_desc>
+			</value>
+			<value>
+				<name>Java File</name>
+				<alias>java</alias>
+				<short_desc>Favour Java files as Soot source</short_desc>
+				<long_desc>
+Try to resolve classes first from <tt>.java</tt> files found in
+the Soot classpath.  Fall back to <tt>.class</tt> files only when
+unable to find a <tt>.java</tt> file.
 </long_desc>
 			</value>
 		</multiopt>
@@ -863,6 +892,41 @@ that must have already been executed. Since these static initializers cannot be
 executed again, the corresponding call graph edges are removed from the call graph.
 </long_desc>
                                 </boolopt>
+                                <multiopt>
+                                        <name>Context sensitivity</name>
+                                        <alias>context</alias>
+                                        <value>
+                                                <name>Context-insensitive</name>
+                                                <alias>insens</alias>
+                                                <default/>
+<short_desc>Builds a context-insensitive call graph</short_desc>
+<long_desc>
+Builds a context-insensitive call graph.
+</long_desc>
+                                        </value>
+                                        <value>
+                                                <name>1-CFA</name>
+                                                <alias>1cfa</alias>
+<short_desc>Builds a 1-CFA call graph</short_desc>
+<long_desc>
+Builds a 1-CFA call graph.
+</long_desc>
+
+                                        </value>
+                                        <value>
+                                                <name>Object Sensitive</name>
+                                                <alias>objsens</alias>
+<short_desc>Builds an object-sensitive call graph</short_desc>
+<long_desc>
+Builds an object-sensitive call graph.
+</long_desc>
+
+                                        </value>
+                                        <short_desc>Select context-sensitivity level</short_desc>
+                                        <long_desc>
+This option tells Spark which level of context-sensitivity to use in constructing the call graph.
+</long_desc>
+                                </multiopt>
 				<sub_phase>
 					<name>Class Hierarchy Analysis</name>
 					<alias>cg.cha</alias>
@@ -1003,6 +1067,19 @@ allocation site.
         </long_desc>
 						</boolopt>
 						<boolopt>
+							<name>Propagate All String Constants</name>
+							<alias>string-constants</alias>
+							<default>false</default>
+                                                        <short_desc>Propagate all string constants, not just class names</short_desc>
+							<long_desc>
+When this option is set to false, Spark only distinguishes string constants that
+may be the name of a class loaded dynamically using reflection, and all other
+string constants are lumped together into a single string constant node.
+Setting this option to true causes all string constants to be propagated
+individually.
+        </long_desc>
+						</boolopt>
+						<boolopt>
 							<name>Simulate Natives</name>
 							<alias>simulate-natives</alias>
 							<default>true</default>
@@ -1030,28 +1107,6 @@ nodes are made bidirectional, as in <a href="http://doi.acm.org/10.1145/237721.2
 When this option is set to true, the call graph is computed on-the-fly
 as points-to information is computed. Otherwise, an initial
 CHA approximation to the call graph is used.
-        </long_desc>
-						</boolopt>
-						<boolopt>
-							<name>Parms As Fields</name>
-							<alias>parms-as-fields</alias>
-							<default>false</default>
-                                                        <short_desc>Represent method parameters as fields of <tt>this</tt></short_desc>
-							<long_desc>
-When this option is set to true, parameters to methods are represented
-as fields (Red nodes) of the <tt>this</tt> object; otherwise, parameters are
-represented as variable (Green) nodes.
-        </long_desc>
-						</boolopt>
-						<boolopt>
-							<name>Returns As Fields</name>
-							<alias>returns-as-fields</alias>
-							<default>false</default>
-                                                        <short_desc>Represent method return values as fields of <tt>this</tt></short_desc>
-							<long_desc>
-When this option is set to true, return values from methods are
-represented as fields (Red nodes) of the <tt>this</tt> object; otherwise,
-return values are represented as variable (Green) nodes.
         </long_desc>
 						</boolopt>
 					</section>
@@ -1579,6 +1634,19 @@ allocation site.
         </long_desc>
 						</boolopt>
 						<boolopt>
+							<name>Propagate All String Constants</name>
+							<alias>string-constants</alias>
+							<default>false</default>
+                                                        <short_desc>Propagate all string constants, not just class names</short_desc>
+							<long_desc>
+When this option is set to false, Spark only distinguishes string constants that
+may be the name of a class loaded dynamically using reflection, and all other
+string constants are lumped together into a single string constant node.
+Setting this option to true causes all string constants to be propagated
+individually.
+        </long_desc>
+						</boolopt>
+						<boolopt>
 							<name>Simulate Natives</name>
 							<alias>simulate-natives</alias>
 							<default>true</default>
@@ -1606,28 +1674,6 @@ nodes are made bidirectional, as in <a href="http://doi.acm.org/10.1145/237721.2
 When this option is set to true, the call graph is computed on-the-fly
 as points-to information is computed. Otherwise, an initial
 CHA approximation to the call graph is used.
-        </long_desc>
-						</boolopt>
-						<boolopt>
-							<name>Parms As Fields</name>
-							<alias>parms-as-fields</alias>
-							<default>false</default>
-                                                        <short_desc>Represent method parameters as fields of <tt>this</tt></short_desc>
-							<long_desc>
-When this option is set to true, parameters to methods are represented
-as fields (Red nodes) of the <tt>this</tt> object; otherwise, parameters are
-represented as variable (Green) nodes.
-        </long_desc>
-						</boolopt>
-						<boolopt>
-							<name>Returns As Fields</name>
-							<alias>returns-as-fields</alias>
-							<default>false</default>
-                                                        <short_desc>Represent method return values as fields of <tt>this</tt></short_desc>
-							<long_desc>
-When this option is set to true, return values from methods are
-represented as fields (Red nodes) of the <tt>this</tt> object; otherwise,
-return values are represented as variable (Green) nodes.
         </long_desc>
 						</boolopt>
 					</section>
@@ -1788,26 +1834,46 @@ cryptic statistics about the size of the points-to sets computed.
 				</sub_phase>
 			</radio_phase>
 
-<!-- DISABLED FOR NOW ++
-			<phase>
-				<name>Whole Shimple Transformation Pack</name>
-				<alias>wstp</alias>
-				<boolopt>
-					<name>Enabled</name>
-					<alias>enabled</alias>
+      <phase>
+        <name>Whole Shimple Transformation Pack</name>
+        <alias>wstp</alias>
+        <short_desc>Whole-shimple transformation pack</short_desc>
+        <long_desc>
+<p>
+Soot can perform whole-program analyses.  In whole-shimple mode, Soot
+applies the contents of the Whole-Shimple Transformation Pack to the
+scene as a whole after constructing a call graph for the program.</p>
+<p>
+In an unmodified copy of Soot the Whole-Shimple Transformation
+Pack is empty.</p>
+        </long_desc>
+        <boolopt>
+          <name>Enabled</name>
+          <alias>enabled</alias>
           <default>true</default>
-				</boolopt>
-			</phase>
-			<phase>
-				<name>Whole Shimple Optimization Pack</name>
-				<alias>wsop</alias>
-				<boolopt>
-					<name>Enabled</name>
-					<alias>enabled</alias>
+        </boolopt>
+      </phase>
+      <phase>
+        <name>Whole Shimple Optimization Pack</name>
+        <alias>wsop</alias>
+        <short_desc>Whole-shimple optimization pack</short_desc>
+        <long_desc>
+<p>
+If Soot is running in whole shimple mode and the Whole-Shimple
+Optimization Pack is enabled, the pack's transformations are
+applied to the scene as a whole after construction of the call
+graph and application of any enabled Whole-Shimple
+Transformations.</p>
+<p>
+In an unmodified copy of Soot the Whole-Shimple Optimization
+Pack is empty.</p>
+        </long_desc>        
+        <boolopt>
+          <name>Enabled</name>
+          <alias>enabled</alias>
           <default>false</default>
-				</boolopt>
-			</phase>
-++ DISABLED FOR NOW -->
+        </boolopt>
+      </phase>
 
 			<phase>
 				<name>Whole-Jimple Transformation Pack</name>
@@ -2111,6 +2177,39 @@ Checker.</p>
 						<default>false</default>
 					</boolopt>
 				</sub_phase>
+                <sub_phase>
+					<name>Unreachable Method Tagger</name>
+					<alias>wjap.umt</alias>
+					<short_desc>Tags all unreachable methods</short_desc>
+					<long_desc><p>Uses the call graph to determine which methods are unreachable and adds color tags so they can be highlighted in a source browser.</p></long_desc> 
+					<boolopt>
+						<name>Enabled</name>
+						<alias>enabled</alias>
+						<default>false</default>
+					</boolopt>
+                </sub_phase>
+                <sub_phase>
+					<name>Unreachable Fields Tagger</name>
+					<alias>wjap.uft</alias>
+					<short_desc>Tags all unreachable fields</short_desc>
+					<long_desc><p>Uses the call graph to determine which fields are unreachable and adds color tags so they can be highlighted in a source browser.</p></long_desc> 
+					<boolopt>
+						<name>Enabled</name>
+						<alias>enabled</alias>
+						<default>false</default>
+					</boolopt>
+                </sub_phase>
+                <sub_phase>
+					<name>Tightest Qualifiers Tagger</name>
+					<alias>wjap.tqt</alias>
+					<short_desc>Tags all qualifiers that could be tighter</short_desc>
+					<long_desc><p>Determines which methods and fields have qualifiers that could be tightened. For example: if a field or method has the qualifier of public but is only used within the declaring class it could be private. This, this field or method is tagged with color tags so that the results can be highlighted in a source browser.</p></long_desc> 
+					<boolopt>
+						<name>Enabled</name>
+						<alias>enabled</alias>
+						<default>false</default>
+					</boolopt>
+                </sub_phase>
 			</phase>
       <phase>
         <name>Shimple Control</name>
@@ -2914,6 +3013,13 @@ class implementing the methods invoked. For details, see the
 <tt>ArrayBoundsChecker</tt> source code.</p>
 </long_desc>
 					</boolopt>
+                    <boolopt>
+                        <name>Add Color Tags</name>
+                        <alias>add-color-tags</alias>
+                        <default>false</default>
+                        <short_desc>Add color tags to results of array bound check analysis.</short_desc>
+                        <long_desc>Add color tags to the results of the array bounds check analysis.</long_desc>
+                    </boolopt>
 				</sub_phase>
 				<sub_phase>
 					<name>Profiling Generator</name>
@@ -3050,6 +3156,17 @@ information in these tags.  For example, even variables (such as
 						<default>false</default>
 					</boolopt>
 				</sub_phase>
+                <sub_phase>
+					<name>Parameter Alias Tagger</name>
+					<alias>jap.pat</alias>
+					<short_desc>Colour-codes method parameters that may be aliased</short_desc>
+					<long_desc>For each method with parameters of reference type, this tagger indicates the aliasing relationships between the parameters using colour tags. Parameters that may be aliased are the same colour. Parameters that may not be aliased are in different colours.</long_desc>
+					<boolopt>
+						<name>Enabled</name>
+						<alias>enabled</alias>
+						<default>false</default>
+					</boolopt>
+                </sub_phase>
 			</phase>
 			<phase>
 				<name>Grimp Body Creation</name>
@@ -3495,6 +3612,9 @@ Perform intraprocedural optimizations on the application classes.
 			<alias>whole-optimize</alias>
 			<expansion>-p</expansion>
 			<expansion>wjop</expansion>
+			<expansion>enabled:true</expansion>
+      			<expansion>-p</expansion>
+			<expansion>wsop</expansion>
 			<expansion>enabled:true</expansion>
 			<expansion>-w</expansion>
 			<expansion>-O</expansion>

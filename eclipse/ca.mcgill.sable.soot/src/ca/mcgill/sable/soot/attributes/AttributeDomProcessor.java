@@ -170,11 +170,17 @@ public class AttributeDomProcessor {
 		else if (node.getNodeType() == Node.TEXT_NODE){
 			String type = node.getParentNode().getNodeName();
 			
-			if (type.equals("java_ln")){			
-				current.setJava_ln((new Integer(node.getNodeValue())).intValue());
+			if (type.equals("java_start_ln")){			
+				current.setJavaStartLn((new Integer(node.getNodeValue())).intValue());
 			}
-			else if (type.equals("jimple_ln")) {
-				current.setJimple_ln((new Integer(node.getNodeValue())).intValue());
+			else if (type.equals("java_end_ln")){			
+				current.setJavaEndLn((new Integer(node.getNodeValue())).intValue());
+			}
+			else if (type.equals("jimple_start_ln")) {
+				current.setJimpleStartLn((new Integer(node.getNodeValue())).intValue());
+			}
+			else if (type.equals("jimple_end_ln")){
+				current.setJimpleEndLn((new Integer(node.getNodeValue())).intValue());
 			}
 			else if (type.equals("startOffset")){
 				current.setJimpleOffsetStart((new Integer(node.getNodeValue()).intValue()));
@@ -182,6 +188,14 @@ public class AttributeDomProcessor {
 			else if (type.equals("endOffset")){ 
 				current.setJimpleOffsetEnd((new Integer(node.getNodeValue()).intValue()));
 			}
+            else if (type.equals("sourceStartOffset")){
+                 current.setJavaOffsetStart((new Integer(node.getNodeValue()).intValue()));
+                 //System.out.println("java start offset: "+current.getJavaOffsetStart());
+            }
+            else if (type.equals("sourceEndOffset")){ 
+                 current.setJavaOffsetEnd((new Integer(node.getNodeValue()).intValue()));
+                 //System.out.println("java end offset: "+current.getJavaOffsetEnd());
+            }
 			else if (type.equals("red")) {
 				current.setRed((new Integer(node.getNodeValue()).intValue()));
 			}
@@ -190,6 +204,9 @@ public class AttributeDomProcessor {
 			}
 			else if (type.equals("blue")){
 				current.setBlue((new Integer(node.getNodeValue()).intValue()));
+			}
+			else if (type.equals("fg")){
+				current.setFg((new Integer(node.getNodeValue()).intValue()));
 			}
 			else if (type.equals("text")) {
 				current.addTextAttr(node.getNodeValue());
@@ -213,6 +230,16 @@ public class AttributeDomProcessor {
 			else if (type.equals("endOffset")){ 
 				vbAttr.setEndOffset((new Integer(node.getNodeValue()).intValue()));
 			}
+            else if (type.equals("sourceStartOffset")){
+                vbAttr.setSourceStartOffset((new Integer(node.getNodeValue()).intValue()));
+                //System.out.println("java start offset: "+vbAttr.getSourceStartOffset());
+                           
+            }
+            else if (type.equals("sourceEndOffset")){ 
+                vbAttr.setSourceEndOffset((new Integer(node.getNodeValue()).intValue()));
+                //System.out.println("java end offset: "+vbAttr.getSourceEndOffset());
+                 
+            }
 			else if (type.equals("red")) {
 				vbAttr.setRed((new Integer(node.getNodeValue()).intValue()));
 			}
@@ -221,6 +248,9 @@ public class AttributeDomProcessor {
 			}
 			else if (type.equals("blue")){
 				vbAttr.setBlue((new Integer(node.getNodeValue()).intValue()));
+			}
+			else if (type.equals("fg")){
+				vbAttr.setFg((new Integer(node.getNodeValue()).intValue()));
 			}
 		
 		}

@@ -69,8 +69,22 @@ public class XMLAttributesPrinter {
 		
 		int java_ln = 0;
 		int jimple_ln = 0;
-		
-		Iterator it = c.getMethods().iterator();
+	
+        // tag fields
+        Iterator fit = c.getFields().iterator();
+		while (fit.hasNext()){
+            SootField sf = (SootField)fit.next();
+            Iterator fTags = sf.getTags().iterator();
+            startPrintAttribute();
+            while (fTags.hasNext()){
+                Tag t = (Tag)fTags.next();
+                printAttributeTag(t);
+            }
+            endPrintAttribute();
+        }
+        
+        // tag methods
+        Iterator it = c.getMethods().iterator();
 		while (it.hasNext()) {
 			SootMethod sm = (SootMethod)it.next();
 			if (!sm.hasActiveBody()) {
@@ -124,7 +138,12 @@ public class XMLAttributesPrinter {
 			printJavaLnAttr((new Integer(((LineNumberTag)t).toString())).intValue());
 		}
 		else if (t instanceof JimpleLineNumberTag) {
-			printJimpleLnAttr((new Integer(((JimpleLineNumberTag)t).toString())).intValue());
+            JimpleLineNumberTag jlnTag = (JimpleLineNumberTag)t;
+			printJimpleLnAttr(jlnTag.getStartLineNumber(), jlnTag.getEndLineNumber());
+		}
+		else if (t instanceof SourceLineNumberTag) {
+            SourceLineNumberTag jlnTag = (SourceLineNumberTag)t; 
+			printJavaLnAttr(jlnTag.getStartLineNumber(), jlnTag.getEndLineNumber());
 		}
 		else if (t instanceof LinkTag) {
 			LinkTag lt = (LinkTag)t;
@@ -134,13 +153,17 @@ public class XMLAttributesPrinter {
 		else if (t instanceof StringTag) {
 			printTextAttr(formatForXML(((StringTag)t).toString()));
 		}
-		else if (t instanceof PositionTag){
+		else if (t instanceof SourcePositionTag){
+			SourcePositionTag pt = (SourcePositionTag)t;
+			printSourcePositionAttr(pt.getStartOffset(), pt.getEndOffset());
+		}
+        else if (t instanceof PositionTag){
 			PositionTag pt = (PositionTag)t;
 			printPositionAttr(pt.getStartOffset(), pt.getEndOffset());
 		}
 		else if (t instanceof ColorTag){
 			ColorTag ct = (ColorTag)t;
-			printColorAttr(ct.getRed(), ct.getGreen(), ct.getBlue());
+			printColorAttr(ct.getRed(), ct.getGreen(), ct.getBlue(), ct.isForeground());
 		}
 		else {
 			printTextAttr(t.toString());
@@ -153,9 +176,9 @@ public class XMLAttributesPrinter {
 		while (it.hasNext()){
 			Tag t = (Tag)it.next();
 			//G.v().out.println(t.getClass().toString());
-			if (t instanceof LineNumberTag) {
+			if (t instanceof SourceLineNumberTag) {
 				//G.v().out.println("t is LineNumberTag");
-				return (new Integer(((LineNumberTag)t).toString())).intValue();
+				return ((SourceLineNumberTag)t).getStartLineNumber();
 			}
 		}
 		return 0;
@@ -176,12 +199,22 @@ public class XMLAttributesPrinter {
 		writerOut.println("<attribute>");
 	}
 
+	private void printJavaLnAttr(int start_ln, int end_ln){
+		writerOut.println("<java_start_ln>"+start_ln+"</java_start_ln>");
+		writerOut.println("<java_end_ln>"+end_ln+"</java_end_ln>");
+	}
+
 	private void printJavaLnAttr(int java_ln){
 		writerOut.println("<java_ln>"+java_ln+"</java_ln>");
 	}
 
 	private void printJimpleLnAttr(int jimple_ln){
 		writerOut.println("<jimple_ln>"+jimple_ln+"</jimple_ln>");
+	}
+
+	private void printJimpleLnAttr(int start_ln, int end_ln){
+		writerOut.println("<jimple_start_ln>"+start_ln+"</jimple_start_ln>");
+		writerOut.println("<jimple_end_ln>"+end_ln+"</jimple_end_ln>");
 	}
 
 	private void printTextAttr(String text){
@@ -197,21 +230,40 @@ public class XMLAttributesPrinter {
 		writerOut.println("</link_attribute>");
 	}
 
+	/*private void startPrintSourceValBoxAttr(){
+		writerOut.println("<source_value_box_attribute>");
+	}*/
+    
 	private void startPrintValBoxAttr(){
 		writerOut.println("<value_box_attribute>");
 	}
 
+	private void printSourcePositionAttr(int start, int end){
+		writerOut.println("<sourceStartOffset>"+start+"</sourceStartOffset>");
+		writerOut.println("<sourceEndOffset>"+end+"</sourceEndOffset>");
+	}
+    
 	private void printPositionAttr(int start, int end){
 		writerOut.println("<startOffset>"+start+"</startOffset>");
 		writerOut.println("<endOffset>"+end+"</endOffset>");
 	}
 	
-	private void printColorAttr(int r, int g, int b){
+	private void printColorAttr(int r, int g, int b, boolean fg){
 		writerOut.println("<red>"+r+"</red>");
 		writerOut.println("<green>"+g+"</green>");
 		writerOut.println("<blue>"+b+"</blue>");
+        if (fg) {
+		    writerOut.println("<fg>1</fg>");
+        }
+        else {
+		    writerOut.println("<fg>0</fg>");    
+        }
 	}
 	
+	/*private void endPrintSourceValBoxAttr(){
+		writerOut.println("</source_value_box_attribute>");
+	}*/
+    
 	private void endPrintValBoxAttr(){
 		writerOut.println("</value_box_attribute>");
 	}
@@ -247,6 +299,7 @@ public class XMLAttributesPrinter {
 	private String  formatForXML(String in) {
 		in = StringTools.replaceAll(in, "<", "&lt;");
 		in = StringTools.replaceAll(in, ">", "&gt;");
+		in = StringTools.replaceAll(in, "&", "&amp;");
 		return in;
 	}
 

@@ -130,7 +130,7 @@ public class SootAttributesJavaHover extends AbstractSootAttributesHover impleme
 		((AbstractTextEditor)getEditor()).setAction("sootattributeAction", actionDel.createAction(getEditor(), ((AbstractTextEditor)getEditor()).get.getVerticalRuler()));
 	}
 	}*/
-	private void computeAttributes() {
+	protected void computeAttributes() {
 		SootAttributeFilesReader safr = new SootAttributeFilesReader();
 		AttributeDomProcessor adp = safr.readFile(createAttrFileName());
 		if (adp != null) {
@@ -151,31 +151,34 @@ public class SootAttributesJavaHover extends AbstractSootAttributesHover impleme
 		return sb.toString();
 	}
 	
-	private void addSootAttributeMarkers() {
+	protected void addSootAttributeMarkers() {
 		
 		//removeOldMarkers();
 		
 		if (getAttrsHandler() == null)return;
 		
 		Iterator it = getAttrsHandler().getAttrList().iterator();
+		HashMap markerAttr = new HashMap();
+		
 		while (it.hasNext()) {
 			SootAttribute sa = (SootAttribute)it.next();
 			if (((sa.getAllTextAttrs("<br>") == null) || (sa.getAllTextAttrs("<br>").length() == 0)) && 
 				((sa.getAllLinkAttrs() == null) || (sa.getAllLinkAttrs().size() ==0))) continue;
-			HashMap markerAttr = new HashMap();
-			markerAttr.put(IMarker.MESSAGE, "Soot Attribute: "+sa.getText());
-			markerAttr.put(IMarker.LINE_NUMBER, new Integer(sa.getJava_ln()));
+			
+			markerAttr.put(IMarker.MESSAGE, "Soot Attribute");
+			markerAttr.put(IMarker.LINE_NUMBER, new Integer(sa.getJavaStartLn()));
+		
 			try {
-				if (sa.getTextList() != null){
-					MarkerUtilities.createMarker(getRec(), markerAttr, "ca.mcgill.sable.soot.sootattributemarker");
-				}
+			//if (sa.getTextList() != null){
+				MarkerUtilities.createMarker(getRec(), markerAttr, "ca.mcgill.sable.soot.sootattributemarker");
+			//	}
 				//MarkerUtilities.createMarker(getRec(), markerAttr, "org.eclipse.core.resources.bookmark");		
 			}
 			catch(CoreException e) {
 				System.out.println(e.getMessage());
 			}
-		}
 		
+		}
 
 	}
 	
@@ -185,10 +188,10 @@ public class SootAttributesJavaHover extends AbstractSootAttributesHover impleme
 	
 	protected String getAttributes() {
 		
-		if (SootPlugin.getDefault().getManager().isFileMarkersUpdate((IFile)getRec())){
+		/*if (SootPlugin.getDefault().getManager().isFileMarkersUpdate((IFile)getRec())){
 			SootPlugin.getDefault().getManager().setToFalseUpdate((IFile)getRec());
 			try {
-				//System.out.println("need to remove markers from: "+getRec().getFullPath().toOSString());
+				System.out.println("need to remove markers from: "+getRec().getFullPath().toOSString());
 				getRec().deleteMarkers("ca.mcgill.sable.soot.sootattributemarker", true, IResource.DEPTH_ONE);
 				SootPlugin.getDefault().getManager().setToFalseRemove((IFile)getRec());
 			} 
@@ -203,15 +206,21 @@ public class SootAttributesJavaHover extends AbstractSootAttributesHover impleme
 		else if (SootPlugin.getDefault().getManager().isFileMarkersRemove((IFile)getRec())) {
 			//SootPlugin.getDefault().getManager().setToFalseRemove((IFile)getRec());
 			try {
-				//System.out.println("need to remove markers from: "+getRec().getFullPath().toOSString());
+				System.out.println("need to remove markers from: "+getRec().getFullPath().toOSString());
 				getRec().deleteMarkers("ca.mcgill.sable.soot.sootattributemarker", true, IResource.DEPTH_ONE);
 			}
 			catch(CoreException e){
 			}
 			return null;
-		}
+		}*/
 		
 		if (getAttrsHandler() != null) {
+            
+            //System.out.println("about to make java colorer");
+            ////setSajc(new SootAttributesJavaColorer());
+            
+            //sajc.computeColors(getAttrsHandler(), getViewer(), getEditor());
+                          
 			//System.out.println("getting attribute for java ln: "+getLineNum());
 		  	return getAttrsHandler().getJavaAttribute(getLineNum());
 		}
@@ -219,6 +228,26 @@ public class SootAttributesJavaHover extends AbstractSootAttributesHover impleme
 			return null;
 		}
 	}
-	
+    
+    protected void addColorTags(){
+    	setSajc(new SootAttributesJavaColorer());
+    	getSajc().computeColors(getAttrsHandler(), getViewer(), getEditor());	
+    }
+    
+    private SootAttributesJavaColorer sajc;   
+
+    /**
+     * @return
+     */
+    public SootAttributesJavaColorer getSajc() {
+        return sajc;
+    }
+
+    /**
+     * @param colorer
+     */
+    public void setSajc(SootAttributesJavaColorer colorer) {
+        sajc = colorer;
+    }
 
 }

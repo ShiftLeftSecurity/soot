@@ -188,10 +188,20 @@ revision control.</p>
 
 <p>With a Subversion client, you can obtain a copy of the
 development version of Soot, as well as any old versions. To obtain the
-latest development version of Soot, use the command:<br>
+latest development version of Soot, use one of the following commands:<br>
+<tt>svn checkout https://svn.sable.mcgill.ca/soot/soot/trunk soot-dev</tt><br>
 <tt>svn export https://svn.sable.mcgill.ca/soot/soot/trunk soot-dev</tt></p>
 
-<p>You can also browse our latest version, as well as a ViewCVS history, using
+<p>The <tt>checkout</tt> version records additional information required
+to update your checked out version of Soot with the repository at a
+later time (with the <tt>svn update</tt> command). The <tt>export</tt>
+version provides a "clean" copy of only the Soot files themselves.</p>
+
+<p>In order to compile Soot from source, you will also need a copy of
+the Jasmin and Polyglot classes, available from the
+<a href="http://www.sable.mcgill.ca/software/">download page</a>.</p>
+
+<p>You can also browse our latest version of the Soot repository, as well as a ViewCVS history, using
 just a web browser. For further instructions, please see
 <a href="http://svn.sable.mcgill.ca/">http://svn.sable.mcgill.ca/</a>.</p>
 </blockquote>
@@ -203,8 +213,10 @@ just a web browser. For further instructions, please see
 </table>
 
 <blockquote>
-Since version 2.0, Soot includes our initial release of a <a href="eclipse/index.html">plugin</a> that makes it
+Since version 2.0, Soot includes a <a href="eclipse/index.html">plugin</a> that makes it
 possible to use Soot from <a href="http://www.eclipse.org">Eclipse</a>.
+We have a separate <a href="eclipse/index.html">web page with instructions for
+installing and using the plugin.</a>
 </blockquote>
 
 <br>
@@ -256,7 +268,7 @@ elimination has triggered JIT problems with sunwjit.
 <blockquote>
 
 Soot is already compiled in the distribution. To recompile Soot, we
-use <tt>make</tt> using the <tt>Makefile</tt> in the main
+use <tt>gmake</tt>(GNU make) using the <tt>Makefile</tt> in the main
 <tt>soot</tt> directory. Jasmin must be in your <tt>classpath</tt>
 to compile Soot. Jasmin can be recompiled by using the script <tt>./bin/compile_all.sh</tt> 
 in the main Jasmin directory (you may need to type <tt>sh ./bin/compile_all.sh</tt>). 
@@ -264,7 +276,7 @@ in the main Jasmin directory (you may need to type <tt>sh ./bin/compile_all.sh</
 <!-- 1.2.2
 Soot is already compiled in the distribution.  To recompile Soot, 
 we recommend the use of the <tt>SootCompiler</tt> class in the main <tt>soot/src</tt> directory.
-However, we use <tt>make</tt> using the <tt>Makefile</tt> in the main <tt>soot</tt> directory.
+However, we use <tt>gmake</tt>(GNU make) using the <tt>Makefile</tt> in the main <tt>soot</tt> directory.
 Note that in either case, jasmin must be in your classpath to compile Soot.
 Release 1.2.2 uses a new version of Jasmin, 1.06-s10, which has no dependence on
 Soot.

@@ -38,6 +38,9 @@ import soot.jimple.toolkits.annotation.arraycheck.*;
 import soot.jimple.toolkits.annotation.profiling.*;
 import soot.jimple.toolkits.annotation.callgraph.*;
 import soot.jimple.toolkits.annotation.parity.*;
+import soot.jimple.toolkits.annotation.methods.*;
+import soot.jimple.toolkits.annotation.fields.*;
+import soot.jimple.toolkits.annotation.qualifiers.*;
 import soot.jimple.toolkits.annotation.nullcheck.*;
 import soot.jimple.toolkits.annotation.tags.*;
 import soot.jimple.toolkits.pointer.*;
@@ -56,6 +59,12 @@ import soot.xml.*;
 /** Manages the Packs containing the various phases and their options. */
 public class PackManager {
     public PackManager( Singletons.Global g ) { G.v().PhaseOptions().setPackManager(this); init(); }
+
+    public boolean onlyStandardPacks() { return onlyStandardPacks; }
+    private boolean onlyStandardPacks = false;
+    void notifyAddPack() {
+        onlyStandardPacks = false;
+    }
 
     private void init()
     {
@@ -86,11 +95,11 @@ public class PackManager {
             p.add(new Transform("cg.bdd", BDDSparkTransformer.v()));
         }
 
-        // Whole-Shimple transformation pack (DISABLED)
-        // addPack(p = new ScenePack("wstp"));
+        // Whole-Shimple transformation pack
+        addPack(p = new ScenePack("wstp"));
 
-        // Whole-Shimple Optimization pack (DISABLED)
-        // addPack(p = new ScenePack("wsop"));
+        // Whole-Shimple Optimization pack
+        addPack(p = new ScenePack("wsop"));
 
         // Whole-Jimple transformation pack 
         addPack(p = new ScenePack("wjtp"));
@@ -109,6 +118,9 @@ public class PackManager {
         addPack(p = new ScenePack("wjap"));
         {
             p.add(new Transform("wjap.ra", RectangularArrayFinder.v()));
+            p.add(new Transform("wjap.umt", UnreachableMethodsTagger.v()));
+            p.add(new Transform("wjap.uft", UnreachableFieldsTagger.v()));
+            p.add(new Transform("wjap.tqt", TightestQualifiersTagger.v()));
         }
 
         // Shimple pack
@@ -148,12 +160,13 @@ public class PackManager {
         {
             p.add(new Transform("jap.npc", NullPointerChecker.v()));
             p.add(new Transform("jap.npcolorer", NullPointerColorer.v()));
-			p.add(new Transform("jap.abc", ArrayBoundsChecker.v()));
+            p.add(new Transform("jap.abc", ArrayBoundsChecker.v()));
             p.add(new Transform("jap.profiling", ProfilingGenerator.v()));
             p.add(new Transform("jap.sea", SideEffectTagger.v()));
             p.add(new Transform("jap.fieldrw", FieldTagger.v()));
             p.add(new Transform("jap.cgtagger", CallGraphTagger.v()));
             p.add(new Transform("jap.parity", ParityTagger.v()));
+            p.add(new Transform("jap.pat", ParameterAliasTagger.v()));
 	    
         }
         
@@ -189,6 +202,8 @@ public class PackManager {
             p.add(new Transform("tag.dep", DependenceTagAggregator.v()));
             p.add(new Transform("tag.fieldrw", FieldTagAggregator.v()));
         }
+
+        onlyStandardPacks = true;
     }
 
     public static PackManager v() { 
@@ -236,7 +251,7 @@ public class PackManager {
     }
 
     public void runPacks() {
-        if (Options.v().whole_program()) {
+        if (Options.v().whole_program() || Options.v().whole_shimple()) {
             runWholeProgramPacks();
         }
         preProcessDAVA();
@@ -256,16 +271,15 @@ public class PackManager {
     private void runWholeProgramPacks() {
         getPack("cg").apply();
 
-        // DISABLED
-        //if (Options.v().via_shimple()) {
-        //getPack("wstp").apply();
-        //getPack("wsop").apply();
-        //} else {
-
+        if (Options.v().whole_shimple()) {
+            ShimpleTransformer.v().transform();
+            getPack("wstp").apply();
+            getPack("wsop").apply();
+        } else {
             getPack("wjtp").apply();
             getPack("wjop").apply();
             getPack("wjap").apply();
-        //}
+        }
     }
 
     /* preprocess classes for DAVA */
@@ -300,7 +314,8 @@ public class PackManager {
     }
 
     private Iterator reachableClasses() {
-        if( false && Options.v().whole_program() ) {
+        if( false && (Options.v().whole_program() ||
+                      Options.v().whole_shimple())) {
             QueueReader methods = Scene.v().getReachableMethods().listener();
             HashSet reachableClasses = new HashSet();
             
@@ -402,6 +417,7 @@ public class PackManager {
                 throw new RuntimeException();
         }
 
+        boolean wholeShimple = Options.v().whole_shimple();
         if( Options.v().via_shimple() ) produceShimple = true;
 
         Iterator methodIt = c.methodIterator();
@@ -410,14 +426,29 @@ public class PackManager {
 
             if (!m.isConcrete()) continue;
 
-            if (produceShimple) {
-                ShimpleBody body = Shimple.v().newBody(m.retrieveActiveBody());
-                m.setActiveBody(body);
-                PackManager.v().getPack("stp").apply(body);
-                PackManager.v().getPack("sop").apply(body);
+            if (produceShimple || wholeShimple) {
+                ShimpleBody sBody = null;
 
-                if( produceJimple )
-                    m.setActiveBody(body.toJimpleBody());
+                // whole shimple or not?
+                {
+                    Body body = m.retrieveActiveBody();
+
+                    if(body instanceof ShimpleBody){
+                        sBody = (ShimpleBody) body;
+                        if(!sBody.isSSA())
+                            sBody.rebuild();
+                    }
+                    else{
+                        sBody = Shimple.v().newBody(body);
+                    }
+                }
+                
+                m.setActiveBody(sBody);
+                PackManager.v().getPack("stp").apply(sBody);
+                PackManager.v().getPack("sop").apply(sBody);
+
+                if( produceJimple || (wholeShimple && !produceShimple) )
+                    m.setActiveBody(sBody.toJimpleBody());
             }
 
             if (produceJimple) {

@@ -57,6 +57,7 @@ public class PhaseOptionsDialog extends AbstractOptionsDialog implements Selecti
 	protected void initializePageContainer() {
 
 
+		
 Composite General_OptionsChild = General_OptionsCreate(getPageContainer());
 
 Composite Input_OptionsChild = Input_OptionsCreate(getPageContainer());
@@ -76,6 +77,10 @@ Composite Miscellaneous_OptionsChild = Miscellaneous_OptionsCreate(getPageContai
 Composite jbChild = jbCreate(getPageContainer());
 
 Composite cgChild = cgCreate(getPageContainer());
+
+Composite wstpChild = wstpCreate(getPageContainer());
+
+Composite wsopChild = wsopCreate(getPageContainer());
 
 Composite wjtpChild = wjtpCreate(getPageContainer());
 
@@ -159,6 +164,12 @@ Composite wjopwjop_siChild = wjopwjop_siCreate(getPageContainer());
 
 Composite wjapwjap_raChild = wjapwjap_raCreate(getPageContainer());
 
+Composite wjapwjap_umtChild = wjapwjap_umtCreate(getPageContainer());
+
+Composite wjapwjap_uftChild = wjapwjap_uftCreate(getPageContainer());
+
+Composite wjapwjap_tqtChild = wjapwjap_tqtCreate(getPageContainer());
+
 Composite sopsop_cpfChild = sopsop_cpfCreate(getPageContainer());
 
 Composite jopjop_cseChild = jopjop_cseCreate(getPageContainer());
@@ -200,6 +211,8 @@ Composite japjap_fieldrwChild = japjap_fieldrwCreate(getPageContainer());
 Composite japjap_cgtaggerChild = japjap_cgtaggerCreate(getPageContainer());
 
 Composite japjap_parityChild = japjap_parityCreate(getPageContainer());
+
+Composite japjap_patChild = japjap_patCreate(getPageContainer());
 
 Composite gbgb_a1Child = gbgb_a1Create(getPageContainer());
 
@@ -437,6 +450,9 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		addToEnableGroup("cg", getcgtrim_clinit_widget(), "trim-clinit");
 		
 		
+		addToEnableGroup("cg", getcgcontext_widget(), "context");
+		
+		
 		getcgenabled_widget().getButton().addSelectionListener(this);
 		
 		getcgsafe_forname_widget().getButton().addSelectionListener(this);
@@ -496,6 +512,9 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		addToEnableGroup("cg", "cg.spark", getcgcg_sparkmerge_stringbuffer_widget(), "merge-stringbuffer");
 
 		
+		addToEnableGroup("cg", "cg.spark", getcgcg_sparkstring_constants_widget(), "string-constants");
+
+		
 		addToEnableGroup("cg", "cg.spark", getcgcg_sparksimulate_natives_widget(), "simulate-natives");
 
 		
@@ -503,12 +522,6 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 
 		
 		addToEnableGroup("cg", "cg.spark", getcgcg_sparkon_fly_cg_widget(), "on-fly-cg");
-
-		
-		addToEnableGroup("cg", "cg.spark", getcgcg_sparkparms_as_fields_widget(), "parms-as-fields");
-
-		
-		addToEnableGroup("cg", "cg.spark", getcgcg_sparkreturns_as_fields_widget(), "returns-as-fields");
 
 		
 		addToEnableGroup("cg", "cg.spark", getcgcg_sparksimplify_offline_widget(), "simplify-offline");
@@ -594,6 +607,9 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		addToEnableGroup("cg", "cg.bdd", getcgcg_bddmerge_stringbuffer_widget(), "merge-stringbuffer");
 
 		
+		addToEnableGroup("cg", "cg.bdd", getcgcg_bddstring_constants_widget(), "string-constants");
+
+		
 		addToEnableGroup("cg", "cg.bdd", getcgcg_bddsimulate_natives_widget(), "simulate-natives");
 
 		
@@ -601,12 +617,6 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 
 		
 		addToEnableGroup("cg", "cg.bdd", getcgcg_bddon_fly_cg_widget(), "on-fly-cg");
-
-		
-		addToEnableGroup("cg", "cg.bdd", getcgcg_bddparms_as_fields_widget(), "parms-as-fields");
-
-		
-		addToEnableGroup("cg", "cg.bdd", getcgcg_bddreturns_as_fields_widget(), "returns-as-fields");
 
 		
 		addToEnableGroup("cg", "cg.bdd", getcgcg_bddsimplify_offline_widget(), "simplify-offline");
@@ -644,6 +654,24 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		
 		addToEnableGroup("cg", "cg.bdd", getcgcg_bddset_mass_widget(), "set-mass");
 
+		
+		
+		makeNewEnableGroup("wstp");
+		
+		
+		addToEnableGroup("wstp", getwstpenabled_widget(), "enabled");
+		
+		
+		getwstpenabled_widget().getButton().addSelectionListener(this);
+		
+		
+		makeNewEnableGroup("wsop");
+		
+		
+		addToEnableGroup("wsop", getwsopenabled_widget(), "enabled");
+		
+		
+		getwsopenabled_widget().getButton().addSelectionListener(this);
 		
 		
 		makeNewEnableGroup("wjtp");
@@ -721,6 +749,30 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		addToEnableGroup("wjap", "wjap.ra", getwjapwjap_raenabled_widget(), "enabled");
 		
 		getwjapwjap_raenabled_widget().getButton().addSelectionListener(this);
+		
+		
+		makeNewEnableGroup("wjap", "wjap.umt");
+		
+		
+		addToEnableGroup("wjap", "wjap.umt", getwjapwjap_umtenabled_widget(), "enabled");
+		
+		getwjapwjap_umtenabled_widget().getButton().addSelectionListener(this);
+		
+		
+		makeNewEnableGroup("wjap", "wjap.uft");
+		
+		
+		addToEnableGroup("wjap", "wjap.uft", getwjapwjap_uftenabled_widget(), "enabled");
+		
+		getwjapwjap_uftenabled_widget().getButton().addSelectionListener(this);
+		
+		
+		makeNewEnableGroup("wjap", "wjap.tqt");
+		
+		
+		addToEnableGroup("wjap", "wjap.tqt", getwjapwjap_tqtenabled_widget(), "enabled");
+		
+		getwjapwjap_tqtenabled_widget().getButton().addSelectionListener(this);
 		
 		
 		makeNewEnableGroup("shimple");
@@ -971,6 +1023,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		
 		addToEnableGroup("jap", "jap.abc", getjapjap_abcprofiling_widget(), "profiling");
 		
+		addToEnableGroup("jap", "jap.abc", getjapjap_abcadd_color_tags_widget(), "add-color-tags");
+		
 		getjapjap_abcenabled_widget().getButton().addSelectionListener(this);
 		
 		getjapjap_abcwith_all_widget().getButton().addSelectionListener(this);
@@ -986,6 +1040,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		getjapjap_abcwith_rectarray_widget().getButton().addSelectionListener(this);
 		
 		getjapjap_abcprofiling_widget().getButton().addSelectionListener(this);
+		
+		getjapjap_abcadd_color_tags_widget().getButton().addSelectionListener(this);
 		
 		
 		makeNewEnableGroup("jap", "jap.profiling");
@@ -1036,6 +1092,14 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		addToEnableGroup("jap", "jap.parity", getjapjap_parityenabled_widget(), "enabled");
 		
 		getjapjap_parityenabled_widget().getButton().addSelectionListener(this);
+		
+		
+		makeNewEnableGroup("jap", "jap.pat");
+		
+		
+		addToEnableGroup("jap", "jap.pat", getjapjap_patenabled_widget(), "enabled");
+		
+		getjapjap_patenabled_widget().getButton().addSelectionListener(this);
 		
 		
 		makeNewEnableGroup("gb");
@@ -1303,6 +1367,16 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 
 		if (boolRes != defBoolRes) {
 			getConfig().put(getGeneral_Optionswhole_program_widget().getAlias(), new Boolean(boolRes));
+		}
+		
+		boolRes = getGeneral_Optionswhole_shimple_widget().getButton().getSelection();
+		
+		
+		defBoolRes = false;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getGeneral_Optionswhole_shimple_widget().getAlias(), new Boolean(boolRes));
 		}
 		
 		boolRes = getGeneral_Optionsdebug_widget().getButton().getSelection();
@@ -1700,6 +1774,16 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		if (boolRes != defBoolRes) {
 			getConfig().put(getcgtrim_clinit_widget().getAlias(), new Boolean(boolRes));
 		}
+		 
+		stringRes = getcgcontext_widget().getSelectedAlias();
+
+		
+		defStringRes = "insens";
+		
+
+		if (!stringRes.equals(defStringRes)) {
+			getConfig().put(getcgcontext_widget().getAlias(), stringRes);
+		}
 		
 		boolRes = getcgcg_chaenabled_widget().getButton().getSelection();
 		
@@ -1821,6 +1905,16 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 			getConfig().put(getcgcg_sparkmerge_stringbuffer_widget().getAlias(), new Boolean(boolRes));
 		}
 		
+		boolRes = getcgcg_sparkstring_constants_widget().getButton().getSelection();
+		
+		
+		defBoolRes = false;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getcgcg_sparkstring_constants_widget().getAlias(), new Boolean(boolRes));
+		}
+		
 		boolRes = getcgcg_sparksimulate_natives_widget().getButton().getSelection();
 		
 		
@@ -1849,26 +1943,6 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 
 		if (boolRes != defBoolRes) {
 			getConfig().put(getcgcg_sparkon_fly_cg_widget().getAlias(), new Boolean(boolRes));
-		}
-		
-		boolRes = getcgcg_sparkparms_as_fields_widget().getButton().getSelection();
-		
-		
-		defBoolRes = false;
-		
-
-		if (boolRes != defBoolRes) {
-			getConfig().put(getcgcg_sparkparms_as_fields_widget().getAlias(), new Boolean(boolRes));
-		}
-		
-		boolRes = getcgcg_sparkreturns_as_fields_widget().getButton().getSelection();
-		
-		
-		defBoolRes = false;
-		
-
-		if (boolRes != defBoolRes) {
-			getConfig().put(getcgcg_sparkreturns_as_fields_widget().getAlias(), new Boolean(boolRes));
 		}
 		
 		boolRes = getcgcg_sparksimplify_offline_widget().getButton().getSelection();
@@ -2131,6 +2205,16 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 			getConfig().put(getcgcg_bddmerge_stringbuffer_widget().getAlias(), new Boolean(boolRes));
 		}
 		
+		boolRes = getcgcg_bddstring_constants_widget().getButton().getSelection();
+		
+		
+		defBoolRes = false;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getcgcg_bddstring_constants_widget().getAlias(), new Boolean(boolRes));
+		}
+		
 		boolRes = getcgcg_bddsimulate_natives_widget().getButton().getSelection();
 		
 		
@@ -2159,26 +2243,6 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 
 		if (boolRes != defBoolRes) {
 			getConfig().put(getcgcg_bddon_fly_cg_widget().getAlias(), new Boolean(boolRes));
-		}
-		
-		boolRes = getcgcg_bddparms_as_fields_widget().getButton().getSelection();
-		
-		
-		defBoolRes = false;
-		
-
-		if (boolRes != defBoolRes) {
-			getConfig().put(getcgcg_bddparms_as_fields_widget().getAlias(), new Boolean(boolRes));
-		}
-		
-		boolRes = getcgcg_bddreturns_as_fields_widget().getButton().getSelection();
-		
-		
-		defBoolRes = false;
-		
-
-		if (boolRes != defBoolRes) {
-			getConfig().put(getcgcg_bddreturns_as_fields_widget().getAlias(), new Boolean(boolRes));
 		}
 		
 		boolRes = getcgcg_bddsimplify_offline_widget().getButton().getSelection();
@@ -2299,6 +2363,26 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 
 		if (boolRes != defBoolRes) {
 			getConfig().put(getcgcg_bddset_mass_widget().getAlias(), new Boolean(boolRes));
+		}
+		
+		boolRes = getwstpenabled_widget().getButton().getSelection();
+		
+		
+		defBoolRes = true;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getwstpenabled_widget().getAlias(), new Boolean(boolRes));
+		}
+		
+		boolRes = getwsopenabled_widget().getButton().getSelection();
+		
+		
+		defBoolRes = false;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getwsopenabled_widget().getAlias(), new Boolean(boolRes));
 		}
 		
 		boolRes = getwjtpenabled_widget().getButton().getSelection();
@@ -2446,6 +2530,36 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 
 		if (boolRes != defBoolRes) {
 			getConfig().put(getwjapwjap_raenabled_widget().getAlias(), new Boolean(boolRes));
+		}
+		
+		boolRes = getwjapwjap_umtenabled_widget().getButton().getSelection();
+		
+		
+		defBoolRes = false;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getwjapwjap_umtenabled_widget().getAlias(), new Boolean(boolRes));
+		}
+		
+		boolRes = getwjapwjap_uftenabled_widget().getButton().getSelection();
+		
+		
+		defBoolRes = false;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getwjapwjap_uftenabled_widget().getAlias(), new Boolean(boolRes));
+		}
+		
+		boolRes = getwjapwjap_tqtenabled_widget().getButton().getSelection();
+		
+		
+		defBoolRes = false;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getwjapwjap_tqtenabled_widget().getAlias(), new Boolean(boolRes));
 		}
 		
 		boolRes = getshimpleenabled_widget().getButton().getSelection();
@@ -2878,6 +2992,16 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 			getConfig().put(getjapjap_abcprofiling_widget().getAlias(), new Boolean(boolRes));
 		}
 		
+		boolRes = getjapjap_abcadd_color_tags_widget().getButton().getSelection();
+		
+		
+		defBoolRes = false;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getjapjap_abcadd_color_tags_widget().getAlias(), new Boolean(boolRes));
+		}
+		
 		boolRes = getjapjap_profilingenabled_widget().getButton().getSelection();
 		
 		
@@ -2955,6 +3079,16 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 
 		if (boolRes != defBoolRes) {
 			getConfig().put(getjapjap_parityenabled_widget().getAlias(), new Boolean(boolRes));
+		}
+		
+		boolRes = getjapjap_patenabled_widget().getButton().getSelection();
+		
+		
+		defBoolRes = false;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getjapjap_patenabled_widget().getAlias(), new Boolean(boolRes));
 		}
 		
 		boolRes = getgbenabled_widget().getButton().getSelection();
@@ -3377,6 +3511,7 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		SootOption subSectParent;
 		
 
+		
 		SootOption General_Options_branch = new SootOption("General Options", "General_Options");
 		root.addChild(General_Options_branch);
 		parent = General_Options_branch;		
@@ -3601,6 +3736,20 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 
 			subSectParent.addChild(cg_BDD_Spark_Output_Options_branch);
 			
+			//Whole Shimple Transformation Pack
+			SootOption wstp_branch = new SootOption("Whole Shimple Transformation Pack", "wstp");
+			parent.addChild(wstp_branch);
+			subParent = wstp_branch;
+
+
+			
+			//Whole Shimple Optimization Pack
+			SootOption wsop_branch = new SootOption("Whole Shimple Optimization Pack", "wsop");
+			parent.addChild(wsop_branch);
+			subParent = wsop_branch;
+
+
+			
 			//Whole-Jimple Transformation Pack
 			SootOption wjtp_branch = new SootOption("Whole-Jimple Transformation Pack", "wjtp");
 			parent.addChild(wjtp_branch);
@@ -3650,6 +3799,36 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 
 			
 			subSectParent = wjap_wjap_ra_branch;
+			
+			
+			SootOption wjap_wjap_umt_branch = new SootOption("Unreachable Method Tagger", "wjapwjap_umt");
+			subParent.addChild(wjap_wjap_umt_branch);
+
+
+			
+
+			
+			subSectParent = wjap_wjap_umt_branch;
+			
+			
+			SootOption wjap_wjap_uft_branch = new SootOption("Unreachable Fields Tagger", "wjapwjap_uft");
+			subParent.addChild(wjap_wjap_uft_branch);
+
+
+			
+
+			
+			subSectParent = wjap_wjap_uft_branch;
+			
+			
+			SootOption wjap_wjap_tqt_branch = new SootOption("Tightest Qualifiers Tagger", "wjapwjap_tqt");
+			subParent.addChild(wjap_wjap_tqt_branch);
+
+
+			
+
+			
+			subSectParent = wjap_wjap_tqt_branch;
 			
 			
 			//Shimple Control
@@ -3904,6 +4083,16 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 			subSectParent = jap_jap_parity_branch;
 			
 			
+			SootOption jap_jap_pat_branch = new SootOption("Parameter Alias Tagger", "japjap_pat");
+			subParent.addChild(jap_jap_pat_branch);
+
+
+			
+
+			
+			subSectParent = jap_jap_pat_branch;
+			
+			
 			//Grimp Body Creation
 			SootOption gb_branch = new SootOption("Grimp Body Creation", "gb");
 			parent.addChild(gb_branch);
@@ -4082,6 +4271,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 	}
 
 
+		
+		
 	private BooleanOptionWidget General_Optionshelp_widget;
 	
 	private void setGeneral_Optionshelp_widget(BooleanOptionWidget widget) {
@@ -4140,6 +4331,16 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 	
 	public BooleanOptionWidget getGeneral_Optionswhole_program_widget() {
 		return General_Optionswhole_program_widget;
+	}	
+	
+	private BooleanOptionWidget General_Optionswhole_shimple_widget;
+	
+	private void setGeneral_Optionswhole_shimple_widget(BooleanOptionWidget widget) {
+		General_Optionswhole_shimple_widget = widget;
+	}
+	
+	public BooleanOptionWidget getGeneral_Optionswhole_shimple_widget() {
+		return General_Optionswhole_shimple_widget;
 	}	
 	
 	private BooleanOptionWidget General_Optionsdebug_widget;
@@ -4554,6 +4755,18 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		return cgtrim_clinit_widget;
 	}	
 	
+	
+	private MultiOptionWidget cgcontext_widget;
+	
+	private void setcgcontext_widget(MultiOptionWidget widget) {
+		cgcontext_widget = widget;
+	}
+	
+	public MultiOptionWidget getcgcontext_widget() {
+		return cgcontext_widget;
+	}	
+	
+	
 	private BooleanOptionWidget cgcg_chaenabled_widget;
 	
 	private void setcgcg_chaenabled_widget(BooleanOptionWidget widget) {
@@ -4674,6 +4887,16 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		return cgcg_sparkmerge_stringbuffer_widget;
 	}	
 	
+	private BooleanOptionWidget cgcg_sparkstring_constants_widget;
+	
+	private void setcgcg_sparkstring_constants_widget(BooleanOptionWidget widget) {
+		cgcg_sparkstring_constants_widget = widget;
+	}
+	
+	public BooleanOptionWidget getcgcg_sparkstring_constants_widget() {
+		return cgcg_sparkstring_constants_widget;
+	}	
+	
 	private BooleanOptionWidget cgcg_sparksimulate_natives_widget;
 	
 	private void setcgcg_sparksimulate_natives_widget(BooleanOptionWidget widget) {
@@ -4702,26 +4925,6 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 	
 	public BooleanOptionWidget getcgcg_sparkon_fly_cg_widget() {
 		return cgcg_sparkon_fly_cg_widget;
-	}	
-	
-	private BooleanOptionWidget cgcg_sparkparms_as_fields_widget;
-	
-	private void setcgcg_sparkparms_as_fields_widget(BooleanOptionWidget widget) {
-		cgcg_sparkparms_as_fields_widget = widget;
-	}
-	
-	public BooleanOptionWidget getcgcg_sparkparms_as_fields_widget() {
-		return cgcg_sparkparms_as_fields_widget;
-	}	
-	
-	private BooleanOptionWidget cgcg_sparkreturns_as_fields_widget;
-	
-	private void setcgcg_sparkreturns_as_fields_widget(BooleanOptionWidget widget) {
-		cgcg_sparkreturns_as_fields_widget = widget;
-	}
-	
-	public BooleanOptionWidget getcgcg_sparkreturns_as_fields_widget() {
-		return cgcg_sparkreturns_as_fields_widget;
 	}	
 	
 	private BooleanOptionWidget cgcg_sparksimplify_offline_widget;
@@ -4992,6 +5195,16 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		return cgcg_bddmerge_stringbuffer_widget;
 	}	
 	
+	private BooleanOptionWidget cgcg_bddstring_constants_widget;
+	
+	private void setcgcg_bddstring_constants_widget(BooleanOptionWidget widget) {
+		cgcg_bddstring_constants_widget = widget;
+	}
+	
+	public BooleanOptionWidget getcgcg_bddstring_constants_widget() {
+		return cgcg_bddstring_constants_widget;
+	}	
+	
 	private BooleanOptionWidget cgcg_bddsimulate_natives_widget;
 	
 	private void setcgcg_bddsimulate_natives_widget(BooleanOptionWidget widget) {
@@ -5020,26 +5233,6 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 	
 	public BooleanOptionWidget getcgcg_bddon_fly_cg_widget() {
 		return cgcg_bddon_fly_cg_widget;
-	}	
-	
-	private BooleanOptionWidget cgcg_bddparms_as_fields_widget;
-	
-	private void setcgcg_bddparms_as_fields_widget(BooleanOptionWidget widget) {
-		cgcg_bddparms_as_fields_widget = widget;
-	}
-	
-	public BooleanOptionWidget getcgcg_bddparms_as_fields_widget() {
-		return cgcg_bddparms_as_fields_widget;
-	}	
-	
-	private BooleanOptionWidget cgcg_bddreturns_as_fields_widget;
-	
-	private void setcgcg_bddreturns_as_fields_widget(BooleanOptionWidget widget) {
-		cgcg_bddreturns_as_fields_widget = widget;
-	}
-	
-	public BooleanOptionWidget getcgcg_bddreturns_as_fields_widget() {
-		return cgcg_bddreturns_as_fields_widget;
 	}	
 	
 	private BooleanOptionWidget cgcg_bddsimplify_offline_widget;
@@ -5160,6 +5353,26 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 	
 	public BooleanOptionWidget getcgcg_bddset_mass_widget() {
 		return cgcg_bddset_mass_widget;
+	}	
+	
+	private BooleanOptionWidget wstpenabled_widget;
+	
+	private void setwstpenabled_widget(BooleanOptionWidget widget) {
+		wstpenabled_widget = widget;
+	}
+	
+	public BooleanOptionWidget getwstpenabled_widget() {
+		return wstpenabled_widget;
+	}	
+	
+	private BooleanOptionWidget wsopenabled_widget;
+	
+	private void setwsopenabled_widget(BooleanOptionWidget widget) {
+		wsopenabled_widget = widget;
+	}
+	
+	public BooleanOptionWidget getwsopenabled_widget() {
+		return wsopenabled_widget;
 	}	
 	
 	private BooleanOptionWidget wjtpenabled_widget;
@@ -5320,6 +5533,36 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 	
 	public BooleanOptionWidget getwjapwjap_raenabled_widget() {
 		return wjapwjap_raenabled_widget;
+	}	
+	
+	private BooleanOptionWidget wjapwjap_umtenabled_widget;
+	
+	private void setwjapwjap_umtenabled_widget(BooleanOptionWidget widget) {
+		wjapwjap_umtenabled_widget = widget;
+	}
+	
+	public BooleanOptionWidget getwjapwjap_umtenabled_widget() {
+		return wjapwjap_umtenabled_widget;
+	}	
+	
+	private BooleanOptionWidget wjapwjap_uftenabled_widget;
+	
+	private void setwjapwjap_uftenabled_widget(BooleanOptionWidget widget) {
+		wjapwjap_uftenabled_widget = widget;
+	}
+	
+	public BooleanOptionWidget getwjapwjap_uftenabled_widget() {
+		return wjapwjap_uftenabled_widget;
+	}	
+	
+	private BooleanOptionWidget wjapwjap_tqtenabled_widget;
+	
+	private void setwjapwjap_tqtenabled_widget(BooleanOptionWidget widget) {
+		wjapwjap_tqtenabled_widget = widget;
+	}
+	
+	public BooleanOptionWidget getwjapwjap_tqtenabled_widget() {
+		return wjapwjap_tqtenabled_widget;
 	}	
 	
 	private BooleanOptionWidget shimpleenabled_widget;
@@ -5756,6 +5999,16 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		return japjap_abcprofiling_widget;
 	}	
 	
+	private BooleanOptionWidget japjap_abcadd_color_tags_widget;
+	
+	private void setjapjap_abcadd_color_tags_widget(BooleanOptionWidget widget) {
+		japjap_abcadd_color_tags_widget = widget;
+	}
+	
+	public BooleanOptionWidget getjapjap_abcadd_color_tags_widget() {
+		return japjap_abcadd_color_tags_widget;
+	}	
+	
 	private BooleanOptionWidget japjap_profilingenabled_widget;
 	
 	private void setjapjap_profilingenabled_widget(BooleanOptionWidget widget) {
@@ -5836,6 +6089,16 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 	
 	public BooleanOptionWidget getjapjap_parityenabled_widget() {
 		return japjap_parityenabled_widget;
+	}	
+	
+	private BooleanOptionWidget japjap_patenabled_widget;
+	
+	private void setjapjap_patenabled_widget(BooleanOptionWidget widget) {
+		japjap_patenabled_widget = widget;
+	}
+	
+	public BooleanOptionWidget getjapjap_patenabled_widget() {
+		return japjap_patenabled_widget;
 	}	
 	
 	private BooleanOptionWidget gbenabled_widget;
@@ -6269,7 +6532,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = ""+" "+""+" "+"h";
 		defKey = defKey.trim();
@@ -6367,6 +6631,22 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		
 		
 		
+		defKey = ""+" "+""+" "+"ws";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = false;
+			
+		}
+
+		setGeneral_Optionswhole_shimple_widget(new BooleanOptionWidget(editGroupGeneral_Options, SWT.NONE, new OptionData("Whole-Shimple Mode", "", "","ws", "\nRun in whole shimple mode, taking into consideration the whole \nprogram when performing Shimple analyses and transformations. \nSoot uses the Call Graph Constructor to build a call graph for \nthe program, then applies enabled transformations in the \nWhole-Shimple Transformation and Whole-Shimple Optimization \nbefore applying enabled intraprocedural transformations. Note \nthat the Whole-Shimple Optimization pack is normally disabled \n(and thus not applied by whole shimple mode), unless you also \nspecify the Whole Program Optimize option.", defaultBool)));
+		
+		
+		
 		defKey = ""+" "+""+" "+"debug";
 		defKey = defKey.trim();
 
@@ -6424,7 +6704,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = ""+" "+""+" "+"allow-phantom-refs";
 		defKey = defKey.trim();
@@ -6453,6 +6734,12 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		new OptionData("Jimple File",
 		"J",
 		"\nTry to resolve classes first from .jimple files found in the \nSoot classpath. Fall back to .class files only when unable to \nfind a .jimple file. ",
+		
+		false),
+		
+		new OptionData("Java File",
+		"java",
+		"\nTry to resolve classes first from .java files found in the Soot \nclasspath. Fall back to .class files only when unable to find a \n.java file. ",
 		
 		false),
 		
@@ -6528,7 +6815,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = ""+" "+""+" "+"xml-attributes";
 		defKey = defKey.trim();
@@ -6683,7 +6971,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = ""+" "+""+" "+"O";
 		defKey = defKey.trim();
@@ -6775,7 +7064,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"jb"+" "+"enabled";
 		defKey = defKey.trim();
@@ -6835,7 +7125,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"jb.ls"+" "+"enabled";
 		defKey = defKey.trim();
@@ -6879,7 +7170,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"jb.a"+" "+"enabled";
 		defKey = defKey.trim();
@@ -6939,7 +7231,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"jb.ule"+" "+"enabled";
 		defKey = defKey.trim();
@@ -6983,7 +7276,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"jb.tr"+" "+"enabled";
 		defKey = defKey.trim();
@@ -7027,7 +7321,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"jb.ulp"+" "+"enabled";
 		defKey = defKey.trim();
@@ -7087,7 +7382,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"jb.lns"+" "+"enabled";
 		defKey = defKey.trim();
@@ -7147,7 +7443,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"jb.cp"+" "+"enabled";
 		defKey = defKey.trim();
@@ -7223,7 +7520,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"jb.dae"+" "+"enabled";
 		defKey = defKey.trim();
@@ -7283,7 +7581,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"jb.cp-ule"+" "+"enabled";
 		defKey = defKey.trim();
@@ -7327,7 +7626,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"jb.lp"+" "+"enabled";
 		defKey = defKey.trim();
@@ -7387,7 +7687,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"jb.ne"+" "+"enabled";
 		defKey = defKey.trim();
@@ -7431,7 +7732,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"jb.uce"+" "+"enabled";
 		defKey = defKey.trim();
@@ -7475,7 +7777,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"cg"+" "+"enabled";
 		defKey = defKey.trim();
@@ -7572,6 +7875,42 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		setcgtrim_clinit_widget(new BooleanOptionWidget(editGroupcg, SWT.NONE, new OptionData("Trim Static Initializer Edges", "p", "cg","trim-clinit", "\nThe call graph contains an edge from each statement that could \ntrigger execution of a static initializer to that static \ninitializer. However, each static initializer is triggered only \nonce. When this option is enabled, after the call graph is \nbuilt, an intra-procedural analysis is performed to detect \nstatic initializer edges leading to methods that must have \nalready been executed. Since these static initializers cannot be \nexecuted again, the corresponding call graph edges are removed \nfrom the call graph. ", defaultBool)));
 		
 		
+		
+		data = new OptionData [] {
+		
+		new OptionData("Context-insensitive",
+		"insens",
+		"\nBuilds a context-insensitive call graph. ",
+		
+		true),
+		
+		new OptionData("1-CFA",
+		"1cfa",
+		"\nBuilds a 1-CFA call graph. ",
+		
+		false),
+		
+		new OptionData("Object Sensitive",
+		"objsens",
+		"\nBuilds an object-sensitive call graph. ",
+		
+		false),
+		
+		};
+		
+										
+		setcgcontext_widget(new MultiOptionWidget(editGroupcg, SWT.NONE, data, new OptionData("Context sensitivity", "p", "cg","context", "\nThis option tells Spark which level of context-sensitivity to \nuse in constructing the call graph. ")));
+		
+		defKey = "p"+" "+"cg"+" "+"context";
+		defKey = defKey.trim();
+		
+		if (isInDefList(defKey)) {
+			defaultString = getStringDef(defKey);
+		
+			getcgcontext_widget().setDef(defaultString);
+		}
+		
+		
 
 		
 		return editGroupcg;
@@ -7599,7 +7938,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"cg.cha"+" "+"enabled";
 		defKey = defKey.trim();
@@ -7659,7 +7999,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"cg.spark"+" "+"enabled";
 		defKey = defKey.trim();
@@ -7703,7 +8044,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"cg.spark"+" "+"verbose";
 		defKey = defKey.trim();
@@ -7795,7 +8137,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"cg.spark"+" "+"vta";
 		defKey = defKey.trim();
@@ -7877,6 +8220,22 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		
 		
 		
+		defKey = "p"+" "+"cg.spark"+" "+"string-constants";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = false;
+			
+		}
+
+		setcgcg_sparkstring_constants_widget(new BooleanOptionWidget(editGroupcgSpark_Pointer_Assignment_Graph_Building_Options, SWT.NONE, new OptionData("Propagate All String Constants", "p", "cg.spark","string-constants", "\nWhen this option is set to false, Spark only distinguishes \nstring constants that may be the name of a class loaded \ndynamically using reflection, and all other string constants are \nlumped together into a single string constant node. Setting this \noption to true causes all string constants to be propagated \nindividually. ", defaultBool)));
+		
+		
+		
 		defKey = "p"+" "+"cg.spark"+" "+"simulate-natives";
 		defKey = defKey.trim();
 
@@ -7924,38 +8283,6 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		setcgcg_sparkon_fly_cg_widget(new BooleanOptionWidget(editGroupcgSpark_Pointer_Assignment_Graph_Building_Options, SWT.NONE, new OptionData("On Fly Call Graph", "p", "cg.spark","on-fly-cg", "\nWhen this option is set to true, the call graph is computed \non-the-fly as points-to information is computed. Otherwise, an \ninitial CHA approximation to the call graph is used. ", defaultBool)));
 		
 		
-		
-		defKey = "p"+" "+"cg.spark"+" "+"parms-as-fields";
-		defKey = defKey.trim();
-
-		if (isInDefList(defKey)) {
-			defaultBool = getBoolDef(defKey);	
-		}
-		else {
-			
-			defaultBool = false;
-			
-		}
-
-		setcgcg_sparkparms_as_fields_widget(new BooleanOptionWidget(editGroupcgSpark_Pointer_Assignment_Graph_Building_Options, SWT.NONE, new OptionData("Parms As Fields", "p", "cg.spark","parms-as-fields", "\nWhen this option is set to true, parameters to methods are \nrepresented as fields (Red nodes) of the this object; otherwise, \nparameters are represented as variable (Green) nodes. ", defaultBool)));
-		
-		
-		
-		defKey = "p"+" "+"cg.spark"+" "+"returns-as-fields";
-		defKey = defKey.trim();
-
-		if (isInDefList(defKey)) {
-			defaultBool = getBoolDef(defKey);	
-		}
-		else {
-			
-			defaultBool = false;
-			
-		}
-
-		setcgcg_sparkreturns_as_fields_widget(new BooleanOptionWidget(editGroupcgSpark_Pointer_Assignment_Graph_Building_Options, SWT.NONE, new OptionData("Returns As Fields", "p", "cg.spark","returns-as-fields", "\nWhen this option is set to true, return values from methods are \nrepresented as fields (Red nodes) of the this object; otherwise, \nreturn values are represented as variable (Green) nodes. \n", defaultBool)));
-		
-		
 
 		
 		return editGroupcgSpark_Pointer_Assignment_Graph_Building_Options;
@@ -7983,7 +8310,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"cg.spark"+" "+"simplify-offline";
 		defKey = defKey.trim();
@@ -8059,7 +8387,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		data = new OptionData [] {
 		
@@ -8291,7 +8620,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"cg.spark"+" "+"dump-html";
 		defKey = defKey.trim();
@@ -8463,7 +8793,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"cg.bdd"+" "+"enabled";
 		defKey = defKey.trim();
@@ -8507,7 +8838,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"cg.bdd"+" "+"verbose";
 		defKey = defKey.trim();
@@ -8599,7 +8931,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"cg.bdd"+" "+"vta";
 		defKey = defKey.trim();
@@ -8681,6 +9014,22 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		
 		
 		
+		defKey = "p"+" "+"cg.bdd"+" "+"string-constants";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = false;
+			
+		}
+
+		setcgcg_bddstring_constants_widget(new BooleanOptionWidget(editGroupcgBDD_Spark_Pointer_Assignment_Graph_Building_Options, SWT.NONE, new OptionData("Propagate All String Constants", "p", "cg.bdd","string-constants", "\nWhen this option is set to false, Spark only distinguishes \nstring constants that may be the name of a class loaded \ndynamically using reflection, and all other string constants are \nlumped together into a single string constant node. Setting this \noption to true causes all string constants to be propagated \nindividually. ", defaultBool)));
+		
+		
+		
 		defKey = "p"+" "+"cg.bdd"+" "+"simulate-natives";
 		defKey = defKey.trim();
 
@@ -8728,38 +9077,6 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		setcgcg_bddon_fly_cg_widget(new BooleanOptionWidget(editGroupcgBDD_Spark_Pointer_Assignment_Graph_Building_Options, SWT.NONE, new OptionData("On Fly Call Graph", "p", "cg.bdd","on-fly-cg", "\nWhen this option is set to true, the call graph is computed \non-the-fly as points-to information is computed. Otherwise, an \ninitial CHA approximation to the call graph is used. ", defaultBool)));
 		
 		
-		
-		defKey = "p"+" "+"cg.bdd"+" "+"parms-as-fields";
-		defKey = defKey.trim();
-
-		if (isInDefList(defKey)) {
-			defaultBool = getBoolDef(defKey);	
-		}
-		else {
-			
-			defaultBool = false;
-			
-		}
-
-		setcgcg_bddparms_as_fields_widget(new BooleanOptionWidget(editGroupcgBDD_Spark_Pointer_Assignment_Graph_Building_Options, SWT.NONE, new OptionData("Parms As Fields", "p", "cg.bdd","parms-as-fields", "\nWhen this option is set to true, parameters to methods are \nrepresented as fields (Red nodes) of the this object; otherwise, \nparameters are represented as variable (Green) nodes. ", defaultBool)));
-		
-		
-		
-		defKey = "p"+" "+"cg.bdd"+" "+"returns-as-fields";
-		defKey = defKey.trim();
-
-		if (isInDefList(defKey)) {
-			defaultBool = getBoolDef(defKey);	
-		}
-		else {
-			
-			defaultBool = false;
-			
-		}
-
-		setcgcg_bddreturns_as_fields_widget(new BooleanOptionWidget(editGroupcgBDD_Spark_Pointer_Assignment_Graph_Building_Options, SWT.NONE, new OptionData("Returns As Fields", "p", "cg.bdd","returns-as-fields", "\nWhen this option is set to true, return values from methods are \nrepresented as fields (Red nodes) of the this object; otherwise, \nreturn values are represented as variable (Green) nodes. \n", defaultBool)));
-		
-		
 
 		
 		return editGroupcgBDD_Spark_Pointer_Assignment_Graph_Building_Options;
@@ -8787,7 +9104,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"cg.bdd"+" "+"simplify-offline";
 		defKey = defKey.trim();
@@ -8863,7 +9181,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"cg.bdd"+" "+"dump-html";
 		defKey = defKey.trim();
@@ -9015,6 +9334,96 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 
 
 
+	private Composite wstpCreate(Composite parent) {
+		String defKey;
+		String defaultString;
+		boolean defaultBool = false;
+		
+		Group editGroupwstp = new Group(parent, SWT.NONE);
+		GridLayout layout = new GridLayout();
+		editGroupwstp.setLayout(layout);
+	
+	 	editGroupwstp.setText("Whole Shimple Transformation Pack");
+	 	
+		editGroupwstp.setData("id", "wstp");
+		
+		String descwstp = "Whole-shimple transformation pack";	
+		if (descwstp.length() > 0) {
+			Label descLabelwstp = new Label(editGroupwstp, SWT.WRAP);
+			descLabelwstp.setText(descwstp);
+		}
+		OptionData [] data;	
+		
+		
+		
+		
+		defKey = "p"+" "+"wstp"+" "+"enabled";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = true;
+			
+		}
+
+		setwstpenabled_widget(new BooleanOptionWidget(editGroupwstp, SWT.NONE, new OptionData("Enabled", "p", "wstp","enabled", "\n", defaultBool)));
+		
+		
+
+		
+		return editGroupwstp;
+	}
+
+
+
+	private Composite wsopCreate(Composite parent) {
+		String defKey;
+		String defaultString;
+		boolean defaultBool = false;
+		
+		Group editGroupwsop = new Group(parent, SWT.NONE);
+		GridLayout layout = new GridLayout();
+		editGroupwsop.setLayout(layout);
+	
+	 	editGroupwsop.setText("Whole Shimple Optimization Pack");
+	 	
+		editGroupwsop.setData("id", "wsop");
+		
+		String descwsop = "Whole-shimple optimization pack";	
+		if (descwsop.length() > 0) {
+			Label descLabelwsop = new Label(editGroupwsop, SWT.WRAP);
+			descLabelwsop.setText(descwsop);
+		}
+		OptionData [] data;	
+		
+		
+		
+		
+		defKey = "p"+" "+"wsop"+" "+"enabled";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = false;
+			
+		}
+
+		setwsopenabled_widget(new BooleanOptionWidget(editGroupwsop, SWT.NONE, new OptionData("Enabled", "p", "wsop","enabled", "\n", defaultBool)));
+		
+		
+
+		
+		return editGroupwsop;
+	}
+
+
+
 	private Composite wjtpCreate(Composite parent) {
 		String defKey;
 		String defaultString;
@@ -9035,7 +9444,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"wjtp"+" "+"enabled";
 		defKey = defKey.trim();
@@ -9079,7 +9489,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"wjop"+" "+"enabled";
 		defKey = defKey.trim();
@@ -9123,7 +9534,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"wjop.smb"+" "+"enabled";
 		defKey = defKey.trim();
@@ -9235,7 +9647,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"wjop.si"+" "+"enabled";
 		defKey = defKey.trim();
@@ -9392,7 +9805,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"wjap"+" "+"enabled";
 		defKey = defKey.trim();
@@ -9436,7 +9850,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"wjap.ra"+" "+"enabled";
 		defKey = defKey.trim();
@@ -9456,6 +9871,141 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 
 		
 		return editGroupwjapwjap_ra;
+	}
+
+
+
+	private Composite wjapwjap_umtCreate(Composite parent) {
+		String defKey;
+		String defaultString;
+		boolean defaultBool = false;
+		
+		Group editGroupwjapwjap_umt = new Group(parent, SWT.NONE);
+		GridLayout layout = new GridLayout();
+		editGroupwjapwjap_umt.setLayout(layout);
+	
+	 	editGroupwjapwjap_umt.setText("Unreachable Method Tagger");
+	 	
+		editGroupwjapwjap_umt.setData("id", "wjapwjap_umt");
+		
+		String descwjapwjap_umt = "Tags all unreachable methods";	
+		if (descwjapwjap_umt.length() > 0) {
+			Label descLabelwjapwjap_umt = new Label(editGroupwjapwjap_umt, SWT.WRAP);
+			descLabelwjapwjap_umt.setText(descwjapwjap_umt);
+		}
+		OptionData [] data;	
+		
+		
+		
+		
+		defKey = "p"+" "+"wjap.umt"+" "+"enabled";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = false;
+			
+		}
+
+		setwjapwjap_umtenabled_widget(new BooleanOptionWidget(editGroupwjapwjap_umt, SWT.NONE, new OptionData("Enabled", "p", "wjap.umt","enabled", "\n", defaultBool)));
+		
+		
+
+		
+		return editGroupwjapwjap_umt;
+	}
+
+
+
+	private Composite wjapwjap_uftCreate(Composite parent) {
+		String defKey;
+		String defaultString;
+		boolean defaultBool = false;
+		
+		Group editGroupwjapwjap_uft = new Group(parent, SWT.NONE);
+		GridLayout layout = new GridLayout();
+		editGroupwjapwjap_uft.setLayout(layout);
+	
+	 	editGroupwjapwjap_uft.setText("Unreachable Fields Tagger");
+	 	
+		editGroupwjapwjap_uft.setData("id", "wjapwjap_uft");
+		
+		String descwjapwjap_uft = "Tags all unreachable fields";	
+		if (descwjapwjap_uft.length() > 0) {
+			Label descLabelwjapwjap_uft = new Label(editGroupwjapwjap_uft, SWT.WRAP);
+			descLabelwjapwjap_uft.setText(descwjapwjap_uft);
+		}
+		OptionData [] data;	
+		
+		
+		
+		
+		defKey = "p"+" "+"wjap.uft"+" "+"enabled";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = false;
+			
+		}
+
+		setwjapwjap_uftenabled_widget(new BooleanOptionWidget(editGroupwjapwjap_uft, SWT.NONE, new OptionData("Enabled", "p", "wjap.uft","enabled", "\n", defaultBool)));
+		
+		
+
+		
+		return editGroupwjapwjap_uft;
+	}
+
+
+
+	private Composite wjapwjap_tqtCreate(Composite parent) {
+		String defKey;
+		String defaultString;
+		boolean defaultBool = false;
+		
+		Group editGroupwjapwjap_tqt = new Group(parent, SWT.NONE);
+		GridLayout layout = new GridLayout();
+		editGroupwjapwjap_tqt.setLayout(layout);
+	
+	 	editGroupwjapwjap_tqt.setText("Tightest Qualifiers Tagger");
+	 	
+		editGroupwjapwjap_tqt.setData("id", "wjapwjap_tqt");
+		
+		String descwjapwjap_tqt = "Tags all qualifiers that could be tighter";	
+		if (descwjapwjap_tqt.length() > 0) {
+			Label descLabelwjapwjap_tqt = new Label(editGroupwjapwjap_tqt, SWT.WRAP);
+			descLabelwjapwjap_tqt.setText(descwjapwjap_tqt);
+		}
+		OptionData [] data;	
+		
+		
+		
+		
+		defKey = "p"+" "+"wjap.tqt"+" "+"enabled";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = false;
+			
+		}
+
+		setwjapwjap_tqtenabled_widget(new BooleanOptionWidget(editGroupwjapwjap_tqt, SWT.NONE, new OptionData("Enabled", "p", "wjap.tqt","enabled", "\n", defaultBool)));
+		
+		
+
+		
+		return editGroupwjapwjap_tqt;
 	}
 
 
@@ -9480,7 +10030,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"shimple"+" "+"enabled";
 		defKey = defKey.trim();
@@ -9598,7 +10149,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"stp"+" "+"enabled";
 		defKey = defKey.trim();
@@ -9642,7 +10194,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"sop"+" "+"enabled";
 		defKey = defKey.trim();
@@ -9686,7 +10239,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"sop.cpf"+" "+"enabled";
 		defKey = defKey.trim();
@@ -9746,7 +10300,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"jtp"+" "+"enabled";
 		defKey = defKey.trim();
@@ -9790,7 +10345,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"jop"+" "+"enabled";
 		defKey = defKey.trim();
@@ -9834,7 +10390,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"jop.cse"+" "+"enabled";
 		defKey = defKey.trim();
@@ -9894,7 +10451,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"jop.bcm"+" "+"enabled";
 		defKey = defKey.trim();
@@ -9954,7 +10512,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"jop.lcm"+" "+"enabled";
 		defKey = defKey.trim();
@@ -10066,7 +10625,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"jop.cp"+" "+"enabled";
 		defKey = defKey.trim();
@@ -10142,7 +10702,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"jop.cpf"+" "+"enabled";
 		defKey = defKey.trim();
@@ -10186,7 +10747,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"jop.cbf"+" "+"enabled";
 		defKey = defKey.trim();
@@ -10230,7 +10792,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"jop.dae"+" "+"enabled";
 		defKey = defKey.trim();
@@ -10290,7 +10853,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"jop.uce1"+" "+"enabled";
 		defKey = defKey.trim();
@@ -10334,7 +10898,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"jop.ubf1"+" "+"enabled";
 		defKey = defKey.trim();
@@ -10378,7 +10943,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"jop.uce2"+" "+"enabled";
 		defKey = defKey.trim();
@@ -10422,7 +10988,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"jop.ubf2"+" "+"enabled";
 		defKey = defKey.trim();
@@ -10466,7 +11033,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"jop.ule"+" "+"enabled";
 		defKey = defKey.trim();
@@ -10510,7 +11078,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"jap"+" "+"enabled";
 		defKey = defKey.trim();
@@ -10554,7 +11123,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"jap.npc"+" "+"enabled";
 		defKey = defKey.trim();
@@ -10630,7 +11200,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"jap.npcolorer"+" "+"enabled";
 		defKey = defKey.trim();
@@ -10674,7 +11245,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"jap.abc"+" "+"enabled";
 		defKey = defKey.trim();
@@ -10803,6 +11375,22 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		setjapjap_abcprofiling_widget(new BooleanOptionWidget(editGroupjapjap_abc, SWT.NONE, new OptionData("Profiling", "p", "jap.abc","profiling", "\nProfile the results of array bounds check analysis. The \ninserted profiling code assumes the existence of a MultiCounter \nclass implementing the methods invoked. For details, see the \nArrayBoundsChecker source code.", defaultBool)));
 		
 		
+		
+		defKey = "p"+" "+"jap.abc"+" "+"add-color-tags";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = false;
+			
+		}
+
+		setjapjap_abcadd_color_tags_widget(new BooleanOptionWidget(editGroupjapjap_abc, SWT.NONE, new OptionData("Add Color Tags", "p", "jap.abc","add-color-tags", "\nAdd color tags to the results of the array bounds check \nanalysis.", defaultBool)));
+		
+		
 
 		
 		return editGroupjapjap_abc;
@@ -10830,7 +11418,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"jap.profiling"+" "+"enabled";
 		defKey = defKey.trim();
@@ -10890,7 +11479,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"jap.sea"+" "+"enabled";
 		defKey = defKey.trim();
@@ -10950,7 +11540,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"jap.fieldrw"+" "+"enabled";
 		defKey = defKey.trim();
@@ -11009,7 +11600,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"jap.cgtagger"+" "+"enabled";
 		defKey = defKey.trim();
@@ -11053,7 +11645,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"jap.parity"+" "+"enabled";
 		defKey = defKey.trim();
@@ -11073,6 +11666,51 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 
 		
 		return editGroupjapjap_parity;
+	}
+
+
+
+	private Composite japjap_patCreate(Composite parent) {
+		String defKey;
+		String defaultString;
+		boolean defaultBool = false;
+		
+		Group editGroupjapjap_pat = new Group(parent, SWT.NONE);
+		GridLayout layout = new GridLayout();
+		editGroupjapjap_pat.setLayout(layout);
+	
+	 	editGroupjapjap_pat.setText("Parameter Alias Tagger");
+	 	
+		editGroupjapjap_pat.setData("id", "japjap_pat");
+		
+		String descjapjap_pat = "Colour-codes method parameters that may be aliased";	
+		if (descjapjap_pat.length() > 0) {
+			Label descLabeljapjap_pat = new Label(editGroupjapjap_pat, SWT.WRAP);
+			descLabeljapjap_pat.setText(descjapjap_pat);
+		}
+		OptionData [] data;	
+		
+		
+		
+		
+		defKey = "p"+" "+"jap.pat"+" "+"enabled";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = false;
+			
+		}
+
+		setjapjap_patenabled_widget(new BooleanOptionWidget(editGroupjapjap_pat, SWT.NONE, new OptionData("Enabled", "p", "jap.pat","enabled", "\n", defaultBool)));
+		
+		
+
+		
+		return editGroupjapjap_pat;
 	}
 
 
@@ -11097,7 +11735,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"gb"+" "+"enabled";
 		defKey = defKey.trim();
@@ -11141,7 +11780,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"gb.a1"+" "+"enabled";
 		defKey = defKey.trim();
@@ -11201,7 +11841,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"gb.cf"+" "+"enabled";
 		defKey = defKey.trim();
@@ -11245,7 +11886,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"gb.a2"+" "+"enabled";
 		defKey = defKey.trim();
@@ -11305,7 +11947,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"gb.ule"+" "+"enabled";
 		defKey = defKey.trim();
@@ -11349,7 +11992,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"gop"+" "+"enabled";
 		defKey = defKey.trim();
@@ -11393,7 +12037,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"bb"+" "+"enabled";
 		defKey = defKey.trim();
@@ -11437,7 +12082,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"bb.lso"+" "+"enabled";
 		defKey = defKey.trim();
@@ -11577,7 +12223,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"bb.pho"+" "+"enabled";
 		defKey = defKey.trim();
@@ -11621,7 +12268,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"bb.ule"+" "+"enabled";
 		defKey = defKey.trim();
@@ -11665,7 +12313,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"bb.lp"+" "+"enabled";
 		defKey = defKey.trim();
@@ -11725,7 +12374,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"bop"+" "+"enabled";
 		defKey = defKey.trim();
@@ -11769,7 +12419,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"tag"+" "+"enabled";
 		defKey = defKey.trim();
@@ -11813,7 +12464,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"tag.ln"+" "+"enabled";
 		defKey = defKey.trim();
@@ -11857,7 +12509,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"tag.an"+" "+"enabled";
 		defKey = defKey.trim();
@@ -11901,7 +12554,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"tag.dep"+" "+"enabled";
 		defKey = defKey.trim();
@@ -11945,7 +12599,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = "p"+" "+"tag.fieldrw"+" "+"enabled";
 		defKey = defKey.trim();
@@ -11989,7 +12644,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = ""+" "+""+" "+"include-all";
 		defKey = defKey.trim();
@@ -12108,7 +12764,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = ""+" "+""+" "+"keep-line-number";
 		defKey = defKey.trim();
@@ -12168,7 +12825,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = ""+" "+""+" "+"annot-nullpointer";
 		defKey = defKey.trim();
@@ -12260,7 +12918,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		OptionData [] data;	
 		
-
+		
+		
 		
 		defKey = ""+" "+""+" "+"time";
 		defKey = defKey.trim();

@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.*;
 import java.lang.reflect.InvocationTargetException;
 import ca.mcgill.sable.soot.*;
 import org.eclipse.swt.widgets.*;
+import org.eclipse.jdt.core.*;
 
 
 import java.util.*;
@@ -37,7 +38,7 @@ import java.util.*;
  * Main Soot Launcher. Handles running Soot directly (or as a 
  * process) 
  */
-public class SootLauncher  implements IWorkbenchWindowActionDelegate {
+public abstract class SootLauncher  implements IWorkbenchWindowActionDelegate {
 	
 	private IWorkbenchPart part;
  	protected IWorkbenchWindow window;
@@ -189,15 +190,55 @@ public class SootLauncher  implements IWorkbenchWindowActionDelegate {
 		sootClasspath.initialize();
 		
 		// platform location 
-		platform_location = Platform.getLocation().toOSString();
+		//platform_location = Platform.getLocation().toOSString();
+		platform_location = getSootSelection().getJavaProject().getProject().getLocation().toOSString();
+		System.out.println("platform_location: "+platform_location);
+		platform_location = platform_location.substring(0, platform_location.lastIndexOf(System.getProperty("file.separator")));
+        System.out.println("platform_location: "+platform_location);
 		// external jars location - may need to change don't think I use this anymore
-		external_jars_location = Platform.getLocation().removeLastSegments(2).toOSString();
+		//external_jars_location = Platform.getLocation().removeLastSegments(2).toOSString();
 		setOutputLocation(platform_location+getFileHandler().getSootOutputFolder().getFullPath().toOSString());
 		
 	}
 	
+	protected void addJars(){
+		try {
+	
+			IPackageFragmentRoot [] roots = getSootSelection().getJavaProject().getAllPackageFragmentRoots();
+			
+			for (int i = 0; i < roots.length; i++){
+				System.out.println("root: "+roots[i]);
+				if (roots[i].isArchive()){
+					if (roots[i].getResource() != null){
+					
+						System.out.println("Jar File: "+platform_location+roots[i].getResource().getFullPath().toOSString());
+						setClasspathAppend(platform_location+roots[i].getPath().toOSString());
+
+					}
+					else {
+
+						System.out.println("Jar File: "+roots[i].getPath().toOSString());
+						setClasspathAppend(roots[i].getPath().toOSString());
+
+					}
+					System.out.println("Jar File Kind: "+roots[i].getRawClasspathEntry().getEntryKind());
+					System.out.println("Jar File raw classpath entry: "+roots[i].getRawClasspathEntry());
+					
+					//if (roots[i].getRawClasspathEntry().getEntryKind() == IClasspathEntry.CPE_LIBRARY){
+						//setClasspathAppend(roots[i].getPath().toOSString());
+					//}
+				}
+			}
+		}
+		catch (JavaModelException e){
+		}
+	}
+	
+	public abstract void setClasspathAppend(String ca);
+	
 	public void runFinish() {
 		getFileHandler().refreshFolder();
+		getFileHandler().refreshAll(getSootSelection().getProject());
 		//for updating markers
 		SootPlugin.getDefault().getManager().updateSootRanFlag();
 		//getDavaHandler().handleAfter();

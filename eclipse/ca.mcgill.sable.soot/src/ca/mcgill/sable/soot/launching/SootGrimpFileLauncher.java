@@ -30,7 +30,8 @@ public class SootGrimpFileLauncher extends SootFileLauncher {
 	
 	public void run(IAction action) {
 		super.run(action);
-
+        super.handleFiles();
+        
 		if (isDoNotContinue()) return;
 		setCmd();
 		runSootDirectly();
@@ -59,7 +60,10 @@ public class SootGrimpFileLauncher extends SootFileLauncher {
 		if (isExtraCmd()) {
 			getSootCommandList().addSingleOpt("--"+getExtraCmd());
 		}
-		//getSootCommandList().addDoubleOpt("--"+LaunchCommands.OUTPUT, LaunchCommands.JIMPLE_OUT);
+        if (isSrcPrec()) {
+            getSootCommandList().addDoubleOpt("--"+LaunchCommands.SRC_PREC, getSrcPrec());
+        }
+        //getSootCommandList().addDoubleOpt("--"+LaunchCommands.OUTPUT, LaunchCommands.JIMPLE_OUT);
 		commands.add(getToProcess());
 		//getSootCommandList().addSingleOpt(getToProcess());
 		getSootCommandList().addSingleOpt(commands);

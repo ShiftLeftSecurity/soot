@@ -32,9 +32,9 @@ public class ReachableMethods
 { 
     private CallGraph cg;
     private List entryPoints = new ArrayList(); 
-    private QueueReader edgeSource;
+    private Iterator edgeSource;
     private ChunkedQueue reachables = new ChunkedQueue();
-    private NumberedSet set = new NumberedSet( Scene.v().getMethodNumberer() );
+    private Set set = new HashSet();
     private QueueReader unprocessedMethods;
     private QueueReader allReachables = reachables.reader();
     private Filter filter;
@@ -47,15 +47,16 @@ public class ReachableMethods
         addMethods( entryPoints );
         unprocessedMethods = reachables.reader();
         this.edgeSource = graph.listener();
+        if( filter != null ) this.edgeSource = filter.wrap( this.edgeSource );
     }
     public ReachableMethods( CallGraph graph, Collection entryPoints ) {
     	this(graph, entryPoints.iterator());
     }
     private void addMethods( Iterator methods ) {
         while( methods.hasNext() )
-            addMethod( (SootMethod) methods.next() );
+            addMethod( (MethodOrMethodContext) methods.next() );
     }
-    private void addMethod( SootMethod m ) {
+    private void addMethod( MethodOrMethodContext m ) {
             if( set.add( m ) ) {
                 reachables.add( m );
             }
@@ -66,10 +67,10 @@ public class ReachableMethods
         while(true) {
             Edge e = (Edge) edgeSource.next();
             if( e == null ) break;
-            if( set.contains( e.src() ) ) addMethod( e.tgt() );
+            if( set.contains( e.getSrc() ) ) addMethod( e.getTgt() );
         }
         while(true) {
-            SootMethod m = (SootMethod) unprocessedMethods.next();
+            MethodOrMethodContext m = (MethodOrMethodContext) unprocessedMethods.next();
             if( m == null ) break;
             Iterator targets = cg.edgesOutOf( m );
             if( filter != null ) targets = filter.wrap( targets );
@@ -90,7 +91,7 @@ public class ReachableMethods
         return reachables.reader();
     }
     /** Returns true iff method is reachable. */
-    public boolean contains( SootMethod m ) {
+    public boolean contains( MethodOrMethodContext m ) {
         return set.contains( m );
     }
     /** Returns the number of methods that are reachable. */

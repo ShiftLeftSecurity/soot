@@ -107,7 +107,7 @@ public class PAG extends AbstractPAG {
 
     /** Returns the set of objects pointed to by variable l. */
     public PointsToSet reachingObjects( Local l ) {
-        VarNode n = findVarNode( l );
+        VarNode n = findLocalVarNode( l );
         if( n == null ) {
             return EmptyPointsToSet.v();
         }
@@ -118,7 +118,7 @@ public class PAG extends AbstractPAG {
     public PointsToSet reachingObjects( SootField f ) {
         if( !f.isStatic() )
             throw new RuntimeException( "The parameter f must be a *static* field." );
-        VarNode n = findVarNode( f );
+        VarNode n = findGlobalVarNode( f );
         if( n == null ) {
             return EmptyPointsToSet.v();
         }
@@ -130,8 +130,19 @@ public class PAG extends AbstractPAG {
     public PointsToSet reachingObjects( PointsToSet s, final SootField f ) {
         if( f.isStatic() )
             throw new RuntimeException( "The parameter f must be an *instance* field." );
+
+        return reachingObjectsInternal( s, f );
+    }
+
+    /** Returns the set of objects pointed to by elements of the arrays
+     * in the PointsToSet s. */
+    public PointsToSet reachingObjectsOfArrayElement( PointsToSet s ) {
+        return reachingObjectsInternal( s, ArrayElement.v() );
+    }
+
+    private PointsToSet reachingObjectsInternal( PointsToSet s, final SparkField f ) {
         if( getOpts().field_based() || getOpts().vta() ) {
-            VarNode n = findVarNode( f );
+            VarNode n = findGlobalVarNode( f );
             if( n == null ) {
                 return EmptyPointsToSet.v();
             }
@@ -141,7 +152,8 @@ public class PAG extends AbstractPAG {
             throw new RuntimeException( "The alias edge propagator does not compute points-to information for instance fields! Use a different propagator." );
         }
         PointsToSetInternal bases = (PointsToSetInternal) s;
-        final PointsToSetInternal ret = setFactory.newSet( f.getType(), this );
+        final PointsToSetInternal ret = setFactory.newSet( 
+                (f instanceof SootField) ? ((SootField)f).getType() : null, this );
         bases.forall( new P2SetVisitor() {
         public final void visit( Node n ) {
             ret.addAll( ((AllocNode) n).dot( f ).getP2Set(), null );

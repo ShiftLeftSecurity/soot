@@ -31,20 +31,21 @@ import java.util.zip.*;
  * @author Ondrej Lhotak
  */
 public class PAG2HTML {
-    public PAG2HTML( PAG pag ) {
+    public PAG2HTML( PAG pag, String output_dir ) {
         this.pag = pag;
+        this.output_dir = output_dir;
     }
     public void dump() {
         for( Iterator vIt = pag.getVarNodeNumberer().iterator(); vIt.hasNext(); ) {
             final VarNode v = (VarNode) vIt.next();
             mergedNodes.put( v.getReplacement(), v );
-            if( v.getMethod() != null ) {
-                methodToNodes.put( v.getMethod(), v );
+            if( v instanceof LocalVarNode ) {
+                methodToNodes.put( ((LocalVarNode)v).getMethod(), v );
             }
         }
         try {
             JarOutputStream jarOut = new JarOutputStream(
-                    new FileOutputStream( "pag.jar" ) );
+                    new FileOutputStream( new File(output_dir, "pag.jar") ) );
             for( Iterator vIt = mergedNodes.keySet().iterator(); vIt.hasNext(); ) {
                 final VarNode v = (VarNode) vIt.next();
                 dumpVarNode( v, jarOut );
@@ -65,6 +66,7 @@ public class PAG2HTML {
     /* End of package methods. */
 
     protected PAG pag;
+    protected String output_dir;
     protected MultiMap mergedNodes = new HashMultiMap();
     protected MultiMap methodToNodes = new HashMultiMap();
 
@@ -119,10 +121,14 @@ public class PAG2HTML {
         ret.append( "<li><a href=\""+dirPrefix+"n"+vv.getNumber()+".html\">" );
         ret.append( ""+htmlify(vv.getVariable().toString()) );
         ret.append( "</a><br>" );
-        if( vv.getMethod() != null ) {
+        ret.append( "<li>Context: " );
+        ret.append( ""+(vv.context() == null ?"null":htmlify(vv.context().toString()) ) );
+        ret.append( "</a><br>" );
+        if( vv instanceof LocalVarNode ) {
+            LocalVarNode lvn = (LocalVarNode) vv;
             ret.append( "<a href=\"../"
-                    +toFileName( vv.getMethod().toString() )+".html\">" );
-            ret.append( htmlify(vv.getMethod().toString())+"</a><br>" );
+                    +toFileName(lvn.getMethod().toString() )+".html\">" );
+            ret.append( htmlify(lvn.getMethod().toString())+"</a><br>" );
         }
         ret.append( htmlify(vv.getType().toString())+"\n" );
         return ret.toString();
