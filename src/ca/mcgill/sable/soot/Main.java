@@ -218,7 +218,7 @@ public class Main
         if(args.length == 0)
         {
 // $Format: "            System.out.println(\"Soot version $ProjectVersion$\");"$
-            System.out.println("Soot version 1.beta.4.dev.35.phantom.1");
+            System.out.println("Soot version 1.beta.4.dev.35.phantom.2");
             System.out.println("Copyright (C) 1997-1999 Raja Vallee-Rai (rvalleerai@sable.mcgill.ca).");
             System.out.println("All rights reserved.");
             System.out.println("");
@@ -395,18 +395,18 @@ public class Main
             }
         }
         
-        if(isOptimizingWhole)
-        {
-            System.out.print("Building InvokeGraph...");
-            System.out.flush();
-            InvokeGraph invokeGraph = ClassHierarchyAnalysis.newInvokeGraph(mainClass); 
-            System.out.println();
+//          if(isOptimizingWhole)
+//          {
+//              System.out.print("Building InvokeGraph...");
+//              System.out.flush();
+//              InvokeGraph invokeGraph = ClassHierarchyAnalysis.newInvokeGraph(mainClass); 
+//              System.out.println();
             
-            System.out.print("Inlining invokes...");
-            System.out.flush();
-            GlobalInvokeInliner.inlineInvokes(invokeGraph, classesToProcess);
-            System.out.println();
-        }
+//              System.out.print("Inlining invokes...");
+//              System.out.flush();
+//              GlobalInvokeInliner.inlineInvokes(invokeGraph, classesToProcess);
+//              System.out.println();
+//          }
         
         // Handle each class individually
         {
@@ -624,26 +624,26 @@ public class Main
                 }
                 else
                 {   
-                    if(!m.hasActiveBody())
-                        m.setActiveBody(new JimpleBody(new ClassFileBody(m)));
+//                      if(!m.hasActiveBody())
+//                          m.setActiveBody(new JimpleBody(new ClassFileBody(m)));
                          
-                    Body body = m.getActiveBody();
+//                      Body body = m.getActiveBody();
 
-                    BaseJimpleOptimizer.optimize((JimpleBody) body);
+//                      BaseJimpleOptimizer.optimize((JimpleBody) body);
                     
-                    if(targetExtension.equals(".b") || targetExtension.equals(".baf"))
-                    {
-                        m.setActiveBody(new BafBody(body));
-                    }
-                    else if(targetExtension.equals(".grimple") || targetExtension.equals(".grimp") || 
-                        targetExtension.equals(".class") || targetExtension.equals(".jasmin"))
-                    {
-                        GrimpBody grimpBody = new GrimpBody((JimpleBody) body, BuildJimpleBodyOption.AGGRESSIVE_AGGREGATING);
+//                      if(targetExtension.equals(".b") || targetExtension.equals(".baf"))
+//                      {
+//                          m.setActiveBody(new BafBody(body));
+//                      }
+//                      else if(targetExtension.equals(".grimple") || targetExtension.equals(".grimp") || 
+//                          targetExtension.equals(".class") || targetExtension.equals(".jasmin"))
+//                      {
+//                          GrimpBody grimpBody = new GrimpBody((JimpleBody) body, BuildJimpleBodyOption.AGGRESSIVE_AGGREGATING);
                              
-                        BaseGrimpOptimizer.optimize(grimpBody);
+//                          BaseGrimpOptimizer.optimize(grimpBody);
                         
-                        m.setActiveBody(grimpBody);
-                    }
+//                          m.setActiveBody(grimpBody);
+//                      }
                 }
             }
         }

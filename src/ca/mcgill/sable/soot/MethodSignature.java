@@ -95,6 +95,20 @@ public class MethodSignature
         hashCode = className.hashCode() * 1001 + methodName.hashCode() * 
             13293 + returnType.hashCode() * 17;
     }
+
+    public boolean equals(Object o)
+    {
+        if (o instanceof MethodSignature)
+        {
+            MethodSignature m = (MethodSignature)o;
+
+            if (m.hashCode != hashCode) return false;
+
+            return className.equals(m.className) && methodName.equals(m.methodName)
+                && parameterTypes.equals(m.parameterTypes) && returnType.equals(m.returnType);
+        }
+        return false;
+    }
     
     public String toString()
     {

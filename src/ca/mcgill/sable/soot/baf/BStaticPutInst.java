@@ -97,7 +97,7 @@ public class BStaticPutInst extends AbstractInst implements StaticPutInst
     { 
         return " " + (isBrief ? 
                       (field.getDeclaringClass().getName() + "." + 
-                       field.getName()) : field.getSignature()); 
+                       field.getName()) : field.getSignature().toString()); 
     }
 
     public SootField getField() { return field; }

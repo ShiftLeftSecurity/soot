@@ -80,9 +80,23 @@ public class FieldSignature
         this.className = className;
         this.name = name;
         this.type = type;
-        
+
         hashCode = className.hashCode() * 1001 + name.hashCode() * 13293 + 
             type.hashCode() * 17;
+    }
+
+    public boolean equals(Object o)
+    {
+        if (o instanceof FieldSignature)
+        {
+            FieldSignature f = (FieldSignature)o;
+
+            if (f.hashCode != hashCode) return false;
+
+            return className.equals(f.className) && name.equals(f.name)
+                && type.equals(f.type);
+        }
+        return false;
     }
     
     public String toString()

@@ -92,8 +92,8 @@ public class SootClassManager
 {
     List classes = new ArrayList();
     Map nameToClass = new HashMap();
-    Map fieldSignatureToField = new HashMap();
-    Map methodSignatureToMethod = new HashMap();
+    Map fieldSignatureToField = new DoubleHashMap(100000, 0.7f);
+    Map methodSignatureToMethod = new DoubleHashMap(100000, 0.7f);
     
     public SootClassManager()
     {

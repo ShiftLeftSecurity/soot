@@ -97,7 +97,7 @@ public class BStaticGetInst extends AbstractInst implements StaticGetInst
     { 
         return " " + (isBrief ? 
                       (field.getDeclaringClass().getName() + "." + 
-                       field.getName()) : field.getSignature()); 
+                       field.getName()) : field.getSignature().toString()); 
     }
     
     public SootField getField() { return field; }
