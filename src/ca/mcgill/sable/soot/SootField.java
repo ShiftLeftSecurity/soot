@@ -94,6 +94,18 @@ public class SootField
         this.modifiers = 0;
     }
 
+    public boolean equals(Object o)
+    {
+	if (o instanceof SootField)
+	    {
+		SootField s = (SootField)o;
+		return s.name.equals(name) &&
+		    s.type.equals(type) &&
+		    s.modifiers == modifiers;
+	    }
+	return false;
+    }
+
     public String getName()
     {
         return name;

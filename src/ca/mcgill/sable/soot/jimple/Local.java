@@ -107,6 +107,14 @@ public class Local implements Value, ToBriefString
         return new Local(name, type);
     }
 
+    public boolean equals(Object o)
+    {
+	if (o instanceof Local)
+	    return (((Local)o).name).equals(name)
+		    && (((Local)o).type).equals(type);
+	return false;
+    }
+
     public String getName()
     {
         return name;

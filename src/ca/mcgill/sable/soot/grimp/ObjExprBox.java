@@ -96,7 +96,7 @@ public class ObjExprBox extends ExprBox
             value instanceof NewMultiArrayExpr ||
 	    value instanceof Local ||
 	    (value instanceof CastExpr && 
-	        canContainValue(((CastExpr)value).getOp())) ||
+	        canContainValue(((CastExpr)value).getOp())) || 
 	    value instanceof ArrayRef;
     }
 }

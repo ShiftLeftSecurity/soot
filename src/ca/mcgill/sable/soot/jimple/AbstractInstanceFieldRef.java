@@ -98,6 +98,17 @@ public class AbstractInstanceFieldRef implements InstanceFieldRef
         this.field = field;
     }
 
+    public boolean equals(Object o)
+    {
+	if (o instanceof AbstractInstanceFieldRef)
+	    {
+		AbstractInstanceFieldRef fr = (AbstractInstanceFieldRef)o;
+		return fr.field.equals(field) &&
+		    fr.baseBox.getValue().equals(baseBox.getValue());
+	    }
+	return false;
+    }
+
     public String toString()
     {
         return baseBox.getValue().toString() + ".[" + field.getSignature() + "]";

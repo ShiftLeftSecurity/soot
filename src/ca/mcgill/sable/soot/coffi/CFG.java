@@ -101,9 +101,6 @@
 
  B) Changes:
 
- - Modified on March 2, by Patrick Lam (plam@sable.mcgill.ca). (*)
-   Commented out JSR bytecode code for now.
-   
  - Modified on February 22, by Raja Vallee-Rai (kor@sable.mcgill.ca). (*)
    Fixed a bug with the DUP2_x1 bytecode.
    
@@ -4213,14 +4210,13 @@ public class CFG {
             stmt = Jimple.v().newGotoStmt(new FutureStmt());
             break;
 
-            /*
          case ByteCode.JSR:
          case ByteCode.JSR_W:
          {
-             stmt = Jimple.v().newAssignStmt(Util.getLocalForStackOp(listBody, postTypeStack,
-                postTypeStack.topIndex()), Jimple.v().newNextNextStmtRef());
+//              stmt = Jimple.v().newAssignStmt(Util.getLocalForStackOp(listBody, postTypeStack,
+//                 postTypeStack.topIndex()), Jimple.v().newNextNextStmtRef());
 
-             statements.add(stmt);
+//              statements.add(stmt);
 
              stmt = Jimple.v().newGotoStmt(new FutureStmt());
              statements.add(stmt);
@@ -4228,8 +4224,7 @@ public class CFG {
              stmt = null;
              break;
          }
-        */
-        
+
          case ByteCode.RET:
          {
             Local local =

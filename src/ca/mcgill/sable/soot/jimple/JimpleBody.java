@@ -216,9 +216,15 @@ public class JimpleBody implements StmtBody
 	{
             if(Main.isProfilingOptimization)
               Main.jimpleAggregationTimer.start();
+            int aggrCount = 0;
 
- 	    Transformations.aggregate(this);
- 	    Transformations.removeUnusedLocals(this);
+ 	    while (Transformations.aggregate(this))
+              {
+                Transformations.removeUnusedLocals(this);
+                aggrCount++;
+              }
+            if (aggrCount > 1 && Main.isVerbose)
+              System.out.println("aggregated "+aggrCount+" times");
 
             if(Main.isProfilingOptimization)
               Main.jimpleAggregationTimer.end();

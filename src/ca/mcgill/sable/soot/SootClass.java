@@ -64,9 +64,6 @@
 
  B) Changes:
 
- - Modified on March 2, 1999 by Patrick Lam (plam@sable.mcgill.ca)
-   Added a toString method.
-   
  - Modified on January 26, 1998 by Vijay Sundaresan (vija@sable.mcgill.ca) (*)
    Made the write() method name the output jasmin files according to the classfile
    being output.
@@ -138,6 +135,11 @@ public class SootClass
         this.name = name;
         this.modifiers = 0;
         isResolved = true;
+    }
+
+    public String toString()
+    {
+        return getName();
     }
 
     /*
@@ -903,12 +905,6 @@ public class SootClass
         }
 
     }
-    
-    public String toString()
-    {
-        return getName();
-    }
-
 }
 
 
