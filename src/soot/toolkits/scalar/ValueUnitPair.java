@@ -76,6 +76,11 @@ public class ValueUnitPair extends AbstractUnitBox implements ValueBox, UnitBox
         return true;
     }
     
+    public String toString()
+    {
+        return "Value = " + value + ", Unit = " + unit;
+    }
+    
     public int hashCode()
     {
         return value.hashCode() * 101 + unit.hashCode() + 17;

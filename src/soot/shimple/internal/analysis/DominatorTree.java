@@ -206,17 +206,12 @@ public class DominatorTree implements DirectedGraph
             List dominatorsListClone = dominators.getDominators(block);
             dominatorsListClone.remove(block);
 
-            if(dominators.isDominatedByAll(dominator, dominatorsListClone)){
-                if(dominator == block) System.out.println("equal");
+            if(dominators.isDominatedByAll(dominator, dominatorsListClone))
                 immediateDominator = fetchNode(dominator);
-            }
         }
 
-        if(immediateDominator == null){
-            System.err.println(block);
-            System.err.println(dominators.getDominators(block));
+        if(immediateDominator == null)
             throw new RuntimeException("DominatorTree: Internal Algorithm Error.");
-        }
         
         return immediateDominator;
     }

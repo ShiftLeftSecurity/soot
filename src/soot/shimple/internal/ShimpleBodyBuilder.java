@@ -64,7 +64,7 @@ public class ShimpleBodyBuilder
     protected BlockGraph cfg;
 
     /**
-     * A fixed list of all original Locals that pertain to scalars.
+     * A fixed list of all original Locals.
      **/
     protected List origLocals;
 
@@ -95,23 +95,8 @@ public class ShimpleBodyBuilder
         cfg = new CompleteBlockGraph(body);
         dt = new DominatorTree(cfg, true);
         gd = new GuaranteedDefs(new CompleteUnitGraph(body));
-        origLocals = new ArrayList();
-
-        Iterator localsIt = cfg.getBody().getLocals().iterator();
-
-        while(localsIt.hasNext()){
-            Local local = (Local) localsIt.next();
-
-            Type localType = local.getType();
-            
-            // only concerned with scalars
-            if(localType instanceof PrimType)
-                origLocals.add(local);
-
-            if(!body.isScalarsOnly() && localType instanceof RefType)
-                origLocals.add(local);
-        }
-
+        origLocals = new ArrayList(cfg.getBody().getLocals());
+        
         /* Carry out the transformations. */
         
         insertTrivialPhiNodes();
@@ -412,8 +397,8 @@ public class ShimpleBodyBuilder
                         Value use = useBox.getValue();
 
                         int localIndex = indexOfLocal(use);
-                    
-                        // skip everything but our valid scalar Locals 
+
+                        // not one of our locals
                         if(localIndex == -1)
                             continue;
 
@@ -437,8 +422,8 @@ public class ShimpleBodyBuilder
                     AssignStmt assignStmt = (AssignStmt) unit;
                     
                     Value lhsValue = assignStmt.getLeftOp();
-                
-                    // make sure we're dealing with a scalar assignment
+                    
+                    // not something we're interested in
                     if(!origLocals.contains(lhsValue))
                         continue;
 
@@ -582,8 +567,7 @@ public class ShimpleBodyBuilder
     }
 
     /**
-     * Clever convenience function to fetch proper array indexes into
-     * our naming arrays.
+     * Fetch the proper array index of local for the naming arrays.
      **/
     protected int indexOfLocal(Value local)
     {
@@ -631,7 +615,7 @@ public class ShimpleBodyBuilder
     }
     
     /**
-     * Eliminate PHI-functions in block by naively replacing then with
+     * Eliminate PHI-functions in block by naively replacing them with
      * shimple assignment statements in the control flow predecessors.
      **/
     public static void eliminatePhiNodes(Chain units)
@@ -716,47 +700,133 @@ public class ShimpleBodyBuilder
 
     public void trimExceptionalPhiNode(PhiExpr phiExpr)
     {
-        Chain units = body.getUnits();
-        Value currentArg = null;
-        Unit previousUnit = null;
+        /* A value may appear many times in an exceptional Phi. Hence,
+           the same value may be associated with many UnitBoxes. We
+           build the MultiMap valueToPairs for convenience.  */
+
+        MultiMap valueToPairs = new HashMultiMap();
 
         Iterator argsIt = phiExpr.getArgs().iterator();
-
         while(argsIt.hasNext()){
-            ValueUnitPair argBox = (ValueUnitPair) argsIt.next();
-            Value value = argBox.getValue();
-            Unit unit = argBox.getUnit();
+            ValueUnitPair argPair = (ValueUnitPair) argsIt.next();
+            Value value = argPair.getValue();
+            valueToPairs.put(value, argPair);
+        }
 
-            if(previousUnit == null){
-                previousUnit = unit;
-                currentArg = value;
-                continue;
-            }
+        /* Consider each value and see if we can find the dominating
+           UnitBoxes.  Once we have found all the dominating
+           UnitBoxes, the rest of the redundant arguments can be
+           trimmed.  */
+        
+        Iterator valuesIt = valueToPairs.keySet().iterator();
+        while(valuesIt.hasNext()){
+            Value value = (Value) valuesIt.next();
+
+            // although the champs list constantly shrinks, guaranteeing
+            // termination, the challengers list never does.  This could
+            // be optimised.
+            Set pairsSet = valueToPairs.get(value);
+            List champs = new ArrayList(pairsSet);
+            List challengers = new ArrayList(pairsSet);
             
-            if(value.equals(currentArg)){
-                if(previousUnit != units.getLast()){
-                    Unit succ = (Unit) units.getSuccOf(previousUnit);
+            // champ is the currently assumed dominator
+            ValueUnitPair champ = (ValueUnitPair) champs.remove(0);
+            Unit champU = champ.getUnit();
 
-                    // unit follows previousUnit: hence same try block
-                    if(succ.equals(unit)){
-                        if(!phiExpr.removeArg(argBox))
-                            throw new RuntimeException("Dazed and confused.");
+            // hopefully everything will work out the first time, but
+            // if not, we will have to try a new champion just in case
+            // there is more that can be trimmed.
+            boolean retry = true;
+            while(retry){
+                retry = false;
+
+                // go through each challenger and see if we dominate them
+                // if not, the challenger becomes the new champ
+                for(int i = 0; i < challengers.size(); i++){
+                    ValueUnitPair challenger = (ValueUnitPair)challengers.get(i);
+
+                    if(challenger.equals(champ))
+                        continue;
+                    Unit challengerU = challenger.getUnit();
+                
+                    // kill the challenger
+                    if(dominates(champU, challengerU))
+                        phiExpr.removeArg(challenger);
+
+                    // we die, find a new champ
+                    else if(dominates(challengerU, champU)){
+                        phiExpr.removeArg(champ);
+                        champ = challenger;
+                        champU = champ.getUnit();
+                        champs.remove(champ);
                     }
+
+                    // neither wins, oops!  we'll have to try the next
+                    // available champ at the next pass.  It may very
+                    // well be inevitable that we will have two
+                    // identical value args in an exceptional PhiExpr,
+                    // but the more we can trim the better.
+                    else
+                        retry = true;
+                }
+
+                if(retry) {
+                    if(champs.size() == 0)
+                        break;
+                    champ = (ValueUnitPair)champs.remove(0);
+                    champU = champ.getUnit();
                 }
             }
-            else{
-                currentArg = value;
-            }
-
-            previousUnit = unit;
         }
     }
+    
+    protected Map unitToBlock;
+
+    /**
+     * Returns true if champ dominates challenger.  Note that false
+     * doesn't necessarily mean that challenger dominates champ.
+     **/
+    public boolean dominates(Unit champ, Unit challenger)
+    {
+        if(champ == null || challenger == null)
+            throw new RuntimeException("Dazed and confused.");
+        
+        // self-domination
+        if(champ.equals(challenger))
+            return true;
+        
+        if(unitToBlock == null)
+            unitToBlock = getUnitToBlockMap(cfg);
+
+        Block champBlock = (Block) unitToBlock.get(champ);
+        Block challengerBlock = (Block) unitToBlock.get(challenger);
+
+        if(champBlock.equals(challengerBlock)){
+            Iterator unitsIt = champBlock.iterator();
+
+            while(unitsIt.hasNext()){
+                Unit unit = (Unit) unitsIt.next();
+                if(unit.equals(champ))
+                    return true;
+                if(unit.equals(challenger))
+                    return false;
+            }
+
+            throw new RuntimeException("Dazed and Confused");
+        }
+
+        DominatorNode champNode = dt.fetchNode(champBlock);
+        DominatorNode challengerNode = dt.fetchNode(challengerBlock);
+
+        return(champNode.dominates(challengerNode));
+    }
+
     
     /**
      * Convenience function that really ought to be implemented in
      * soot.toolkits.graph.Block.
      **/
-    public List getDefBoxesFromBlock(Block block)
+    public static List getDefBoxesFromBlock(Block block)
     {
         Iterator unitsIt = block.iterator();
         
@@ -772,7 +842,7 @@ public class ShimpleBodyBuilder
      * Convenience function that really ought to be implemented in
      * soot.toolkits.graph.Block
      **/
-    public List getUseBoxesFromBlock(Block block)
+    public static List getUseBoxesFromBlock(Block block)
     {
         Iterator unitsIt = block.iterator();
         
@@ -782,5 +852,27 @@ public class ShimpleBodyBuilder
             useBoxesList.addAll(((Unit)unitsIt.next()).getUseBoxes());
         
         return useBoxesList;
+    }
+
+    /**
+     * Convenience function that maps units to blocks.  Should
+     * probably be in BlockGraph.
+     **/
+    public static Map getUnitToBlockMap(BlockGraph blocks)
+    {
+        Map unitToBlock = new HashMap();
+
+        Iterator blocksIt = blocks.iterator();
+        while(blocksIt.hasNext()){
+            Block block = (Block) blocksIt.next();
+            Iterator unitsIt = block.iterator();
+
+            while(unitsIt.hasNext()){
+                Unit unit = (Unit) unitsIt.next();
+                unitToBlock.put(unit, block);
+            }
+        }
+
+        return unitToBlock;
     }
 }

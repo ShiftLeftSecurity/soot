@@ -59,22 +59,6 @@ public class ShimpleOptions
 
 
 /*********************************************************************
-*** Options for Building Shimple
-*********************************************************************/
-
-    /**
-     * If set to true, SSA will be computed for scalars only (PrimType).  Otherwise,
-     * SSA is computed for both scalars (PrimType) and objects (RefType. Note: 
-     * object aliasing is not taken into account).  Arrays are not handled either
-     * way.
-     * Default value is false.
-     **/
-    public boolean scalars_only() {
-        return Options.getBoolean( options, "scalars-only" );
-    }
-
-
-/*********************************************************************
 *** Options for Leaving Shimple
 *********************************************************************/
 
@@ -109,11 +93,11 @@ public class ShimpleOptions
     }
     public static String getDeclaredOptions() {
         return
-        " optimize scalars-only naive-phi-elimination pre-optimize-phi-elimination post-optimize-phi-elimination";
+        " optimize naive-phi-elimination pre-optimize-phi-elimination post-optimize-phi-elimination";
     }
     public static String getDefaultOptions() {
         return
-        " optimize:false scalars-only:false naive-phi-elimination:false pre-optimize-phi-elimination:false post-optimize-phi-elimination:true";
+        " optimize:false naive-phi-elimination:false pre-optimize-phi-elimination:false post-optimize-phi-elimination:true";
     }
 }
 

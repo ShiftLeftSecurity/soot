@@ -174,6 +174,34 @@ public class DominatorNode
         }
     }
 
+    public boolean dominates(DominatorNode node)
+    {
+        // assuming the node passed to us is in the tree at all
+        if(isHead())
+            return true;
+        
+        if(isTail())
+            return false;
+
+        // technically we self-dominate
+        if(this.equals(node))
+            return true;
+
+        for(int i = 0; i < children.size(); i++){
+            DominatorNode child = (DominatorNode) children.get(i);
+            if(child.equals(node))
+                return true;
+        }
+
+        for(int i = 0; i < children.size(); i++){
+            DominatorNode child = (DominatorNode) children.get(i);
+            if(child.dominates(node))
+                return true;
+        }
+
+        return false;
+    }
+
     public String toString()
     {
         // *** TODO: Print info about parent and children

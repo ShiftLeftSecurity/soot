@@ -56,33 +56,26 @@ Contents</A>
 <!--Table of Contents-->
 
 <UL>
-<LI><A NAME="tex2html11"
+<LI><A NAME="tex2html9"
   HREF="opts.html">General Options</A>
 <UL>
-<LI><A NAME="tex2html12"
+<LI><A NAME="tex2html10"
   HREF="#SECTION00021000000000000000">Option <TT>optimize</TT></A>
 </UL>
 <BR>
-<LI><A NAME="tex2html13"
-  HREF="#SECTION00030000000000000000">Options for Building Shimple</A>
+<LI><A NAME="tex2html11"
+  HREF="#SECTION00030000000000000000">Options for Leaving Shimple</A>
 <UL>
+<LI><A NAME="tex2html12"
+  HREF="#SECTION00031000000000000000">Option <TT>naive-phi-elimination</TT></A>
+<LI><A NAME="tex2html13"
+  HREF="#SECTION00032000000000000000">Option <TT>pre-optimize-phi-elimination</TT></A>
 <LI><A NAME="tex2html14"
-  HREF="#SECTION00031000000000000000">Option <TT>scalars-only</TT></A>
+  HREF="#SECTION00033000000000000000">Option <TT>post-optimize-phi-elimination</TT></A>
 </UL>
 <BR>
 <LI><A NAME="tex2html15"
-  HREF="#SECTION00040000000000000000">Options for Leaving Shimple</A>
-<UL>
-<LI><A NAME="tex2html16"
-  HREF="#SECTION00041000000000000000">Option <TT>naive-phi-elimination</TT></A>
-<LI><A NAME="tex2html17"
-  HREF="#SECTION00042000000000000000">Option <TT>pre-optimize-phi-elimination</TT></A>
-<LI><A NAME="tex2html18"
-  HREF="#SECTION00043000000000000000">Option <TT>post-optimize-phi-elimination</TT></A>
-</UL>
-<BR>
-<LI><A NAME="tex2html19"
-  HREF="#SECTION00050000000000000000">About this document ...</A>
+  HREF="#SECTION00040000000000000000">About this document ...</A>
 </UL>
 <!--End of Table of Contents-->
 <H1><A NAME="SECTION00020000000000000000">
@@ -102,29 +95,10 @@ Option <TT>optimize</TT></A>
 When this option is set to true, Shimple-based optimizations are applied.
 
 <H1><A NAME="SECTION00030000000000000000">
-Options for Building Shimple</A>
-</H1>
-
-<H2><A NAME="SECTION00031000000000000000">
-Option <TT>scalars-only</TT></A>
-</H2>
-
-<UL>
-<LI>Allowed values: <TT>true false</TT>
-</LI>
-<LI>Default value: <TT>false</TT>
-</LI>
-</UL>
-If set to true, SSA will be computed for scalars only (PrimType).  Otherwise,
-SSA is computed for both scalars (PrimType) and objects (RefType. Note: 
-object aliasing is not taken into account).  Arrays are not handled either
-way.
-
-<H1><A NAME="SECTION00040000000000000000">
 Options for Leaving Shimple</A>
 </H1>
 
-<H2><A NAME="SECTION00041000000000000000">
+<H2><A NAME="SECTION00031000000000000000">
 Option <TT>naive-phi-elimination</TT></A>
 </H2>
 
@@ -138,7 +112,7 @@ If set to true, neither pre-optimization nor post-optimization will be applied
 to the Phi elimination process.  Note that setting this option to true takes
 precedence over other Phi elimination options.
 
-<H2><A NAME="SECTION00042000000000000000">
+<H2><A NAME="SECTION00032000000000000000">
 Option <TT>pre-optimize-phi-elimination</TT></A>
 </H2>
 
@@ -150,7 +124,7 @@ Option <TT>pre-optimize-phi-elimination</TT></A>
 </UL>
 If set to true, some optimizations are applied before Phi nodes are eliminated.
 
-<H2><A NAME="SECTION00043000000000000000">
+<H2><A NAME="SECTION00033000000000000000">
 Option <TT>post-optimize-phi-elimination</TT></A>
 </H2>
 
@@ -162,7 +136,7 @@ Option <TT>post-optimize-phi-elimination</TT></A>
 </UL>
 If set to false, optimizations are not applied after eliminating Phi nodes.
 
-<H1><A NAME="SECTION00050000000000000000">
+<H1><A NAME="SECTION00040000000000000000">
 About this document ...</A>
 </H1>
  <STRONG>Shimple Options</STRONG><P>
@@ -180,7 +154,7 @@ Mathematics Department, Macquarie University, Sydney.
 The command line arguments were: <BR>
  <STRONG>latex2html</STRONG> <TT>-no_auto_link -no_subdir -split 0 opts.tex</TT>
 <P>
-The translation was initiated by Navindra UMANEE on 2003-05-05<HR>
+The translation was initiated by Navindra UMANEE on 2003-05-10<HR>
 <!--Navigation Panel-->
 <IMG WIDTH="81" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next_inactive"
  SRC="/usr/share/latex2html/icons/nx_grp_g.png"> 
@@ -192,7 +166,7 @@ The translation was initiated by Navindra UMANEE on 2003-05-05<HR>
 <!--End of Navigation Panel-->
 <ADDRESS>
 Navindra UMANEE
-2003-05-05
+2003-05-10
 </ADDRESS>
 </BODY>
 </HTML>

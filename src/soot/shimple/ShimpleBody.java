@@ -209,17 +209,6 @@ public class ShimpleBody extends StmtBody
         return isSSA;
     }
 
-    /**
-     * Indicates whether SSA has been computed only for scalars
-     * (PrimType) or for both scalars and objects (RefType. Note:
-     * object aliasing is not taken into account).  Arrays are not
-     * handled either way.
-     **/
-    public boolean isScalarsOnly()
-    {
-        return options.scalars_only();
-    }
-    
     public ShimpleOptions getOptions()
     {
         return options;

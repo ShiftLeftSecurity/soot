@@ -30,6 +30,7 @@ import soot.*;
 import soot.toolkits.graph.*;
 import soot.util.*;
 import java.util.*;
+import soot.shimple.*;
 
 /**
  * A utility class for generating dot graph file for a control flow graph
@@ -57,6 +58,15 @@ public class CFGViewer {
   /* in one page or several pages of 8.5x11 */
   public static boolean onepage      = true;
 
+  /* build CFG for Shimple */
+  public static boolean shimple = false;
+  /* build CFG for Jimple->Shimple->Jimple */
+  public static boolean viaShimple = false;
+
+  /* build complete CFG graphs */
+  public static boolean complete = false;
+    
+    
   public static void main(String[] args) {
 
     /* check the arguments */
@@ -81,6 +91,13 @@ public class CFGViewer {
 	  || (methname.equals(meth.getName()))) {
 	if (meth.isConcrete()) {
 	  Body body = meth.retrieveActiveBody();
+
+	  if(shimple || viaShimple)
+	     body = Shimple.v().newBody(body);
+
+	  if(viaShimple && !shimple)
+             body = Shimple.v().newJimpleBody((ShimpleBody)body);
+
 	  print_cfg(body);
 	}
       }
@@ -113,6 +130,12 @@ public class CFGViewer {
 	Scene.v().setSootClassPath(args[++i]);
       } else if (args[i].equals("--multipages")) {
 	onepage = false;
+      } else if (args[i].equals("--shimple")) {
+	shimple = true;
+      } else if (args[i].equals("--via-shimple")) {
+	viaShimple = true;
+      } else if (args[i].equals("--complete")) {
+        complete = true;
       } else {
 	int smpos = args[i].indexOf(':');
 	if (smpos == -1) {
@@ -133,10 +156,13 @@ public class CFGViewer {
 
     switch (graphtype) {
     case UNITGRAPH:
-      graph = new UnitGraph(body, false);
+      graph = new UnitGraph(body, complete);
       break;
     case BLOCKGRAPH:
-      graph = new BlockGraph(body, BlockGraph.BRIEF);
+      if(complete)
+        graph = new BlockGraph(body, BlockGraph.COMPLETE);
+      else
+        graph = new BlockGraph(body, BlockGraph.BRIEF);
       break;
     case ARRAYBLOCK:
       graph = new BlockGraph(body, BlockGraph.ARRAYREF);
