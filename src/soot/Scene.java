@@ -31,7 +31,6 @@ import soot.util.*;
 import java.util.*;
 import soot.jimple.toolkits.invoke.*;
 import soot.jimple.toolkits.scalar.*;
-import soot.jimple.toolkits.scalar.pre.*;
 import soot.jimple.toolkits.scalar.PRE.*;
 import soot.toolkits.scalar.*;
 

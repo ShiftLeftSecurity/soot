@@ -1,5 +1,5 @@
 /* Soot - a J*va Optimization Framework
- * Copyright (C) 2000 Patrick Lam
+ * Copyright (C) 2002 Florian Loitsch
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -23,35 +23,32 @@
  * contributors.  (Soot is distributed at http://www.sable.mcgill.ca/soot)
  */
 
-package soot.jimple.toolkits.scalar.pre;
+
+package soot.toolkits.scalar;
 
 import soot.*;
-import soot.jimple.*;
-import soot.toolkits.scalar.*;
-import soot.toolkits.graph.*;
+import soot.util.*;
 import java.util.*;
 
-class DelayedExprs
-{
-    AnticipEarliestExprs anea;
-    DelayednessAnalysis del;
+/** 
+ * Provides an implementation of a flow universe, wrapping arrays.
+ */
+public class ArrayFlowUniverse implements FlowUniverse {
+  Object[] elements;
 
-    public DelayedExprs(BlockGraph g, AnticipEarliestExprs anea, 
-                                FlowUniverse uni)
-    {
-        this.anea = anea;
-        this.del = new DelayednessAnalysis(g, anea, uni);
-    }
+  public ArrayFlowUniverse(Object[] elements) {
+    this.elements = elements;
+  }
 
-    public BoundedFlowSet getDelayedExprsBefore(Block b)
-    {
-        BoundedFlowSet res = (BoundedFlowSet)(((BoundedFlowSet)del.getFlowBefore(b)).clone());
-        res.union(anea.getAnticipEarliestExprsBefore(b), res);
-        return res;
-    }
+  public int size() {
+    return elements.length;
+  }
 
-    public BoundedFlowSet getDelayedExprsAfter(Block b)
-    {
-        return (BoundedFlowSet)del.getFlowAfter(b);
-    }
+  public Iterator iterator() {
+    return Arrays.asList(elements).iterator();
+  }
+
+  public Object[] toArray() {
+    return elements;
+  }
 }

@@ -1,5 +1,5 @@
 /* Soot - a J*va Optimization Framework
- * Copyright (C) 2000 Patrick Lam
+ * Copyright (C) 2002 Florian Loitsch
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -23,26 +23,46 @@
  * contributors.  (Soot is distributed at http://www.sable.mcgill.ca/soot)
  */
 
-package soot.jimple.toolkits.scalar.pre;
+
+package soot.toolkits.scalar;
 
 import soot.*;
-import soot.jimple.*;
-import soot.toolkits.scalar.*;
-import soot.toolkits.graph.*;
+import soot.util.*;
 import java.util.*;
 
-class AnticipatableExprs
-{
-    GlobalAnticipatabilityAnalysis a;
-     
-    public AnticipatableExprs(BlockGraph g, FlowUniverse uni)
-    {
-        a = new GlobalAnticipatabilityAnalysis(g, uni);
-    }
+/** 
+ * provides functional code for most of the methods. Subclasses are invited to
+ * provide a more efficient version. Most often this will be done in the
+ * following way:<br>
+ * <pre>
+ * public void yyy(FlowSet dest) {
+ *   if (dest instanceof xxx) {
+ *     blahblah;
+ *   } else
+ *     super.yyy(dest)
+ * }
+ * </pre>
+ */
 
-    /* universe is all expressions in the program. */
-    public BoundedFlowSet getAnticipatableExprsBefore(Block b)
-    {
-        return (BoundedFlowSet)a.getFlowAfter(b);
+public abstract class AbstractBoundedFlowSet extends AbstractFlowSet implements
+                                                               BoundedFlowSet {
+  
+  public void complement() {
+    complement(this);
+  }
+
+  public void complement(FlowSet dest) {
+    if (this == dest)
+      complement();
+    else {
+      BoundedFlowSet tmp = (BoundedFlowSet)topSet();
+      tmp.difference(this, dest);
     }
+  }
+
+  public Object topSet() {
+    BoundedFlowSet tmp = (BoundedFlowSet)emptySet();
+    tmp.complement();
+    return tmp;
+  }
 }
