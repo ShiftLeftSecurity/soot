@@ -14,6 +14,8 @@ import java.util.*;
 
 public class NativeMethodDriver {
 
+  private static boolean DEBUG = true;
+
   private static HashMap cnameToSim = new HashMap(100);
 
   static {
@@ -113,7 +115,7 @@ public class NativeMethodDriver {
     String cname = method.getDeclaringClass().getName();
     NativeMethodClass clsSim = (NativeMethodClass)cnameToSim.get(cname);
 
-    System.out.println(method.toString());
+//    System.out.println(method.toString());
     if (clsSim == null) {
       throw new NativeMethodNotSupportedException(method);
     } else {
@@ -124,8 +126,10 @@ public class NativeMethodDriver {
 			      returnVar,
 			      params);
       } catch (NativeMethodNotSupportedException e) {
-	System.err.println("WARNING: it is unsafe to simulate the method ");
-	System.err.println("         "+method.toString());	
+	if (DEBUG) {
+	  System.err.println("WARNING: it is unsafe to simulate the method ");
+	  System.err.println("         "+method.toString());	
+	}
       }
       return true;
     }

@@ -35,68 +35,72 @@ import soot.toolkits.graph.*;
 
 public class VariableTypeAnalysis
 {
-    VTATypeGraph vtg;
-    HashMap superNodesToReachingTypes;
-    InvokeGraph ig;
 
-    StronglyConnectedComponents scc;
-    DirectedGraph superGraph;
-    MethodCallGraph mcg;
+  VTATypeGraph vtg;
 
-    Date VTAStart, VTAFinish;
+  HashMap superNodesToReachingTypes;
+  InvokeGraph ig;
 
-    TypeSet computeReachingTypes(List superNode)
-    {
-        TypeSet retVal = new TypeSet();
-        Iterator snIt = superNode.iterator();
+  StronglyConnectedComponents scc;
+  DirectedGraph superGraph;
+  MethodCallGraph mcg;
 
-        while (snIt.hasNext())
-        {
-            Object o = snIt.next();
-            retVal.addAll((TypeSet)vtg.nodeToReachingTypes.get(o));
-        }
+  Date VTAStart, VTAFinish;
 
-        return retVal;
+  TypeSet computeReachingTypes(List superNode) {
+    TypeSet retVal = new TypeSet();
+    Iterator snIt = superNode.iterator();
+
+    while (snIt.hasNext()) {
+      Object o = snIt.next();
+      TypeSet reachingTypes = (TypeSet)vtg.labelToReachingTypes.get(o);
+      retVal.addAll(reachingTypes);
     }
 
-    TypeSet computeConservativeReachingTypes(Hierarchy h, List superNode) {
+    return retVal;
+  }
 
-        TypeSet retVal = new TypeSet();
-        Iterator snIt = superNode.iterator();
+  TypeSet computeConservativeReachingTypes(Hierarchy h, List superNode) {
+    
+    TypeSet retVal = new TypeSet();
+    Iterator snIt = superNode.iterator();
         
-        LinkedList st = new LinkedList();
-        snIt = superNode.iterator(); 
-        while (snIt.hasNext()) {
-            Object o = snIt.next();
-            Type t = (Type)vtg.labelToDeclaredType.get(o);
+    LinkedList st = new LinkedList();
+    snIt = superNode.iterator(); 
+    while (snIt.hasNext()) {
+      Object o = snIt.next();
 
-            if(t instanceof ArrayType) {
-                retVal.add(RefType.v("java.lang.Object"));
-                if(((ArrayType)t).baseType instanceof RefType)
-                    st.addLast(((RefType)((ArrayType)t).baseType).getSootClass());
-            }
-            else st.addLast(((RefType)t).getSootClass());
-            while(!st.isEmpty()) {
-                SootClass c = (SootClass)st.removeLast();
-                if(c.isInterface())
-                    st.addAll(h.getImplementersOf(c));
-                else
-                    for (Iterator classIt = h.getSubclassesOfIncluding(c).iterator(); classIt.hasNext(); )
-                        retVal.add(RefType.v((SootClass)classIt.next()));
-            }
-        }
-        
-        return retVal;
+      Type t = (Type)vtg.labelToDeclaredType.get(o);
+
+      if(t instanceof ArrayType) {
+	retVal.add(RefType.v("java.lang.Object"));
+	if(((ArrayType)t).baseType instanceof RefType)
+	  st.addLast(((RefType)((ArrayType)t).baseType).getSootClass());
+      } else {
+	st.addLast(((RefType)t).getSootClass());
+      }
+
+      while(!st.isEmpty()) {
+	SootClass c = (SootClass)st.removeLast();
+	if(c.isInterface())
+	  st.addAll(h.getImplementersOf(c));
+	else
+	  for (Iterator classIt = h.getSubclassesOfIncluding(c).iterator(); classIt.hasNext(); )
+	    retVal.add(RefType.v((SootClass)classIt.next()));
+      }
     }
+        
+    return retVal;
+  }
 
-    public List getReachingTypesOf(Object o) {
-
-        TypeSet reachingTypes = (TypeSet)superNodesToReachingTypes.get(scc.getComponentOf(o));
-        if (reachingTypes==null) return null;
-        Hierarchy h = Scene.v().getActiveHierarchy();
+  public List getReachingTypesOf(Object o) {
+    TypeSet reachingTypes = (TypeSet)superNodesToReachingTypes.get(scc.getComponentOf(o));
+    if (reachingTypes==null) return null;
+    Hierarchy h = Scene.v().getActiveHierarchy();
 
         List validReachingTypes = new LinkedList();
-        Type t = (Type)vtg.labelToDeclaredType.get(o);
+	
+	Type t = (Type)vtg.labelToDeclaredType.get(o);
         Type declaredType = t;
 
         if (t instanceof ArrayType) 
@@ -134,68 +138,72 @@ public class VariableTypeAnalysis
         return validReachingTypes;
     }   
 
-    /** Constructs a VariableTypeAnalysis object for the given InvokeGraph.
-     * Calling trimInvokeGraph will modify the associated invokeGraph according
-     * to this VTA's results. */
-    public VariableTypeAnalysis(InvokeGraph ig)
+  /** Constructs a VariableTypeAnalysis object for the given
+   * InvokeGraph.  Calling trimInvokeGraph will modify the
+   * associated invokeGraph according to this VTA's results. 
+   */
+  public VariableTypeAnalysis(InvokeGraph ig) {
+    Date start, finish;
+
+    start = new Date();
+    VTAStart = start;
+    //    if (Main.isVerbose) 
     {
-        Date start, finish;
-
-        start = new Date();
-        VTAStart = start;
-        if (Main.isVerbose) {
-            System.out.println("[vta] VTA started on "+start);
-            System.out.println("[vta] Constructing Variable Type Analysis graph.");
-        }
-
-        this.ig = ig;
-        vtg = new VTATypeGraph(ig);
-
-        finish = new Date();
-        if (Main.isVerbose) {
-            System.out.println("[vta] VTA graph has "+vtg.size()+" nodes and "+vtg.numEdges()+" edges.");
-            long runtime = finish.getTime()-start.getTime();
-            System.out.println("[vta] Graph construction took "+
-                               (runtime/60000)+" min. "+
-                               ((runtime%60000)/1000)+" sec.");
-            System.out.println("[vta] Computing strongly connected components.");
-        }
-        start = finish;
-
-        // ha!
-        scc = new StronglyConnectedComponents(vtg);
-
-        finish = new Date();
-        if (Main.isVerbose) {
-            long runtime = finish.getTime()-start.getTime();
-            System.out.println("[vta] SCC took "+
-                               (runtime/60000)+" min. "+
-                               ((runtime%60000)/1000)+" sec.");
-            System.out.println("[vta] Propagating types.");
-        }
-        start = finish;
-
-        // Now we need a new graph.
-        superGraph = scc.getSuperGraph();
-
-        Hierarchy h = Scene.v().getActiveHierarchy();
-        visitNodes(h, superGraph);
-
-        finish = new Date();
-        if (Main.isVerbose) {
-            long runtime = finish.getTime()-start.getTime();
-            System.out.println("[vta] Type propagation took "+
-                               (runtime/60000)+" min. "+
-                               ((runtime%60000)/1000)+" sec.");
-            System.out.println("[vta] Done constructing Variable Type Analysis graph.");
-        }
-        if (Main.isVerbose)
-            System.out.println("[vta] Done constructing Variable Type Analysis graph.");
+      System.out.println("[vta] VTA started on "+start);
+      System.out.println("[vta] Constructing Variable Type Analysis graph.");
     }
 
-    /** Uses the results of this analysis to trim the active invoke graph. */
-    public void trimActiveInvokeGraph()
+    this.ig = ig;
+    vtg = new VTATypeGraph(ig);
+
+    finish = new Date();
+    //    if (Main.isVerbose) 
     {
+      System.out.println("[vta] VTA graph has "+vtg.size()+" nodes and "+vtg.numEdges()+" edges.");
+      long runtime = finish.getTime()-start.getTime();
+      System.out.println("[vta] Graph construction took "+
+			 (runtime/60000)+" min. "+
+			 ((runtime%60000)/1000)+" sec.");
+      System.out.println("[vta] Computing strongly connected components.");
+    }
+    start = finish;
+
+        // ha!
+    scc = new StronglyConnectedComponents(vtg);
+
+    finish = new Date();
+    //    if (Main.isVerbose) 
+    {
+      long runtime = finish.getTime()-start.getTime();
+      System.out.println("[vta] SCC took "+
+			 (runtime/60000)+" min. "+
+			 ((runtime%60000)/1000)+" sec.");
+      System.out.println("[vta] Propagating types.");
+    }
+    start = finish;
+
+    // Now we need a new graph.
+    superGraph = scc.getSuperGraph();
+
+    Hierarchy h = Scene.v().getActiveHierarchy();
+    visitNodes(h, superGraph);
+
+    finish = new Date();
+    //    if (Main.isVerbose) 
+    {
+      long runtime = finish.getTime()-start.getTime();
+      System.out.println("[vta] Type propagation took "+
+			 (runtime/60000)+" min. "+
+			 ((runtime%60000)/1000)+" sec.");
+      System.out.println("[vta] Done constructing Variable Type Analysis graph.");
+    }
+    if (Main.isVerbose)
+      System.out.println("[vta] Done constructing Variable Type Analysis graph.");
+  }
+
+  /** Uses the results of this analysis to trim the active invoke graph. */
+  public void trimActiveInvokeGraph()
+  {
         if (Main.isVerbose)
             System.out.println("[vta] Trimming active invoke graph.");
 
@@ -224,9 +232,10 @@ public class VariableTypeAnalysis
                 Iterator fieldsIt = c.getFields().iterator();
                 while (fieldsIt.hasNext()) {
                     SootField f = (SootField)fieldsIt.next();
-                    if (!VTATypeGraph.isRefLikeType(f.getType()))
+
+		    if (!VTATypeGraph.isRefLikeType(f.getType()))
                         continue;
-                    System.out.println(f+" :: "+getReachingTypesOf(VTATypeGraph.getVTALabel(f)));
+		    System.out.println(f+" :: "+getReachingTypesOf(VTATypeGraph.getVTALabel(f)));
                 }
             }
 
@@ -284,13 +293,16 @@ public class VariableTypeAnalysis
                             }
 
                             List validReachingTypes = getReachingTypesOf(VTATypeGraph.getVTALabel(m, base));
-                            Type t = (Type)vtg.labelToDeclaredType.get(VTATypeGraph.getVTALabel(m, base));
+
+			    Type t = (Type)vtg.labelToDeclaredType.get(VTATypeGraph.getVTALabel(m, base));
+
                             if (t instanceof ArrayType) 
                                 t = RefType.v("java.lang.Object");
                             SootClass cls = ((RefType)t).getSootClass();
 
-                            TypeSet reachingTypes = (TypeSet)superNodesToReachingTypes.get(scc.getComponentOf
-                                                                            (VTATypeGraph.getVTALabel(m, base)));
+                 TypeSet reachingTypes = 
+		   (TypeSet)superNodesToReachingTypes.get(scc.getComponentOf
+							  (VTATypeGraph.getVTALabel(m, base)));
 
                             List targets = h.resolveConcreteDispatch(validReachingTypes, ie.getMethod());
                             Iterator targetsIt = targets.iterator();
