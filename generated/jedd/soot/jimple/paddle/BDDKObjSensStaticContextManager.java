@@ -30,8 +30,8 @@ public class BDDKObjSensStaticContextManager extends AbsStaticContextManager {
                                                                                                          new PhysicalDomain[] { C2.v() }),
                                                                           new PhysicalDomain[] { C1.v() },
                                                                           new PhysicalDomain[] { C2.v() }));
-        out.add(new jedd.internal.RelationContainer(new Attribute[] { srcm.v(), srcc.v(), tgtm.v(), stmt.v(), kind.v(), tgtc.v() },
-                                                    new PhysicalDomain[] { MS.v(), C1.v(), MT.v(), ST.v(), KD.v(), C2.v() },
+        out.add(new jedd.internal.RelationContainer(new Attribute[] { tgtc.v(), srcm.v(), srcc.v(), tgtm.v(), stmt.v(), kind.v() },
+                                                    new PhysicalDomain[] { C2.v(), MS.v(), C1.v(), MT.v(), ST.v(), KD.v() },
                                                     ("out.add(newEdges) at /tmp/fixing-paddle/src/soot/jimple/padd" +
                                                      "le/BDDKObjSensStaticContextManager.jedd:39,8-11"),
                                                     newEdges));

@@ -838,7 +838,6 @@ public class Scene  //extends AbstractHost
 		tryLoadClass(name,i);
 	    }
 	}
-
     }
 
     private List dynamicClasses;
@@ -846,6 +845,17 @@ public class Scene  //extends AbstractHost
         return dynamicClasses;
     }
 
+    private void loadNecessaryClass(String name) {
+        SootClass c;
+
+        c = Scene.v().loadClassAndSupport(name);
+
+        if (mainClass == null) {
+            mainClass = c;
+            Scene.v().setMainClass(c);
+        }
+        c.setApplicationClass();
+    }
     /** Load the set of classes that soot needs, including those specified on the
      *  command-line. This is the standard way of initialising the list of
      *  classes soot should use.
@@ -857,15 +867,7 @@ public class Scene  //extends AbstractHost
 
         while (it.hasNext()) {
             String name = (String) it.next();
-            SootClass c;
-
-            c = Scene.v().loadClassAndSupport(name);
-
-            if (mainClass == null) {
-                mainClass = c;
-                Scene.v().setMainClass(c);
-            }
-            c.setApplicationClass();
+            loadNecessaryClass(name);
         }
 
         loadDynamicClasses();
@@ -880,6 +882,7 @@ public class Scene  //extends AbstractHost
         }
 
         prepareClasses();
+        setMainClassFromOptions();
         setDoneResolving();
     }
 
@@ -1017,5 +1020,11 @@ public class Scene  //extends AbstractHost
     private boolean doneResolving = false;
     public boolean doneResolving() { return doneResolving; }
     public void setDoneResolving() { doneResolving = true; }
+    public void setMainClassFromOptions() {
+        if( Options.v().main_class() != null
+                && Options.v().main_class().length() > 0 ) {
+            setMainClass(getSootClass(Options.v().main_class()));
+        }
+    }
 }
 

@@ -1,5 +1,4 @@
 /* Soot - a J*va Optimization Framework
- * Copyright (C) 1997-1999 Raja Vallee-Rai
  * Copyright (C) 2004 Ondrej Lhotak
  *
  * This library is free software; you can redistribute it and/or
@@ -18,30 +17,15 @@
  * Boston, MA 02111-1307, USA.
  */
 
-/*
- * Modified by the Sable Research Group and others 1997-1999.  
- * See the 'credits' file distributed with Soot for the complete list of
- * contributors.  (Soot is distributed at http://www.sable.mcgill.ca/soot)
- */
+package soot.toolkits.scalar;
 
-
-
-
-
-package soot.jimple;
-
+import soot.toolkits.graph.*;
 import soot.*;
-import java.util.*;
 
-public interface InvokeExpr extends Expr
+
+/**
+ *   Analysis that computes live locals, local defs, and local uses all at once.
+ */
+public interface CombinedAnalysis extends LocalDefs, LocalUses, LiveLocals
 {
-    public void setMethodRef(SootMethodRef smr);
-    public SootMethodRef getMethodRef();
-    public SootMethod getMethod();
-    public List getArgs();
-    public Value getArg(int index);
-    public int getArgCount();
-    public void setArg(int index, Value arg);
-    public ValueBox getArgBox(int index);
-    public Type getType();
 }

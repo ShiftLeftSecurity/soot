@@ -72,7 +72,7 @@ public class BDDCflow {
                                                                                                           new jedd.Attribute[] { kind.v() },
                                                                                                           new jedd.PhysicalDomain[] { KD.v() })));
         callGraph.eq(jedd.internal.Jedd.v().compose(jedd.internal.Jedd.v().read(jedd.internal.Jedd.v().project(PaddleScene.v().cg.edges().get(),
-                                                                                                               new jedd.PhysicalDomain[] { C1.v(), C2.v() })),
+                                                                                                               new jedd.PhysicalDomain[] { C2.v(), C1.v() })),
                                                     wantedKinds,
                                                     new jedd.PhysicalDomain[] { KD.v() }));
     }

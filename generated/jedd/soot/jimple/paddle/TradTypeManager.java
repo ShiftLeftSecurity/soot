@@ -85,14 +85,14 @@ public class TradTypeManager extends AbsTypeManager {
                                                        jedd.internal.Jedd.v().trueBDD());
         if (bddGetter == null) bddGetter = this.new BDDGetter();
         return new jedd.internal.RelationContainer(new jedd.Attribute[] { var.v(), obj.v() },
-                                                   new jedd.PhysicalDomain[] { V2.v(), H2.v() },
+                                                   new jedd.PhysicalDomain[] { V1.v(), H2.v() },
                                                    ("return jedd.internal.Jedd.v().replace(bddGetter.get(), new j" +
                                                     "edd.PhysicalDomain[...], new jedd.PhysicalDomain[...]); at /" +
                                                     "tmp/fixing-paddle/src/soot/jimple/paddle/TradTypeManager.jed" +
                                                     "d:94,8-14"),
                                                    jedd.internal.Jedd.v().replace(bddGetter.get(),
-                                                                                  new jedd.PhysicalDomain[] { V1.v(), H1.v() },
-                                                                                  new jedd.PhysicalDomain[] { V2.v(), H2.v() }));
+                                                                                  new jedd.PhysicalDomain[] { H1.v() },
+                                                                                  new jedd.PhysicalDomain[] { H2.v() }));
     }
     
     class BDDGetter {

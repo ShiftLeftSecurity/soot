@@ -155,8 +155,8 @@ public class BDDCflowStack {
                                                                                                        "addle/BDDCflowStack.jedd:94,39-54"),
                                                                                                       ret)));
             if (jedd.internal.Jedd.v().equals(jedd.internal.Jedd.v().read(ret),
-                                              ret.eqUnion(stmtsInShadow(new jedd.internal.RelationContainer(new jedd.Attribute[] { method.v(), shadow.v() },
-                                                                                                            new jedd.PhysicalDomain[] { MT.v(), V1.v() },
+                                              ret.eqUnion(stmtsInShadow(new jedd.internal.RelationContainer(new jedd.Attribute[] { shadow.v(), method.v() },
+                                                                                                            new jedd.PhysicalDomain[] { V1.v(), MT.v() },
                                                                                                             ("stmtsInShadow(targets) at /tmp/fixing-paddle/src/soot/jimple" +
                                                                                                              "/paddle/BDDCflowStack.jedd:95,31-44"),
                                                                                                             targets)))))

@@ -145,6 +145,11 @@ public class Options extends OptionsBase {
                 whole_shimple = true;
   
             else if( false 
+            || option.equals( "validate" )
+            )
+                validate = true;
+  
+            else if( false 
             || option.equals( "debug" )
             )
                 debug = true;
@@ -249,6 +254,28 @@ public class Options extends OptionsBase {
             || option.equals( "allow-phantom-refs" )
             )
                 allow_phantom_refs = true;
+  
+            else if( false 
+            || option.equals( "use-old-type-assigner" )
+            )
+                use_old_type_assigner = true;
+  
+            else if( false
+            || option.equals( "main-class" )
+            ) {
+                if( !hasMoreOptions() ) {
+                    G.v().out.println( "No value given for option -"+option );
+                    return false;
+                }
+                String value = nextOption();
+    
+                if( main_class.length() == 0 )
+                    main_class = value;
+                else {
+                    G.v().out.println( "Duplicate values "+main_class+" and "+value+" for option -"+option );
+                    return false;
+                }
+            }
   
             else if( false
             || option.equals( "d" )
@@ -852,6 +879,10 @@ public class Options extends OptionsBase {
     private boolean whole_shimple = false;
     public void set_whole_shimple( boolean setting ) { whole_shimple = setting; }
   
+    public boolean validate() { return validate; }
+    private boolean validate = false;
+    public void set_validate( boolean setting ) { validate = setting; }
+  
     public boolean debug() { return debug; }
     private boolean debug = false;
     public void set_debug( boolean setting ) { debug = setting; }
@@ -885,6 +916,13 @@ public class Options extends OptionsBase {
     private boolean allow_phantom_refs = false;
     public void set_allow_phantom_refs( boolean setting ) { allow_phantom_refs = setting; }
   
+    public boolean use_old_type_assigner() { return use_old_type_assigner; }
+    private boolean use_old_type_assigner = false;
+    public void set_use_old_type_assigner( boolean setting ) { use_old_type_assigner = setting; }
+  
+    public String main_class() { return main_class; }
+    public void set_main_class( String setting ) { main_class = setting; }
+    private String main_class = "";
     public String output_dir() { return output_dir; }
     public void set_output_dir( String setting ) { output_dir = setting; }
     private String output_dir = "";
@@ -1031,6 +1069,7 @@ public class Options extends OptionsBase {
 +padOpt(" -app", "Run in application mode" )
 +padOpt(" -w -whole-program", "Run in whole-program mode" )
 +padOpt(" -ws -whole-shimple", "Run in whole-shimple mode" )
++padOpt(" -validate", "Run internal validation on bodies" )
 +padOpt(" -debug", "Print various Soot debugging info" )
 +padOpt(" -debug-resolver", "Print debugging info from SootResolver" )
 +"\nInput Options:\n"
@@ -1043,6 +1082,8 @@ public class Options extends OptionsBase {
 +padVal(" java", "Favour Java files as Soot source" )
 +padOpt(" -full-resolver", "Force transitive resolving of referenced classes" )
 +padOpt(" -allow-phantom-refs", "Allow unresolved classes; may cause errors" )
++padOpt(" -use-old-type-assigner", "Use old type assigner - may be slower" )
++padOpt(" -main-class CLASS", "Sets the main class for whole-program." )
 +"\nOutput Options:\n"
       
 +padOpt(" -d DIR -output-dir DIR", "Store output files in DIR" )
