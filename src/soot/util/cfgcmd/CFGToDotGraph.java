@@ -25,7 +25,7 @@ import soot.*;
 import soot.toolkits.exceptions.ThrowableSet;
 import soot.toolkits.graph.DirectedGraph;
 import soot.toolkits.graph.BlockGraph;
-import soot.toolkits.graph.CompleteUnitGraph;
+import soot.toolkits.graph.PrunedUnitGraph;
 import soot.toolkits.graph.Block;
 import soot.toolkits.graph.UnitGraph;
 import soot.util.dot.DotGraph;
@@ -52,7 +52,7 @@ public class CFGToDotGraph {
    * <p>Returns a CFGToDotGraph converter which will draw the graph
    * as a single arbitrarily-sized page, with full-length node labels.</p>
    *
-   * <p> If asked to draw a <code>CompleteUnitGraph</code>, the
+   * <p> If asked to draw a <code>PrunedUnitGraph</code>, the
    * converter will identify the exceptions that will be thrown, and
    * will distinguish different edges by coloring regular control flow
    * edges black, exceptional control flow edges red, and thrown
@@ -100,7 +100,7 @@ public class CFGToDotGraph {
    * each node may throw, in the form of an edge from the throwing
    * node to the handler (if any), labeled with the possible
    * exception types.  This parameter has an effect only when
-   * drawing <code>CompleteUnitGraph</code>s.
+   * drawing <code>PrunedUnitGraph</code>s.
    *
    * @param showExceptions indicates whether to abbreviate the text of 
    * node labels.
@@ -190,14 +190,14 @@ public class CFGToDotGraph {
 
   /**
    * Create a {@link DotGraph} whose nodes and edges depict the
-   * control flow in a {@link CompleteUnitGraph}, with 
+   * control flow in a {@link PrunedUnitGraph}, with 
    * distinguished edges for exceptional control flow.
    * 
    * @param graph the control flow graph
    *
    * @return a visualization of the input graph.
    */
-  public DotGraph drawCFG(CompleteUnitGraph graph) {
+  public DotGraph drawCFG(PrunedUnitGraph graph) {
     Body body = graph.getBody();
     DotGraph canvas = initDotGraph(body);
     DotLabeller labeller = new DotLabeller((int)(graph.size()/0.7f), 0.7f);
@@ -226,8 +226,8 @@ public class CFGToDotGraph {
       if (showExceptions) {
 	for (Iterator destsIt = graph.getExceptionDests(node).iterator();
 	     destsIt.hasNext(); ) {
-	  CompleteUnitGraph.ExceptionDest dest = 
-	    (CompleteUnitGraph.ExceptionDest) destsIt.next();
+	  PrunedUnitGraph.ExceptionDest dest = 
+	    (PrunedUnitGraph.ExceptionDest) destsIt.next();
 	  Object handlerStart = null;
 	  if (dest.trap() == null) {
 	    // Giving each escaping exception its own, invisible

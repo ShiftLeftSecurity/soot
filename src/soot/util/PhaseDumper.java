@@ -44,8 +44,7 @@ import soot.Singletons;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.options.Options;
-import soot.options.PhaseDumperOptions;
-import soot.toolkits.graph.CompleteUnitGraph;
+import soot.toolkits.graph.PrunedUnitGraph;
 import soot.toolkits.graph.DirectedGraph;
 import soot.util.Chain;
 import soot.util.cfgcmd.CFGToDotGraph;
@@ -363,11 +362,11 @@ public class PhaseDumper {
 
     /**
      * Asks the <code>PhaseDumper</code> to dump the passed {@link
-     * CompleteUnitGraph} if the current phase is being dumped.
+     * PrunedUnitGraph} if the current phase is being dumped.
      *
      * @param g the graph to dump.
      */
-    public void dumpGraph(CompleteUnitGraph g) {
+    public void dumpGraph(PrunedUnitGraph g) {
 	if (alreadyDumping) {
 	    return;
 	}

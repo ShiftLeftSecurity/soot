@@ -55,7 +55,7 @@ public class ConstantPropagatorAndFolder extends BodyTransformer
                                "] Propagating and folding constants...");
 
         Chain units = stmtBody.getUnits();
-        CompleteUnitGraph unitGraph = new CompleteUnitGraph(stmtBody);
+        PrunedUnitGraph unitGraph = new PrunedUnitGraph(stmtBody);
         LocalDefs localDefs;
         
         localDefs = new SimpleLocalDefs(unitGraph);

@@ -537,6 +537,17 @@ that produce more than one (for example, the Aggregator may
 produce multiple <code>CompleteUnitGraph</code>s).</p>
 </long_desc>
 	</listopt>
+	<boolopt>
+	  <name>Show Exception Destinations</name>
+	  <alias>show-exception-dests</alias>
+	  <default>true</default>
+	  <short_desc/>
+	  <long_desc>
+Indicate whether to show exception destination edges as
+well as control flow edges in
+dumps of pruned control flow graphs.
+</long_desc>
+	</boolopt>
 	</section>
 	<section>
 		<name>Processing Options</name>
@@ -555,42 +566,6 @@ This is a mechanism for specifying phase-specific options to
 different parts of Soot. See <var>Soot phase options</var> for
 details about the available phases and options.</p>
 </long_desc>
-
-      <phase>
-        <name>CFG/Exceptions Control</name>
-        <alias>cfgex</alias>
-        <class>CFGExceptionsOptions</class>
-	<short_desc>Sets parameters for the generation of control flow graphs</short_desc>
-        <long_desc>
-<p>
-CFG/Exceptions Control is not a phase, per se, but a place to
-collect options that control the analysis of exceptional control
-flow, the generation of control flow graphs, and the use of
-control flow graphs. These graphs are
-constructed and used by many phases of Soot.</p>
-</long_desc>
-	<boolopt>
-	  <name>Enabled</name>
-	  <alias>enabled</alias>
-	  <default>false</default>
-	  <short_desc/>
-	  <long_desc>
-``Enabling'' CFG/Exceptions has no effect, since it is not really
-a phase.
-</long_desc>
-	</boolopt>
-	<boolopt>
-	  <name>Show Exceptions in dumped CFGs</name>
-	  <alias>show-exceptions</alias>
-	  <default>true</default>
-	  <short_desc/>
-	  <long_desc>
-Indicate whether to include exception destination edges as
-well as control flow edges in
-dumped CompleteUnitGraphs.
-</long_desc>
-	</boolopt>
-</phase>
 			<phase>
 				<name>Jimple Body Creation</name>
 				<alias>jb</alias>
@@ -3793,6 +3768,59 @@ Jimple for processing by the rest of Soot. For more information,
 see the documentation for the <tt>shimp</tt>, <tt>stp</tt>, and
 <tt>sop</tt> phases.
 </long_desc>
+		</boolopt>
+						<multiopt>
+							<name>Default ThrowAnalysis</name>
+							<alias>throw-analysis</alias>
+							<long_desc>
+This option specifies how CFGs with pruned exceptional control
+flow edges are to estimate the exceptions which each statement
+may throw.
+        </long_desc>
+							<value>
+								<name>Pedantic</name>
+								<alias>pedantic</alias>
+								<short_desc>Pedantically conservative throw analysis</short_desc>
+								<long_desc>
+Says that any instruction may throw any
+<code>Throwable</code> whatsoever. Strictly speaking this is
+correct, because the Java libraries include the
+<code>Thread.stop(Throwable)</code>
+method, which allows other threads to cause arbitrary exceptions
+to occur at arbitrary points in the execution of a victim thread.
+</long_desc>
+							</value>
+							<value>
+								<name>Unit</name>
+								<alias>unit</alias>
+								<default/>
+								<short_desc>Unit Throw Analysis</short_desc>
+								<long_desc>
+Says that each statement in the intermediate representation
+may throw those exception types associated with the corresponding
+Java bytecode instructions in the JVM Specification.  The
+analysis deals with each statement in isolation, without regard
+to the surrounding program.
+</long_desc>
+							</value>
+						</multiopt>
+		<boolopt>
+			<name>Exeption Edges from Predecessors Only</name>
+			<alias>exception-edges-from-preds-only</alias>
+			<short_desc>Add exceptional edges from only the predecessors of excepting statements without side effects</short_desc>
+			<long_desc>
+If this option is true, then when an instruction may throw an
+exception that would be caught by an exception handler, the CFGs
+produced by Soot's <code>PrunedUnitGraph</code> and
+<code>PrunedBlockGraph</code> classes will include edges from the
+predecessors of the excepting instruction, but not from the
+excepting instruction itself, unless the excepting instruction has
+potential side-effects. If the option is false, the CFGs
+include edges to the handler from the excepting instruction itself, as well as
+from its predecessors, even if the excepting instruction
+has no potential side effects.
+</long_desc>
+			<default>true</default>
 		</boolopt>
 	</section>
 	<section>

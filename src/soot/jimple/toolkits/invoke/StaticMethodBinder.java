@@ -290,7 +290,7 @@ public class StaticMethodBinder extends SceneTransformer
     private static boolean methodUsesThis(SootMethod m)
     {
         JimpleBody b = (JimpleBody)m.getActiveBody();
-        CompleteUnitGraph g = new CompleteUnitGraph(b);
+        PrunedUnitGraph g = new PrunedUnitGraph(b);
         LocalDefs ld = new SimpleLocalDefs(g);
         LocalUses lu = new SimpleLocalUses(g, ld);
 

@@ -23,62 +23,32 @@
  * contributors.  (Soot is distributed at http://www.sable.mcgill.ca/soot)
  */
 
-
 package soot.toolkits.graph;
 
-import java.util.*;
-import soot.*;
-import java.io.*;
+import soot.Body;
+import soot.toolkits.graph.PrunedBlockGraph;
+import soot.toolkits.graph.CompleteUnitGraph;
 
 /**
- *  <p>Represents a CFG where the nodes are {@link Block}s and the
- *  edges are derived from control flow.  Control flow associated with
- *  exceptions is taken into account: when a <tt>Unit</tt> may throw
- *  an exception that is caught by a {@link Trap} within the
- *  <tt>Body</tt>, the excepting <tt>Unit</tt> starts a new basic
- *  block.</p>
+ *  <p>Represents a CFG for a {@link Body} instance where the nodes
+ *  are {@link Block} instances, and where control flow associated with
+ *  exceptions is taken into account. When dividing the {@link Body} into
+ *  basic blocks, 
+ *  <code>CompleteBlockGraph</code> assumes that every {@link Unit} covered by a
+ *  {@link Trap} has the potential to throw an
+ *  exception caught by the {@link Trap}.  This generally has the effect of 
+ *  separating every covered {@link Unit} into a separate block.
+ *
+ *  <p>This implementation of <code>CompleteBlockGraph</code> is included
+ *  for backwards compatibility, but the graphs it produces are not
+ *  necessarily identical to the graphs produced by the implementation of
+ *  <code>CompleteBlockGraph</code> See the documentation for 
+ *  {@link CompleteUnitGraph} for details of the incompatibilities.
+ *  </p>
  */
-
-public class CompleteBlockGraph extends BlockGraph 
+public class CompleteBlockGraph extends PrunedBlockGraph 
 {
-    /**
-     *   <p> Constructs a <tt>CompleteBlockGraph</tt> for the blocks
-     *   found by partitioning the the units of the provided
-     *   {@link Body} instance into basic blocks.</p>
-     *
-     *   <p> Note that this constructor builds a {@link
-     *   CompleteUnitGraph} internally when splitting <tt>body</tt>'s
-     *   {@link Unit}s into {@link Block}s.  Callers who already have
-     *   a {@link CompleteUnitGraph} to hand can use the constructor
-     *   taking a <tt>CompleteUnitGraph</tt> as a parameter, as a
-     *   minor optimization.
-     *
-     *   @param body    The underlying body we want to make a graph for.
-     */
-    public CompleteBlockGraph(Body body)
-    {
-        super(new CompleteUnitGraph(body));
-    }
-
-
-    /**
-     *   Constructs a graph for the blocks found by partitioning the
-     *   the units in a {@link CompleteUnitGraph}.  
-     *
-     *   @param body    The underlying body we want to make a graph for.
-     *
-     *   @param unitGraph A {@link CompleteUnitGraph} build from <tt>body</tt>
-     *                  The <tt>CompleteBlockGraph</tt> constructor uses
-     *                  the passed <tt>graph</tt> to split the body into
-     *			blocks. 
-     */
-    public CompleteBlockGraph(CompleteUnitGraph unitGraph)
-    {
-        super(unitGraph);
-
-	if (DEBUG)
-	    soot.util.PhaseDumper.v().dumpGraph(this, mBody);
+    public CompleteBlockGraph(Body b) {
+	super(new CompleteUnitGraph(b));
     }
 }
-
-

@@ -15,7 +15,7 @@ public class ReachingDefsTagger extends BodyTransformer {
 
     protected void internalTransform(Body b, String phaseName, Map options){
     
-        SimpleLocalDefs sld = new SimpleLocalDefs(new CompleteUnitGraph(b));
+        SimpleLocalDefs sld = new SimpleLocalDefs(new PrunedUnitGraph(b));
 
         Iterator it = b.getUnits().iterator();
         while (it.hasNext()){

@@ -40,7 +40,7 @@ public class UnreachableCodeEliminator extends BodyTransformer
     public UnreachableCodeEliminator( Singletons.Global g ) {}
     public static UnreachableCodeEliminator v() { return G.v().UnreachableCodeEliminator(); }
 
-    CompleteUnitGraph stmtGraph;
+    PrunedUnitGraph stmtGraph;
     HashSet visited;
     int numPruned;
 
@@ -52,7 +52,7 @@ public class UnreachableCodeEliminator extends BodyTransformer
             G.v().out.println("[" + body.getMethod().getName() + "] Eliminating unreachable code...");
 
         numPruned = 0;
-        stmtGraph = new CompleteUnitGraph(body);
+        stmtGraph = new PrunedUnitGraph(body);
         visited = new HashSet();
 
         // Used to be: "mark first statement and all its successors, recursively"

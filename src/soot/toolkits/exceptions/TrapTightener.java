@@ -30,7 +30,7 @@ import soot.Trap;
 import soot.Unit;
 import soot.options.Options;
 import soot.util.Chain;
-import soot.toolkits.graph.CompleteUnitGraph;
+import soot.toolkits.graph.PrunedUnitGraph;
 
 /**
  * A {@link BodyTransformer} that shrinks the protected area covered
@@ -45,7 +45,7 @@ import soot.toolkits.graph.CompleteUnitGraph;
  *
  * The {@link TrapTightener} is used to reduce the risk of
  * unverifiable code which can result from the use of {@link
- * CompleteUnitGraph}s from which unrealizable exceptional
+ * PrunedUnitGraph}s from which unrealizable exceptional
  * control flow edges have been removed.
  */
 
@@ -61,7 +61,7 @@ public final class TrapTightener extends BodyTransformer {
 	Chain trapChain = body.getTraps();
 	Chain unitChain = body.getUnits();
 	if (trapChain.size() > 0) {
-	    CompleteUnitGraph graph = new CompleteUnitGraph(body);
+	    PrunedUnitGraph graph = new PrunedUnitGraph(body);
 
 	    for (Iterator trapIt = trapChain.iterator(); trapIt.hasNext(); ) {
 		Trap trap = (Trap) trapIt.next();
@@ -111,11 +111,11 @@ public final class TrapTightener extends BodyTransformer {
      * @return <tt>true</tt> if <tt>u</tt> might throw an exception caught
      * by <tt>t</tt>, according to <tt>g</tt.
      */
-    protected boolean mightThrowTo(CompleteUnitGraph g, Unit u, Trap t) {
+    protected boolean mightThrowTo(PrunedUnitGraph g, Unit u, Trap t) {
 	Collection dests = g.getExceptionDests(u);
 	for (Iterator destIt = dests.iterator(); destIt.hasNext(); ) {
-	    CompleteUnitGraph.ExceptionDest dest = 
-		(CompleteUnitGraph.ExceptionDest) destIt.next();
+	    PrunedUnitGraph.ExceptionDest dest = 
+		(PrunedUnitGraph.ExceptionDest) destIt.next();
 	    if (dest.trap() == t) {
 		return true;
 	    }

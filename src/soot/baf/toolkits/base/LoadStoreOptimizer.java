@@ -59,7 +59,7 @@ public class LoadStoreOptimizer extends BodyTransformer
     // Instance vars.
     private Chain mUnits;
     private Body mBody;
-    private CompleteUnitGraph mCompleteUnitGraph;
+    private PrunedUnitGraph mPrunedUnitGraph;
     private LocalDefs mLocalDefs;
     private LocalUses mLocalUses;
     private Map mUnitToBlockMap;     // maps a unit it's containing block
@@ -114,9 +114,9 @@ public class LoadStoreOptimizer extends BodyTransformer
     
     private void computeLocalDefsAndLocalUsesInfo() 
     {        
-        mCompleteUnitGraph =  new CompleteUnitGraph(mBody);
-        mLocalDefs = new SimpleLocalDefs(mCompleteUnitGraph);
-        mLocalUses = new SimpleLocalUses(mCompleteUnitGraph, mLocalDefs);            
+        mPrunedUnitGraph =  new PrunedUnitGraph(mBody);
+        mLocalDefs = new SimpleLocalDefs(mPrunedUnitGraph);
+        mLocalUses = new SimpleLocalUses(mPrunedUnitGraph, mLocalDefs);            
     }
    
 

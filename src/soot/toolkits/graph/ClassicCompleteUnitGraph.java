@@ -38,18 +38,19 @@ import soot.options.Options;
  *  purposes, and should not be used in actual analyses.</p>
  *
  *  <p> There are two distinctions between the graphs produced by the
- *  <tt>ClassicCompleteUnitGraph</tt> and the current
- *  <tt>CompleteUnitGraph</tt>:
+ *  <tt>ClassicCompleteUnitGraph</tt> and 
+ *  <tt>PrunedUnitGraph</tt>:
  *  <ol>
  *
- *  <li><tt>CompleteUnitGraph</tt> only creates edges to a
- *  <tt>Trap</tt> handler for trapped <tt>Unit</tt>s that have the
- *  potential to throw the particular exception type caught by the
- *  handler.  <tt>ClassicCompleteUnitGraph</tt> creates edges for all
- *  trapped <tt>Unit</tt>s, regardless of what exceptions they may
- *  throw.</li>
+ *  <li><tt>PrunedUnitGraph</tt> only creates edges to a <tt>Trap</tt>
+ *  handler for trapped <tt>Unit</tt>s that have the potential to
+ *  throw the particular exception type caught by the handler,
+ *  according to the {@link ThrowAnalysis} used to estimate which
+ *  exceptions each {@link Unit} may throw..
+ *  <tt>ClassicCompleteUnitGraph</tt> creates edges for all trapped
+ *  <tt>Unit</tt>s, regardless of what exceptions they may throw.</li>
  *
- *  <li> When <tt>CompleteUnitGraph</tt> creates edges for a trapped
+ *  <li> When <tt>PrunedUnitGraph</tt> creates edges for a trapped
  *  <tt>Unit</tt> that may throw a caught exception, it adds edges
  *  from each predecessor of the excepting <tt>Unit</tt> to the
  *  handler. Only if the excepting <tt>Unit</tt> may have side effects
@@ -59,7 +60,7 @@ import soot.options.Options;
  *  to the handler, and adds edges from the predecessor only of the
  *  first <tt>Unit</tt> covered by a <tt>Trap</tt> (in this one aspect
  *  <tt>ClassicCompleteUnitGraph</tt> is less conservative than
- *  <tt>CompleteUnitGraph</tt>, since it ignores the possibility of a
+ *  <tt>PrunedUnitGraph</tt>, since it ignores the possibility of a
  *  branch into the middle of a protected area.</li>
  *
  * </ol></p>

@@ -63,6 +63,8 @@ public class Options extends OptionsBase {
     public static final int output_format_class = 12;
     public static final int output_format_d = 13;
     public static final int output_format_dava = 13;
+    public static final int throw_analysis_pedantic = 1;
+    public static final int throw_analysis_unit = 2;
 
     public boolean parse( String[] argv ) {
         LinkedList phaseOptions = new LinkedList();
@@ -458,6 +460,11 @@ public class Options extends OptionsBase {
                 dump_cfg.add( value );
             }
   
+            else if( false 
+            || option.equals( "show-exception-dests" )
+            )
+                show_exception_dests = true;
+  
             else if( false
             || option.equals( "p" )
             || option.equals( "phase-option" )
@@ -526,6 +533,50 @@ public class Options extends OptionsBase {
             || option.equals( "via-shimple" )
             )
                 via_shimple = true;
+  
+            else if( false
+            || option.equals( "throw-analysis" )
+            ) {
+                if( !hasMoreOptions() ) {
+                    G.v().out.println( "No value given for option -"+option );
+                    return false;
+                }
+                String value = nextOption();
+    
+                if( false );
+    
+                else if( false
+                || value.equals( "pedantic" )
+                ) {
+                    if( throw_analysis != 0
+                    && throw_analysis != throw_analysis_pedantic ) {
+                        G.v().out.println( "Multiple values given for option "+option );
+                        return false;
+                    }
+                    throw_analysis = throw_analysis_pedantic;
+                }
+    
+                else if( false
+                || value.equals( "unit" )
+                ) {
+                    if( throw_analysis != 0
+                    && throw_analysis != throw_analysis_unit ) {
+                        G.v().out.println( "Multiple values given for option "+option );
+                        return false;
+                    }
+                    throw_analysis = throw_analysis_unit;
+                }
+    
+                else {
+                    G.v().out.println( "Invalid value "+value+" given for option -"+option );
+                    return false;
+                }
+           }
+  
+            else if( false 
+            || option.equals( "exception-edges-from-preds-only" )
+            )
+                exception_edges_from_preds_only = true;
   
             else if( false
             || option.equals( "i" )
@@ -797,6 +848,10 @@ public class Options extends OptionsBase {
     }
     public void set_dump_cfg( List setting ) { dump_cfg = setting; }
     private List dump_cfg = null;
+    public boolean show_exception_dests() { return show_exception_dests; }
+    private boolean show_exception_dests = false;
+    public void set_show_exception_dests( boolean setting ) { show_exception_dests = setting; }
+  
     public boolean via_grimp() { return via_grimp; }
     private boolean via_grimp = false;
     public void set_via_grimp( boolean setting ) { via_grimp = setting; }
@@ -804,6 +859,16 @@ public class Options extends OptionsBase {
     public boolean via_shimple() { return via_shimple; }
     private boolean via_shimple = false;
     public void set_via_shimple( boolean setting ) { via_shimple = setting; }
+  
+    public int throw_analysis() {
+        if( throw_analysis == 0 ) return throw_analysis_unit;
+        return throw_analysis; 
+    }
+    public void set_throw_analysis( int setting ) { throw_analysis = setting; }
+    private int throw_analysis = 0;
+    public boolean exception_edges_from_preds_only() { return exception_edges_from_preds_only; }
+    private boolean exception_edges_from_preds_only = false;
+    public void set_exception_edges_from_preds_only( boolean setting ) { exception_edges_from_preds_only = setting; }
   
     public List include() { 
         if( include == null )
@@ -909,6 +974,7 @@ public class Options extends OptionsBase {
 +padOpt(" -xml-attributes", "Save tags to XML attributes for Eclipse" )
 +padOpt(" -dump-body PHASENAME", "Dump the internal representation of each method before and after phase PHASENAME" )
 +padOpt(" -dump-cfg PHASENAME", "Dump the internal representation of each CFG constructed during phase PHASENAME" )
++padOpt(" -show-exception-dests", "" )
 +"\nProcessing Options:\n"
       
 +padOpt(" -p PHASE OPT:VAL -phase-option PHASE OPT:VAL", "Set PHASE's OPT option to VALUE" )
@@ -916,6 +982,10 @@ public class Options extends OptionsBase {
 +padOpt(" -W -whole-optimize", "Perform whole program optimizations" )
 +padOpt(" -via-grimp", "Convert to bytecode via Grimp instead of via Baf" )
 +padOpt(" -via-shimple", "Enable Shimple SSA representation" )
++padOpt(" -throw-analysis ARG", "" )
++padVal(" pedantic", "Pedantically conservative throw analysis" )
++padVal(" unit (default)", "Unit Throw Analysis" )
++padOpt(" -exception-edges-from-preds-only", "Add exceptional edges from only the predecessors of excepting statements without side effects" )
 +"\nApplication Mode Options:\n"
       
 +padOpt(" -i PKG -include PKG", "Include classes in PKG as application classes" )
@@ -944,7 +1014,6 @@ public class Options extends OptionsBase {
     public String getPhaseList() {
         return ""
     
-        +padOpt("cfgex", "Sets parameters for the generation of control flow graphs")
         +padOpt("jb", "Creates a JimpleBody for each method")
         +padVal("jb.ls", "Local splitter: one local per DU-UD web")
         +padVal("jb.a", "Aggregator: removes some unnecessary copies")
@@ -1023,13 +1092,6 @@ public class Options extends OptionsBase {
     }
 
     public String getPhaseHelp( String phaseName ) {
-    
-        if( phaseName.equals( "cfgex" ) )
-            return "Phase "+phaseName+":\n"+
-                "\nCFG/Exceptions Control is not a phase, per se, but a place to \ncollect options that control the analysis of exceptional control \nflow, the generation of control flow graphs, and the use of \ncontrol flow graphs. These graphs are constructed and used by \nmany phases of Soot."
-                +"\n\nRecognized options (with default values):\n"
-                +padOpt( "enabled (false)", "" )
-                +padOpt( "show-exceptions (true)", "" );
     
         if( phaseName.equals( "jb" ) )
             return "Phase "+phaseName+":\n"+
@@ -1678,11 +1740,6 @@ public class Options extends OptionsBase {
   
     public static String getDeclaredOptionsForPhase( String phaseName ) {
     
-        if( phaseName.equals( "cfgex" ) )
-            return ""
-                +"enabled "
-                +"show-exceptions ";
-    
         if( phaseName.equals( "jb" ) )
             return ""
                 +"enabled "
@@ -2103,11 +2160,6 @@ public class Options extends OptionsBase {
     }
 
     public static String getDefaultOptionsForPhase( String phaseName ) {
-    
-        if( phaseName.equals( "cfgex" ) )
-            return ""
-              +"enabled:false "
-              +"show-exceptions:true ";
     
         if( phaseName.equals( "jb" ) )
             return ""
@@ -2530,7 +2582,6 @@ public class Options extends OptionsBase {
   
     public void warnForeignPhase( String phaseName ) {
     
-        if( phaseName.equals( "cfgex" ) ) return;
         if( phaseName.equals( "jb" ) ) return;
         if( phaseName.equals( "jb.ls" ) ) return;
         if( phaseName.equals( "jb.a" ) ) return;
@@ -2611,8 +2662,6 @@ public class Options extends OptionsBase {
 
     public void warnNonexistentPhase() {
     
-        if( !PackManager.v().hasPhase( "cfgex" ) )
-            G.v().out.println( "Warning: Options exist for non-existent phase cfgex" );
         if( !PackManager.v().hasPhase( "jb" ) )
             G.v().out.println( "Warning: Options exist for non-existent phase jb" );
         if( !PackManager.v().hasPhase( "jb.ls" ) )

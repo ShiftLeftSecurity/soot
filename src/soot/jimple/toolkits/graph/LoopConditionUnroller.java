@@ -81,7 +81,7 @@ public class LoopConditionUnroller extends BodyTransformer {
     while (headIter.hasNext())
       unrollConditions((Block)headIter.next());
 
-    UnitGraph cug = new CompleteUnitGraph(body);
+    UnitGraph cug = new PrunedUnitGraph(body);
 
     if(Options.v().verbose())
       G.v().out.println("[" + body.getMethod().getName() +
