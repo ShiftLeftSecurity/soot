@@ -18,7 +18,7 @@
  */
 
 /*
- * Modified by the Sable Research Group and others 1997-2003.  
+ * Modified by the Sable Research Group and others 1997-2004.  
  * See the 'credits' file distributed with Soot for the complete list of
  * contributors.  (Soot is distributed at http://www.sable.mcgill.ca/soot)
  */
@@ -51,7 +51,7 @@ import soot.toolkits.exceptions.PedanticThrowAnalysis;
  *  middle of the region protected by a {@link Trap} this 
  *  implementation of <code>CompleteUnitGraph</code> will include
  *  edges from those branching {@link Unit}s to the {@link Trap}'s
- *  handler (since they are predecessors of an instruction which may
+ *  handler (since the branches are predecessors of an instruction which may
  *  throw an exception caught by the {@link Trap}.  The 2.0.1
  *  implementation of {@link CompleteUnitGraph} mistakenly omitted
  *  these edges.

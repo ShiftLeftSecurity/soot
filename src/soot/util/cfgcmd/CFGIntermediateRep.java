@@ -40,8 +40,9 @@ public abstract class CFGIntermediateRep extends CFGOptionMatcher.CFGOption {
   }
 
   /**
-   * Converts a {@link JimpleBody} into the corresponding {@link Body}
-   * in this intermediate representation. 
+   * Converts a {@link soot.jimple.JimpleBody JimpleBody} into the
+   * corresponding {@link soot.Body Body} in this intermediate
+   * representation.
    *
    * @param b The Jimple body to be represented.
    *

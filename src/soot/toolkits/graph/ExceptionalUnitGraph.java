@@ -18,7 +18,7 @@
  */
 
 /*
- * Modified by the Sable Research Group and others 1997-2003.  
+ * Modified by the Sable Research Group and others 1997-2004.  
  * See the 'credits' file distributed with Soot for the complete list of
  * contributors.  (Soot is distributed at http://www.sable.mcgill.ca/soot)
  */
@@ -58,12 +58,16 @@ import soot.jimple.NewExpr;
  *  may throw an exception that could be caught by a {@link Trap} in
  *  the <tt>Body</tt>, there will be an edge from each of the
  *  excepting <tt>Unit</tt>'s predecessors to the <tt>Trap</tt>
- *  handler <tt>Unit</tt> (since any of those predecessors may have
+ *  handler's first <tt>Unit</tt> (since any of those predecessors may have
  *  been the last <tt>Unit</tt> to complete execution before the
  *  handler). If the excepting <tt>Unit</tt> might have the side
  *  effect of changing some fields, then there will be an edge from
- *  the excepting </tt>Unit</tt> itself to its handlers, since the
- *  side effects might occur before the exception is raised.</p>
+ *  the excepting <tt>Unit</tt> itself to its handlers, since the
+ *  side effects might occur before the exception is raised. If the 
+ *  excepting <tt>Unit</tt> has no side effects, then parameters passed
+ *  to the <tt>ExceptionalUnitGraph</tt> constructor determine whether
+ *  or not there is an edge from the excepting <tt>Unit</tt> itself to
+ *  the handler <tt>Unit</tt>.</p>
  */
 public class ExceptionalUnitGraph extends UnitGraph
 {
@@ -89,33 +93,33 @@ public class ExceptionalUnitGraph extends UnitGraph
      *  @param body the <tt>Body</tt> from which to build a graph.
      *
      *  @param throwAnalysis the source of information about the exceptions
-     *                       which each <tt>Unit</tt>s may throw.
+     *                       which each {@link Unit} may throw.
      *
      *  @param alwaysAddEdgesFromExceptingUnits indicates whether the CFG
      *			     should always include edges to a handler
-     *			     from all trapped {@link Unit}s which may throw an
-     *			     exception which the handler catches.</p>
-     *
-     *			     <p>The CFG will contain edges to the
+     *			     from all trapped <tt>Unit</tt>s which may throw an
+     *			     exception which the handler catches.
+     *			     The CFG will contain edges to the
      *			     handler from all predecessors of the
-     *			     {@link Unit}s which may throw a caught
+     *			     <tt>Unit</tt>s which may throw a caught
      *			     exception regardless of the setting for
      *			     this parameter. If this parameter is
      *			     <code>true</code>, there will also be edges to the
      *			     handler from all the potentially
-     *			     excepting {@link Unit}s themselves. If
+     *			     excepting <tt>Unit</tt>s themselves. If
      *			     this parameter is <code>false</code>, there will be
-     *			     edges to the handler only * from the
-     *			     excepting {@link Unit}s themselves if *
-     *			     they have potential side effects.<p>
-     *
-     *			     <p>A setting of <code>false</code> will produce
+     *			     edges to the handler from the 
+     *			     excepting <tt>Unit</tt>s themselves only if 
+     *			     they have potential side effects (or if they 
+     *                       are also the predecessors of other potentially
+     *                       excepting <tt>Unit</tt>s).
+     *			     A setting of <code>false</code> produces
      *			     CFGs which allow for more precise analyses, since
-     *			     a {@link Unit} without side effects has no
+     *			     a <tt>Unit</tt> without side effects has no
      *			     effect on the computational state when it throws
      *			     an exception.  Use settings of <code>true</code>
      *			     for compatibility with more conservative analyses,
-     *			     or to cater to conservative bytecode verifiers.</p>
+     *			     or to cater to conservative bytecode verifiers.
      */
     public ExceptionalUnitGraph(Body body, ThrowAnalysis throwAnalysis,
 				boolean alwaysAddEdgesFromExceptingUnits) {
@@ -182,11 +186,15 @@ public class ExceptionalUnitGraph extends UnitGraph
 
     /**
      *  Constructs the graph from a given Body instance.
+     *  This constructor variant uses a default value for the 
+     *  <code>alwaysAddEdgesFromExceptingUnits</code> parameter provided
+     *  by the {@link Options} class.
      *
-     *  @param body the <tt>Body</tt> from which to build a graph.
+     *  @param body the {@link Body} from which to build a graph.
      *
      *  @param throwAnalysis the source of information about the exceptions
-     *                       which each <tt>Unit</tt>s may throw.
+     *                       which each {@link Unit} may throw.
+     *
      */
     public ExceptionalUnitGraph(Body body, ThrowAnalysis throwAnalysis) {
 	this(body, throwAnalysis, Options.v().always_add_edges_from_excepting_units());
@@ -195,7 +203,10 @@ public class ExceptionalUnitGraph extends UnitGraph
     /**
      *  Constructs the graph from a given Body instance, using the
      *  {@link Scene}'s default {@link ThrowAnalysis} to estimate the
-     *  set of exceptions that each {@link Unit} might throw.
+     *  set of exceptions that each {@link Unit} might throw and a
+     *  default value for the 
+     *  <code>alwaysAddEdgesFromExceptingUnits</code> parameter provided
+     *  by the {@link Options} class.
      *
      *  @param body the <tt>Body</tt> from which to build a graph.
      *
@@ -207,7 +218,7 @@ public class ExceptionalUnitGraph extends UnitGraph
 
 
     /**
-     * Utility method used in the construction of <tt>UnitGraph</tt>s
+     * Utility method used in the construction of {@link UnitGraph}
      * variants which include exceptional control flow. It determines
      * the possible exceptions which each <tt>Unit</tt> might throw
      * and the set of traps which might catch those exceptions.
@@ -215,10 +226,10 @@ public class ExceptionalUnitGraph extends UnitGraph
      * @param throwAnalysis The source of information about which
      *			    exceptions each <tt>Unit</tt> may throw.
      *
-     * @return A {@link Map} from {@link Unit}s to {@link Collection}s of
+     * @return A {@link Map} from <tt>Unit</tt>s to {@link Collection}s of
      *         {@link ExceptionDest}s. Each <tt>ExceptionDest</tt> associated
      *         with a <tt>Unit</tt> includes a {@link ThrowableSet} specifying 
-     *         exceptions that the <tt>Unit></tt> might throw and a
+     *         exceptions that the <tt>Unit</tt> might throw and a
      *         {@link Trap} specifying the handler which catches those exceptions
      *         (if the <tt>Trap</tt> is <tt>null</tt>, those exceptions 
      *         escape the method without being caught).
@@ -406,23 +417,23 @@ public class ExceptionalUnitGraph extends UnitGraph
      * Method to compute the edges corresponding to exceptional
      * control flow.
      *
-     * @param unitToDests A {@link Map} from {@link Unit}s to 
-     *                    {@link Collection}s of {@link ExceptionDest}s
+     * @param unitToDests A <tt>Map</tt> from {@link Unit}s to 
+     *                    {@link Collection}s of {@link ExceptionalUnitGraph.ExceptionDest ExceptionDest}s
      *                    which represent the handlers that might catch
      *                    exceptions thrown by the <tt>Unit</tt>. This is
      *                    an ``in parameter''.
      *
-     * @param unitToSuccs A {@link Map} from {@link Unit}s to 
-     *                    {@link List}s of {@link Unit}s. This is * an
+     * @param unitToSuccs A <tt>Map</tt> from <tt>Unit</tt>s to 
+     *                    {@link List}s of <tt>Unit</tt>s. This is an
      *                    ``out parameter'';
      *                    <tt>buildExceptionalEdges</tt> will add a
      *                    mapping from every <tt>Unit</tt> in the body
      *                    that may throw an exception that could be
-     *                    caught by a <tt>Trap</tt> in the body to a
+     *                    caught by a {@link Trap} in the body to a
      *                    list of its exceptional successors.
      *
-     * @param unitToPreds A {@link Map} from {@link Unit}s to 
-     *                    {@link List}s of {@link Unit}s. This is an
+     * @param unitToPreds A <tt>Map</tt> from <tt>Unit</tt>s to 
+     *                    <tt>List</tt>s of <tt>Unit</tt>s. This is an
      *                    ``out parameter'';
      *                    <tt>buildExceptionalEdges</tt> will add a
      *                    mapping from each handler unit that may
@@ -434,12 +445,12 @@ public class ExceptionalUnitGraph extends UnitGraph
      *			  lack side effects
      *
      * @return a {@link Set} of trap <tt>Unit</tt>s that might catch 
-     *         exceptions thrown by the first <tt>Unit</tt> in this
-     *         <tt>Body</tt>'s unit chain. Such trap <tt>Unit</tt>s
-     *         may need to be added to the list of heads (depending on 
-     *         your definition of heads), since they can be the first
-     *         <tt>Unit</tt> in the <tt>Body</tt> which actually completes
-     *	       execution.
+     *         exceptions thrown by the first <tt>Unit</tt> in the {@link Body}
+     *         associated with the graph being constructed. 
+     *         Such trap <tt>Unit</tt>s may need to be added to the
+     *         list of heads (depending on your definition of heads),
+     *         since they can be the first <tt>Unit</tt> in the
+     *         <tt>Body</tt> which actually completes execution.
      */
     protected Set buildExceptionalEdges(Map unitToDests, 
 					Map unitToSuccs, Map unitToPreds,
@@ -623,12 +634,12 @@ public class ExceptionalUnitGraph extends UnitGraph
 
     /**
      * Utility method for checking if a Unit might throw an exception which
-     * may be caught by a Trap within this method.  
+     * may be caught by a {@link Trap} within this method.  
      *
      * @param u     The unit for whose exceptions are to be checked
      *
      * @return whether or not <code>u</code> may throw an exception which may be
-     *              caught by a {@link Trap} in this method,
+     *              caught by a <tt>Trap</tt> in this method,
      */
     private boolean mightThrowToIntraproceduralCatcher(Unit u) {
 	Collection dests = getExceptionDests(u);
@@ -688,12 +699,14 @@ public class ExceptionalUnitGraph extends UnitGraph
 
 
     /**
-     * Returns a collection of {@link ExceptionDest} objects which represent
-     * how exceptions thrown by a specified unit will be handled.
+     * Returns a collection of 
+     * {@link * ExceptionalUnitGraph.ExceptionDest ExceptionDest}
+     * objects which represent how exceptions thrown by a specified
+     * unit will be handled.
      *
      * @param u The unit for which to provide exception information.
      *
-     * @return a collection of {@link ExceptionDest} objects describing
+     * @return a collection of <tt>ExceptionDest</tt> objects describing
      *	       the traps, if any, which catch the exceptions
      *	       which may be thrown by <CODE>u</CODE>.
      */
@@ -719,8 +732,8 @@ public class ExceptionalUnitGraph extends UnitGraph
      * which may be thrown by a given {@link Unit}.</p>
      *
      * <p>Note that these ``destinations'' are different from the
-     * edges in the CFG proper which are returned by {@link
-     * getSuccsOf} and {@link getPredsOf()}. An edge from
+     * edges in the CFG proper which are returned by 
+     * <tt>getSuccsOf()</tt> and <tt>getPredsOf()</tt>. An edge from
      * <CODE>a</CODE> to <CODE>b</CODE>) in the CFG represents the
      * fact that after unit <CODE>a</CODE> executes (perhaps only
      * partially, if it throws an exception after possibly producing a
@@ -755,7 +768,7 @@ public class ExceptionalUnitGraph extends UnitGraph
 	 * Returns the exceptions thrown to this destination.
 	 *
 	 * @return a {@link ThrowableSet} representing
-	 * the exceptions which may be caught by this {@link ExceptionDest}'s 
+	 * the exceptions which may be caught by this {@link ExceptionalUnitGraph.ExceptionDest ExceptionDest}'s 
 	 * trap.
 	 */
 	public ThrowableSet throwables() {

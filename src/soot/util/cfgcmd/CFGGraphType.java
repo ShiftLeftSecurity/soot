@@ -61,9 +61,10 @@ public abstract class CFGGraphType extends CFGOptionMatcher.CFGOption {
   public abstract DirectedGraph buildGraph(Body b);
 
   /**
-   * Method that will draw a {@link DotGraph} representation of the 
-   * control flow in this type of graph.  This method is intended 
-   * for use within {@link CFGViewer}.
+   * Method that will draw a {@link soot.util.dot.DotGraph DotGraph}
+   * representation of the control flow in this type of graph.  This
+   * method is intended for use within {@link soot.tools.CFGViewer
+   * CFGViewer}.
    *
    * @param drawer The {@link CFGToDotGraph} object that will draw the
    * graph.
