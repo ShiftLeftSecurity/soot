@@ -1036,4 +1036,10 @@ public class Singletons {
         return instancePedanticThrowAnalysis;
     }
 
+    private TrapTightener instanceTrapTightener;
+    public TrapTightener TrapTightener() {
+        if( instanceTrapTightener == null ) instanceTrapTightener = new TrapTightener( g );
+        return instanceTrapTightener;
+    }
+
 }

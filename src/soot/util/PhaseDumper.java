@@ -30,18 +30,20 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collections;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.StringTokenizer;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
 import soot.Body;
 import soot.G;
-import soot.options.Options;
+import soot.PhaseOptions;
 import soot.Printer;
 import soot.Scene;
 import soot.Singletons;
 import soot.SootClass;
 import soot.SootMethod;
+import soot.options.Options;
 import soot.options.PhaseDumperOptions;
 import soot.toolkits.graph.CompleteUnitGraph;
 import soot.toolkits.graph.DirectedGraph;
@@ -379,7 +381,11 @@ public class PhaseDumper {
 		String outputFile = nextGraphFileName(g.getBody(), 
 						      phaseName + "-" + 
 						      getClassIdent(g) + "-");
-		DotGraph dotGraph = new CFGToDotGraph().drawCFG(g);
+		Map cfgOptions = G.v().PhaseOptions().getPhaseOptions("cfgex");
+		CFGToDotGraph drawer = new CFGToDotGraph();
+		drawer.setShowExceptions(PhaseOptions.getBoolean(cfgOptions, 
+								 "show-exceptions"));
+		DotGraph dotGraph = drawer.drawCFG(g);
 		dotGraph.plot(outputFile);
 
 	    } catch (java.io.IOException e) {

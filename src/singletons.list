@@ -156,3 +156,4 @@ AltClassLoader
 ThrowableSet.Manager
 UnitThrowAnalysis
 PedanticThrowAnalysis
+TrapTightener

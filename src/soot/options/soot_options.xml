@@ -527,7 +527,6 @@ different parts of Soot. See <var>Soot phase options</var> for
 details about the available phases and options.</p>
 </long_desc>
 
-<!--
       <phase>
         <name>CFG/Exceptions Control</name>
         <alias>cfgex</alias>
@@ -541,8 +540,28 @@ flow, the generation of control flow graphs, and the use of
 control flow graphs. These graphs are
 constructed and used by many phases of Soot.</p>
 </long_desc>
--->
-
+	<boolopt>
+	  <name>Enabled</name>
+	  <alias>enabled</alias>
+	  <default>false</default>
+	  <short_desc/>
+	  <long_desc>
+``Enabling'' CFG/Exceptions has no effect, since it is not really
+a phase.
+</long_desc>
+	</boolopt>
+	<boolopt>
+	  <name>Show Exceptions in dumped CFGs</name>
+	  <alias>show-exceptions</alias>
+	  <default>true</default>
+	  <short_desc/>
+	  <long_desc>
+Indicate whether to include exception destination edges as
+well as control flow edges in
+dumped CompleteUnitGraphs.
+</long_desc>
+	</boolopt>
+</phase>
 			<phase>
 				<name>Jimple Body Creation</name>
 				<alias>jb</alias>
@@ -862,6 +881,25 @@ traps whose catch blocks are empty.
 Remove exception table entries when none of the protected instructions can
 throw the exception being caught.
 </long_desc>
+					</boolopt>
+				</sub_phase>
+				<sub_phase>
+					<name>Trap Tightener</name>
+					<alias>jb.tt</alias>
+					<short_desc>Trap Tightener</short_desc>
+					<long_desc>
+The Trap Tightener changes the area protected by each exception handler,
+so that it begins with the first instruction in the old protected
+area which is actually capable of throwing the exception caught by the
+handler, and ends just after the last instruction in the old
+protected area which can throw an exception caught by the
+handler.  This reduces the chance of producing unverifiable code
+as a byproduct of pruning exceptional control flow within CFGs.
+</long_desc>
+					<boolopt>
+						<name>Enabled</name>
+						<alias>enabled</alias>
+                                                <default>true</default>
 					</boolopt>
 				</sub_phase>
 			</phase>

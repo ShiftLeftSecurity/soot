@@ -64,6 +64,7 @@ public class PackManager {
         // Jimple body creation
         addPack(p = new JimpleBodyPack());
         {
+            p.add(new Transform("jb.tt", soot.exceptions.TrapTightener.v()));
             p.add(new Transform("jb.ls", LocalSplitter.v()));
             p.add(new Transform("jb.a", Aggregator.v()));
             p.add(new Transform("jb.ule", UnusedLocalEliminator.v()));
@@ -110,6 +111,10 @@ public class PackManager {
         {
             p.add(new Transform("wjap.ra", RectangularArrayFinder.v()));
         }
+
+	// CFG control "pack" (not really a phase, just a place to collect
+	// options).
+	addPack(p = new BodyPack("cfgex"));
 
         // Shimple pack
         addPack(p = new BodyPack(Shimple.PHASE));

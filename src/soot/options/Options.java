@@ -917,6 +917,7 @@ public class Options extends OptionsBase {
     public String getPhaseList() {
         return ""
     
+        +padOpt("cfgex", "Sets parameters for the generation of control flow graphs")
         +padOpt("jb", "Creates a JimpleBody for each method")
         +padVal("jb.ls", "Local splitter: one local per DU-UD web")
         +padVal("jb.a", "Aggregator: removes some unnecessary copies")
@@ -930,6 +931,7 @@ public class Options extends OptionsBase {
         +padVal("jb.lp", "Local packer: minimizes number of locals")
         +padVal("jb.ne", "Nop eliminator")
         +padVal("jb.uce", "Unreachable code eliminator")
+        +padVal("jb.tt", "Trap Tightener")
         +padOpt("cg", "Call graph constructor")
         +padVal("cg.cha", "Builds call graph using Class Hierarchy Analysis")
         +padVal("cg.spark", "Spark points-to analysis framework")
@@ -987,6 +989,13 @@ public class Options extends OptionsBase {
     }
 
     public String getPhaseHelp( String phaseName ) {
+    
+        if( phaseName.equals( "cfgex" ) )
+            return "Phase "+phaseName+":\n"+
+                "\nCFG/Exceptions Control is not a phase, per se, but a place to \ncollect options that control the analysis of exceptional control \nflow, the generation of control flow graphs, and the use of \ncontrol flow graphs. These graphs are constructed and used by \nmany phases of Soot."
+                +"\n\nRecognized options (with default values):\n"
+                +padOpt( "enabled (false)", "" )
+                +padOpt( "show-exceptions (true)", "" );
     
         if( phaseName.equals( "jb" ) )
             return "Phase "+phaseName+":\n"+
@@ -1074,6 +1083,12 @@ public class Options extends OptionsBase {
                 +"\n\nRecognized options (with default values):\n"
                 +padOpt( "enabled (true)", "" )
                 +padOpt( "remove-unreachable-traps (false)", "" );
+    
+        if( phaseName.equals( "jb.tt" ) )
+            return "Phase "+phaseName+":\n"+
+                "\nThe Trap Tightener changes the area protected by each exception \nhandler, so that it begins with the first instruction in the old \nprotected area which is actually capable of throwing the \nexception caught by the handler, and ends just after the last \ninstruction in the old protected area which can throw an \nexception caught by the handler. This reduces the chance of \nproducing unverifiable code as a byproduct of pruning \nexceptional control flow within CFGs. "
+                +"\n\nRecognized options (with default values):\n"
+                +padOpt( "enabled (true)", "" );
     
         if( phaseName.equals( "cg" ) )
             return "Phase "+phaseName+":\n"+
@@ -1581,6 +1596,11 @@ public class Options extends OptionsBase {
   
     public static String getDeclaredOptionsForPhase( String phaseName ) {
     
+        if( phaseName.equals( "cfgex" ) )
+            return ""
+                +"enabled "
+                +"show-exceptions ";
+    
         if( phaseName.equals( "jb" ) )
             return ""
                 +"enabled "
@@ -1641,6 +1661,10 @@ public class Options extends OptionsBase {
             return ""
                 +"enabled "
                 +"remove-unreachable-traps ";
+    
+        if( phaseName.equals( "jb.tt" ) )
+            return ""
+                +"enabled ";
     
         if( phaseName.equals( "cg" ) )
             return ""
@@ -1970,6 +1994,11 @@ public class Options extends OptionsBase {
 
     public static String getDefaultOptionsForPhase( String phaseName ) {
     
+        if( phaseName.equals( "cfgex" ) )
+            return ""
+              +"enabled:false "
+              +"show-exceptions:true ";
+    
         if( phaseName.equals( "jb" ) )
             return ""
               +"enabled:true "
@@ -2030,6 +2059,10 @@ public class Options extends OptionsBase {
             return ""
               +"enabled:true "
               +"remove-unreachable-traps:false ";
+    
+        if( phaseName.equals( "jb.tt" ) )
+            return ""
+              +"enabled:true ";
     
         if( phaseName.equals( "cg" ) )
             return ""
@@ -2359,6 +2392,7 @@ public class Options extends OptionsBase {
   
     public void warnForeignPhase( String phaseName ) {
     
+        if( phaseName.equals( "cfgex" ) ) return;
         if( phaseName.equals( "jb" ) ) return;
         if( phaseName.equals( "jb.ls" ) ) return;
         if( phaseName.equals( "jb.a" ) ) return;
@@ -2372,6 +2406,7 @@ public class Options extends OptionsBase {
         if( phaseName.equals( "jb.lp" ) ) return;
         if( phaseName.equals( "jb.ne" ) ) return;
         if( phaseName.equals( "jb.uce" ) ) return;
+        if( phaseName.equals( "jb.tt" ) ) return;
         if( phaseName.equals( "cg" ) ) return;
         if( phaseName.equals( "cg.cha" ) ) return;
         if( phaseName.equals( "cg.spark" ) ) return;
@@ -2431,6 +2466,8 @@ public class Options extends OptionsBase {
 
     public void warnNonexistentPhase() {
     
+        if( !PackManager.v().hasPhase( "cfgex" ) )
+            G.v().out.println( "Warning: Options exist for non-existent phase cfgex" );
         if( !PackManager.v().hasPhase( "jb" ) )
             G.v().out.println( "Warning: Options exist for non-existent phase jb" );
         if( !PackManager.v().hasPhase( "jb.ls" ) )
@@ -2457,6 +2494,8 @@ public class Options extends OptionsBase {
             G.v().out.println( "Warning: Options exist for non-existent phase jb.ne" );
         if( !PackManager.v().hasPhase( "jb.uce" ) )
             G.v().out.println( "Warning: Options exist for non-existent phase jb.uce" );
+        if( !PackManager.v().hasPhase( "jb.tt" ) )
+            G.v().out.println( "Warning: Options exist for non-existent phase jb.tt" );
         if( !PackManager.v().hasPhase( "cg" ) )
             G.v().out.println( "Warning: Options exist for non-existent phase cg" );
         if( !PackManager.v().hasPhase( "cg.cha" ) )
