@@ -49,6 +49,9 @@ import soot.util.Chain;
      */
 public abstract class BlockGraph implements DirectedGraph 
 {
+    protected boolean DEBUG = true; // Controls whether subclass
+				    // constructors dump a representation
+				    // of the graph they build.
     Body mBody;
     Chain mUnits;
     List mBlocks;
@@ -203,8 +206,30 @@ public abstract class BlockGraph implements DirectedGraph
 	    addBlock(blockHead, blockTail, indexInMethod, blockLength, 
 		     blockList, unitToBlock);
 	}
+
+	// The underlying UnitGraph defines heads and tails.
+	for (Iterator it = unitGraph.getHeads().iterator(); it.hasNext(); ) {
+	    Unit headUnit = (Unit) it.next();
+	    Block headBlock = (Block) unitToBlock.get(headUnit);
+	    if (headBlock.getHead() == headUnit) {
+		mHeads.add(headBlock);
+	    } else {
+		throw new RuntimeException("BlockGraph(): head Unit is not the first unit in the corresponding Block!");
+	    }
+	}
+	for (Iterator it = unitGraph.getTails().iterator(); it.hasNext(); ) {
+	    Unit tailUnit = (Unit) it.next();
+	    Block tailBlock = (Block) unitToBlock.get(tailUnit);
+	    if (tailBlock.getTail() == tailUnit) {
+		mTails.add(tailBlock);
+	    } else {
+		throw new RuntimeException("BlockGraph(): tail Unit is not the last unit in the corresponding Block!");
+	    }
+	}
+	
 	for (Iterator blockIt = blockList.iterator(); blockIt.hasNext(); ) {
 	    Block block = (Block) blockIt.next();
+
 	    List predUnits = unitGraph.getPredsOf(block.getHead());
 	    List predBlocks = new ArrayList(predUnits.size());
 	    for (Iterator predIt = predUnits.iterator(); predIt.hasNext(); ) {
@@ -215,9 +240,21 @@ public abstract class BlockGraph implements DirectedGraph
 		}
 		predBlocks.add(predBlock);
 	    }
+
 	    if (predBlocks.size() == 0) {
 		block.setPreds(Collections.EMPTY_LIST);
-		mHeads.add(block);
+
+		// If the UnreachableCodeEliminator is not eliminating
+		// unreachable handlers, then they will have no
+		// predecessors, yet not be heads.
+		/* if (! mHeads.contains(block)) {
+		    throw new RuntimeException("Block with no predecessors is not a head!");
+
+		    // Note that a block can be a head even if it has
+		    // predecessors: a handler that might catch an exception
+		    // thrown by the first Unit in the method.
+		} 
+		*/
 	    } else {
 		block.setPreds(Collections.unmodifiableList(predBlocks));
 		if (block.getHead() == mUnits.getFirst()) {
@@ -238,7 +275,11 @@ public abstract class BlockGraph implements DirectedGraph
 	    }
 	    if (succBlocks.size() == 0) {
 		block.setSuccs(Collections.EMPTY_LIST);
-		mTails.add(block);
+		if (! mTails.contains(block)) {
+		    throw new RuntimeException("Block with no successors is not a tail!: " + block.toString());
+		    // Note that a block can be a tail even if it has
+		    // successors: a return that throws a caught exception.
+		}
 	    } else {
 		block.setSuccs(Collections.unmodifiableList(succBlocks));
 	    }
