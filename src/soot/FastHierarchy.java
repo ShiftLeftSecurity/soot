@@ -89,9 +89,16 @@ public class FastHierarchy
         r.lower = start++;
         Iterator it = classToSubclasses.get( c ).iterator();
         while( it.hasNext() ) {
-            start = dfsVisit( start, (SootClass) it.next() );
+	    SootClass sc = (SootClass) it.next();
+	    // For some awful reason, Soot thinks interface are subclasses
+	    // of java.lang.Object
+	    if( sc.isInterface() ) continue;
+            start = dfsVisit( start, sc );
         }
         r.upper = start++;
+	if( c.isInterface() ) {
+	    throw new RuntimeException( "Attempt to dfs visit interface "+c );
+	}
         classToInterval.put( c, r );
         return start;
     }
@@ -105,7 +112,7 @@ public class FastHierarchy
 	/* First build the inverse maps. */
 	for( Iterator it = sc.getClasses().iterator(); it.hasNext(); ) {
 	    SootClass cl = (SootClass) it.next();
-	    if( cl.hasSuperclass() ) {
+	    if( !cl.isInterface() && cl.hasSuperclass() ) {
 		classToSubclasses.put( cl.getSuperclass(), cl );
 	    }
 	    for( Iterator ifs = cl.getInterfaces().iterator(); ifs.hasNext(); ) {
@@ -254,6 +261,48 @@ public class FastHierarchy
 	}
     }
 
+    public Collection resolveConcreteDispatch(Collection concreteTypes, SootMethod m ) {
+
+	Set ret = new HashSet();
+	SootClass declaringClass = m.getDeclaringClass();
+	for( Iterator it = concreteTypes.iterator(); it.hasNext(); ) {
+	    Type t = (Type) it.next();
+	    if( t instanceof NullType ) {
+		String methodSig = m.getSubSignature();
+		HashSet s = new HashSet();
+		s.add( declaringClass );
+		while( !s.isEmpty() ) {
+		    SootClass c = (SootClass) s.iterator().next();
+		    s.remove( c );
+		    if( c.declaresMethod( methodSig ) ) {
+			ret.add( c.getMethod( methodSig ) );
+		    }
+		    if( classToSubclasses.containsKey( c ) ) {
+			s.addAll( classToSubclasses.get( c ) );
+		    }
+		}
+		return ret;
+	    } else if( t instanceof RefType ) {
+		RefType concreteType = (RefType) t;
+		SootClass concreteClass = concreteType.getSootClass();
+		if( !canStoreClass( concreteClass, declaringClass ) ) {
+		    continue;
+		}
+		SootMethod concreteM = resolveConcreteDispatch( concreteClass, m );
+		if( concreteM != null ) {
+		    ret.add( concreteM );
+		}
+	    } else if( t instanceof ArrayType ) {
+		SootMethod concreteM = resolveConcreteDispatch( 
+			RefType.v( "java.lang.Object" ).getSootClass(), m );
+		if( concreteM != null ) {
+		    ret.add( concreteM );
+		}
+	    } else throw new RuntimeException( "Unrecognized reaching type "+t );
+	}
+	return ret;
+    }
+
     // Questions about method invocation.
 
     /** Given an object of actual type C (o = new C()), returns the method which will be called
@@ -274,7 +323,7 @@ public class FastHierarchy
 	    }
 	    concreteType = concreteType.getSuperclass();
         }
-        throw new RuntimeException("could not resolve concrete dispatch!\nType: "+concreteType+"\nMethod: "+m);
+	return null;
     }
 
     /** Returns the target for the given SpecialInvokeExpr. */

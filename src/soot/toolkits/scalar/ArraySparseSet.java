@@ -162,7 +162,7 @@ public class ArraySparseSet implements FlowSet
             System.arraycopy(elements, index + 1, elements, index, numElements - (index + 1));
             numElements--;
       */
-      elements[index] = elements[--numElements];
+      elements[index] = elements[numElements--];
     }
     
     public void union(FlowSet otherFlow, FlowSet destFlow)
