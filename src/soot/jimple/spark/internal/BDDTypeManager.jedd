@@ -22,11 +22,11 @@ import soot.jimple.spark.*;
 import soot.jimple.spark.pag.*;
 import soot.*;
 import soot.util.*;
-import java.util.Iterator;
 import soot.util.queue.*;
 import soot.Type;
 import soot.options.SparkOptions;
 import soot.jimple.spark.bdddomains.*;
+import java.util.*;
 
 /** A map of bit-vectors representing subtype relationships.
  * @author Ondrej Lhotak
@@ -42,6 +42,8 @@ public final class BDDTypeManager extends AbstractTypeManager {
         varNodeType = 0B;
         allocNodeType = 0B;
         typeSubtype = 0B;
+        seenVTypes = new HashSet();
+        seenATypes = new HashSet();
     }
     final public void makeTypeMask() {
         if( fh == null ) {
@@ -58,24 +60,52 @@ public final class BDDTypeManager extends AbstractTypeManager {
     int lastVarNode = 0;
     private void update() {
         if( fh == null ) return;
-        System.out.println( "called update" );
 
         ArrayNumberer anNumb = pag.getAllocNodeNumberer();
         ArrayNumberer vnNumb = pag.getVarNodeNumberer();
+
+        HashSet newSeenVTypes = new HashSet();
+        HashSet newSeenATypes = new HashSet();
+
         for( int j = lastAllocNode+1; j <= anNumb.size(); j++ ) {
             AllocNode an = (AllocNode) anNumb.get(j);
-            newAnType |= new { an => obj, an.getType() => type };
-            for( int i = 1; i <= vnNumb.size(); i++ ) {
-                updatePair( (VarNode) vnNumb.get( i ), an );
-            }
+            Type antype = an.getType();
+            newAnType |= new { an => obj, antype => type };
+            if( !seenATypes.contains( antype ) ) newSeenATypes.add( antype );
         }
+
         for( int i = lastVarNode+1; i <= vnNumb.size(); i++ ) {
             VarNode vn = (VarNode) vnNumb.get(i);
-            newVnType |= new { vn => var, vn.getType() => type };
-            for( int j = 1; j <= lastAllocNode; j++ ) {
-                updatePair( vn, (AllocNode) anNumb.get( j ) );
+            Type vntype = vn.getType();
+            newVnType |= new { vn => var, vntype => type };
+            if( !seenVTypes.contains( vntype ) ) newSeenVTypes.add( vntype );
+        }
+
+        seenATypes.addAll( newSeenATypes );
+
+        for( Iterator antypeIt = seenATypes.iterator(); antypeIt.hasNext(); ) {
+
+            final Type antype = (Type) antypeIt.next();
+            for( Iterator vntypeIt = newSeenVTypes.iterator(); vntypeIt.hasNext(); ) {
+                final Type vntype = (Type) vntypeIt.next();
+                if( castNeverFails( antype, vntype ) ) {
+                    typeSubtype |= new { antype => subt, vntype => supt };
+                }
             }
         }
+
+        for( Iterator antypeIt = newSeenATypes.iterator(); antypeIt.hasNext(); ) {
+
+            final Type antype = (Type) antypeIt.next();
+            for( Iterator vntypeIt = seenVTypes.iterator(); vntypeIt.hasNext(); ) {
+                final Type vntype = (Type) vntypeIt.next();
+                if( castNeverFails( antype, vntype ) ) {
+                    typeSubtype |= new { antype => subt, vntype => supt };
+                }
+            }
+        }
+
+        seenVTypes.addAll( newSeenVTypes );
 
         varNodeType |= newVnType;
         allocNodeType |= newAnType;
@@ -101,26 +131,14 @@ public final class BDDTypeManager extends AbstractTypeManager {
         tmp2 = 0B;
     }
 
-    private void updatePair( VarNode vn, AllocNode an ) {
-        Type vtype = vn.getType();
-        Type atype = an.getType();
-
-        <atp, dtp> pair = new { atype => atp, vtype => dtp };
-        if( seenPairs != (seenPairs |= pair) ) {
-            // never seen this pair of types before
-            if( castNeverFails( atype, vtype ) ) {
-                typeSubtype |= (atp=>subt, dtp=>supt) pair;
-            }
-        }
-    }
-
     <subt:T1, supt:T2> typeSubtype;
     <var:V1, type:T1> varNodeType;
     <var:V1, type:T1> newVnType;
     <obj:H1, type:T1> allocNodeType;
     <obj:H1, type:T1> newAnType;
     <var:V1, obj:H1> typeMask;
-    <atp:T1, dtp:T2> seenPairs;
+    HashSet seenVTypes = new HashSet();
+    HashSet seenATypes = new HashSet();
 
 }
 

@@ -77,7 +77,7 @@ public class BDDPAG extends AbstractPAG {
         return new jedd.Relation(new jedd.Domain[] { dst.v() },
                                  new jedd.PhysicalDomain[] { V2.v() },
                                  jedd.Jedd.v().project(this.loads,
-                                                       new jedd.PhysicalDomain[] { V1.v(), FD.v() })).iterator();
+                                                       new jedd.PhysicalDomain[] { FD.v(), V1.v() })).iterator();
     }
     
     public boolean doAddSimpleEdge(VarNode from, VarNode to) {

@@ -4,11 +4,11 @@ import soot.jimple.spark.*;
 import soot.jimple.spark.pag.*;
 import soot.*;
 import soot.util.*;
-import java.util.Iterator;
 import soot.util.queue.*;
 import soot.Type;
 import soot.options.SparkOptions;
 import soot.jimple.spark.bdddomains.*;
+import java.util.*;
 
 public final class BDDTypeManager extends AbstractTypeManager {
     public BDDTypeManager(BDDPAG bddpag) { super(bddpag); }
@@ -20,6 +20,8 @@ public final class BDDTypeManager extends AbstractTypeManager {
         this.varNodeType.eq(jedd.Jedd.v().falseBDD());
         this.allocNodeType.eq(jedd.Jedd.v().falseBDD());
         this.typeSubtype.eq(jedd.Jedd.v().falseBDD());
+        this.seenVTypes = new HashSet();
+        this.seenATypes = new HashSet();
     }
     
     public final void makeTypeMask() {
@@ -38,23 +40,50 @@ public final class BDDTypeManager extends AbstractTypeManager {
     
     private void update() {
         if (this.fh == null) return;
-        System.out.println("called update");
         ArrayNumberer anNumb = this.pag.getAllocNodeNumberer();
         ArrayNumberer vnNumb = this.pag.getVarNodeNumberer();
+        HashSet newSeenVTypes = new HashSet();
+        HashSet newSeenATypes = new HashSet();
         for (int j = this.lastAllocNode + 1; j <= anNumb.size(); j++) {
             AllocNode an = (AllocNode) anNumb.get(j);
-            this.newAnType.eqUnion(jedd.Jedd.v().literal(new Object[] { an, an.getType() },
+            Type antype = an.getType();
+            this.newAnType.eqUnion(jedd.Jedd.v().literal(new Object[] { an, antype },
                                                          new jedd.Domain[] { obj.v(), type.v() },
                                                          new jedd.PhysicalDomain[] { H1.v(), T1.v() }));
-            for (int i = 1; i <= vnNumb.size(); i++) { this.updatePair((VarNode) vnNumb.get(i), an); }
+            if (!this.seenATypes.contains(antype)) newSeenATypes.add(antype);
         }
         for (int i = this.lastVarNode + 1; i <= vnNumb.size(); i++) {
             VarNode vn = (VarNode) vnNumb.get(i);
-            this.newVnType.eqUnion(jedd.Jedd.v().literal(new Object[] { vn, vn.getType() },
+            Type vntype = vn.getType();
+            this.newVnType.eqUnion(jedd.Jedd.v().literal(new Object[] { vn, vntype },
                                                          new jedd.Domain[] { var.v(), type.v() },
                                                          new jedd.PhysicalDomain[] { V1.v(), T1.v() }));
-            for (int j = 1; j <= this.lastAllocNode; j++) { this.updatePair(vn, (AllocNode) anNumb.get(j)); }
+            if (!this.seenVTypes.contains(vntype)) newSeenVTypes.add(vntype);
         }
+        this.seenATypes.addAll(newSeenATypes);
+        for (Iterator antypeIt = this.seenATypes.iterator(); antypeIt.hasNext(); ) {
+            final Type antype = (Type) antypeIt.next();
+            for (Iterator vntypeIt = newSeenVTypes.iterator(); vntypeIt.hasNext(); ) {
+                final Type vntype = (Type) vntypeIt.next();
+                if (this.castNeverFails(antype, vntype)) {
+                    this.typeSubtype.eqUnion(jedd.Jedd.v().literal(new Object[] { antype, vntype },
+                                                                   new jedd.Domain[] { subt.v(), supt.v() },
+                                                                   new jedd.PhysicalDomain[] { T1.v(), T2.v() }));
+                }
+            }
+        }
+        for (Iterator antypeIt = newSeenATypes.iterator(); antypeIt.hasNext(); ) {
+            final Type antype = (Type) antypeIt.next();
+            for (Iterator vntypeIt = this.seenVTypes.iterator(); vntypeIt.hasNext(); ) {
+                final Type vntype = (Type) vntypeIt.next();
+                if (this.castNeverFails(antype, vntype)) {
+                    this.typeSubtype.eqUnion(jedd.Jedd.v().literal(new Object[] { antype, vntype },
+                                                                   new jedd.Domain[] { subt.v(), supt.v() },
+                                                                   new jedd.PhysicalDomain[] { T1.v(), T2.v() }));
+                }
+            }
+        }
+        this.seenVTypes.addAll(newSeenVTypes);
         this.varNodeType.eqUnion(this.newVnType);
         this.allocNodeType.eqUnion(this.newAnType);
         final jedd.Relation tmp =
@@ -85,20 +114,6 @@ public final class BDDTypeManager extends AbstractTypeManager {
         tmp2.eq(jedd.Jedd.v().falseBDD());
     }
     
-    private void updatePair(VarNode vn, AllocNode an) {
-        Type vtype = vn.getType();
-        Type atype = an.getType();
-        final jedd.Relation pair =
-          new jedd.Relation(new jedd.Domain[] { atp.v(), dtp.v() },
-                            new jedd.PhysicalDomain[] { T1.v(), T2.v() },
-                            jedd.Jedd.v().literal(new Object[] { atype, vtype },
-                                                  new jedd.Domain[] { atp.v(), dtp.v() },
-                                                  new jedd.PhysicalDomain[] { T1.v(), T2.v() }));
-        if (!jedd.Jedd.v().equals(jedd.Jedd.v().read(this.seenPairs), this.seenPairs.eqUnion(pair))) {
-            if (this.castNeverFails(atype, vtype)) { this.typeSubtype.eqUnion(pair); }
-        }
-    }
-    
     final jedd.Relation typeSubtype =
       new jedd.Relation(new jedd.Domain[] { subt.v(), supt.v() }, new jedd.PhysicalDomain[] { T1.v(), T2.v() });
     
@@ -117,6 +132,7 @@ public final class BDDTypeManager extends AbstractTypeManager {
     final jedd.Relation typeMask =
       new jedd.Relation(new jedd.Domain[] { var.v(), obj.v() }, new jedd.PhysicalDomain[] { V1.v(), H1.v() });
     
-    final jedd.Relation seenPairs =
-      new jedd.Relation(new jedd.Domain[] { atp.v(), dtp.v() }, new jedd.PhysicalDomain[] { T1.v(), T2.v() });
+    HashSet seenVTypes = new HashSet();
+    
+    HashSet seenATypes = new HashSet();
 }

@@ -73,12 +73,10 @@ public final class BDDPropagator extends Propagator {
             }while(!jedd.Jedd.v().equals(jedd.Jedd.v().read(newPointsTo), jedd.Jedd.v().falseBDD())); 
             newPointsTo.eq(jedd.Jedd.v().minus(jedd.Jedd.v().read(this.pag.pointsTo), oldPointsTo));
             objectsBeingStored.eq(jedd.Jedd.v().replace(jedd.Jedd.v().relprod(jedd.Jedd.v().read(this.pag.stores),
-                                                                              jedd.Jedd.v().replace(newPointsTo,
-                                                                                                    new jedd.PhysicalDomain[] { H1.v() },
-                                                                                                    new jedd.PhysicalDomain[] { H2.v() }),
+                                                                              newPointsTo,
                                                                               new jedd.PhysicalDomain[] { V1.v() }),
-                                                        new jedd.PhysicalDomain[] { V2.v() },
-                                                        new jedd.PhysicalDomain[] { V1.v() }));
+                                                        new jedd.PhysicalDomain[] { V2.v(), H1.v() },
+                                                        new jedd.PhysicalDomain[] { V1.v(), H2.v() }));
             newStorePt.eq(jedd.Jedd.v().minus(jedd.Jedd.v().read(objectsBeingStored), oldStorePt));
             oldStorePt.eqUnion(newStorePt);
             newFieldPt.eq(jedd.Jedd.v().relprod(jedd.Jedd.v().read(oldStorePt),
