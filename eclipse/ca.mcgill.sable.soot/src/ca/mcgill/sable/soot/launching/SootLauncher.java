@@ -36,7 +36,7 @@ import ca.mcgill.sable.soot.attributes.AbstractAttributesComputer;
 import ca.mcgill.sable.soot.attributes.JavaAttributesComputer;
 import ca.mcgill.sable.soot.attributes.JimpleAttributesComputer;
 import ca.mcgill.sable.soot.attributes.SootAttributesJavaColorer;
-
+import ca.mcgill.sable.soot.editors.*;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.jdt.core.*;
 
@@ -201,9 +201,9 @@ public abstract class SootLauncher  implements IWorkbenchWindowActionDelegate {
 		// platform location 
 		//platform_location = Platform.getLocation().toOSString();
 		platform_location = getSootSelection().getJavaProject().getProject().getLocation().toOSString();
-		System.out.println("platform_location: "+platform_location);
+		//System.out.println("platform_location: "+platform_location);
 		platform_location = platform_location.substring(0, platform_location.lastIndexOf(System.getProperty("file.separator")));
-        System.out.println("platform_location: "+platform_location);
+        //System.out.println("platform_location: "+platform_location);
 		// external jars location - may need to change don't think I use this anymore
 		//external_jars_location = Platform.getLocation().removeLastSegments(2).toOSString();
 		setOutputLocation(platform_location+getFileHandler().getSootOutputFolder().getFullPath().toOSString());
@@ -216,16 +216,16 @@ public abstract class SootLauncher  implements IWorkbenchWindowActionDelegate {
 			IPackageFragmentRoot [] roots = getSootSelection().getJavaProject().getAllPackageFragmentRoots();
 			
 			for (int i = 0; i < roots.length; i++){
-				System.out.println("root: "+roots[i]);
-				System.out.println("root kind: "+roots[i].getKind());
-				System.out.println("root path: "+roots[i].getPath());
+				//System.out.println("root: "+roots[i]);
+				//System.out.println("root kind: "+roots[i].getKind());
+				//System.out.println("root path: "+roots[i].getPath());
 				
 				
 				if (roots[i].isArchive()){
 					if (roots[i].getResource() != null){
 					
-						System.out.println("resource: "+roots[i].getResource());
-						System.out.println("Jar File: "+platform_location+roots[i].getResource().getFullPath().toOSString());
+						//System.out.println("resource: "+roots[i].getResource());
+						//System.out.println("Jar File: "+platform_location+roots[i].getResource().getFullPath().toOSString());
 						setClasspathAppend(platform_location+roots[i].getPath().toOSString());
 
 					}
@@ -257,7 +257,18 @@ public abstract class SootLauncher  implements IWorkbenchWindowActionDelegate {
 		SootPlugin.getDefault().getManager().updateSootRanFlag();
 		//getDavaHandler().handleAfter();
 		//getFileHandler().handleFilesChanged();
-		IEditorPart activeEdPart = SootPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
+		final IEditorPart activeEdPart = SootPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
+		/*if ((activeEdPart != null) && (activeEdPart instanceof JimpleEditor)){
+            if (activeEdPart.getEditorInput() != null){
+                System.out.println("will update ed first");
+                    
+                activeEdPart.getSite().getShell().getDisplay().asyncExec(new Runnable(){
+                    public void run() {
+                        ((AbstractTextEditor)activeEdPart).setInput(activeEdPart.getEditorInput());
+                    };
+                });
+            }
+		}*/
 		SootPlugin.getDefault().getPartManager().updatePart(activeEdPart);
 	}
 	

@@ -136,10 +136,8 @@ Composite jbjb_neChild = jbjb_neCreate(getPageContainer());
 
 Composite jbjb_uceChild = jbjb_uceCreate(getPageContainer());
 
-<<<<<<< .working
 Composite jbjb_ttChild = jbjb_ttCreate(getPageContainer());
 
-=======
 Composite jjjj_lsChild = jjjj_lsCreate(getPageContainer());
 
 Composite jjjj_aChild = jjjj_aCreate(getPageContainer());
@@ -164,7 +162,6 @@ Composite jjjj_neChild = jjjj_neCreate(getPageContainer());
 
 Composite jjjj_uceChild = jjjj_uceCreate(getPageContainer());
 
->>>>>>> .merge-right.r1351
 Composite cgcg_chaChild = cgcg_chaCreate(getPageContainer());
 
 Composite cgcg_sparkChild = cgcg_sparkCreate(getPageContainer());
@@ -465,7 +462,6 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		
 		getjbjb_uceremove_unreachable_traps_widget().getButton().addSelectionListener(this);
 		
-<<<<<<< .working
 		
 		makeNewEnableGroup("jb", "jb.tt");
 		
@@ -475,7 +471,6 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		getjbjb_ttenabled_widget().getButton().addSelectionListener(this);
 		
 		
-=======
 		makeNewEnableGroup("jj");
 		
 		
@@ -614,7 +609,6 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		getjjjj_uceenabled_widget().getButton().addSelectionListener(this);
 		
 		
->>>>>>> .merge-right.r1351
 		makeNewEnableGroup("cg");
 		
 		
@@ -1969,7 +1963,6 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 			getConfig().put(getjbjb_uceenabled_widget().getAlias(), new Boolean(boolRes));
 		}
 		
-<<<<<<< .working
 		boolRes = getjbjb_uceremove_unreachable_traps_widget().getButton().getSelection();
 		
 		
@@ -1990,7 +1983,6 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 			getConfig().put(getjbjb_ttenabled_widget().getAlias(), new Boolean(boolRes));
 		}
 		
-=======
 		boolRes = getjjenabled_widget().getButton().getSelection();
 		
 		
@@ -2014,7 +2006,7 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		boolRes = getjjjj_lsenabled_widget().getButton().getSelection();
 		
 		
-		defBoolRes = true;
+		defBoolRes = false;
 		
 
 		if (boolRes != defBoolRes) {
@@ -2201,7 +2193,6 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 			getConfig().put(getjjjj_uceenabled_widget().getAlias(), new Boolean(boolRes));
 		}
 		
->>>>>>> .merge-right.r1351
 		boolRes = getcgenabled_widget().getButton().getSelection();
 		
 		
@@ -4190,7 +4181,6 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 			subSectParent = jb_jb_uce_branch;
 			
 			
-<<<<<<< .working
 			SootOption jb_jb_tt_branch = new SootOption("Trap Tightener", "jbjb_tt");
 			subParent.addChild(jb_jb_tt_branch);
 
@@ -4201,7 +4191,6 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 			subSectParent = jb_jb_tt_branch;
 			
 			
-=======
 			//Java To Jimple Body Creation
 			SootOption jj_branch = new SootOption("Java To Jimple Body Creation", "jj");
 			parent.addChild(jj_branch);
@@ -4329,7 +4318,6 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 			subSectParent = jj_jj_uce_branch;
 			
 			
->>>>>>> .merge-right.r1351
 			//Call Graph Constructor
 			SootOption cg_branch = new SootOption("Call Graph Constructor", "cg");
 			parent.addChild(cg_branch);
@@ -5428,7 +5416,6 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		return jbjb_uceenabled_widget;
 	}	
 	
-<<<<<<< .working
 	private BooleanOptionWidget jbjb_uceremove_unreachable_traps_widget;
 	
 	private void setjbjb_uceremove_unreachable_traps_widget(BooleanOptionWidget widget) {
@@ -5449,7 +5436,6 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		return jbjb_ttenabled_widget;
 	}	
 	
-=======
 	private BooleanOptionWidget jjenabled_widget;
 	
 	private void setjjenabled_widget(BooleanOptionWidget widget) {
@@ -5660,7 +5646,6 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		return jjjj_uceenabled_widget;
 	}	
 	
->>>>>>> .merge-right.r1351
 	private BooleanOptionWidget cgenabled_widget;
 	
 	private void setcgenabled_widget(BooleanOptionWidget widget) {
@@ -8888,7 +8873,6 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 
 
 
-<<<<<<< .working
 	private Composite jbjb_ttCreate(Composite parent) {
 		String defKey;
 		String defaultString;
@@ -8935,7 +8919,6 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 
 
 
-=======
 	private Composite jjCreate(Composite parent) {
 		String defKey;
 		String defaultString;
@@ -9030,7 +9013,7 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 		else {
 			
-			defaultBool = true;
+			defaultBool = false;
 			
 		}
 
@@ -9662,7 +9645,6 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 
 
 
->>>>>>> .merge-right.r1351
 	private Composite cgCreate(Composite parent) {
 		String defKey;
 		String defaultString;

@@ -90,7 +90,7 @@ public class SootSavedConfiguration {
 		Iterator it = getEclipseDefs().keySet().iterator();
 		while (it.hasNext()) {
 			String key = (String)it.next();
-			System.out.println("trying to remove: "+key);
+			//System.out.println("trying to remove: "+key);
 			//System.out.println("test to remove: "+key);
 			if (getConfig().containsKey(key)) {
 				String needsToMatch = "";
@@ -113,9 +113,9 @@ public class SootSavedConfiguration {
 					System.out.println("removing: "+key);
 					getConfig().remove(key);
 				}*/
-				System.out.println("needs to match: "+needsToMatch);
+				//System.out.println("needs to match: "+needsToMatch);
 				if (getConfig().get(key).equals(needsToMatch) || getConfig().get(key).equals(val)) {
-					System.out.println("removing: "+key);
+					//System.out.println("removing: "+key);
 					getConfig().remove(key);
 				}
 			}
@@ -148,7 +148,7 @@ public class SootSavedConfiguration {
 		StringBuffer tempSaved = new StringBuffer(getSaved());
 		while (it.hasNext()) {
 			String key = (String)it.next();
-			System.out.println("key in add Eclipse Defs: "+key);
+			//System.out.println("key in add Eclipse Defs: "+key);
 			//System.out.println("going to add : "+key);
 			if (getSaved().indexOf((DASH+key)) != -1) {
 				// already there don't add (implies user changed val)	
@@ -200,7 +200,7 @@ public class SootSavedConfiguration {
 			}
 			else {
 				Object val = getEclipseDefs().get(key);
-				System.out.println("val: "+val);
+				//System.out.println("val: "+val);
 				if (val instanceof String){
 
 					String res = (String)val;
@@ -332,6 +332,7 @@ public class SootSavedConfiguration {
 		if (getRunArray() == null){
 			setRunArray(new ArrayList());
 		}
+	
 		Iterator it = getSaveArray().iterator();
 		String lastKey = "";
 		while (it.hasNext()){
@@ -348,22 +349,28 @@ public class SootSavedConfiguration {
 			//	spliter = " ";
 			//}
 			//System.out.println("char at 2: "+test.charAt(2));
-			System.out.println("test in toRunArray: "+test);
+			//System.out.println("test in toRunArray: "+test);
 			if (test.equals("true")){
 				// don't send 
 			}
+			else if (test.equals("false")){
+				// don't send and also don't send key 
+				int index = getRunArray().size() - 1;
+				getRunArray().remove(index);
+			}
 			else if (test.indexOf(spliter) != -1){
-				System.out.println("test has newline");
+				//System.out.println("test has newline");
 				String [] tokens = test.split(spliter);
 				getRunArray().add(tokens[0]);
-				System.out.println("added "+tokens[0]);
+				
+				//System.out.println("added "+tokens[0]);
 				for (int i = 1; i < tokens.length; i++){
 				//StringTokenizer st = new StringTokenizer(test, "\r\n");
 				//getRunArray().add(st.nextToken());
 				//while (st.hasMoreTokens()){
 					getRunArray().add(lastKey);
 					getRunArray().add(tokens[i]);
-					System.out.println("added "+tokens[i]);
+					//System.out.println("added "+tokens[i]);
 				}
 			}
 			/*else if (test.indexOf("\n") != -1){
@@ -397,10 +404,10 @@ public class SootSavedConfiguration {
 			switch (next.countTokens()) {
 				case 2: {
 					String key = next.nextToken();
-					System.out.print("key: "+key);
+					//System.out.print("key: "+key);
 					String val = next.nextToken();
 					val = val.trim();
-					System.out.println("value: /"+val+"/");
+					//System.out.println("value: /"+val+"/");
 					
 					// if true its a boolean and want to send
 					if (val.equals("true")) {
@@ -460,12 +467,18 @@ public class SootSavedConfiguration {
 			StringTokenizer st = new StringTokenizer(key);
 			//System.out.println("about to find val");
 			Object val = getConfig().get(key);
+			System.out.println("val: "+val);
+			
 			//System.out.println("found val");
 			switch(st.countTokens()) {
 				case 1: {
 					String aliasName = st.nextToken();
 					if (aliasName.equals("sootMainClass")) continue;
-					System.out.println("adding: "+aliasName);
+					//System.out.println("adding: "+aliasName);
+					if (val instanceof String) {
+						String test = (String)val;
+						if ((test == null) |(test.length() == 0)) { System.out.println("continuing" ); continue;}
+					}
 					getSaveArray().add(DASH+aliasName);
 					//toSave.append(DASH);
 					//String aliasName = st.nextToken();
@@ -483,12 +496,12 @@ public class SootSavedConfiguration {
 						else if (test.indexOf('\n') != -1){
 							spliter = "\n";
 						}
-						System.out.println("test in toRunArray: "+test);
+						//System.out.println("test in toSaveArray: "+test);
 						//if (test.equals("true")){
 							// don't send 
 						//}
 						if (test.indexOf(spliter) != -1){
-							System.out.println("test has newline");
+							//System.out.println("test has newline");
 							String [] tokens = test.split(spliter);
 							getSaveArray().add(tokens[0]);
 				
@@ -498,7 +511,7 @@ public class SootSavedConfiguration {
 								//while (st.hasMoreTokens()){
 									getSaveArray().add(DASH+aliasName);
 									getSaveArray().add(tokens[i]);
-									System.out.println("added "+tokens[i]);
+									//System.out.println("added "+tokens[i]);
 							}
 						}
 						else {
@@ -516,6 +529,7 @@ public class SootSavedConfiguration {
 							System.out.println("LISTOPT: String contains newline");
 						}
 						else {*/
+							//System.out.println("added val: "+val);
 							getSaveArray().add(val);
 						}
 						//}
