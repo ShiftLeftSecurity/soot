@@ -197,7 +197,7 @@ public class Main implements Runnable
 		    dir.mkdirs();
 		}
 		catch( SecurityException se) {
-		    System.err.println( "Unable to create " + classPath);
+		    System.out.println( "Unable to create " + classPath);
 		    System.exit(0);
 		}
 	}
@@ -220,7 +220,7 @@ public class Main implements Runnable
 		    dir.mkdirs();
 		}
 		catch( SecurityException se) {
-		    System.err.println( "Unable to create " + path);
+		    System.out.println( "Unable to create " + path);
 		    System.exit(0);
 		}
 	}
@@ -898,8 +898,8 @@ public class Main implements Runnable
 	while (cl.contains( "k") || cl.contains( "cache-dir")) {
 	    String s = cl.getValue();
 	    if (s.equals( "")) {
-		System.err.println( "Warning: -k option without argument");
-		System.err.println( "         Using default cache directory");
+		System.out.println( "Warning: -k option without argument");
+		System.out.println( "         Using default cache directory");
 		setWithCache( true);
 	    }
 	    else
@@ -918,8 +918,8 @@ public class Main implements Runnable
 	while (cl.contains("d")) {
 	    String s = cl.getValueOf("d");
 	    if (s.equals("")) {
-		System.err.println ("Warning: -d option used without argument");
-		System.err.println ("         Using default output directory");
+		System.out.println ("Warning: -d option used without argument");
+		System.out.println ("         Using default output directory");
 	    }
 	    outputDir = s;
 	}
@@ -927,7 +927,7 @@ public class Main implements Runnable
 	while (cl.contains("x") || cl.contains("exclude")) {
 	    String s = cl.getValue();
 	    if (s.equals("")) {
-		System.err.println ("Warning: exclude-package option used without argument");
+		System.out.println ("Warning: exclude-package option used without argument");
 	    } else {
 		addExclude(s);
 	    }
@@ -936,7 +936,7 @@ public class Main implements Runnable
 	while (cl.contains("i") || cl.contains("include")) {
 	    String s = cl.getValue();
 	    if (s.equals("")) {
-		System.err.println ("Warning: include-package option used without argument");
+		System.out.println ("Warning: include-package option used without argument");
 	    } else {
 		addInclude(s);
 	    }
@@ -960,7 +960,7 @@ public class Main implements Runnable
 	while (cl.contains("p") || cl.contains("phase-option")) {
 	    String s = cl.getValue();
 	    if (s.equals("")) {
-		System.err.println ("Warning: phase-option option used without argument");
+		System.out.println ("Warning: phase-option option used without argument");
 	    } else {
 		processPhaseOptions(s);
 	    }
@@ -1101,7 +1101,7 @@ public class Main implements Runnable
 	    case 0:
 				// should never reached that point, due to the way
 				// the LongOption are created
-		System.err.println("000000000000");
+		System.out.println("000000000000");
 		break;
 	    case 1:
 				// non-option argument

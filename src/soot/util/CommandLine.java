@@ -195,7 +195,7 @@ public class CommandLine {
 			}
 			// verify if contains has been called enough
 			for (int i = o.waterMark+1; i < o.values.size(); i++) {
-				System.err.println("Option " + o.name + " is not always checked.\n"
+				System.out.println("Option " + o.name + " is not always checked.\n"
 								   + "Bug in command-line parsing");
 			}
 		}
@@ -249,7 +249,7 @@ public class CommandLine {
 		}
 
 		if ( index == -1 ) {
-			System.err.println("CommandLine usage: You must first check "
+			System.out.println("CommandLine usage: You must first check "
 							   + "that an option is present before asking "
 							   + "for its value");
 			return null;

@@ -360,7 +360,7 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable
 		    dir.mkdirs();
 		}
 		catch( SecurityException se) {
-		    System.err.println( "Unable to create " + cachePathName);
+		    System.out.println( "Unable to create " + cachePathName);
 		    System.exit(0);
 		}
 	    }

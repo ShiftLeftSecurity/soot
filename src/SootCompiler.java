@@ -168,13 +168,13 @@ public class SootCompiler
 
         if (ok != 0)
 	{
-	  System.err.println ("An error occured while compiling file");
+	  System.out.println ("An error occured while compiling file");
 	  return false;
 	}
     }
     catch (Exception e)
     {
-	System.err.println ("Error occurred while calling the compile method:");
+	System.out.println ("Error occurred while calling the compile method:");
 	e.printStackTrace();
 	return false;
     }
@@ -207,7 +207,7 @@ public class SootCompiler
     }
     catch (Exception e)
     {
-      System.err.println ("Unable to perform copy:\n" + e.toString ());
+      System.out.println ("Unable to perform copy:\n" + e.toString ());
     }
   }
 
@@ -282,7 +282,7 @@ public class SootCompiler
 			    + " Creating one ...");
 	if (!classesDir.mkdirs ())
 	  {
-	    System.err.println (classesDir.getPath () + " cannot be created");
+	    System.out.println (classesDir.getPath () + " cannot be created");
 	    System.exit (1);
 	  }
       }
@@ -353,12 +353,12 @@ public class SootCompiler
   {
     if (!srcDir.exists ())
       {
-	System.err.println (srcDir.getPath () + " does not exist");
+	System.out.println (srcDir.getPath () + " does not exist");
 	System.exit (1);
       }
     if (!srcDir.isDirectory ())
       {
-	System.err.println (srcDir.getPath () + " is not a directory");
+	System.out.println (srcDir.getPath () + " is not a directory");
 	System.exit (1);
       }
   }
