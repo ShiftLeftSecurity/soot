@@ -125,6 +125,8 @@ public class SootClass
 
     private boolean isPhantom;
 
+    Map fieldSignatureToField = new HashMap(10, 0.7f);
+    Map methodSignatureToMethod = new HashMap(10, 0.7f);
         
     /**
         Constructs an empty SootClass with the given name and modifiers.
@@ -230,7 +232,7 @@ public class SootClass
         f.isDeclared = true;
         f.declaringClass = this;
         
-        manager.fieldSignatureToField.put(f.getSignature(), f);
+        fieldSignatureToField.put(f.getSignature(), f);
     }
 
     /**
@@ -242,7 +244,7 @@ public class SootClass
         if(!f.isDeclared() || f.getDeclaringClass() != this)
             throw new IncorrectDeclarerException(f.getName());
 
-        manager.fieldSignatureToField.remove(f.getSignature());
+        fieldSignatureToField.remove(f.getSignature());
         fields.remove(f);
         f.isDeclared = false;
     }
@@ -257,7 +259,7 @@ public class SootClass
             throw new ca.mcgill.sable.soot.NoSuchFieldException("No field " + name + " in class " + getName());
 
         else
-            return (SootField) manager.fieldSignatureToField.get(new FieldSignature(getName(), name, type));
+            return (SootField) fieldSignatureToField.get(new FieldSignature(getName(), name, type));
     }
 
     /**
@@ -318,7 +320,7 @@ public class SootClass
 
     public boolean declaresField(String name, Type type)
     {
-        return manager.fieldSignatureToField.containsKey(new FieldSignature(getName(), name, type));
+        return fieldSignatureToField.containsKey(new FieldSignature(getName(), name, type));
     }
     
     public String getFieldSignatureOf(String fieldName, Type type)
@@ -395,7 +397,7 @@ public class SootClass
             throw new ca.mcgill.sable.soot.NoSuchMethodException(getName() + "." + name + "(" + 
                 parameterTypes + ")" + " : " + returnType);
         else
-            return (SootMethod) manager.methodSignatureToMethod.get(new MethodSignature(getName(), name, parameterTypes, returnType));
+            return (SootMethod) methodSignatureToMethod.get(new MethodSignature(getName(), name, parameterTypes, returnType));
     }
 
     /**
@@ -496,7 +498,7 @@ public class SootClass
 
     public boolean declaresMethod(String name, List parameterTypes, Type returnType)
     {
-        return manager.methodSignatureToMethod.containsKey(new MethodSignature(getName(), name, parameterTypes, returnType));
+       return methodSignatureToMethod.containsKey(new MethodSignature(getName(), name, parameterTypes, returnType));
     }
 
     /**
@@ -543,7 +545,7 @@ public class SootClass
         m.isDeclared = true;
         m.declaringClass = this;
         
-        manager.methodSignatureToMethod.put(m.getSignature(), m);
+        methodSignatureToMethod.put(m.getSignature(), m);
     }
 
     /**
@@ -555,7 +557,7 @@ public class SootClass
         if(!m.isDeclared() || m.getDeclaringClass() != this)
             throw new IncorrectDeclarerException(m.getName());
 
-        manager.methodSignatureToMethod.remove(m.getSignature());
+        methodSignatureToMethod.remove(m.getSignature());
         
         methods.remove(m);
         m.isDeclared = false;

@@ -408,7 +408,9 @@ public class Util
                 
                             Type fieldType = Util.jimpleTypeOfFieldDescriptor(cm, fieldDescriptor);
                             SootClass sootClass = cm.getClass(cName);
-                            
+
+                            // sootClass.declaresField(fieldName, fieldType);
+                                                        
                             if(!sootClass.declaresField(fieldName, fieldType))
                             {   
                                 SootField newField = new SootField(fieldName, fieldType);
@@ -474,7 +476,7 @@ public class Util
             
                             SootClass sootClass = cm.getClass(cName);
                             
-                            sootClass.declaresMethod(localMethodName, localParameterTypes, localReturnType);
+                            // sootClass.declaresMethod(localMethodName, localParameterTypes, localReturnType);
                             
                             if(!sootClass.declaresMethod(localMethodName, localParameterTypes, localReturnType))
                             {   
@@ -486,6 +488,107 @@ public class Util
                         }
         
                 }
+/*                
+                // Go through the constant pool, creating phantom fields, methods and interfaces
+                {
+                    for(int k = 0; k < coffiClass.constant_pool_count; k++)
+                        if(coffiClass.constant_pool[k] instanceof CONSTANT_Fieldref_info)
+                        {
+                            CONSTANT_Fieldref_info fieldInfo =
+                                (CONSTANT_Fieldref_info) constant_pool[k];
+        
+                            CONSTANT_Class_info c =
+                                (CONSTANT_Class_info) constant_pool[fieldInfo.class_index];
+                
+                            String cName = ((CONSTANT_Utf8_info) (constant_pool[c.name_index])).convert();
+                            cName = cName.replace('/', '.');
+                
+                            CONSTANT_NameAndType_info nt =
+                                (CONSTANT_NameAndType_info) constant_pool[fieldInfo.name_and_type_index];
+                
+                            String fieldName = ((CONSTANT_Utf8_info) (constant_pool[nt.name_index])).convert();
+                            String fieldDescriptor = ((CONSTANT_Utf8_info) (constant_pool[nt.descriptor_index])).
+                                    convert();
+                
+                            Type fieldType = Util.jimpleTypeOfFieldDescriptor(cm, fieldDescriptor);
+                            SootClass sootClass = cm.getClass(cName);
+                            
+                            if(!sootClass.declaresField(fieldName, fieldType))
+                            {   
+                                SootField newField = new SootField(fieldName, fieldType);
+                                newField.setPhantom(true);
+                                
+                                sootClass.addField(newField);
+                            } 
+                        } 
+                        else if(coffiClass.constant_pool[k] instanceof CONSTANT_Methodref_info ||
+                            coffiClass.constant_pool[k] instanceof CONSTANT_InterfaceMethodref_info)
+                        {
+                            int class_index;
+                            int name_and_type_index;
+                        
+                            if(coffiClass.constant_pool[k] instanceof CONSTANT_Methodref_info)
+                            {
+                                CONSTANT_Methodref_info localMethodInfo =
+                                    (CONSTANT_Methodref_info) constant_pool[k];
+                                
+                                class_index = localMethodInfo.class_index;
+                                name_and_type_index = localMethodInfo.name_and_type_index;
+                            }
+                            else
+                            {
+                                CONSTANT_InterfaceMethodref_info localMethodInfo =
+                                    (CONSTANT_InterfaceMethodref_info) constant_pool[k];
+                                
+                                class_index = localMethodInfo.class_index;
+                                name_and_type_index = localMethodInfo.name_and_type_index;
+                            }
+                            
+                            CONSTANT_Class_info c =
+                                (CONSTANT_Class_info) constant_pool[class_index];
+                
+                            String cName = ((CONSTANT_Utf8_info) (constant_pool[c.name_index])).convert();
+                                cName = cName.replace('/', '.');
+                
+                            CONSTANT_NameAndType_info nt =
+                                (CONSTANT_NameAndType_info) constant_pool[name_and_type_index];
+                
+                            String localMethodName = ((CONSTANT_Utf8_info) (constant_pool[nt.name_index])).convert();
+                            String localMethodDescriptor = ((CONSTANT_Utf8_info) (constant_pool[nt.descriptor_index])).
+                                convert();
+                                            
+                            Local[] localParameters;
+                            List localParameterTypes;
+                            Type localReturnType;
+                
+                            // Generate parameters & returnType & parameterTypes
+                            {
+                                Type[] localTypes = Util.jimpleTypesOfFieldOrMethodDescriptor(cm,
+                                    localMethodDescriptor);
+                
+                                localParameterTypes = new ArrayList();
+                
+                                for(int m = 0; m < localTypes.length - 1; m++)
+                                {
+                                    localParameterTypes.add(localTypes[m]);
+                                }
+                
+                                localReturnType = localTypes[localTypes.length - 1];
+                            }
+                            
+                            SootClass sootClass = cm.getClass(cName);
+                            
+                            if(!sootClass.declaresMethod(localMethodName, localParameterTypes, localReturnType))
+                            {   
+                                SootMethod newMethod = new SootMethod(localMethodName, localParameterTypes, localReturnType);
+                                newMethod.setPhantom(true);
+                                
+                                sootClass.addMethod(newMethod);
+                            } 
+                        }
+        
+                }
+*/
             }
 
         // Set coffi source of method
