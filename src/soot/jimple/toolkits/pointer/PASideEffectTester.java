@@ -1,17 +1,8 @@
 package soot.jimple.toolkits.pointer;
 
 import soot.*;
+import soot.jimple.*;
 import java.util.*;
-
-/** Provides naive side effect information. 
- * Relies on no context information; instead, does the least 
- * conservative thing possible even in the possible presence of badness. 
- *
- * Possible weakness of SideEffectTester: consider a Box.  We don't 
- * have a name for "what-is-inside-the-box" and so we can't 
- * ask questions about it.  But perhaps we need only ask questions
- * about the box itself; the sideeffect tester can deal with
- * that internally. */
 
 //  ArrayRef, 
 //  CaughtExceptionRef, 
@@ -24,13 +15,71 @@ import java.util.*;
 
 public class PASideEffectTester implements SideEffectTester
 {
+    PointerAnalysis pa = Scene.v().getActivePointerAnalysis();
+    SideEffectAnalysis sea = Scene.v().getActiveSideEffectAnalysis();
+    HashMap unitToRead;
+    HashMap unitToWrite;
+    HashMap localToReachingObjects;
+    SootMethod currentMethod;
+
+    public PASideEffectTester() {
+	if( Union.factory == null ) {
+	    Union.factory = new UnionFactory() {
+		public Union newUnion() { return new FullObjectSet(); }
+	    };
+	}
+    }
+
+    /** Call this when starting to analyze a new method to setup the cache. */
+    public void newMethod( SootMethod m ) {
+	unitToRead = new HashMap();
+	unitToWrite = new HashMap();
+	localToReachingObjects = new HashMap();
+	currentMethod = m;
+	sea.findNTRWSets( currentMethod );
+    }
+
+    protected RWSet readSet( Unit u ) {
+	RWSet ret = (RWSet) unitToRead.get( u );
+	if( ret == null ) {
+	    unitToRead.put( u, ret = sea.readSet( currentMethod, (Stmt) u ) );
+	}
+	return ret;
+    }
+
+    protected RWSet writeSet( Unit u ) {
+	RWSet ret = (RWSet) unitToWrite.get( u );
+	if( ret == null ) {
+	    unitToWrite.put( u, ret = sea.writeSet( currentMethod, (Stmt) u ) );
+	}
+	return ret;
+    }
+    
+    protected ObjectSet reachingObjects( Local l ) {
+	ObjectSet ret = (ObjectSet) localToReachingObjects.get( l );
+	if( ret == null ) {
+	    localToReachingObjects.put( l, 
+		    ret = pa.reachingObjects( currentMethod, null, l ) );
+	}
+	return ret;
+    }
+
     /** Returns true if the unit can read from v.
      * Does not deal with expressions; deals with Refs. */
     public boolean unitCanReadFrom(Unit u, Value v)
     {
-	/*
-        Stmt s = (Stmt)u;
+	return valueTouchesRWSet( readSet( u ), v, u.getUseBoxes() );
+    }
 
+    /** Returns true if the unit can read from v.
+     * Does not deal with expressions; deals with Refs. */
+    public boolean unitCanWriteTo(Unit u, Value v)
+    {
+	return valueTouchesRWSet( writeSet( u ), v, u.getDefBoxes() );
+    }
+
+    protected boolean valueTouchesRWSet(RWSet s, Value v, List boxes)
+    {
         // This doesn't really make any sense, but we need to return something.
         if (v instanceof Constant)
             return false;
@@ -38,87 +87,42 @@ public class PASideEffectTester implements SideEffectTester
         if (v instanceof Expr)
             throw new RuntimeException("can't deal with expr");
 
-        // If it's an invoke, then only locals are safe.
-        if (s.containsInvokeExpr())
-        {
-            if (v instanceof Local) {
-                return false;
-	    } else {
-		RWSet readSet = sea.readSet( u );
-		return readSet.containsValue( v );
-	    }
-        }
+	for( Iterator it = boxes.iterator(); it.hasNext(); ) {
+	    ValueBox box = (ValueBox) it.next();
+	    Value boxed = box.getValue();
+	    if( boxed.equivTo( v ) ) return true;
+	}
 
-        // otherwise, use boxes tell all.
-        Iterator useIt = u.getUseBoxes().iterator();
-        while (useIt.hasNext())
-        {
-            Value use = (Value)useIt.next();
+	if (v instanceof Local) {
+	    return false;
+	}
 
-            if (use.equivTo(v))
-                return true;
+	if( v instanceof InstanceFieldRef ) {
+	    InstanceFieldRef ifr = (InstanceFieldRef) v;
+	    if( s == null ) return false;
+	    ObjectSet o1 = s.getBaseForField( ifr.getField() );
+	    if( o1 == null ) return false;
+	    ObjectSet o2 = reachingObjects( (Local) ifr.getBase() );
+	    if( o2 == null ) return false;
+	    return o1.hasNonEmptyIntersection( o2 );
+	}
 
-            Iterator vUseIt = v.getUseBoxes().iterator();
-            while (vUseIt.hasNext())
-            {
-                if (use.equivTo(vUseIt.next()))
-                    return true;
-            }
-        }
-	*/
-        return false;
-    }
+	if( v instanceof ArrayRef ) {
+	    ArrayRef ar = (ArrayRef) v;
+	    if( s == null ) return false;
+	    ObjectSet o1 = s.getBaseForField( PointerAnalysis.ARRAY_ELEMENTS_NODE );
+	    if( o1 == null ) return false;
+	    ObjectSet o2 = reachingObjects( (Local) ar.getBase() );
+	    if( o2 == null ) return false;
+	    return o1.hasNonEmptyIntersection( o2 );
+	}
 
-    public boolean unitCanWriteTo(Unit u, Value v)
-    {
-	/*
-        Stmt s = (Stmt)u;
+	if( v instanceof StaticFieldRef ) {
+	    StaticFieldRef sfr = (StaticFieldRef) v;
+	    if( s == null ) return false;
+	    return s.getGlobals().contains( sfr.getField() );
+	}
 
-        if (v instanceof Constant)
-            return false;
-
-        if (v instanceof Expr)
-            throw new RuntimeException("can't deal with expr");
-
-        // If it's an invoke, then only locals are safe.
-        if (s.containsInvokeExpr())
-        {
-            if (v instanceof Local) {
-                return false;
-	    } else {
-		RWSet readSet = sea.readSet( u );
-		return readSet.containsValue( v );
-	    }
-        }
-
-        // otherwise, def boxes tell all.
-        Iterator defIt = u.getDefBoxes().iterator();
-        while (defIt.hasNext())
-        {
-            Value def = ((ValueBox)(defIt.next())).getValue();
-            Iterator useIt = v.getUseBoxes().iterator();
-            while (useIt.hasNext())
-            {
-                Value use = ((ValueBox)useIt.next()).getValue();
-                if (def.equivTo(use))
-                    return true;
-            }
-            // also handle the container of all these useboxes!
-            if (def.equivTo(v))
-                return true;
-
-            // deal with aliasing - handle case where they
-            // are a read to the same field, regardless of
-            // base object.
-            if (v instanceof InstanceFieldRef && 
-                def instanceof InstanceFieldRef)
-            {
-                if (((InstanceFieldRef)v).getField() ==
-                    ((InstanceFieldRef)def).getField())
-                    return true;
-            }
-        }
-	*/
-        return false;
+	throw new RuntimeException( "Forgot to handle value "+v );
     }
 }

@@ -143,7 +143,7 @@ public abstract class PointerPropagationGraph extends PointerStmtSwitch
 	addLoadEdge( src.getBase(), src.getBase().getType(),
 
 	    PointerAnalysis.ARRAY_ELEMENTS_NODE, 
-	    ( (ArrayType) src.getBase().getType() ).baseType,
+	    src.getType(),
 
 	    dest, dest.getType() );
     }
@@ -153,7 +153,7 @@ public abstract class PointerPropagationGraph extends PointerStmtSwitch
 	    dest.getBase(), dest.getBase().getType(),
 
 	    PointerAnalysis.ARRAY_ELEMENTS_NODE,
-	    ( (ArrayType) dest.getBase().getType() ).baseType );
+	    dest.getType() );
     }
     protected void caseGlobalLoadStmt( Local dest, StaticFieldRef src ) {
 	addSimpleEdge( src.getField(), src.getField().getType(),
@@ -163,15 +163,38 @@ public abstract class PointerPropagationGraph extends PointerStmtSwitch
 	addSimpleEdge( src, src.getType(), 
 	    dest.getField(), dest.getField().getType() ); 
     }
-    protected void caseAnyNewStmt( Local dest, Expr e ) {
+    protected void caseAnyNewStmtHelper( Object dest, Type destType,
+	    Object src, Type srcType ) {
 	if( typesForSites ||
 		( mergeStringbuffer 
 		  && RefType.v( "java.lang.StringBuffer" )
-		    .equals( e.getType() ) ) ) {
+		    .equals( srcType ) ) ) {
 
-	    addNewEdge( e.getType(), e.getType(), dest, dest.getType() );
+	    addNewEdge( srcType, srcType, dest, destType );
 	} else {
-	    addNewEdge( e, e.getType(), dest, dest.getType() );
+	    addNewEdge( src, srcType, dest, destType );
+	}
+    }
+    protected void caseAnyNewStmt( Local dest, Expr e ) {
+	if( e instanceof NewMultiArrayExpr ) {
+	    // do prdele prace!!!
+	    NewMultiArrayExpr nmae = (NewMultiArrayExpr) e;
+	    Object oldee = dest;
+	    Type oldtt = dest.getType();
+	    caseAnyNewStmtHelper( dest, dest.getType(), e, e.getType() );
+	    for( int d = nmae.getSizeCount() - 1; d > 0; d-- ) {
+		Type tt = ArrayType.v( nmae.getBaseType().baseType, d );
+		Pair ee = new Pair( nmae, new Integer(d) );
+
+		caseAnyNewStmtHelper( ee, tt, ee, tt );
+		addStoreEdge( ee, tt,
+			oldee, oldtt,
+			PointerAnalysis.ARRAY_ELEMENTS_NODE, tt );
+		oldtt = tt;
+		oldee = ee;
+	    }
+	} else {
+	    caseAnyNewStmtHelper( dest, dest.getType(), e, e.getType() );
 	}
     }
     protected void caseInvokeStmt( Local dest, InvokeExpr e ) {

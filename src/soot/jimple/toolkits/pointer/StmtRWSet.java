@@ -50,11 +50,14 @@ public class StmtRWSet extends RWSet {
 	    StmtRWSet o = (StmtRWSet) other;
 	    if( !field.equals( o.field ) ) return false;
 	    if( base == null ) return o.base == null;
-	    return base.equals( o.base );
+	    return base.hasNonEmptyIntersection( o.base );
+	} else if( other instanceof MethodRWSet ) {
+	    MethodRWSet o = (MethodRWSet) other;
+	    if( base == null ) return other.getGlobals().contains( field );
+	    return base.hasNonEmptyIntersection( other.getBaseForField( field ) );
+	} else {
+	    return other.hasNonEmptyIntersection( this );
 	}
-	MethodRWSet o = (MethodRWSet) other;
-	if( base == null ) return other.getGlobals().contains( field );
-	return base.hasNonEmptyIntersection( other.getBaseForField( field ) );
     }
 
     /** Adds the RWSet other into this set. */
@@ -73,6 +76,15 @@ public class StmtRWSet extends RWSet {
 	    throw new RuntimeException( "Can't do that" );
 	this.field = field;
 	base = otherBase;
+	return true;
+    }
+    public boolean isEquivTo( RWSet other ) {
+	if( !( other instanceof StmtRWSet ) ) return false;
+	StmtRWSet o = (StmtRWSet) other;
+	if( callsNative != o.callsNative ) return false;
+	if( !field.equals( o.field ) ) return false;
+	if( base instanceof FullObjectSet && o.base instanceof FullObjectSet ) return true;
+	if( base != o.base ) return false;
 	return true;
     }
 }

@@ -117,7 +117,10 @@ public class NativeMethodDriver {
 
 //    System.out.println(method.toString());
     if (clsSim == null) {
-      throw new NativeMethodNotSupportedException(method);
+	  System.err.println("WARNING: it is unsafe to simulate the method ");
+	  System.err.println("         "+method.toString());	
+      //throw new NativeMethodNotSupportedException(method);
+      return true;
     } else {
 
       try {

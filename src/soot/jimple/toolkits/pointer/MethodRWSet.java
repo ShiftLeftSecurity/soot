@@ -4,14 +4,14 @@ import soot.*;
 
 /** Represents the read or write set of a statement. */
 public class MethodRWSet extends RWSet {
-    protected Set globals;
-    protected Map fields;
+    public Set globals;
+    public Map fields;
     protected boolean callsNative = false;
     protected boolean isFull = false;
     static Set allGlobals = new HashSet();
     static Set allFields = new HashSet();
     final static ObjectSet fullObjectSet = new FullObjectSet();
-    final static int MAX_SIZE = Integer.MAX_VALUE;
+    public static int MAX_SIZE = Integer.MAX_VALUE;
 
     static int count = 0;
     public MethodRWSet() {
@@ -166,10 +166,13 @@ public class MethodRWSet extends RWSet {
     static int fieldCount = 0;
     static void addedField( int size ) {
 	fieldCount++;
-	if( 0 == ( fieldCount % 1000 ) ) System.out.println( "Added "+fieldCount+"th field" );
+	//if( 0 == ( fieldCount % 1000 ) ) System.out.println( "Added "+fieldCount+"th field" );
 
 	if( size > 1000 && (( size & (size-1) )== 0 ) ) {
 	    System.out.println( "This method has reached "+size+" fields" );
 	}
+    }
+    public boolean isEquivTo( RWSet other ) {
+	return other == this;
     }
 }

@@ -14,6 +14,9 @@ public class AllocNode extends Node
     public static AllocNode v( Object newExpr, Type t, SootMethod m ) {
 	AllocNode ret = (AllocNode) nodeMap.get( newExpr );
 	if( ret == null ) {
+	    if( !(t instanceof RefLikeType) ) throw new RuntimeException(
+		    "Attempt to create AllocNode of type "+t+" newe is "+newExpr+
+		    " and method is "+m );
 	    nodeMap.put( newExpr, ret = new AllocNode( newExpr, t, m ) );
 	}
 	return ret;

@@ -101,7 +101,7 @@ public class NodePPG extends PointerPropagationGraph
 	System.out.println( "Loads:  "+countLoads );
 	System.out.println( "Stores: "+countStores );
 	MultiMap[] m = { news, simple, loads, stores };
-	for( int i = 0; i < m.length; i++ ) {
+	if( false ) for( int i = 0; i < m.length; i++ ) {
 	    for( Iterator it = m[i].keySet().iterator(); it.hasNext(); ) {
 		Node key = (Node) it.next();
 		System.out.println( key.toString() + m[i].get( key ).toString() );
@@ -218,6 +218,7 @@ public class NodePPG extends PointerPropagationGraph
 	    out.println();
 	}
     }
+    /*
     public void compute() {
 	PrintStream out = null;
 	try {
@@ -238,6 +239,59 @@ public class NodePPG extends PointerPropagationGraph
 		out.print( " "+n2.id );
 	    }
 	    out.println();
+	}
+    }
+    */
+    protected Map fieldMap = new HashMap();
+    int nextId = 0;
+    protected String makeFieldRefId( FieldRefNode n ) {
+	Integer fid = (Integer) fieldMap.get( n.getField() );
+	if( fid == null ) {
+	    fieldMap.put( n.getField(), fid = new Integer( ++nextId ) );
+	}
+	return ""+n.getBase().id+" "+fid;
+    }
+    public void compute() {
+	PrintStream out = null;
+	try {
+	    out = new PrintStream( new FileOutputStream( "pag" ) );
+	} catch( FileNotFoundException e ) {
+	    return;
+	}
+	out.println( "Allocations:" );
+	for( Iterator it = news.keySet().iterator(); it.hasNext(); ) {
+	    AllocNode src = (AllocNode) it.next();
+	    for( Iterator it2 = news.get(src).iterator(); it2.hasNext(); ) {
+		VarNode dst = (VarNode) it2.next();
+		out.println( ""+src.id+" "+dst.id );
+	    }
+	}
+
+	out.println( "Simple Assignments:" );
+	for( Iterator it = simple.keySet().iterator(); it.hasNext(); ) {
+	    VarNode src = (VarNode) it.next();
+	    for( Iterator it2 = simple.get(src).iterator(); it2.hasNext(); ) {
+		VarNode dst = (VarNode) it2.next();
+		out.println( ""+src.id+" "+dst.id );
+	    }
+	}
+
+	out.println( "Loads:" );
+	for( Iterator it = loads.keySet().iterator(); it.hasNext(); ) {
+	    FieldRefNode src = (FieldRefNode) it.next();
+	    for( Iterator it2 = loads.get(src).iterator(); it2.hasNext(); ) {
+		VarNode dst = (VarNode) it2.next();
+		out.println( makeFieldRefId( src )+" "+dst.id );
+	    }
+	}
+
+	out.println( "Stores:" );
+	for( Iterator it = stores.keySet().iterator(); it.hasNext(); ) {
+	    VarNode src = (VarNode) it.next();
+	    for( Iterator it2 = stores.get(src).iterator(); it2.hasNext(); ) {
+		FieldRefNode dst = (FieldRefNode) it2.next();
+		out.println( ""+src.id+" "+makeFieldRefId( dst ) );
+	    }
 	}
     }
     public void dumpStats() {

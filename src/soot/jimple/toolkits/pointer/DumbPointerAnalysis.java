@@ -9,7 +9,7 @@ public class DumbPointerAnalysis implements PointerAnalysis {
     /** Returns the set of objects reaching variable l before stmt in method. */
     public ObjectSet reachingObjects( SootMethod method, Stmt stmt,
 	    Local l ) {
-	return new DumbObjectSet();
+	return new FullObjectSet();
     }
 }
 

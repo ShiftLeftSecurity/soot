@@ -50,6 +50,8 @@ public class KlojTransformer extends SceneTransformer
 		s = new IterativeScheduler( h );
 	    } else if( method.equals( "worklist" ) ) {
 		s = new WorklistScheduler( h );
+	    } else if( method.equals( "df" ) ) {
+		s = new DepthFirstScheduler( h );
 	    } else if( method.equals( "merge-iter" ) ) {
 		s = new MergingIterativeScheduler();
 	    } else {
@@ -92,14 +94,14 @@ public class KlojTransformer extends SceneTransformer
 	Date doneCompute = new Date();
 	System.out.println( "Solution found in "+(doneCompute.getTime() - startCompute.getTime() )/1000+" seconds." );
 	b.dumpStats();
-	if( !Options.getBoolean( options, "dont-trim-callgraph" ) ) {
-	    System.out.println( ig.computeStats() );
-	    new InvokeGraphTrimmer( (PointerAnalysis) b, ig ).trimInvokeGraph();
-	    System.out.println( ig.computeStats() );
-	    Date doneTrim = new Date();
-	    System.out.println( "Graph trimmed in "+(doneTrim.getTime() - doneCompute.getTime() )/1000+" seconds." );
-	}
 	if( b instanceof PointerAnalysis ) {
+	    if( !Options.getBoolean( options, "dont-trim-callgraph" ) ) {
+		System.out.println( ig.computeStats() );
+		new InvokeGraphTrimmer( (PointerAnalysis) b, ig ).trimInvokeGraph();
+		System.out.println( ig.computeStats() );
+		Date doneTrim = new Date();
+		System.out.println( "Graph trimmed in "+(doneTrim.getTime() - doneCompute.getTime() )/1000+" seconds." );
+	    }
 	    Scene.v().setActivePointerAnalysis( (PointerAnalysis) b );
 	}
     }

@@ -2,7 +2,7 @@ package soot.jimple.toolkits.pointer;
 import java.util.*;
 import soot.*;
 
-public class VarNode extends ValNode
+public class VarNode extends ValNode implements Comparable
 {
     static Map nodeMap = new HashMap(4);
     public static VarNode v( Object val ) {
@@ -13,6 +13,9 @@ public class VarNode extends ValNode
     public static VarNode v( Object val, Type t, SootMethod m ) {
 	VarNode ret = (VarNode) nodeMap.get( val );
 	if( ret == null ) {
+	    if( !(t instanceof RefLikeType) ) throw new RuntimeException(
+		    "Attempt to create VarNode of type "+t+" val is "+val+
+		    " and method is "+m );
 	    if( val instanceof Pair ) {
 		Pair p = (Pair) val;
 		if( p.o1 instanceof SootMethod && p.o2 instanceof Integer ) {
@@ -57,6 +60,10 @@ public class VarNode extends ValNode
     }
     public String toString() {
 	return "VarNode "+id+" "+val+" "+m;
+    }
+    public int compareTo( Object o ) {
+	VarNode other = (VarNode) o;
+	return finishingNumber - other.finishingNumber;
     }
     public int finishingNumber = 0;
     /*

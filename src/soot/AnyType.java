@@ -33,7 +33,7 @@ import soot.util.*;
 import java.util.*;
 
 
-public class AnyType extends Type
+public class AnyType extends Type implements RefLikeType
 {
     private static AnyType constant = new AnyType();
 
@@ -66,5 +66,9 @@ public class AnyType extends Type
     public void apply(Switch sw)
     {
         ((TypeSwitch) sw).caseAnyType(this);
+    }
+
+    public Type getArrayBaseType() {
+	throw new RuntimeException( "Attempt to get array base type of a non-array" );  
     }
 }

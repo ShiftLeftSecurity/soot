@@ -61,7 +61,7 @@ public class InvokeGraphTrimmer
 
                     InvokeExpr ie = (InvokeExpr)s.getInvokeExpr();
                     
-                    List ieSites = ig.getTargetsOf(s);
+                    //List ieSites = ig.getTargetsOf(s);
 
                     if (ie instanceof VirtualInvokeExpr ||
                         ie instanceof InterfaceInvokeExpr)
@@ -74,21 +74,35 @@ public class InvokeGraphTrimmer
                             // we have, now, a set of reaching types for receiver.
                             // remove extra targets (by clearing targets and re-adding
                             // the ones that VTA doesn't rule out.)
+			    List oldTargets = ig.getTargetsOf(s);
                             ig.removeAllTargets(s);
 
 			    List validReachingTypes = new LinkedList( 
 				pa.reachingObjects( m, s, (Local) base )
 				    .possibleTypes() );
 
-                            Collection targets = fh.resolveConcreteDispatch(validReachingTypes, ie.getMethod());
+                            Collection targets = fh.resolveConcreteDispatch(validReachingTypes, ie.getMethod(), (RefType) base.getType() );
+			    /*
 			    if( targets.isEmpty() ) {
 				System.out.println( "Couldn't resolve dispatch "+s+" in method "+m );
 				System.out.println( "reaching types: "+validReachingTypes );
 			    }
+			    */
                             Iterator targetsIt = targets.iterator();
                             
-                            while (targetsIt.hasNext())
-                                ig.addTarget(s, (SootMethod)targetsIt.next());
+                            while (targetsIt.hasNext()) {
+				SootMethod target = (SootMethod) targetsIt.next();
+                                ig.addTarget(s, target);
+				if( !oldTargets.contains( target ) ) {
+				    System.out.println( "Computed possible target "+
+					    target+" for site "+s+" in method "+m+
+					    "that wasn't there in CHA" );
+				    System.out.println( "Type of base is "+base.getType() );
+				    System.out.println( "Reaching types of base are "+validReachingTypes );
+				    System.out.println( "Old targets are "+oldTargets );
+				    System.out.println( "New targets are "+targets );
+				}
+			    }
                         }
                     }
                 }

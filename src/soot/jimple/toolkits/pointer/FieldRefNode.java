@@ -8,6 +8,9 @@ public class FieldRefNode extends ValNode
     public static FieldRefNode v( VarNode base, Object field, Type t, SootMethod m ) {
 	FieldRefNode ret = (FieldRefNode) base.dot( field );
 	if( ret == null ) {
+	    if( !(t instanceof RefLikeType) ) throw new RuntimeException(
+		    "Attempt to create FieldRefNode of type "+t+" base is "+base+
+		    " and field is "+field+" and method is "+m );
 	    ret = new FieldRefNode( base, field, t, m );
 	} else {
 	    if( !ret.getType().equals( t ) ) {

@@ -13,6 +13,7 @@ class ColourHandler extends Handler {
 	sites.black.forall( new RasVisitor() {
 	    public void visit( AllocNode a ) {
 		SiteDotField aDotF = SiteDotField.v( a, from.getField() );
+		if( aDotF == null ) return;
 		if( b.hasAllocSites( aDotF ) ) {
 		    ColourRas r = (ColourRas) b.getAllocSites( aDotF );
 		    b.addAllocSites( to, r.gray );
@@ -22,6 +23,7 @@ class ColourHandler extends Handler {
 	sites.gray.forall( new RasVisitor() {
 	    public void visit( AllocNode a ) {
 		SiteDotField aDotF = SiteDotField.v( a, from.getField() );
+		if( aDotF == null ) return;
 		if( b.hasAllocSites( aDotF ) ) {
 		    ColourRas r = (ColourRas) b.getAllocSites( aDotF );
 		    b.addAllocSites( to, r.black );
@@ -38,12 +40,14 @@ class ColourHandler extends Handler {
 	sites.black.forall( new RasVisitor() {
 	    public void visit( AllocNode a ) {
 		SiteDotField aDotF = SiteDotField.v( a, f );
+		if( aDotF == null ) return;
 		b.addAllocSites( aDotF, fromSites.gray );
 	    }
 	} );
 	sites.gray.forall( new RasVisitor() {
 	    public void visit( AllocNode a ) {
 		SiteDotField aDotF = SiteDotField.v( a, f );
+		if( aDotF == null ) return;
 		b.addAllocSites( aDotF, fromSites.black );
 		b.addAllocSites( aDotF, fromSites.gray );
 	    }

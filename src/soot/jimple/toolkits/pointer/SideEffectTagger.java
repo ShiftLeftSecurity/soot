@@ -1,4 +1,6 @@
 package soot.jimple.toolkits.pointer;
+import soot.tagkit.*;
+import soot.jimple.toolkits.pointer.kloj.*;
 import soot.*;
 import java.util.*;
 import soot.toolkits.graph.*;
@@ -8,76 +10,166 @@ import java.io.*;
 
 public class SideEffectTagger extends BodyTransformer
 { 
-    private static SideEffectTagger instance = 
-	new SideEffectTagger();
+    public static int numRWs = 0;
+    public static int numWRs = 0;
+    public static int numRRs = 0;
+    public static int numWWs = 0;
+    public static int numNatives = 0;
+    public static Date startTime = null;
+    private static SideEffectTagger instance = new SideEffectTagger();
     private SideEffectTagger() {}
-    private Map bodyToGraph = new HashMap(0);
-    private Set analysesInProgress = new HashSet(0);
-    private Set preAnalysesInProgress = new HashSet(0);
-    private InvokeGraph ig;
     boolean optionDontTag = false;
+    boolean optionNaive = false;
 
     public static SideEffectTagger v() { return instance; }
 
     public String getDeclaredOptions() { return super.getDeclaredOptions() +
-	" dont-tag "; }
+	" dont-tag max-size naive "; }
 
-    public String getDefaultOptions() { return ""; }
+    public String getDefaultOptions() { return " max-size:1000000 "; }
 
-    protected void internalTransform(Body b, String phaseName, Map options)
+    protected class UniqueRWSets {
+	protected ArrayList l = new ArrayList();
+	RWSet getUnique( RWSet s ) {
+	    if( s == null ) return s;
+	    for( Iterator it = l.iterator(); it.hasNext(); ) {
+		RWSet ret = (RWSet) it.next();
+		if( ret.isEquivTo( s ) ) return ret;
+	    }
+	    l.add( s );
+	    return s;
+	}
+	Iterator iterator() {
+	    return l.iterator();
+	}
+	short indexOf( RWSet s ) {
+	    short i = 0;
+	    for( Iterator it = l.iterator(); it.hasNext(); ) {
+		RWSet ret = (RWSet) it.next();
+		if( ret.isEquivTo( s ) ) return i;
+		i++;
+	    }
+	    return -1;
+	}
+    }
+
+    protected void initializationStuff( String phaseName ) {
+	if( !Scene.v().hasActiveInvokeGraph() ) {
+	    InvokeGraphBuilder.v().transform( phaseName + ".igb" );
+	}
+	if( Union.factory == null ) {
+	    Union.factory = new UnionFactory() {
+		public Union newUnion() { return new FullObjectSet(); }
+	    };
+	}
+	if( startTime == null ) {
+	    startTime = new Date();
+	}
+    }
+    protected Object keyFor( Stmt s ) {
+	if( s.containsInvokeExpr() ) {
+	    if( optionNaive ) throw new RuntimeException( "shouldn't get here" );
+	    InvokeGraph ig = Scene.v().getActiveInvokeGraph();
+	    if( !ig.containsSite( s ) ) {
+		return Collections.EMPTY_LIST;
+	    }
+	    return Scene.v().getActiveInvokeGraph().getTargetsOf( s );
+	} else {
+	    return s;
+	}
+    }
+    protected void internalTransform(Body body, String phaseName, Map options)
     {
+	initializationStuff( phaseName );
 	SideEffectAnalysis sea = Scene.v().getActiveSideEffectAnalysis();
-	sea.findNTRWSets( b.getMethod() );
+	optionNaive = Options.getBoolean( options, "naive" );
+	if( !optionNaive ) {
+	    sea.findNTRWSets( body.getMethod() );
+	}
 	HashMap stmtToReadSet = new HashMap();
 	HashMap stmtToWriteSet = new HashMap();
+	UniqueRWSets sets = new UniqueRWSets();
 	optionDontTag = Options.getBoolean( options, "dont-tag" );
-	for( Iterator stmtIt = b.getUnits().iterator(); stmtIt.hasNext(); ) {
+	boolean justDoTotallyConservativeThing = 
+	    body.getMethod().getName().equals( "<clinit>" );
+	for( Iterator stmtIt = body.getUnits().iterator(); stmtIt.hasNext(); ) {
 	    Stmt stmt = (Stmt) stmtIt.next();
-	    stmtToReadSet.put( stmt, sea.readSet( b.getMethod(), stmt ) );
-	    stmtToWriteSet.put( stmt, sea.writeSet( b.getMethod(), stmt ) );
+	    if( justDoTotallyConservativeThing 
+	    || ( optionNaive && stmt.containsInvokeExpr() ) ) {
+		stmtToReadSet.put( stmt, sets.getUnique( new FullRWSet() ) );
+		stmtToWriteSet.put( stmt, sets.getUnique( new FullRWSet() ) );
+		continue;
+	    }
+	    Object key = keyFor( stmt );
+	    if( !stmtToReadSet.containsKey( key ) ) {
+		stmtToReadSet.put( key,
+		    sets.getUnique( sea.readSet( body.getMethod(), stmt ) ) );
+		stmtToWriteSet.put( key,
+		    sets.getUnique( sea.writeSet( body.getMethod(), stmt ) ) );
+	    }
 	}
-	for( Iterator outerIt = b.getUnits().iterator(); outerIt.hasNext(); ) {
-	    Stmt outer = (Stmt) outerIt.next();
-	    RWSet outerRead = (RWSet) stmtToReadSet.get( outer );
-	    RWSet outerWrite = (RWSet) stmtToWriteSet.get( outer );
-	    DependenceTag tag = null;
+	DependenceGraph graph = new DependenceGraph();
+	for( Iterator outerIt = sets.iterator(); outerIt.hasNext(); ) {
+	    RWSet outer = (RWSet) outerIt.next();
 
-	    for( Iterator innerIt = b.getUnits().iterator(); innerIt.hasNext(); ) {
-		Stmt inner = (Stmt) innerIt.next();
-		RWSet innerRead = (RWSet) stmtToReadSet.get( inner );
-		RWSet innerWrite = (RWSet) stmtToWriteSet.get( inner );
-
-		if( outerRead != null && innerWrite != null &&
-			outerRead.hasNonEmptyIntersection( innerWrite ) ) {
-		    if( tag == null ) tag = new DependenceTag();
-		    tag.addStmtRW( inner );
-		}
-		if( outerWrite != null && innerRead != null &&
-			outerWrite.hasNonEmptyIntersection( innerRead ) ) {
-		    if( tag == null ) tag = new DependenceTag();
-		    tag.addStmtWR( inner );
-		}
-		if( outer != inner ) {
-		    if( outerRead != null && innerRead != null &&
-			    outerRead.hasNonEmptyIntersection( innerRead ) ) {
-			if( tag == null ) tag = new DependenceTag();
-			tag.addStmtRR( inner );
-		    }
-		    if( outerWrite != null && innerWrite != null &&
-			    outerWrite.hasNonEmptyIntersection( innerWrite ) ) {
-			if( tag == null ) tag = new DependenceTag();
-			tag.addStmtWW( inner );
-		    }
+	    for( Iterator innerIt = sets.iterator(); innerIt.hasNext(); ) {
+		RWSet inner = (RWSet) innerIt.next();
+		if( inner == outer ) break;
+		if( outer.hasNonEmptyIntersection( inner ) ) {
+		    graph.addEdge( sets.indexOf( outer ), sets.indexOf( inner ) );
 		}
 	    }
-	    if( ( outerRead != null && outerRead.getCallsNative() ) 
-		    || ( outerWrite != null && outerWrite.getCallsNative() ) ) {
-		if( tag == null ) tag = new DependenceTag();
-		tag.setCallsNative();
+	}
+	if( !optionDontTag ) {
+	    body.getMethod().addTag( graph );
+	}
+	for( Iterator stmtIt = body.getUnits().iterator(); stmtIt.hasNext(); ) {
+	    Stmt stmt = (Stmt) stmtIt.next();
+	    Object key;
+	    if( optionNaive && stmt.containsInvokeExpr() ) {
+		key = stmt;
+	    } else {
+		key = keyFor( stmt );
 	    }
-	    if( tag != null ) {
-		if( !optionDontTag )
-		    outer.addTag( tag );
+	    RWSet read = (RWSet) stmtToReadSet.get( key );
+	    RWSet write = (RWSet) stmtToWriteSet.get( key );
+	    if( read != null || write != null ) {
+		DependenceTag tag = new DependenceTag();
+		if( read != null && read.getCallsNative() ) {
+		    tag.setCallsNative();
+		    numNatives++;
+		} else if( write != null && write.getCallsNative() ) {
+		    tag.setCallsNative();
+		    numNatives++;
+		}
+		tag.setRead( sets.indexOf( read ) );
+		tag.setWrite( sets.indexOf( write ) );
+		if( !optionDontTag ) stmt.addTag( tag );
+
+		// The loop below is just fro calculating stats.
+		if( !justDoTotallyConservativeThing ) {
+		    for( Iterator innerIt = body.getUnits().iterator();
+			    innerIt.hasNext(); ) {
+			Stmt inner = (Stmt) innerIt.next();
+			Object ikey;
+			if( optionNaive && inner.containsInvokeExpr() ) {
+			    ikey = inner;
+			} else {
+			    ikey = keyFor( inner );
+			}
+			RWSet innerRead = (RWSet) stmtToReadSet.get( ikey );
+			RWSet innerWrite = (RWSet) stmtToWriteSet.get( ikey );
+			if( graph.areAdjacent( sets.indexOf( read ),
+				    sets.indexOf( innerWrite ) ) ) numRWs++;
+			if( graph.areAdjacent( sets.indexOf( write ),
+				    sets.indexOf( innerRead ) ) ) numWRs++;
+			if( inner == stmt ) continue;
+			if( graph.areAdjacent( sets.indexOf( write ),
+				    sets.indexOf( innerWrite ) ) ) numWWs++;
+			if( graph.areAdjacent( sets.indexOf( read ),
+				    sets.indexOf( innerRead ) ) ) numRRs++;
+		    }
+		}
 	    }
 	}
     }

@@ -212,7 +212,7 @@ public class FastHierarchy
 	} else {
 	    ArrayType achild = (ArrayType) child;
 	    if( parent instanceof RefType ) {
-		// From Java Language Spec, Chapter 10, Arrays
+		// From Java Language Spec 2nd ed., Chapter 10, Arrays
 		return parent.equals( RefType.v( "java.lang.Object" ) )
 		|| parent.equals( RefType.v( "java.io.Serializable" ) )
 		|| parent.equals( RefType.v( "java.lang.Cloneable" ) );
@@ -221,14 +221,20 @@ public class FastHierarchy
 					        
 	    // You can store a int[][] in a Object[]. Yuck!
 	    // Also, you can store a Interface[] in a Object[]
-	    return ( achild.numDimensions == aparent.numDimensions &&
-		    achild.baseType instanceof RefType &&
-		    aparent.baseType instanceof RefType &&
-		    canStoreType( achild.baseType, aparent.baseType ) )
-	    || ( achild.numDimensions > aparent.numDimensions &&
-	       ( aparent.baseType.equals( RefType.v( "java.lang.Object" ) )
-		 || aparent.baseType.equals( RefType.v( "java.io.Serializable" ) )
-		 || aparent.baseType.equals( RefType.v( "java.lang.Cloneable" ) ) ) );
+	    if( achild.numDimensions == aparent.numDimensions ) {
+		if( achild.baseType.equals( aparent.baseType ) ) return true;
+		if( !(achild.baseType instanceof RefType ) ) return false;
+		if( !(aparent.baseType instanceof RefType ) ) return false;
+		return canStoreType( achild.baseType, aparent.baseType );
+	    } else if( achild.numDimensions > aparent.numDimensions ) {
+		if( aparent.baseType.equals( RefType.v( "java.lang.Object" ) ) )
+		    return true;
+		if( aparent.baseType.equals( RefType.v( "java.io.Serializable" ) ) )
+		    return true;
+		if( aparent.baseType.equals( RefType.v( "java.lang.Cloneable" ) ) )
+		    return true;
+		return false;
+	    } else return false;
 	}
     }
 
@@ -263,10 +269,11 @@ public class FastHierarchy
 	}
     }
 
-    public Collection resolveConcreteDispatch(Collection concreteTypes, SootMethod m ) {
+    public Collection resolveConcreteDispatch(Collection concreteTypes, SootMethod m, RefType declaredTypeOfBase ) {
 
 	Set ret = new HashSet();
-	SootClass declaringClass = m.getDeclaringClass();
+	//SootClass declaringClass = m.getDeclaringClass();
+	SootClass declaringClass = declaredTypeOfBase.getSootClass();
 	for( Iterator it = concreteTypes.iterator(); it.hasNext(); ) {
 	    Type t = (Type) it.next();
 	    if( t instanceof AnyType ) {
@@ -276,11 +283,20 @@ public class FastHierarchy
 		while( !s.isEmpty() ) {
 		    SootClass c = (SootClass) s.iterator().next();
 		    s.remove( c );
-		    if( c.declaresMethod( methodSig ) ) {
-			ret.add( c.getMethod( methodSig ) );
+		    if( !c.isInterface() && canStoreClass( c, declaringClass ) ) {
+			SootMethod concreteM = resolveConcreteDispatch( c, m );
+			if( concreteM != null ) {
+			    ret.add( concreteM );
+			}
 		    }
 		    if( classToSubclasses.containsKey( c ) ) {
 			s.addAll( classToSubclasses.get( c ) );
+		    }
+		    if( interfaceToSubinterfaces.containsKey( c ) ) {
+			s.addAll( interfaceToSubinterfaces.get( c ) );
+		    }
+		    if( interfaceToImplementers.containsKey( c ) ) {
+			s.addAll( interfaceToImplementers.get( c ) );
 		    }
 		}
 		return ret;

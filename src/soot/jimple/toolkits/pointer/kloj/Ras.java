@@ -11,6 +11,9 @@ public abstract class Ras implements ObjectSet
 
     Type type;
     protected Ras( Type t ) {
+	if( t != null && !( t instanceof RefLikeType ) ) {
+	    throw new RuntimeException( "Attempt to create RAS of type "+t );
+	}
 	this.type = t;
     }
     public abstract boolean isEmpty();

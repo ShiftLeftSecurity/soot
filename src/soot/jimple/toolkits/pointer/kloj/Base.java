@@ -21,8 +21,8 @@ class Base extends NodePPG implements PointerAnalysis
 	s.setBase( this );
 	Union.factory = new UnionFactory() {
 	    //ReallyCheapRasUnion ru =  new ReallyCheapRasUnion();
-	    //public Union newUnion() { return new RasUnion(); }
-	    public Union newUnion() { return new MemoryEfficientRasUnion(); }
+	    public Union newUnion() { return new RasUnion(); }
+	    //public Union newUnion() { return new MemoryEfficientRasUnion(); }
 	};
 	if( Options.getString( options, "ras" ).equals( "bit" ) ) {
 	    System.out.println( "Using BitRas" );
@@ -96,7 +96,7 @@ class Base extends NodePPG implements PointerAnalysis
     }
     public void dumpStats() {
 	int counts[] = new int[30001];
-	for( Iterator it = rasmap.keySet().iterator(); it.hasNext(); ) {
+	if( false ) for( Iterator it = rasmap.keySet().iterator(); it.hasNext(); ) {
 	    Object key = it.next();
 	    int i =  ( (Ras) rasmap.get( key ) ).size();
 	    if( i >= counts.length ) i = counts.length-1;

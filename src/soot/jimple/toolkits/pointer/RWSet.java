@@ -16,4 +16,5 @@ public abstract class RWSet {
     public abstract boolean union( RWSet other );
     public abstract boolean addGlobal( SootField global );
     public abstract boolean addFieldRef( ObjectSet otherBase, Object field );
+    public abstract boolean isEquivTo( RWSet other );
 }

@@ -1,11 +1,15 @@
+// FOREACH( type, variable, collection )
+
+
+
 package soot.jimple.toolkits.pointer.kloj;
 import soot.jimple.toolkits.pointer.*;
 import java.util.*;
 
-class WorklistScheduler extends Scheduler {
+class DepthFirstScheduler extends Scheduler {
     int changed;
-    HashSet worklist;
-    HashSet previousWorklist;
+    TreeSet worklist;
+    TreeSet previousWorklist;
     protected void wroteTo( VarNode v ) {
 	worklist.add( v );
 	changed++;
@@ -15,13 +19,14 @@ class WorklistScheduler extends Scheduler {
     }
     protected void compute() {
 	int iterNum = 0;
-	worklist = new HashSet(4);
+	worklist = new TreeSet();
+	new VarNodeDFS( b.getSimple() ).apply();
 	computeAllocs();
 	do {
 	    System.out.println( "Iteration: "+(++iterNum) );
 	    changed = 0;
 	    previousWorklist = worklist;
-	    worklist = new HashSet(4);
+	    worklist = new TreeSet();
 	    {
 		for( Iterator fromIt = previousWorklist.iterator();
 			fromIt.hasNext(); ) {
@@ -62,7 +67,7 @@ class WorklistScheduler extends Scheduler {
 	    b.nextIter();
 	} while( changed > 0 );
     }
-    WorklistScheduler( Handler h ) {
+    DepthFirstScheduler( Handler h ) {
 	super( h );
     }
 }

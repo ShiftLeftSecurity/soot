@@ -15,6 +15,9 @@ public class SiteDotField
 	SiteDotField ret = (SiteDotField) nodeMap.get( p );
 	if( ret == null ) {
 	    ret = new SiteDotField( o1, o2 );
+	    if( !( ret.type instanceof RefLikeType ) ) {
+		return null;
+	    }
 	    nodeMap.put( p, ret );
 	}
 	return ret;
@@ -39,7 +42,7 @@ public class SiteDotField
 		type = Scene.v().getSootClass( "java.lang.Object" ).getType();
 	    } else {
 		ArrayType arrayType = (ArrayType) o1.getType();
-		type = arrayType.baseType;
+		type = arrayType.getArrayBaseType();
 	    }
 	}
     }

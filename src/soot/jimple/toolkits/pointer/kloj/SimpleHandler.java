@@ -13,6 +13,7 @@ class SimpleHandler extends Handler {
 	sites.forall( new RasVisitor() {
 	    public void visit( AllocNode a ) {
 		SiteDotField aDotF = SiteDotField.v( a, from.getField() );
+		if( aDotF == null ) return;
 		if( b.hasAllocSites( aDotF ) ) {
 		    b.addAllocSites( to, b.getAllocSites( aDotF ) );
 		}
@@ -27,6 +28,7 @@ class SimpleHandler extends Handler {
 	sites.forall( new RasVisitor() {
 	    public void visit( AllocNode a ) {
 		SiteDotField aDotF = SiteDotField.v( a, f );
+		if( aDotF == null ) return;
 		b.addAllocSites( aDotF, fromSites );
 	    }
 	} );
