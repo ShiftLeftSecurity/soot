@@ -164,6 +164,12 @@ Composite wjopwjop_siChild = wjopwjop_siCreate(getPageContainer());
 
 Composite wjapwjap_raChild = wjapwjap_raCreate(getPageContainer());
 
+Composite wjapwjap_umtChild = wjapwjap_umtCreate(getPageContainer());
+
+Composite wjapwjap_uftChild = wjapwjap_uftCreate(getPageContainer());
+
+Composite wjapwjap_tqtChild = wjapwjap_tqtCreate(getPageContainer());
+
 Composite sopsop_cpfChild = sopsop_cpfCreate(getPageContainer());
 
 Composite jopjop_cseChild = jopjop_cseCreate(getPageContainer());
@@ -737,6 +743,30 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		getwjapwjap_raenabled_widget().getButton().addSelectionListener(this);
 		
 		
+		makeNewEnableGroup("wjap", "wjap.umt");
+		
+		
+		addToEnableGroup("wjap", "wjap.umt", getwjapwjap_umtenabled_widget(), "enabled");
+		
+		getwjapwjap_umtenabled_widget().getButton().addSelectionListener(this);
+		
+		
+		makeNewEnableGroup("wjap", "wjap.uft");
+		
+		
+		addToEnableGroup("wjap", "wjap.uft", getwjapwjap_uftenabled_widget(), "enabled");
+		
+		getwjapwjap_uftenabled_widget().getButton().addSelectionListener(this);
+		
+		
+		makeNewEnableGroup("wjap", "wjap.tqt");
+		
+		
+		addToEnableGroup("wjap", "wjap.tqt", getwjapwjap_tqtenabled_widget(), "enabled");
+		
+		getwjapwjap_tqtenabled_widget().getButton().addSelectionListener(this);
+		
+		
 		makeNewEnableGroup("shimple");
 		
 		
@@ -985,6 +1015,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		
 		addToEnableGroup("jap", "jap.abc", getjapjap_abcprofiling_widget(), "profiling");
 		
+		addToEnableGroup("jap", "jap.abc", getjapjap_abcadd_color_tags_widget(), "add-color-tags");
+		
 		getjapjap_abcenabled_widget().getButton().addSelectionListener(this);
 		
 		getjapjap_abcwith_all_widget().getButton().addSelectionListener(this);
@@ -1000,6 +1032,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		getjapjap_abcwith_rectarray_widget().getButton().addSelectionListener(this);
 		
 		getjapjap_abcprofiling_widget().getButton().addSelectionListener(this);
+		
+		getjapjap_abcadd_color_tags_widget().getButton().addSelectionListener(this);
 		
 		
 		makeNewEnableGroup("jap", "jap.profiling");
@@ -2462,6 +2496,36 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 			getConfig().put(getwjapwjap_raenabled_widget().getAlias(), new Boolean(boolRes));
 		}
 		
+		boolRes = getwjapwjap_umtenabled_widget().getButton().getSelection();
+		
+		
+		defBoolRes = false;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getwjapwjap_umtenabled_widget().getAlias(), new Boolean(boolRes));
+		}
+		
+		boolRes = getwjapwjap_uftenabled_widget().getButton().getSelection();
+		
+		
+		defBoolRes = false;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getwjapwjap_uftenabled_widget().getAlias(), new Boolean(boolRes));
+		}
+		
+		boolRes = getwjapwjap_tqtenabled_widget().getButton().getSelection();
+		
+		
+		defBoolRes = false;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getwjapwjap_tqtenabled_widget().getAlias(), new Boolean(boolRes));
+		}
+		
 		boolRes = getshimpleenabled_widget().getButton().getSelection();
 		
 		
@@ -2890,6 +2954,16 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 
 		if (boolRes != defBoolRes) {
 			getConfig().put(getjapjap_abcprofiling_widget().getAlias(), new Boolean(boolRes));
+		}
+		
+		boolRes = getjapjap_abcadd_color_tags_widget().getButton().getSelection();
+		
+		
+		defBoolRes = false;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getjapjap_abcadd_color_tags_widget().getAlias(), new Boolean(boolRes));
 		}
 		
 		boolRes = getjapjap_profilingenabled_widget().getButton().getSelection();
@@ -3679,6 +3753,36 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 
 			
 			subSectParent = wjap_wjap_ra_branch;
+			
+			
+			SootOption wjap_wjap_umt_branch = new SootOption("Unreachable Method Tagger", "wjapwjap_umt");
+			subParent.addChild(wjap_wjap_umt_branch);
+
+
+			
+
+			
+			subSectParent = wjap_wjap_umt_branch;
+			
+			
+			SootOption wjap_wjap_uft_branch = new SootOption("Unreachable Fields Tagger", "wjapwjap_uft");
+			subParent.addChild(wjap_wjap_uft_branch);
+
+
+			
+
+			
+			subSectParent = wjap_wjap_uft_branch;
+			
+			
+			SootOption wjap_wjap_tqt_branch = new SootOption("Tightest Qualifiers Tagger", "wjapwjap_tqt");
+			subParent.addChild(wjap_wjap_tqt_branch);
+
+
+			
+
+			
+			subSectParent = wjap_wjap_tqt_branch;
 			
 			
 			//Shimple Control
@@ -5355,6 +5459,36 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		return wjapwjap_raenabled_widget;
 	}	
 	
+	private BooleanOptionWidget wjapwjap_umtenabled_widget;
+	
+	private void setwjapwjap_umtenabled_widget(BooleanOptionWidget widget) {
+		wjapwjap_umtenabled_widget = widget;
+	}
+	
+	public BooleanOptionWidget getwjapwjap_umtenabled_widget() {
+		return wjapwjap_umtenabled_widget;
+	}	
+	
+	private BooleanOptionWidget wjapwjap_uftenabled_widget;
+	
+	private void setwjapwjap_uftenabled_widget(BooleanOptionWidget widget) {
+		wjapwjap_uftenabled_widget = widget;
+	}
+	
+	public BooleanOptionWidget getwjapwjap_uftenabled_widget() {
+		return wjapwjap_uftenabled_widget;
+	}	
+	
+	private BooleanOptionWidget wjapwjap_tqtenabled_widget;
+	
+	private void setwjapwjap_tqtenabled_widget(BooleanOptionWidget widget) {
+		wjapwjap_tqtenabled_widget = widget;
+	}
+	
+	public BooleanOptionWidget getwjapwjap_tqtenabled_widget() {
+		return wjapwjap_tqtenabled_widget;
+	}	
+	
 	private BooleanOptionWidget shimpleenabled_widget;
 	
 	private void setshimpleenabled_widget(BooleanOptionWidget widget) {
@@ -5787,6 +5921,16 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 	
 	public BooleanOptionWidget getjapjap_abcprofiling_widget() {
 		return japjap_abcprofiling_widget;
+	}	
+	
+	private BooleanOptionWidget japjap_abcadd_color_tags_widget;
+	
+	private void setjapjap_abcadd_color_tags_widget(BooleanOptionWidget widget) {
+		japjap_abcadd_color_tags_widget = widget;
+	}
+	
+	public BooleanOptionWidget getjapjap_abcadd_color_tags_widget() {
+		return japjap_abcadd_color_tags_widget;
 	}	
 	
 	private BooleanOptionWidget japjap_profilingenabled_widget;
@@ -9613,6 +9757,141 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 
 
 
+	private Composite wjapwjap_umtCreate(Composite parent) {
+		String defKey;
+		String defaultString;
+		boolean defaultBool = false;
+		
+		Group editGroupwjapwjap_umt = new Group(parent, SWT.NONE);
+		GridLayout layout = new GridLayout();
+		editGroupwjapwjap_umt.setLayout(layout);
+	
+	 	editGroupwjapwjap_umt.setText("Unreachable Method Tagger");
+	 	
+		editGroupwjapwjap_umt.setData("id", "wjapwjap_umt");
+		
+		String descwjapwjap_umt = "Tags all unreachable methods";	
+		if (descwjapwjap_umt.length() > 0) {
+			Label descLabelwjapwjap_umt = new Label(editGroupwjapwjap_umt, SWT.WRAP);
+			descLabelwjapwjap_umt.setText(descwjapwjap_umt);
+		}
+		OptionData [] data;	
+		
+		
+		
+		
+		defKey = "p"+" "+"wjap.umt"+" "+"enabled";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = false;
+			
+		}
+
+		setwjapwjap_umtenabled_widget(new BooleanOptionWidget(editGroupwjapwjap_umt, SWT.NONE, new OptionData("Enabled", "p", "wjap.umt","enabled", "\n", defaultBool)));
+		
+		
+
+		
+		return editGroupwjapwjap_umt;
+	}
+
+
+
+	private Composite wjapwjap_uftCreate(Composite parent) {
+		String defKey;
+		String defaultString;
+		boolean defaultBool = false;
+		
+		Group editGroupwjapwjap_uft = new Group(parent, SWT.NONE);
+		GridLayout layout = new GridLayout();
+		editGroupwjapwjap_uft.setLayout(layout);
+	
+	 	editGroupwjapwjap_uft.setText("Unreachable Fields Tagger");
+	 	
+		editGroupwjapwjap_uft.setData("id", "wjapwjap_uft");
+		
+		String descwjapwjap_uft = "Tags all unreachable fields";	
+		if (descwjapwjap_uft.length() > 0) {
+			Label descLabelwjapwjap_uft = new Label(editGroupwjapwjap_uft, SWT.WRAP);
+			descLabelwjapwjap_uft.setText(descwjapwjap_uft);
+		}
+		OptionData [] data;	
+		
+		
+		
+		
+		defKey = "p"+" "+"wjap.uft"+" "+"enabled";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = false;
+			
+		}
+
+		setwjapwjap_uftenabled_widget(new BooleanOptionWidget(editGroupwjapwjap_uft, SWT.NONE, new OptionData("Enabled", "p", "wjap.uft","enabled", "\n", defaultBool)));
+		
+		
+
+		
+		return editGroupwjapwjap_uft;
+	}
+
+
+
+	private Composite wjapwjap_tqtCreate(Composite parent) {
+		String defKey;
+		String defaultString;
+		boolean defaultBool = false;
+		
+		Group editGroupwjapwjap_tqt = new Group(parent, SWT.NONE);
+		GridLayout layout = new GridLayout();
+		editGroupwjapwjap_tqt.setLayout(layout);
+	
+	 	editGroupwjapwjap_tqt.setText("Tightest Qualifiers Tagger");
+	 	
+		editGroupwjapwjap_tqt.setData("id", "wjapwjap_tqt");
+		
+		String descwjapwjap_tqt = "Tags all qualifiers that could be tighter";	
+		if (descwjapwjap_tqt.length() > 0) {
+			Label descLabelwjapwjap_tqt = new Label(editGroupwjapwjap_tqt, SWT.WRAP);
+			descLabelwjapwjap_tqt.setText(descwjapwjap_tqt);
+		}
+		OptionData [] data;	
+		
+		
+		
+		
+		defKey = "p"+" "+"wjap.tqt"+" "+"enabled";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = false;
+			
+		}
+
+		setwjapwjap_tqtenabled_widget(new BooleanOptionWidget(editGroupwjapwjap_tqt, SWT.NONE, new OptionData("Enabled", "p", "wjap.tqt","enabled", "\n", defaultBool)));
+		
+		
+
+		
+		return editGroupwjapwjap_tqt;
+	}
+
+
+
 	private Composite shimpleCreate(Composite parent) {
 		String defKey;
 		String defaultString;
@@ -10976,6 +11255,22 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 
 		setjapjap_abcprofiling_widget(new BooleanOptionWidget(editGroupjapjap_abc, SWT.NONE, new OptionData("Profiling", "p", "jap.abc","profiling", "\nProfile the results of array bounds check analysis. The \ninserted profiling code assumes the existence of a MultiCounter \nclass implementing the methods invoked. For details, see the \nArrayBoundsChecker source code.", defaultBool)));
+		
+		
+		
+		defKey = "p"+" "+"jap.abc"+" "+"add-color-tags";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = false;
+			
+		}
+
+		setjapjap_abcadd_color_tags_widget(new BooleanOptionWidget(editGroupjapjap_abc, SWT.NONE, new OptionData("Add Color Tags", "p", "jap.abc","add-color-tags", "\nAdd color tags to the results of the array bounds check \nanalysis.", defaultBool)));
 		
 		
 

@@ -14,3 +14,15 @@ soot.version=2.1.0-custom
 ## Location in which to generate Soot release tarballs.
 release.loc=/tmp
 
+## Location of JFlex classes jar file
+jflex.jar=${user.home}/JFlex.jar
+
+## Location of Jedd runtime classes jar file
+jedd.runtime.jar=${user.home}/jedd-runtime.jar
+
+## Location of Jedd translator classes jar file
+jedd.translator.jar=${user.home}/jedd-translator.jar
+
+## Command to invoke SAT solver
+sat.solver.cmd=${user.home}/zchaff.2001.2.17.linux
+
