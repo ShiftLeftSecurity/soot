@@ -75,7 +75,8 @@ public class CFGOptionMatcher {
 	    }
 	}
 	if (match == -1) {
-	    G.v().out.println(quarry + " does not match any value.");
+	    G.v().out.println("\"" + quarry + "\"" + 
+			      " does not match any value.");
 	    throw new CompilationDeathException(
 		CompilationDeathException.COMPILATION_ABORTED,
 		"Option parse error");
