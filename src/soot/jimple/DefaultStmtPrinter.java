@@ -218,7 +218,7 @@ public class DefaultStmtPrinter implements StmtPrinter
 
         // Create statement name table
         {
-            Iterator boxIt = b.getTargetUnitBoxes().iterator();
+            Iterator boxIt = b.getUnitBoxes(true).iterator();
 
             Set labelStmts = new HashSet();
 

@@ -335,38 +335,23 @@ public abstract class Body extends AbstractHost implements Serializable
         return unitChain;
     }
 
-    /*
-    public List getUnitBoxes()
-    {
-
-System.out.println("WARNING: Body.getUnitBoxes() is now deprecated.\n\n" +
-
-"With the introduction of PhiExpr, getUnitBoxes now returns more than just\n"+
-"the UnitBoxes for targets of normal control flow statements.  If you wish\n"+
-"to get all the UnitBoxes for pointer updates, use getAllUnitBoxes(),\n"+
-"otherwise use getTargetUnitBoxes() to obtain the UnitBoxes for Units\n"+
-"which are the target of normal control flow.\n\n"+
-
-"Calling getAllUnitBoxes()...")
-
-        return getAllUnitBoxes();
-    }
-    */
-
     /**
      *   Returns the result of iterating through all Units in this
      *   body and querying them for their UnitBoxes.  All UnitBoxes
      *   thus found are returned. Branching Units and statements which
      *   use PhiExpr will have UnitBoxes; a UnitBox contains a Unit
-     *   that is either a target of a branch or is being used as an
-     *   internal pointer.
-     *
+     *   that is either a target of a branch or is being used as a
+     *   pointer to the end of a CFG block.
+     *   <p>
+     *   This method is typically used for pointer patching, eg when
+     *   the unit chain is cloned.
+     *   <p>
      *   @return a list of all the UnitBoxes held by this body's units.
      *     
      *   @see UnitBox
-     *   @see #getTargetUnitBoxes
-     *   @see Unit#getUnitBoxes
-     *   @see PhiExpr#getUnitBoxes
+     *   @see #getUnitBoxes(boolean)
+     *   @see Unit#getUnitBoxes()
+     *   @see soot.shimple.PhiExpr#getUnitBoxes()
      **/
     public List getAllUnitBoxes() 
     {
@@ -402,27 +387,40 @@ System.out.println("WARNING: Body.getUnitBoxes() is now deprecated.\n\n" +
     }
 
     /**
-     *   Returns the result of iterating through all branching Units
-     *   in this body and querying them for their UnitBoxes.  All
-     *   UnitBoxes thus found are returned. These UnitBoxes
-     *   contains a Unit that is the target of a branch.
-     *
+     *   If branchTarget is true, returns the result of iterating
+     *   through all branching Units in this body and querying them
+     *   for their UnitBoxes. These UnitBoxes contains a Unit that is
+     *   the target of a branch.  This is typically used for labeling
+     *   blocks or updating the targets of branching statements.
+     *   <p>
+     *   If branchTarget is false, returns the result of iterating
+     *   through the non-branching Units in this body and querying them
+     *   for their UnitBoxes.  Any such UnitBoxes (typically from PhiExpr)
+     *   contain a Unit that indicates the end of a CFG block.
+     *   <p>
      *   @return a list of all the UnitBoxes held by this body's
      *   branching units.
      *     
      *   @see UnitBox
-     *   @see #getAllUnitBoxes
-     *   @see Unit#getUnitBoxes
-     **/
-    public List getTargetUnitBoxes() 
+     *   @see #getAllUnitBoxes()
+     *   @see Unit#getUnitBoxes()
+     *   @see soot.shimple.PhiExpr#getUnitBoxes()
+    **/
+    public List getUnitBoxes(boolean branchTarget) 
     {
         ArrayList unitBoxList = new ArrayList();
         {
 	    Iterator it = unitChain.iterator();
 	    while(it.hasNext()) {
 		Unit item = (Unit) it.next();
-                if(item.branches())
-                    unitBoxList.addAll(item.getUnitBoxes());  
+                if(branchTarget){
+                    if(item.branches())
+                        unitBoxList.addAll(item.getUnitBoxes());
+                }
+                else{
+                    if(!item.branches())
+                        unitBoxList.addAll(item.getUnitBoxes());
+                }
 	    }
 	}
 
