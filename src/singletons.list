@@ -157,6 +157,7 @@ UnreachableMethodsTagger
 UnreachableFieldsTagger
 TightestQualifiersTagger
 ParameterAliasTagger
+ReachingDefsTagger
 PhaseDumper
 AltClassLoader
 ThrowableSet.Manager
