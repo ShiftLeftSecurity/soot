@@ -31,7 +31,7 @@ public class TradMethodPAGContextifier extends AbsMethodPAGContextifier
     public TradMethodPAGContextifier(
         Rsrc_dst simple,
         Rsrc_fld_dst load,
-        Rsrc_fld_dst store,
+        Rsrc_dst_fld store,
         Robj_var alloc,
 
         Rvar_method_type locals,
@@ -46,7 +46,7 @@ public class TradMethodPAGContextifier extends AbsMethodPAGContextifier
 
         Qsrcc_src_dstc_dst csimple,
         Qsrcc_src_fld_dstc_dst cload,
-        Qsrcc_src_fld_dstc_dst cstore,
+        Qsrcc_src_dstc_dst_fld cstore,
         Qobjc_obj_varc_var calloc ) 
     {
         super(
@@ -92,7 +92,7 @@ public class TradMethodPAGContextifier extends AbsMethodPAGContextifier
             }
         }
         for( Iterator tIt = store.iterator(); tIt.hasNext(); ) {
-            final Rsrc_fld_dst.Tuple t = (Rsrc_fld_dst.Tuple) tIt.next();
+            final Rsrc_dst_fld.Tuple t = (Rsrc_dst_fld.Tuple) tIt.next();
             if( global(t.src()) ) {
                 if( global(t.dst()) ) {
                     addStore( null, t.src(), t.fld(), null, t.dst() );
@@ -153,7 +153,7 @@ public class TradMethodPAGContextifier extends AbsMethodPAGContextifier
                 addSimple( t.ctxt(), e.src(), t.ctxt(), e.dst() );
             }
             for( Iterator eIt = mpag.rstore.copy().iterator(); eIt.hasNext(); ) {
-                final Rsrc_fld_dst.Tuple e = (Rsrc_fld_dst.Tuple) eIt.next();
+                final Rsrc_dst_fld.Tuple e = (Rsrc_dst_fld.Tuple) eIt.next();
                 addStore( t.ctxt(), e.src(), e.fld(), t.ctxt(), e.dst() );
             }
             for( Iterator eIt = mpag.rload.copy().iterator(); eIt.hasNext(); ) {
@@ -213,7 +213,7 @@ public class TradMethodPAGContextifier extends AbsMethodPAGContextifier
     private void addStore( Context srcc, VarNode src, PaddleField fld, Context dstc, VarNode dst ) {
         if( src instanceof GlobalVarNode ) srcc = null;
         if( dst instanceof GlobalVarNode ) dstc = null;
-        cstore.add( srcc, src, fld, dstc, dst );
+        cstore.add( srcc, src, dstc, dst, fld );
     }
 
     private void addLoad( Context srcc, VarNode src, PaddleField fld, Context dstc, VarNode dst ) {
@@ -255,11 +255,11 @@ public class TradMethodPAGContextifier extends AbsMethodPAGContextifier
     private static class MethodPAG {
         Qsrc_dstTrad simple = new Qsrc_dstTrad("mpagsimple");
         Qsrc_fld_dstTrad load = new Qsrc_fld_dstTrad("mpagload");
-        Qsrc_fld_dstTrad store = new Qsrc_fld_dstTrad("mpagstore");
+        Qsrc_dst_fldTrad store = new Qsrc_dst_fldTrad("mpagstore");
         Qobj_varTrad alloc = new Qobj_varTrad("mpagalloc");
         Rsrc_dstTrad rsimple = (Rsrc_dstTrad) simple.reader("mpag");
         Rsrc_fld_dstTrad rload = (Rsrc_fld_dstTrad) load.reader("mpag");
-        Rsrc_fld_dstTrad rstore = (Rsrc_fld_dstTrad) store.reader("mpag");
+        Rsrc_dst_fldTrad rstore = (Rsrc_dst_fldTrad) store.reader("mpag");
         Robj_varTrad ralloc = (Robj_varTrad) alloc.reader("mpag");
     }
 

@@ -45,15 +45,15 @@ public class BDDKCFAStaticContextManager extends AbsStaticContextManager {
                                                                           new PhysicalDomain[] { ST.v() },
                                                                           new PhysicalDomain[] { C2.v() }));
         newEdges.eq(jedd.internal.Jedd.v().cast((jedd.internal.RelationContainer)
-                                                  new jedd.internal.RelationContainer(new Attribute[] { tgtm.v(), tgtc.v(), stmt.v(), srcc.v(), srcm.v(), kind.v() },
-                                                                                      new PhysicalDomain[] { MT.v(), C2.v(), ST.v(), C1.v(), MS.v(), KD.v() },
+                                                  new jedd.internal.RelationContainer(new Attribute[] { stmt.v(), tgtm.v(), kind.v(), srcm.v(), srcc.v(), tgtc.v() },
+                                                                                      new PhysicalDomain[] { ST.v(), MT.v(), KD.v(), MS.v(), C1.v(), C2.v() },
                                                                                       ("newEdges.applyShifter(shifter) at /tmp/fixing-paddle/src/soo" +
                                                                                        "t/jimple/paddle/BDDKCFAStaticContextManager.jedd:51,12-20"),
                                                                                       newEdges).applyShifter(shifter),
                                                 new Attribute[] { srcc.v(), srcm.v(), stmt.v(), kind.v(), tgtc.v(), tgtm.v() },
                                                 new PhysicalDomain[] { C1.v(), MS.v(), ST.v(), KD.v(), C2.v(), MT.v() }));
-        out.add(new jedd.internal.RelationContainer(new Attribute[] { tgtm.v(), tgtc.v(), stmt.v(), srcc.v(), srcm.v(), kind.v() },
-                                                    new PhysicalDomain[] { MT.v(), C2.v(), ST.v(), C1.v(), MS.v(), KD.v() },
+        out.add(new jedd.internal.RelationContainer(new Attribute[] { stmt.v(), tgtm.v(), kind.v(), srcm.v(), srcc.v(), tgtc.v() },
+                                                    new PhysicalDomain[] { ST.v(), MT.v(), KD.v(), MS.v(), C1.v(), C2.v() },
                                                     ("out.add(newEdges) at /tmp/fixing-paddle/src/soot/jimple/padd" +
                                                      "le/BDDKCFAStaticContextManager.jedd:52,8-11"),
                                                     newEdges));

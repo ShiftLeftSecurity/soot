@@ -28,13 +28,13 @@ public class BDDInsensitiveVirtualContextManager extends AbsVirtualContextManage
                                                "src/soot/jimple/paddle/BDDInsensitiveVirtualContextManager.j" +
                                                "edd:35,45-51"),
                                               jedd.internal.Jedd.v().join(jedd.internal.Jedd.v().read(jedd.internal.Jedd.v().project(in.get(),
-                                                                                                                                     new jedd.PhysicalDomain[] { H1.v(), V1.v(), C2.v() })),
+                                                                                                                                     new jedd.PhysicalDomain[] { C2.v(), V1.v(), H1.v() })),
                                                                           jedd.internal.Jedd.v().literal(new Object[] { null, null },
                                                                                                          new jedd.Attribute[] { srcc.v(), tgtc.v() },
                                                                                                          new jedd.PhysicalDomain[] { C1.v(), C2.v() }),
                                                                           new jedd.PhysicalDomain[] {  }));
-        out.add(new jedd.internal.RelationContainer(new jedd.Attribute[] { tgtm.v(), tgtc.v(), stmt.v(), srcc.v(), srcm.v(), kind.v() },
-                                                    new jedd.PhysicalDomain[] { MT.v(), C2.v(), ST.v(), C1.v(), MS.v(), KD.v() },
+        out.add(new jedd.internal.RelationContainer(new jedd.Attribute[] { stmt.v(), tgtm.v(), kind.v(), srcm.v(), srcc.v(), tgtc.v() },
+                                                    new jedd.PhysicalDomain[] { ST.v(), MT.v(), KD.v(), MS.v(), C1.v(), C2.v() },
                                                     ("out.add(newOut) at /tmp/fixing-paddle/src/soot/jimple/paddle" +
                                                      "/BDDInsensitiveVirtualContextManager.jedd:38,8-11"),
                                                     newOut));

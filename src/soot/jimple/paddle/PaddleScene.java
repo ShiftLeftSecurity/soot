@@ -81,12 +81,12 @@ public class PaddleScene
 
     public Qsrc_dst simple;
     public Qsrc_fld_dst load;
-    public Qsrc_fld_dst store;
+    public Qsrc_dst_fld store;
     public Qobj_var alloc;
 
     public Qsrcc_src_dstc_dst csimple;
     public Qsrcc_src_fld_dstc_dst cload;
-    public Qsrcc_src_fld_dstc_dst cstore;
+    public Qsrcc_src_dstc_dst_fld cstore;
     public Qobjc_obj_varc_var calloc;
 
     public Qvarc_var_objc_obj paout;
@@ -254,12 +254,12 @@ public class PaddleScene
 
         simple = new Qsrc_dstSet("simple");
         load = new Qsrc_fld_dstSet("load");
-        store = new Qsrc_fld_dstSet("store");
+        store = new Qsrc_dst_fldSet("store");
         alloc = new Qobj_varSet("alloc");
 
         csimple = new Qsrcc_src_dstc_dstSet("csimple");
         cload = new Qsrcc_src_fld_dstc_dstSet("cload");
-        cstore = new Qsrcc_src_fld_dstc_dstSet("cstore");
+        cstore = new Qsrcc_src_dstc_dst_fldSet("cstore");
         calloc = new Qobjc_obj_varc_varSet("calloc");
 
         paout = new Qvarc_var_objc_objSet("paout");
@@ -293,12 +293,12 @@ public class PaddleScene
 
         simple = new Qsrc_dstBDD("simple");
         load = new Qsrc_fld_dstBDD("load");
-        store = new Qsrc_fld_dstBDD("store");
+        store = new Qsrc_dst_fldBDD("store");
         alloc = new Qobj_varBDD("alloc");
 
         csimple = new Qsrcc_src_dstc_dstBDD("csimple");
         cload = new Qsrcc_src_fld_dstc_dstBDD("cload");
-        cstore = new Qsrcc_src_fld_dstc_dstBDD("cstore");
+        cstore = new Qsrcc_src_dstc_dst_fldBDD("cstore");
         calloc = new Qobjc_obj_varc_varBDD("calloc");
 
         paout = new Qvarc_var_objc_objBDD("paout");
@@ -327,8 +327,8 @@ public class PaddleScene
         mpb = new TradMethodPAGBuilder( rmout.reader("mpb"), simple, load, store, alloc );
         mpc = new BDDMethodPAGContextifier(
                 simple.reader("mpc"),
-                store.reader("mpc"),
                 load.reader("mpc"),
+                store.reader("mpc"),
                 alloc.reader("mpc"),
                 locals.reader("mpc"),
                 globals.reader("mpc"),
@@ -338,7 +338,7 @@ public class PaddleScene
                 parms.reader("mpc"),
                 rets.reader("mpc"),
                 cgout.reader("mpc"),
-                csimple, cstore, cload, calloc );
+                csimple, cload, cstore, calloc );
         ecs = new BDDEdgeContextStripper( cgout.reader("ecs"), ecsout );
         ceh = new TradCallEdgeHandler( ecsout.reader("ceh"), parms, rets );
 
@@ -404,12 +404,12 @@ public class PaddleScene
 
         simple = new Qsrc_dstTrad("simple");
         load = new Qsrc_fld_dstTrad("load");
-        store = new Qsrc_fld_dstTrad("store");
+        store = new Qsrc_dst_fldTrad("store");
         alloc = new Qobj_varTrad("alloc");
 
         csimple = new Qsrcc_src_dstc_dstTrad("csimple");
         cload = new Qsrcc_src_fld_dstc_dstTrad("cload");
-        cstore = new Qsrcc_src_fld_dstc_dstTrad("cstore");
+        cstore = new Qsrcc_src_dstc_dst_fldTrad("cstore");
         calloc = new Qobjc_obj_varc_varTrad("calloc");
 
         paout = new Qvarc_var_objc_objTrad("paout");
@@ -442,12 +442,12 @@ public class PaddleScene
 
         simple = new Qsrc_dstDebug("simple");
         load = new Qsrc_fld_dstDebug("load");
-        store = new Qsrc_fld_dstDebug("store");
+        store = new Qsrc_dst_fldDebug("store");
         alloc = new Qobj_varDebug("alloc");
 
         csimple = new Qsrcc_src_dstc_dstDebug("csimple");
         cload = new Qsrcc_src_fld_dstc_dstDebug("cload");
-        cstore = new Qsrcc_src_fld_dstc_dstDebug("cstore");
+        cstore = new Qsrcc_src_dstc_dst_fldDebug("cstore");
         calloc = new Qobjc_obj_varc_varDebug("calloc");
 
         paout = new Qvarc_var_objc_objDebug("paout");
@@ -478,12 +478,12 @@ public class PaddleScene
 
         simple = new Qsrc_dstTrace("simple");
         load = new Qsrc_fld_dstTrace("load");
-        store = new Qsrc_fld_dstTrace("store");
+        store = new Qsrc_dst_fldTrace("store");
         alloc = new Qobj_varTrace("alloc");
 
         csimple = new Qsrcc_src_dstc_dstTrace("csimple");
         cload = new Qsrcc_src_fld_dstc_dstTrace("cload");
-        cstore = new Qsrcc_src_fld_dstc_dstTrace("cstore");
+        cstore = new Qsrcc_src_dstc_dst_fldTrace("cstore");
         calloc = new Qobjc_obj_varc_varTrace("calloc");
 
         paout = new Qvarc_var_objc_objTrace("paout");
@@ -515,12 +515,12 @@ public class PaddleScene
 
         simple = new Qsrc_dstNumTrace("simple");
         load = new Qsrc_fld_dstNumTrace("load");
-        store = new Qsrc_fld_dstNumTrace("store");
+        store = new Qsrc_dst_fldNumTrace("store");
         alloc = new Qobj_varNumTrace("alloc");
 
         csimple = new Qsrcc_src_dstc_dstNumTrace("csimple");
         cload = new Qsrcc_src_fld_dstc_dstNumTrace("cload");
-        cstore = new Qsrcc_src_fld_dstc_dstNumTrace("cstore");
+        cstore = new Qsrcc_src_dstc_dst_fldNumTrace("cstore");
         calloc = new Qobjc_obj_varc_varNumTrace("calloc");
 
         paout = new Qvarc_var_objc_objNumTrace("paout");
@@ -556,8 +556,8 @@ public class PaddleScene
         mpb = new TradMethodPAGBuilder( rmout.reader("mpb"), simple, load, store, alloc );
         mpc = new TradMethodPAGContextifier(
                 simple.reader("mpc"),
-                store.reader("mpc"),
                 load.reader("mpc"),
+                store.reader("mpc"),
                 alloc.reader("mpc"),
                 locals.reader("mpc"),
                 globals.reader("mpc"),
@@ -567,7 +567,7 @@ public class PaddleScene
                 parms.reader("mpc"),
                 rets.reader("mpc"),
                 cgout.reader("mpc"),
-                csimple, cstore, cload, calloc );
+                csimple, cload, cstore, calloc );
         ecs = new TradEdgeContextStripper( cgout.reader("ecs"), ecsout );
         ceh = new TradCallEdgeHandler( ecsout.reader("ceh"), parms, rets );
 

@@ -25,15 +25,15 @@ public class BDDObjSensVirtualContextManager extends AbsVirtualContextManager {
                                                "/BDDObjSensVirtualContextManager.jedd:35,45-51"),
                                               jedd.internal.Jedd.v().project(in.get(),
                                                                              new jedd.PhysicalDomain[] { V1.v() }));
-        out.add(new jedd.internal.RelationContainer(new jedd.Attribute[] { tgtm.v(), tgtc.v(), stmt.v(), srcc.v(), srcm.v(), kind.v() },
-                                                    new jedd.PhysicalDomain[] { MT.v(), C2.v(), ST.v(), C1.v(), MS.v(), KD.v() },
+        out.add(new jedd.internal.RelationContainer(new jedd.Attribute[] { stmt.v(), tgtm.v(), kind.v(), srcm.v(), srcc.v(), tgtc.v() },
+                                                    new jedd.PhysicalDomain[] { ST.v(), MT.v(), KD.v(), MS.v(), C1.v(), C2.v() },
                                                     ("out.add(jedd.internal.Jedd.v().replace(newOut, new jedd.Phys" +
                                                      "icalDomain[...], new jedd.PhysicalDomain[...])) at /tmp/fixi" +
                                                      "ng-paddle/src/soot/jimple/paddle/BDDObjSensVirtualContextMan" +
                                                      "ager.jedd:37,8-11"),
                                                     jedd.internal.Jedd.v().replace(newOut,
-                                                                                   new jedd.PhysicalDomain[] { H1.v(), C2.v() },
-                                                                                   new jedd.PhysicalDomain[] { C2.v(), C1.v() })));
+                                                                                   new jedd.PhysicalDomain[] { C2.v(), H1.v() },
+                                                                                   new jedd.PhysicalDomain[] { C1.v(), C2.v() })));
         return !jedd.internal.Jedd.v().equals(jedd.internal.Jedd.v().read(newOut), jedd.internal.Jedd.v().falseBDD());
     }
 }

@@ -32,7 +32,7 @@ public class BDDMethodPAGContextifier extends AbsMethodPAGContextifier
     public BDDMethodPAGContextifier(
         Rsrc_dst simple,
         Rsrc_fld_dst load,
-        Rsrc_fld_dst store,
+        Rsrc_dst_fld store,
         Robj_var alloc,
 
         Rvar_method_type locals,
@@ -47,7 +47,7 @@ public class BDDMethodPAGContextifier extends AbsMethodPAGContextifier
 
         Qsrcc_src_dstc_dst csimple,
         Qsrcc_src_fld_dstc_dst cload,
-        Qsrcc_src_fld_dstc_dst cstore,
+        Qsrcc_src_dstc_dst_fld cstore,
         Qobjc_obj_varc_var calloc ) 
     {
         super(

@@ -56,10 +56,10 @@ public class BDDTypeManager extends AbsTypeManager {
                                                "ains.V1, soot.jimple.paddle.bdddomains.type:soot.jimple.padd" +
                                                "le.bdddomains.T2> newVars; at /tmp/fixing-paddle/src/soot/ji" +
                                                "mple/paddle/BDDTypeManager.jedd:46,20-27"));
-        newVars.eq(jedd.internal.Jedd.v().replace(jedd.internal.Jedd.v().project(locals.get(),
-                                                                                 new PhysicalDomain[] { MS.v() }),
-                                                  new PhysicalDomain[] { T1.v() },
-                                                  new PhysicalDomain[] { T2.v() }));
+        newVars.eq(jedd.internal.Jedd.v().project(jedd.internal.Jedd.v().replace(locals.get(),
+                                                                                 new PhysicalDomain[] { T1.v() },
+                                                                                 new PhysicalDomain[] { T2.v() }),
+                                                  new PhysicalDomain[] { MS.v() }));
         newVars.eqUnion(jedd.internal.Jedd.v().replace(globals.get(),
                                                        new PhysicalDomain[] { T1.v() },
                                                        new PhysicalDomain[] { T2.v() }));
@@ -100,8 +100,8 @@ public class BDDTypeManager extends AbsTypeManager {
     
     public jedd.internal.RelationContainer get() {
         update();
-        return new jedd.internal.RelationContainer(new Attribute[] { obj.v(), var.v() },
-                                                   new PhysicalDomain[] { H1.v(), V1.v() },
+        return new jedd.internal.RelationContainer(new Attribute[] { var.v(), obj.v() },
+                                                   new PhysicalDomain[] { V1.v(), H1.v() },
                                                    ("return result; at /tmp/fixing-paddle/src/soot/jimple/paddle/" +
                                                     "BDDTypeManager.jedd:66,8-14"),
                                                    result);
