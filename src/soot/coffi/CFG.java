@@ -1597,15 +1597,21 @@ public class CFG {
 			// that will leave the last unit outside
 			// the protected area.
 			afterEndStmt = (Stmt) units.getLast();
-		    } else if (endIns == targetIns) {
-			// The protected area ends at the beginning of
-			// its own handler. We don't want to inadvertently
-			// include the new IdentityStmt we just inserted
-			// at the beginning of the handler into
-			// its own protected region.
-			afterEndStmt = newTarget;
 		    } else {
 			afterEndStmt = (Stmt) instructionToLastStmt.get(endIns);
+			IdentityStmt catchStart = 
+			    (IdentityStmt) targetToHandler.get(afterEndStmt); 
+			                    // (Cast to IdentityStmt as an assertion check.)
+			if (catchStart != null) {
+			    // The protected region extends to the beginning of an
+			    // exception handler, so we need to reset afterEndStmt
+			    // to the identity statement which we have inserted
+			    // before the old afterEndStmt.
+			    if (catchStart != units.getPredOf(afterEndStmt)) {
+				throw new IllegalStateException("Assertion failure: catchStart != pred of afterEndStmt");
+			    }
+			    afterEndStmt = catchStart;
+			}
 		    }
 
 		    Trap trap = Jimple.v().newTrap(exception, 
@@ -1617,7 +1623,7 @@ public class CFG {
 	    }
         }
 
-	/* covert line number table to tags attached to statements */
+	/* convert line number table to tags attached to statements */
 	if (Options.v().keep_line_number())
 	{
 	    HashMap stmtstags = new HashMap();
