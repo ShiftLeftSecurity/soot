@@ -310,7 +310,7 @@ public class BlockGraph implements DirectedGraph
                     // this happens if the first unit of the method is under an exception context.(ie first unit is a block and has no pred unit)
                     if((blockTail =(Unit) mUnits.getPredOf(unit)) == null) {
                         blockTail = blockHead;
-                        blockDeltaHeight = ((Inst)unit).getNetCount();
+
                     }
                     
                    
@@ -323,7 +323,7 @@ public class BlockGraph implements DirectedGraph
                 }
                 
                 
-                blockDeltaHeight += ((Inst)unit).getNetCount();
+
                 
             }
             
