@@ -731,6 +731,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		
 		addToEnableGroup("wjop", "wjop.si", getwjopwjop_sienabled_widget(), "enabled");
 		
+		addToEnableGroup("wjop", "wjop.si", getwjopwjop_sirerun_jb_widget(), "rerun-jb");
+		
 		addToEnableGroup("wjop", "wjop.si", getwjopwjop_siinsert_null_checks_widget(), "insert-null-checks");
 		
 		addToEnableGroup("wjop", "wjop.si", getwjopwjop_siinsert_redundant_casts_widget(), "insert-redundant-casts");
@@ -744,6 +746,8 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		addToEnableGroup("wjop", "wjop.si", getwjopwjop_simax_inlinee_size_widget(), "max-inlinee-size");
 		
 		getwjopwjop_sienabled_widget().getButton().addSelectionListener(this);
+		
+		getwjopwjop_sirerun_jb_widget().getButton().addSelectionListener(this);
 		
 		getwjopwjop_siinsert_null_checks_widget().getButton().addSelectionListener(this);
 		
@@ -2553,6 +2557,16 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 
 		if (boolRes != defBoolRes) {
 			getConfig().put(getwjopwjop_sienabled_widget().getAlias(), new Boolean(boolRes));
+		}
+		
+		boolRes = getwjopwjop_sirerun_jb_widget().getButton().getSelection();
+		
+		
+		defBoolRes = true;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getwjopwjop_sirerun_jb_widget().getAlias(), new Boolean(boolRes));
 		}
 		
 		boolRes = getwjopwjop_siinsert_null_checks_widget().getButton().getSelection();
@@ -5673,6 +5687,16 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		return wjopwjop_sienabled_widget;
 	}	
 	
+	private BooleanOptionWidget wjopwjop_sirerun_jb_widget;
+	
+	private void setwjopwjop_sirerun_jb_widget(BooleanOptionWidget widget) {
+		wjopwjop_sirerun_jb_widget = widget;
+	}
+	
+	public BooleanOptionWidget getwjopwjop_sirerun_jb_widget() {
+		return wjopwjop_sirerun_jb_widget;
+	}	
+	
 	private BooleanOptionWidget wjopwjop_siinsert_null_checks_widget;
 	
 	private void setwjopwjop_siinsert_null_checks_widget(BooleanOptionWidget widget) {
@@ -7232,7 +7256,7 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 			
 		}
 
-		setOutput_Optionsdump_cfg_widget(new ListOptionWidget(editGroupOutput_Options, SWT.NONE, new OptionData("CFG Dumping Phases",  "", "","dump-cfg", "\nSpecify that any control flow graphs constructed during the \nPHASENAME phases should be dumped. For example -dump-cfg jb \n-dump-cfg bb.lso would dump all CFGs constructed during the jb \nand bb.lso phases. The pseudo phase name ``ALL'' causes CFGs \nconstructed in all phases to be dumped.This option has no effect \nif the CFG constructing classes were compiled with debugging \ndisabled.The control flow graphs are dumped in the form of a \nfile containing input to dot graph visualization tool. Output \ndot files are stored beneath the soot output directory, in files \nwith names like: \nclassName/methodSignature/phasename-graphType-number.dot, where \nnumber serves to distinguish graphs in phases that produce more \nthan one (for example, the Aggregator may produce multiple \nCompleteUnitGraphs).", defaultString)));
+		setOutput_Optionsdump_cfg_widget(new ListOptionWidget(editGroupOutput_Options, SWT.NONE, new OptionData("CFG Dumping Phases",  "", "","dump-cfg", "\nSpecify that any control flow graphs constructed during the \nPHASENAME phases should be dumped. For example -dump-cfg jb \n-dump-cfg bb.lso would dump all CFGs constructed during the jb \nand bb.lso phases. The pseudo phase name ``ALL'' causes CFGs \nconstructed in all phases to be dumped.This option has no effect \nif the CFG constructing classes were compiled with debugging \ndisabled.The control flow graphs are dumped in the form of a \nfile containing input to dot graph visualization tool. Output \ndot files are stored beneath the soot output directory, in files \nwith names like: \nclassName/methodSignature/phasename-graphType-number.dot, where \nnumber serves to distinguish graphs in phases that produce more \nthan one (for example, the Aggregator may produce multiple \nExceptionalUnitGraphs).", defaultString)));
 		
 		
 		defKey = ""+" "+""+" "+"d";
@@ -10109,6 +10133,22 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		}
 
 		setwjopwjop_sienabled_widget(new BooleanOptionWidget(editGroupwjopwjop_si, SWT.NONE, new OptionData("Enabled", "p", "wjop.si","enabled", "\n", defaultBool)));
+		
+		
+		
+		defKey = "p"+" "+"wjop.si"+" "+"rerun-jb";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = true;
+			
+		}
+
+		setwjopwjop_sirerun_jb_widget(new BooleanOptionWidget(editGroupwjopwjop_si, SWT.NONE, new OptionData("Reconstruct Jimple body after inlining", "p", "wjop.si","rerun-jb", "\nWhen a method with array parameters is inlined, its variables \nmay need to be assigned different types than they had in the \noriginal method to produce compilable code. When this option is \nset, Soot re-runs the Jimple Body pack on each method body which \nhas had another method inlined into it so that the typing \nalgorithm can reassign the types. ", defaultBool)));
 		
 		
 		

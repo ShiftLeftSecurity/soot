@@ -534,7 +534,7 @@ output directory, in files with names like:
 <var>className</var><code>/</code><var>methodSignature</var><code>/</code><var>phasename</var><code>-</code><var>graphType</var><code>-</code><var>number</var><code>.dot</code>,
 where <var>number</var> serves to distinguish graphs in phases
 that produce more than one (for example, the Aggregator may
-produce multiple <code>CompleteUnitGraph</code>s).</p>
+produce multiple <code>ExceptionalUnitGraph</code>s).</p>
 </long_desc>
 	</listopt>
 	<boolopt>
@@ -2119,6 +2119,19 @@ copies of the invoked methods.
                                                 <default>true</default>
 						<short_desc/>
 						<long_desc/>
+					</boolopt>
+					<boolopt>
+						<name>Reconstruct Jimple body after inlining</name>
+						<alias>rerun-jb</alias>
+						<default>true</default>
+						<short_desc/>
+						<long_desc>
+When a method with array parameters is inlined, its variables may need to
+be assigned different types than they had in the original method to produce
+compilable code. When this option is set, Soot re-runs the Jimple Body pack
+on each method body which has had another method inlined into it so that
+the typing algorithm can reassign the types.
+</long_desc>
 					</boolopt>
 					<boolopt>
 						<name>Insert Null Checks</name>
