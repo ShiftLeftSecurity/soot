@@ -54,7 +54,7 @@ public class BDDPAG extends AbstractPAG {
         return new jedd.Relation(new jedd.Domain[] { src.v() },
                                  new jedd.PhysicalDomain[] { V1.v() },
                                  jedd.Jedd.v().project(this.stores,
-                                                       new jedd.PhysicalDomain[] { FD.v(), V2.v() })).iterator();
+                                                       new jedd.PhysicalDomain[] { V2.v(), FD.v() })).iterator();
     }
     
     public Iterator loadSourcesIterator() { throw new RuntimeException("NYI"); }
@@ -77,7 +77,7 @@ public class BDDPAG extends AbstractPAG {
         return new jedd.Relation(new jedd.Domain[] { dst.v() },
                                  new jedd.PhysicalDomain[] { V2.v() },
                                  jedd.Jedd.v().project(this.loads,
-                                                       new jedd.PhysicalDomain[] { FD.v(), V1.v() })).iterator();
+                                                       new jedd.PhysicalDomain[] { V1.v(), FD.v() })).iterator();
     }
     
     public boolean doAddSimpleEdge(VarNode from, VarNode to) {

@@ -1,8 +1,8 @@
 package soot.jimple.spark.bdddomains;
 import jedd.*;
 
-public class FD extends PhysicalDomain {
+public class T3 extends PhysicalDomain {
     public int bits() { return 15; }
     public static PhysicalDomain v() { return instance; }
-    private static PhysicalDomain instance = new FD();
+    private static PhysicalDomain instance = new T3();
 }

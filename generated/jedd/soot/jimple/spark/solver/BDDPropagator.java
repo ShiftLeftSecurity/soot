@@ -69,14 +69,23 @@ public final class BDDPropagator extends Propagator {
                 newPointsTo.eqMinus(this.pag.pointsTo);
                 newPointsTo.eqIntersect(typeManager.get());
                 this.pag.pointsTo.eqUnion(newPointsTo);
-                if (this.pag.getOpts().verbose()) G.v().out.println("Minor iteration");
+                if (this.pag.getOpts().verbose()) {
+                    G.v().out.println("Minor iteration: " +
+                                      new jedd.Relation(new jedd.Domain[] { var.v() },
+                                                        new jedd.PhysicalDomain[] { V1.v() },
+                                                        jedd.Jedd.v().project(newPointsTo,
+                                                                              new jedd.PhysicalDomain[] { H1.v() })).size() +
+                                      " changed p2sets");
+                }
             }while(!jedd.Jedd.v().equals(jedd.Jedd.v().read(newPointsTo), jedd.Jedd.v().falseBDD())); 
             newPointsTo.eq(jedd.Jedd.v().minus(jedd.Jedd.v().read(this.pag.pointsTo), oldPointsTo));
             objectsBeingStored.eq(jedd.Jedd.v().replace(jedd.Jedd.v().relprod(jedd.Jedd.v().read(this.pag.stores),
-                                                                              newPointsTo,
+                                                                              jedd.Jedd.v().replace(newPointsTo,
+                                                                                                    new jedd.PhysicalDomain[] { H1.v() },
+                                                                                                    new jedd.PhysicalDomain[] { H2.v() }),
                                                                               new jedd.PhysicalDomain[] { V1.v() }),
-                                                        new jedd.PhysicalDomain[] { V2.v(), H1.v() },
-                                                        new jedd.PhysicalDomain[] { V1.v(), H2.v() }));
+                                                        new jedd.PhysicalDomain[] { V2.v() },
+                                                        new jedd.PhysicalDomain[] { V1.v() }));
             newStorePt.eq(jedd.Jedd.v().minus(jedd.Jedd.v().read(objectsBeingStored), oldStorePt));
             oldStorePt.eqUnion(newStorePt);
             newFieldPt.eq(jedd.Jedd.v().relprod(jedd.Jedd.v().read(oldStorePt),
@@ -92,27 +101,30 @@ public final class BDDPropagator extends Propagator {
                                                    newPointsTo,
                                                    new jedd.PhysicalDomain[] { V1.v() }));
             loadsFromHeap.eqMinus(loadAss);
-            newPointsTo.eq(jedd.Jedd.v().replace(jedd.Jedd.v().relprod(jedd.Jedd.v().read(jedd.Jedd.v().replace(loadAss,
-                                                                                                                new jedd.PhysicalDomain[] { V2.v() },
-                                                                                                                new jedd.PhysicalDomain[] { V1.v() })),
+            newPointsTo.eq(jedd.Jedd.v().replace(jedd.Jedd.v().relprod(jedd.Jedd.v().read(loadAss),
                                                                        newFieldPt,
                                                                        new jedd.PhysicalDomain[] { H1.v(), FD.v() }),
-                                                 new jedd.PhysicalDomain[] { H2.v() },
-                                                 new jedd.PhysicalDomain[] { H1.v() }));
-            tmpPointsTo.eq(jedd.Jedd.v().replace(jedd.Jedd.v().relprod(jedd.Jedd.v().read(jedd.Jedd.v().replace(loadsFromHeap,
-                                                                                                                new jedd.PhysicalDomain[] { V2.v() },
-                                                                                                                new jedd.PhysicalDomain[] { V1.v() })),
+                                                 new jedd.PhysicalDomain[] { V2.v(), H2.v() },
+                                                 new jedd.PhysicalDomain[] { V1.v(), H1.v() }));
+            tmpPointsTo.eq(jedd.Jedd.v().replace(jedd.Jedd.v().relprod(jedd.Jedd.v().read(loadsFromHeap),
                                                                        this.pag.fieldPt,
                                                                        new jedd.PhysicalDomain[] { H1.v(), FD.v() }),
-                                                 new jedd.PhysicalDomain[] { H2.v() },
-                                                 new jedd.PhysicalDomain[] { H1.v() }));
+                                                 new jedd.PhysicalDomain[] { V2.v(), H2.v() },
+                                                 new jedd.PhysicalDomain[] { V1.v(), H1.v() }));
             newPointsTo.eqUnion(tmpPointsTo);
             loadAss.eqUnion(loadsFromHeap);
             oldPointsTo.eq(this.pag.pointsTo);
             newPointsTo.eqMinus(this.pag.pointsTo);
             newPointsTo.eqIntersect(typeManager.get());
             this.pag.pointsTo.eqUnion(newPointsTo);
-            if (this.pag.getOpts().verbose()) G.v().out.println("Major iteration");
+            if (this.pag.getOpts().verbose()) {
+                G.v().out.println("Major iteration: " +
+                                  new jedd.Relation(new jedd.Domain[] { var.v() },
+                                                    new jedd.PhysicalDomain[] { V1.v() },
+                                                    jedd.Jedd.v().project(newPointsTo,
+                                                                          new jedd.PhysicalDomain[] { H1.v() })).size() +
+                                  " changed p2sets");
+            }
         }while(!jedd.Jedd.v().equals(jedd.Jedd.v().read(newPointsTo), jedd.Jedd.v().falseBDD())); 
     }
     

@@ -66,13 +66,10 @@ public final class BDDPropagator extends Propagator {
                 newPointsTo &= typeManager.get();
                 pag.pointsTo |= newPointsTo;
 
-                if( pag.getOpts().verbose() ) G.v().out.println( "Minor iteration" );
-                /*
                 if( pag.getOpts().verbose() ) {
-                    G.v().out.println( "Minor iteration: "+newPointsTo.
-                            projectDownTo( var ).size()+" changed p2sets" );
+                    G.v().out.println( "Minor iteration: "+
+                        ((obj=>)newPointsTo).size()+" changed p2sets" );
                 }
-                */
 
             } while( newPointsTo != 0B );
 
@@ -114,12 +111,10 @@ public final class BDDPropagator extends Propagator {
             newPointsTo &= typeManager.get();
             pag.pointsTo |= newPointsTo;
 
-            if( pag.getOpts().verbose() ) G.v().out.println( "Major iteration" );
-            /*
             if( pag.getOpts().verbose() ) {
-                G.v().out.println( "Major iteration: "+newPointsTo.projectDownTo( pag.var ).size()+" changed p2sets" );
+                    G.v().out.println( "Major iteration: "+
+                        ((obj=>)newPointsTo).size()+" changed p2sets" );
             }
-            */
         } while(newPointsTo != 0B);
     }
 

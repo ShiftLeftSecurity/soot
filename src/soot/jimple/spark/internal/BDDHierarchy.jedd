@@ -1,0 +1,121 @@
+/* Soot - a J*va Optimization Framework
+ * Copyright (C) 2003 Ondrej Lhotak
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the
+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ * Boston, MA 02111-1307, USA.
+ */
+
+package soot.jimple.spark.internal;
+import soot.*;
+import soot.util.*;
+import soot.jimple.spark.bdddomains.*;
+import java.util.*;
+
+/** A BDD implementation of the class hierarchy.
+ * @author Ondrej Lhotak
+ */
+
+public final class BDDHierarchy {
+    public BDDHierarchy() {
+        // Construct extends and implements relations
+        for( Iterator tIt = Scene.v().getTypeNumberer().iterator(); tIt.hasNext(); ) {
+            final Type t = (Type) tIt.next();
+            processNewType(t);
+        }
+        update();
+    }
+
+    private RefType jlo = RefType.v("java.lang.Object");
+    private void processNewType( Type t ) {
+        if( t instanceof RefType ) {
+            RefType rt = (RefType) t;
+            SootClass sc = rt.getSootClass();
+            if( sc.hasSuperclass() ) {
+                newExtend |= new { rt => subt, sc.getType() => supt };
+            }
+            for( Iterator ifaceIt = sc.getInterfaces().iterator(); ifaceIt.hasNext(); ) {
+                final SootClass iface = (SootClass) ifaceIt.next();
+                newImplement |= new { rt => subt, iface.getType() => supt };
+            }
+        } else if( t instanceof ArrayType ) {
+            ArrayType at = (ArrayType) t;
+            if( at.baseType instanceof PrimType ) {
+                newArray |= new {
+                    at => subt,
+                    ArrayType.v(jlo, at.numDimensions-1) => supt };
+            } else if( at.baseType instanceof RefType ) {
+                RefType rt = (RefType) at.baseType;
+                if( rt.equals( jlo ) ) {
+                    newArray |= new {
+                        at => subt,
+                        ArrayType.v(jlo, at.numDimensions-1) => supt };
+                } else {
+                    newArray |= new {
+                        at => subt,
+                        ArrayType.v(jlo, at.numDimensions) => supt };
+                }
+            } else throw new RuntimeException( "unhandled: "+at.baseType );
+        }
+        if( t.getNumber() > maxType ) maxType = t.getNumber();
+    }
+
+
+    
+    // Compute transitive closure
+    private void updateClosure() {
+        <subt, supt> newClosure = newExtend | newImplement | newArray;
+        while( newClosure != 
+            ( newClosure |= newClosure {subt} >< (supt=>T3) newClosure {supt} ) );
+        while( closure != 
+            ( closure |= closure {subt} >< (supt=>T3) newClosure {supt} ) );
+    }
+
+    // Flush new part of hierarchy into old part
+    private void flush() {
+        extend |= newExtend;
+        newExtend = 0B;
+
+        implement |= newImplement;
+        newImplement = 0B;
+
+        array |= newArray;
+        newArray = 0B;
+    }
+
+    // Update hierarchy for any types that have been newly added since it was
+    // built
+    public void update() {
+        ArrayNumberer tn = Scene.v().getTypeNumberer();
+        for( int i = maxType+1; i < tn.size(); i++ ) {
+            processNewType( (Type) tn.get(i) );
+        }
+        updateClosure();
+        flush();
+    }
+
+    private <subt:T1, supt:T2> extend;
+    private <subt:T1, supt:T2> implement;
+    private <subt:T1, supt:T2> array;
+
+    private <subt, supt> newExtend;
+    private <subt, supt> newImplement;
+    private <subt, supt> newArray;
+
+    private <subt:T1, supt:T2> closure;
+
+    private int maxType = -1;
+
+}
+

@@ -3,7 +3,7 @@ package soot.jimple.spark.bdddomains;
 import jedd.*;
 
 public class H1 extends PhysicalDomain {
-    public int bits() { return 12; }
+    public int bits() { return 16; }
     
     public static PhysicalDomain v() { return H1.instance; }
     

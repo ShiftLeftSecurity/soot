@@ -93,7 +93,7 @@ public class BDDSparkTransformer extends AbstractSparkTransformer
                     +Scene.v().getReachableMethods().size() );
         }
 
-        if( opts.set_mass() ) findSetMass( pag, b );
+        if( opts.set_mass() ) findSetMass( pag );
         if( opts.add_tags() ) {
             addTags( pag );
         }
@@ -108,8 +108,11 @@ public class BDDSparkTransformer extends AbstractSparkTransformer
         throw new RuntimeException( "NYI" );
     }
 
-    private void findSetMass( BDDPAG pag, ContextInsensitiveBuilder b ) {
-        throw new RuntimeException( "NYI" );
+    protected void findSetMass( AbstractPAG pg ) {
+        BDDPAG pag = (BDDPAG) pg;
+        G.v().out.println( "PointsTo mass: " + pag.pointsTo.size() );
+        G.v().out.println( "FieldPt mass: " + pag.fieldPt.size() );
+        G.v().out.println( "Set mass: " + (pag.fieldPt.size()+pag.pointsTo.size()) );
     }
 }
 
