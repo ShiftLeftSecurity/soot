@@ -837,6 +837,7 @@ public class Main implements Runnable
 				// handle --app option first
 	while (cl.contains("app")) {
 	    setAppMode(true);
+              initApp();
 	}
 				
 				// Handle all the options
@@ -1648,7 +1649,6 @@ public class Main implements Runnable
 
       cmdLineClasses = new HashChain();
 
-      initApp();
 
       processCmdLine(cmdLineArgs);
 
