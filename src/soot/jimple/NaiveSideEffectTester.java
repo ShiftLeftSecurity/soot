@@ -104,9 +104,7 @@ public class NaiveSideEffectTester implements SideEffectTester
         // If it's an invoke, then only locals are safe.
         if (s.containsInvokeExpr())
         {
-            if (v instanceof Local)
-                return false;
-            else 
+            if (!(v instanceof Local))
                 return true;
         }
 
@@ -120,7 +118,7 @@ public class NaiveSideEffectTester implements SideEffectTester
             {
                 Value use = ((ValueBox)useIt.next()).getValue();
                 if (def.equivTo(use))
-                    return true;
+                  return true;
             }
             // also handle the container of all these useboxes!
             if (def.equivTo(v))

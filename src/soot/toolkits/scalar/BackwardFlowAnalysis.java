@@ -64,7 +64,10 @@ public abstract class BackwardFlowAnalysis extends FlowAnalysis
             {
                 Object s = it.next();
 
-                changedUnits.addLast(s);
+                /* although only a DFS could really give a good result, it is
+                 * probably wiser to do begin at the bottom for
+                 * Backwards-analysis*/
+                changedUnits.addFirst(s);
                 changedUnitsSet.add(s);
 
                 unitToBeforeFlow.put(s, newInitialFlow());

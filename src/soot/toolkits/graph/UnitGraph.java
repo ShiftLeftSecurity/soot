@@ -47,13 +47,13 @@ public class UnitGraph implements DirectedGraph
     List heads;
     List tails;
 
-    private Map unitToSuccs;
-    private Map unitToPreds;        
+    protected Map unitToSuccs;
+    protected Map unitToPreds;        
     SootMethod method;
     int size;
 
-    Body body;
-    Chain unitChain;
+    protected Body body;
+    protected Chain unitChain;
 
     
     /**
