@@ -37,11 +37,11 @@ public class ContextInsensitiveContextManager implements ContextManager
     }
 
     public void addStaticEdge( MethodOrMethodContext momc, Edge e ) {
-        cg.addEdge( e );
+        cg.addEdge( new Edge( e.getSrc(), e.srcUnit(), e.getTgt(), e.kind() ) );
     }
 
     public void addVirtualEdge( MethodOrMethodContext momc, Edge e, Object typeContext ) {
-        cg.addEdge( e );
+        cg.addEdge( new Edge( e.getSrc(), e.srcUnit(), e.getTgt(), e.kind() ) );
     }
 
     public CallGraph callGraph() { return cg; }

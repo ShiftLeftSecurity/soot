@@ -35,6 +35,7 @@ public class SootOptionsFileLauncher extends SootFileLauncher {
 	public void run(IAction action) {
 		
 		super.run(action);
+        super.handleFiles();
 		
 		if (isDoNotContinue()) return;
 		// sometimes window needs to be reset (not sure why)

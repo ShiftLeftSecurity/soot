@@ -36,6 +36,8 @@ public class SootConfigFileLauncher extends SootFileLauncher {
 	public void run(IAction action) {
 		
 		super.run(action);
+        super.handleFiles();
+        
 		if (isDoNotContinue()) return;
 		window = SootPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow();
 		

@@ -30,13 +30,14 @@ import soot.jimple.spark.sets.PointsToSetInternal;
  * @author Ondrej Lhotak
  */
 public class PAGDumper {
-    public PAGDumper( PAG pag ) {
+    public PAGDumper( PAG pag , String output_dir ) {
         this.pag = pag;
+        this.output_dir = output_dir;
     }
     public void dumpPointsToSets() {
         try {
             final PrintWriter file = new PrintWriter(
-                    new FileOutputStream( "solution" ) );
+                    new FileOutputStream( new File(output_dir, "solution") ) );
             file.println( "Solution:" );
             for( Iterator vnIt = pag.getVarNodeNumberer().iterator(); vnIt.hasNext(); ) {
                 final VarNode vn = (VarNode) vnIt.next();
@@ -66,7 +67,7 @@ public class PAGDumper {
     public void dump() {
         try {
             PrintWriter file = new PrintWriter(
-                new FileOutputStream( "pag" ) );
+                new FileOutputStream( new File(output_dir, "pag") ) );
 
             if( pag.getOpts().topo_sort() ) {
                 new TopoSorter( pag, false ).sort();
@@ -134,6 +135,7 @@ public class PAGDumper {
     /* End of package methods. */
 
     protected PAG pag;
+    protected String output_dir;
     protected int fieldNum = 0;
     protected HashMap fieldMap = new HashMap();
     protected ObjectNumberer root = new ObjectNumberer( null, 0 );
@@ -230,7 +232,10 @@ public class PAGDumper {
             out.print( " "+fieldToNum( fn.getField() ) );
         } else if( pag.getOpts().class_method_var() && n instanceof VarNode ) {
             VarNode vn = (VarNode) n;
-            SootMethod m = vn.getMethod();
+            SootMethod m = null;
+            if( vn instanceof LocalVarNode ) {
+            	m = ((LocalVarNode)vn).getMethod();
+            }
             SootClass c = null;
             if( m != null ) c = m.getDeclaringClass();
             ObjectNumberer cl = root.findOrAdd( c );
