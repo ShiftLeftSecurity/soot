@@ -398,6 +398,8 @@
             <arg file="generated/jedd"/>
             <arg value="-s"/>
             <arg value="${sat.solver.cmd}"/>
+            <arg value="-sc"/>
+            <arg value="${sat.core.cmd}"/>
             <fileset dir="src" includes="**/*.jedd"/>
         </apply>
     </target>
