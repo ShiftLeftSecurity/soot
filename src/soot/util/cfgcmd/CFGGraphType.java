@@ -22,19 +22,21 @@ package soot.util.cfgcmd;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import soot.G;
-import soot.util.dot.DotGraph;
 import soot.Body;
 import soot.toolkits.graph.DirectedGraph;
 import soot.toolkits.graph.UnitGraph;
 import soot.toolkits.graph.BriefUnitGraph;
 import soot.toolkits.graph.CompleteUnitGraph;
 import soot.toolkits.graph.TrapUnitGraph;
+import soot.toolkits.graph.ClassicCompleteBlockGraph;
 import soot.toolkits.graph.ClassicCompleteUnitGraph;
 import soot.toolkits.graph.BlockGraph;
 import soot.toolkits.graph.BriefBlockGraph;
 import soot.toolkits.graph.CompleteBlockGraph;
 import soot.toolkits.graph.ArrayRefBlockGraph;
 import soot.toolkits.graph.ZonedBlockGraph;
+import soot.util.cfgcmd.CFGToDotGraph;
+import soot.util.dot.DotGraph;
 
   /**
    * An enumeration type for representing the type of graph to
@@ -46,22 +48,6 @@ import soot.toolkits.graph.ZonedBlockGraph;
 public abstract class CFGGraphType extends CFGOptionMatcher.CFGOption {
 
   private static final boolean DEBUG = true;  
-
-  /**
-   * <p>Interface that must be satisfied by callers of 
-   * <tt>CFGGraphType.drawNodesAndEdges()</tt>.</p>
-   *
-   * <p>This definition is a kludge; we'd really like to just
-   * use {@link CFGViewer} instead, but that would introduce
-   * a circular depencency between {@link CFGViewer} and
-   * {@link CFGGraphType}.</p>
-   */
-  public interface Viewer {
-    public void drawUnexceptionalNodesAndEdges(DotGraph canvas,
-					       DirectedGraph graph);
-    public void drawExceptionalNodesAndEdges(DotGraph canvas,
-					     CompleteUnitGraph graph);
-  }
 
   /**
    * Method that will build a graph of this type.
@@ -77,16 +63,16 @@ public abstract class CFGGraphType extends CFGOptionMatcher.CFGOption {
    * control flow in this type of graph.  This method is intended 
    * for use within {@link CFGViewer}.
    *
-   * @param viewer The {@link Viewer} in whose context the
-   * graph is to be drawn.
-   *
-   * @param canvas The {@link DotGraph} to which to add the nodes and edges.
+   * @param drawer The {@link CFGToDotGraph} object that will draw the
+   * graph.
    *
    * @param g The graph to draw.
    *
+   * @param b The body associated with the graph, <code>g</code>.
+   *
    */
-  public abstract void drawNodesAndEdges(Viewer viewer, DotGraph canvas,
-					 DirectedGraph g);
+  public abstract DotGraph drawGraph(CFGToDotGraph drawer, DirectedGraph g,
+				     Body b);
 
   private CFGGraphType(String name) {
     super(name);
@@ -98,9 +84,10 @@ public abstract class CFGGraphType extends CFGOptionMatcher.CFGOption {
    *
    * @param name A {@link String} identifying the graph type.
    *
-   * @return A {@link CFGGraphType} object whose
-   * {@link #drawNodesAndEdges()} method will create the desired
-   * sort of control flow graph.
+   * @return A {@link CFGGraphType} object whose {@link #buildGraph()}
+   * method will create the desired sort of control flow graph and
+   * whose {@link #drawGraph} method will produce a {@link
+   * DotGraph} corresponding to the graph.
    */
   public static CFGGraphType getGraphType(String option) {
     return (CFGGraphType) graphTypeOptions.match(option);
@@ -137,9 +124,8 @@ public abstract class CFGGraphType extends CFGOptionMatcher.CFGOption {
 	return new BriefUnitGraph(b); 
       }
 
-    public void drawNodesAndEdges(Viewer viewer, DotGraph canvas,
-				  DirectedGraph g) {
-      viewer.drawUnexceptionalNodesAndEdges(canvas, (BriefUnitGraph) g);
+    public DotGraph drawGraph(CFGToDotGraph drawer, DirectedGraph g, Body b) {
+      return drawer.drawCFG((BriefUnitGraph) g, b);
     }
   };
 
@@ -148,9 +134,8 @@ public abstract class CFGGraphType extends CFGOptionMatcher.CFGOption {
     public DirectedGraph buildGraph(Body b) {
       return new CompleteUnitGraph(b);
     }
-    public void drawNodesAndEdges(Viewer viewer, DotGraph canvas, 
-				  DirectedGraph g) {
-      viewer.drawExceptionalNodesAndEdges(canvas, (CompleteUnitGraph) g);
+    public DotGraph drawGraph(CFGToDotGraph drawer, DirectedGraph g, Body b) {
+      return drawer.drawCFG((CompleteUnitGraph) g);
     }
   };
 
@@ -159,9 +144,8 @@ public abstract class CFGGraphType extends CFGOptionMatcher.CFGOption {
     public DirectedGraph buildGraph(Body b) {
       return new TrapUnitGraph(b);
     }
-    public void drawNodesAndEdges(Viewer viewer, DotGraph canvas, 
-				  DirectedGraph g) {
-      viewer.drawUnexceptionalNodesAndEdges(canvas, (TrapUnitGraph) g);
+    public DotGraph drawGraph(CFGToDotGraph drawer, DirectedGraph g, Body b) {
+      return drawer.drawCFG((TrapUnitGraph) g, b);
     }
   };
 
@@ -170,10 +154,8 @@ public abstract class CFGGraphType extends CFGOptionMatcher.CFGOption {
     public DirectedGraph buildGraph(Body b) {
       return new ClassicCompleteUnitGraph(b);
     }
-    public void drawNodesAndEdges(Viewer viewer, DotGraph canvas, 
-				  DirectedGraph g) {
-      viewer.drawUnexceptionalNodesAndEdges(canvas, 
-					    (ClassicCompleteUnitGraph) g);
+    public DotGraph drawGraph(CFGToDotGraph drawer, DirectedGraph g, Body b) {
+      return drawer.drawCFG((ClassicCompleteUnitGraph) g, b);
     }
   };
 
@@ -182,9 +164,8 @@ public abstract class CFGGraphType extends CFGOptionMatcher.CFGOption {
     public DirectedGraph buildGraph(Body b) {
       return new BriefBlockGraph(b);
     }
-    public void drawNodesAndEdges(Viewer viewer, DotGraph canvas, 
-				  DirectedGraph g) {
-      viewer.drawUnexceptionalNodesAndEdges(canvas, (BriefBlockGraph) g);
+    public DotGraph drawGraph(CFGToDotGraph drawer, DirectedGraph g, Body b) {
+      return drawer.drawCFG((BriefBlockGraph) g, b);
     }
   };
 
@@ -193,9 +174,18 @@ public abstract class CFGGraphType extends CFGOptionMatcher.CFGOption {
     public DirectedGraph buildGraph(Body b) {
       return new CompleteBlockGraph(b);
     }
-    public void drawNodesAndEdges(Viewer viewer, DotGraph canvas, 
-				  DirectedGraph g) {
-      viewer.drawUnexceptionalNodesAndEdges(canvas, (CompleteBlockGraph) g);
+    public DotGraph drawGraph(CFGToDotGraph drawer, DirectedGraph g, Body b) {
+      return drawer.drawCFG((CompleteBlockGraph) g, b);
+    }
+  };
+
+  public static final CFGGraphType CLASSIC_COMPLETE_BLOCK_GRAPH = 
+    new CFGGraphType("ClassicCompleteBlockGraph") {
+    public DirectedGraph buildGraph(Body b) {
+      return new ClassicCompleteBlockGraph(b);
+    }
+    public DotGraph drawGraph(CFGToDotGraph drawer, DirectedGraph g, Body b) {
+      return drawer.drawCFG((ClassicCompleteBlockGraph) g, b);
     }
   };
 
@@ -204,9 +194,8 @@ public abstract class CFGGraphType extends CFGOptionMatcher.CFGOption {
     public DirectedGraph buildGraph(Body b) {
       return new ArrayRefBlockGraph(b);
     }
-    public void drawNodesAndEdges(Viewer viewer, DotGraph canvas, 
-				  DirectedGraph g) {
-      viewer.drawUnexceptionalNodesAndEdges(canvas, (ArrayRefBlockGraph) g);
+    public DotGraph drawGraph(CFGToDotGraph drawer, DirectedGraph g, Body b) {
+      return drawer.drawCFG((ArrayRefBlockGraph) g, b);
     }
   };
 
@@ -215,9 +204,8 @@ public abstract class CFGGraphType extends CFGOptionMatcher.CFGOption {
     public DirectedGraph buildGraph(Body b) {
       return new ZonedBlockGraph(b);
     }
-    public void drawNodesAndEdges(Viewer viewer, DotGraph canvas, 
-				  DirectedGraph g) {
-      viewer.drawUnexceptionalNodesAndEdges(canvas, (ZonedBlockGraph) g);
+    public DotGraph drawGraph(CFGToDotGraph drawer, DirectedGraph g, Body b) {
+      return drawer.drawCFG((ZonedBlockGraph) g, b);
     }
   };
 
@@ -282,9 +270,8 @@ public abstract class CFGGraphType extends CFGOptionMatcher.CFGOption {
 	return loadAltGraph("soot.toolkits.graph.BriefUnitGraph", b);
       }
 
-    public void drawNodesAndEdges(Viewer viewer, DotGraph canvas,
-				  DirectedGraph g) {
-      viewer.drawUnexceptionalNodesAndEdges(canvas, g);
+    public DotGraph drawGraph(CFGToDotGraph drawer, DirectedGraph g, Body b) {
+      return drawer.drawCFG(g, b);
     }
   };
 
@@ -294,9 +281,8 @@ public abstract class CFGGraphType extends CFGOptionMatcher.CFGOption {
 	return loadAltGraph("soot.toolkits.graph.CompleteUnitGraph", b);
       }
 
-    public void drawNodesAndEdges(Viewer viewer, DotGraph canvas,
-				  DirectedGraph g) {
-      viewer.drawUnexceptionalNodesAndEdges(canvas, g);
+    public DotGraph drawGraph(CFGToDotGraph drawer, DirectedGraph g, Body b) {
+      return drawer.drawCFG(g, b);
     }
   };
 
@@ -306,9 +292,8 @@ public abstract class CFGGraphType extends CFGOptionMatcher.CFGOption {
 	return loadAltGraph("soot.toolkits.graph.TrapUnitGraph", b);
       }
 
-    public void drawNodesAndEdges(Viewer viewer, DotGraph canvas,
-				  DirectedGraph g) {
-      viewer.drawUnexceptionalNodesAndEdges(canvas, g);
+    public DotGraph drawGraph(CFGToDotGraph drawer, DirectedGraph g, Body b) {
+      return drawer.drawCFG(g, b);
     }
   };
 
@@ -318,9 +303,8 @@ public abstract class CFGGraphType extends CFGOptionMatcher.CFGOption {
 	return loadAltGraph("soot.toolkits.graph.ArrayRefBlockGraph", b);
       }
 
-    public void drawNodesAndEdges(Viewer viewer, DotGraph canvas,
-				  DirectedGraph g) {
-      viewer.drawUnexceptionalNodesAndEdges(canvas, g);
+    public DotGraph drawGraph(CFGToDotGraph drawer, DirectedGraph g, Body b) {
+      return drawer.drawCFG(g, b);
     }
   };
 
@@ -330,9 +314,8 @@ public abstract class CFGGraphType extends CFGOptionMatcher.CFGOption {
 	return loadAltGraph("soot.toolkits.graph.BriefBlockGraph", b);
       }
 
-    public void drawNodesAndEdges(Viewer viewer, DotGraph canvas,
-				  DirectedGraph g) {
-      viewer.drawUnexceptionalNodesAndEdges(canvas, g);
+    public DotGraph drawGraph(CFGToDotGraph drawer, DirectedGraph g, Body b) {
+      return drawer.drawCFG(g, b);
     }
   };
 
@@ -342,9 +325,8 @@ public abstract class CFGGraphType extends CFGOptionMatcher.CFGOption {
 	return loadAltGraph("soot.toolkits.graph.CompleteBlockGraph", b);
       }
 
-    public void drawNodesAndEdges(Viewer viewer, DotGraph canvas,
-				  DirectedGraph g) {
-      viewer.drawUnexceptionalNodesAndEdges(canvas, g);
+    public DotGraph drawGraph(CFGToDotGraph drawer, DirectedGraph g, Body b) {
+      return drawer.drawCFG(g, b);
     }
   };
 
@@ -354,9 +336,8 @@ public abstract class CFGGraphType extends CFGOptionMatcher.CFGOption {
 	return loadAltGraph("soot.toolkits.graph.ZonedBlockGraph", b);
       }
 
-    public void drawNodesAndEdges(Viewer viewer, DotGraph canvas,
-				  DirectedGraph g) {
-      viewer.drawUnexceptionalNodesAndEdges(canvas, g);
+    public DotGraph drawGraph(CFGToDotGraph drawer, DirectedGraph g, Body b) {
+      return drawer.drawCFG(g, b);
     }
   };
 
@@ -368,6 +349,7 @@ public abstract class CFGGraphType extends CFGOptionMatcher.CFGOption {
       CLASSIC_COMPLETE_UNIT_GRAPH,
       BRIEF_BLOCK_GRAPH,
       COMPLETE_BLOCK_GRAPH,
+      CLASSIC_COMPLETE_BLOCK_GRAPH,
       ARRAY_REF_BLOCK_GRAPH,
       ZONED_BLOCK_GRAPH,
       ALT_ARRAY_REF_BLOCK_GRAPH,
