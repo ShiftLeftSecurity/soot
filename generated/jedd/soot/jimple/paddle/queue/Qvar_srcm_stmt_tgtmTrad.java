@@ -19,15 +19,16 @@ public class Qvar_srcm_stmt_tgtmTrad extends Qvar_srcm_stmt_tgtm {
         q.add(_srcm);
         q.add(_stmt);
         q.add(_tgtm);
+        invalidate();
     }
     
     public void add(final jedd.internal.RelationContainer in) {
         Iterator it =
-          new jedd.internal.RelationContainer(new Attribute[] { var.v(), srcm.v(), stmt.v(), tgtm.v() },
-                                              new PhysicalDomain[] { V1.v(), MS.v(), ST.v(), MT.v() },
-                                              ("in.iterator(new jedd.Attribute[...]) at /home/research/ccl/o" +
-                                               "lhota/soot-trunk/src/soot/jimple/paddle/queue/Qvar_srcm_stmt" +
-                                               "_tgtmTrad.jedd:40,22-24"),
+          new jedd.internal.RelationContainer(new Attribute[] { tgtm.v(), stmt.v(), srcm.v(), var.v() },
+                                              new PhysicalDomain[] { MT.v(), ST.v(), MS.v(), V1.v() },
+                                              ("in.iterator(new jedd.Attribute[...]) at /tmp/fixing-paddle/s" +
+                                               "rc/soot/jimple/paddle/queue/Qvar_srcm_stmt_tgtmTrad.jedd:41," +
+                                               "22-24"),
                                               in).iterator(new Attribute[] { var.v(), srcm.v(), stmt.v(), tgtm.v() });
         while (it.hasNext()) {
             Object[] tuple = (Object[]) it.next();

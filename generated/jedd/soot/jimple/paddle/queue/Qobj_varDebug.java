@@ -17,17 +17,17 @@ public class Qobj_varDebug extends Qobj_var {
     private Qobj_varSet trad = new Qobj_varSet(name + "set");
     
     public void add(AllocNode _obj, VarNode _var) {
+        invalidate();
         bdd.add(_obj, _var);
         trad.add(_obj, _var);
     }
     
     public void add(final jedd.internal.RelationContainer in) {
         Iterator it =
-          new jedd.internal.RelationContainer(new Attribute[] { var.v(), obj.v() },
-                                              new PhysicalDomain[] { V1.v(), H1.v() },
-                                              ("in.iterator(new jedd.Attribute[...]) at /home/research/ccl/o" +
-                                               "lhota/soot-trunk/src/soot/jimple/paddle/queue/Qobj_varDebug." +
-                                               "jedd:39,22-24"),
+          new jedd.internal.RelationContainer(new Attribute[] { obj.v(), var.v() },
+                                              new PhysicalDomain[] { H1.v(), V1.v() },
+                                              ("in.iterator(new jedd.Attribute[...]) at /tmp/fixing-paddle/s" +
+                                               "rc/soot/jimple/paddle/queue/Qobj_varDebug.jedd:40,22-24"),
                                               in).iterator(new Attribute[] { obj.v(), var.v() });
         while (it.hasNext()) {
             Object[] tuple = (Object[]) it.next();

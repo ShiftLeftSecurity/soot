@@ -19,20 +19,22 @@ public final class Qsrc_dstBDD extends Qsrc_dst {
                                                 new PhysicalDomain[] { V1.v(), V2.v() },
                                                 ("add(jedd.internal.Jedd.v().literal(new java.lang.Object[...]" +
                                                  ", new jedd.Attribute[...], new jedd.PhysicalDomain[...])) at" +
-                                                 " /home/research/ccl/olhota/soot-trunk/src/soot/jimple/paddle" +
-                                                 "/queue/Qsrc_dstBDD.jedd:34,8-11"),
+                                                 " /tmp/fixing-paddle/src/soot/jimple/paddle/queue/Qsrc_dstBDD" +
+                                                 ".jedd:34,8-11"),
                                                 jedd.internal.Jedd.v().literal(new Object[] { _src, _dst },
                                                                                new Attribute[] { src.v(), dst.v() },
                                                                                new PhysicalDomain[] { V1.v(), V2.v() })));
     }
     
     public void add(final jedd.internal.RelationContainer in) {
+        if (!jedd.internal.Jedd.v().equals(jedd.internal.Jedd.v().read(in), jedd.internal.Jedd.v().falseBDD()))
+            invalidate();
         for (Iterator it = readers.iterator(); it.hasNext(); ) {
             Rsrc_dstBDD reader = (Rsrc_dstBDD) it.next();
             reader.add(new jedd.internal.RelationContainer(new Attribute[] { dst.v(), src.v() },
                                                            new PhysicalDomain[] { V2.v(), V1.v() },
-                                                           ("reader.add(in) at /home/research/ccl/olhota/soot-trunk/src/s" +
-                                                            "oot/jimple/paddle/queue/Qsrc_dstBDD.jedd:39,12-18"),
+                                                           ("reader.add(in) at /tmp/fixing-paddle/src/soot/jimple/paddle/" +
+                                                            "queue/Qsrc_dstBDD.jedd:40,12-18"),
                                                            in));
         }
     }

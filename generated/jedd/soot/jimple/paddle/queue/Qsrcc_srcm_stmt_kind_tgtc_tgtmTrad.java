@@ -21,15 +21,16 @@ public class Qsrcc_srcm_stmt_kind_tgtc_tgtmTrad extends Qsrcc_srcm_stmt_kind_tgt
         q.add(_kind);
         q.add(_tgtc);
         q.add(_tgtm);
+        invalidate();
     }
     
     public void add(final jedd.internal.RelationContainer in) {
         Iterator it =
-          new jedd.internal.RelationContainer(new Attribute[] { kind.v(), srcm.v(), srcc.v(), tgtc.v(), stmt.v(), tgtm.v() },
-                                              new PhysicalDomain[] { KD.v(), MS.v(), C1.v(), C2.v(), ST.v(), MT.v() },
-                                              ("in.iterator(new jedd.Attribute[...]) at /home/research/ccl/o" +
-                                               "lhota/soot-trunk/src/soot/jimple/paddle/queue/Qsrcc_srcm_stm" +
-                                               "t_kind_tgtc_tgtmTrad.jedd:42,22-24"),
+          new jedd.internal.RelationContainer(new Attribute[] { tgtm.v(), tgtc.v(), stmt.v(), srcc.v(), srcm.v(), kind.v() },
+                                              new PhysicalDomain[] { MT.v(), C2.v(), ST.v(), C1.v(), MS.v(), KD.v() },
+                                              ("in.iterator(new jedd.Attribute[...]) at /tmp/fixing-paddle/s" +
+                                               "rc/soot/jimple/paddle/queue/Qsrcc_srcm_stmt_kind_tgtc_tgtmTr" +
+                                               "ad.jedd:43,22-24"),
                                               in).iterator(new Attribute[] { srcc.v(), srcm.v(), stmt.v(), kind.v(), tgtc.v(), tgtm.v() });
         while (it.hasNext()) {
             Object[] tuple = (Object[]) it.next();

@@ -18,15 +18,15 @@ public class Qsrc_fld_dstTrad extends Qsrc_fld_dst {
         q.add(_src);
         q.add(_fld);
         q.add(_dst);
+        invalidate();
     }
     
     public void add(final jedd.internal.RelationContainer in) {
         Iterator it =
           new jedd.internal.RelationContainer(new Attribute[] { fld.v(), dst.v(), src.v() },
                                               new PhysicalDomain[] { FD.v(), V2.v(), V1.v() },
-                                              ("in.iterator(new jedd.Attribute[...]) at /home/research/ccl/o" +
-                                               "lhota/soot-trunk/src/soot/jimple/paddle/queue/Qsrc_fld_dstTr" +
-                                               "ad.jedd:39,22-24"),
+                                              ("in.iterator(new jedd.Attribute[...]) at /tmp/fixing-paddle/s" +
+                                               "rc/soot/jimple/paddle/queue/Qsrc_fld_dstTrad.jedd:40,22-24"),
                                               in).iterator(new Attribute[] { src.v(), fld.v(), dst.v() });
         while (it.hasNext()) {
             Object[] tuple = (Object[]) it.next();

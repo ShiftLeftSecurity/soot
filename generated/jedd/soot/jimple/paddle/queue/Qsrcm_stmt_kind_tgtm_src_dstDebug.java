@@ -17,17 +17,18 @@ public class Qsrcm_stmt_kind_tgtm_src_dstDebug extends Qsrcm_stmt_kind_tgtm_src_
     private Qsrcm_stmt_kind_tgtm_src_dstSet trad = new Qsrcm_stmt_kind_tgtm_src_dstSet(name + "set");
     
     public void add(SootMethod _srcm, Unit _stmt, Kind _kind, SootMethod _tgtm, VarNode _src, VarNode _dst) {
+        invalidate();
         bdd.add(_srcm, _stmt, _kind, _tgtm, _src, _dst);
         trad.add(_srcm, _stmt, _kind, _tgtm, _src, _dst);
     }
     
     public void add(final jedd.internal.RelationContainer in) {
         Iterator it =
-          new jedd.internal.RelationContainer(new Attribute[] { kind.v(), srcm.v(), dst.v(), stmt.v(), tgtm.v(), src.v() },
-                                              new PhysicalDomain[] { KD.v(), MS.v(), V2.v(), ST.v(), MT.v(), V1.v() },
-                                              ("in.iterator(new jedd.Attribute[...]) at /home/research/ccl/o" +
-                                               "lhota/soot-trunk/src/soot/jimple/paddle/queue/Qsrcm_stmt_kin" +
-                                               "d_tgtm_src_dstDebug.jedd:39,22-24"),
+          new jedd.internal.RelationContainer(new Attribute[] { tgtm.v(), dst.v(), src.v(), stmt.v(), srcm.v(), kind.v() },
+                                              new PhysicalDomain[] { MT.v(), V2.v(), V1.v(), ST.v(), MS.v(), KD.v() },
+                                              ("in.iterator(new jedd.Attribute[...]) at /tmp/fixing-paddle/s" +
+                                               "rc/soot/jimple/paddle/queue/Qsrcm_stmt_kind_tgtm_src_dstDebu" +
+                                               "g.jedd:40,22-24"),
                                               in).iterator(new Attribute[] { srcm.v(), stmt.v(), kind.v(), tgtm.v(), src.v(), dst.v() });
         while (it.hasNext()) {
             Object[] tuple = (Object[]) it.next();

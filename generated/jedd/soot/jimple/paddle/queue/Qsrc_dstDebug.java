@@ -17,6 +17,7 @@ public class Qsrc_dstDebug extends Qsrc_dst {
     private Qsrc_dstSet trad = new Qsrc_dstSet(name + "set");
     
     public void add(VarNode _src, VarNode _dst) {
+        invalidate();
         bdd.add(_src, _dst);
         trad.add(_src, _dst);
     }
@@ -25,9 +26,8 @@ public class Qsrc_dstDebug extends Qsrc_dst {
         Iterator it =
           new jedd.internal.RelationContainer(new Attribute[] { dst.v(), src.v() },
                                               new PhysicalDomain[] { V2.v(), V1.v() },
-                                              ("in.iterator(new jedd.Attribute[...]) at /home/research/ccl/o" +
-                                               "lhota/soot-trunk/src/soot/jimple/paddle/queue/Qsrc_dstDebug." +
-                                               "jedd:39,22-24"),
+                                              ("in.iterator(new jedd.Attribute[...]) at /tmp/fixing-paddle/s" +
+                                               "rc/soot/jimple/paddle/queue/Qsrc_dstDebug.jedd:40,22-24"),
                                               in).iterator(new Attribute[] { src.v(), dst.v() });
         while (it.hasNext()) {
             Object[] tuple = (Object[]) it.next();

@@ -19,20 +19,22 @@ public final class Qsrc_fld_dstBDD extends Qsrc_fld_dst {
                                                 new PhysicalDomain[] { V1.v(), FD.v(), V2.v() },
                                                 ("add(jedd.internal.Jedd.v().literal(new java.lang.Object[...]" +
                                                  ", new jedd.Attribute[...], new jedd.PhysicalDomain[...])) at" +
-                                                 " /home/research/ccl/olhota/soot-trunk/src/soot/jimple/paddle" +
-                                                 "/queue/Qsrc_fld_dstBDD.jedd:34,8-11"),
+                                                 " /tmp/fixing-paddle/src/soot/jimple/paddle/queue/Qsrc_fld_ds" +
+                                                 "tBDD.jedd:34,8-11"),
                                                 jedd.internal.Jedd.v().literal(new Object[] { _src, _fld, _dst },
                                                                                new Attribute[] { src.v(), fld.v(), dst.v() },
                                                                                new PhysicalDomain[] { V1.v(), FD.v(), V2.v() })));
     }
     
     public void add(final jedd.internal.RelationContainer in) {
+        if (!jedd.internal.Jedd.v().equals(jedd.internal.Jedd.v().read(in), jedd.internal.Jedd.v().falseBDD()))
+            invalidate();
         for (Iterator it = readers.iterator(); it.hasNext(); ) {
             Rsrc_fld_dstBDD reader = (Rsrc_fld_dstBDD) it.next();
             reader.add(new jedd.internal.RelationContainer(new Attribute[] { fld.v(), dst.v(), src.v() },
                                                            new PhysicalDomain[] { FD.v(), V2.v(), V1.v() },
-                                                           ("reader.add(in) at /home/research/ccl/olhota/soot-trunk/src/s" +
-                                                            "oot/jimple/paddle/queue/Qsrc_fld_dstBDD.jedd:39,12-18"),
+                                                           ("reader.add(in) at /tmp/fixing-paddle/src/soot/jimple/paddle/" +
+                                                            "queue/Qsrc_fld_dstBDD.jedd:40,12-18"),
                                                            in));
         }
     }

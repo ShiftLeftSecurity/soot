@@ -17,17 +17,17 @@ public class Qvar_typeDebug extends Qvar_type {
     private Qvar_typeSet trad = new Qvar_typeSet(name + "set");
     
     public void add(VarNode _var, Type _type) {
+        invalidate();
         bdd.add(_var, _type);
         trad.add(_var, _type);
     }
     
     public void add(final jedd.internal.RelationContainer in) {
         Iterator it =
-          new jedd.internal.RelationContainer(new Attribute[] { var.v(), type.v() },
-                                              new PhysicalDomain[] { V1.v(), T1.v() },
-                                              ("in.iterator(new jedd.Attribute[...]) at /home/research/ccl/o" +
-                                               "lhota/soot-trunk/src/soot/jimple/paddle/queue/Qvar_typeDebug" +
-                                               ".jedd:39,22-24"),
+          new jedd.internal.RelationContainer(new Attribute[] { type.v(), var.v() },
+                                              new PhysicalDomain[] { T1.v(), V1.v() },
+                                              ("in.iterator(new jedd.Attribute[...]) at /tmp/fixing-paddle/s" +
+                                               "rc/soot/jimple/paddle/queue/Qvar_typeDebug.jedd:40,22-24"),
                                               in).iterator(new Attribute[] { var.v(), type.v() });
         while (it.hasNext()) {
             Object[] tuple = (Object[]) it.next();

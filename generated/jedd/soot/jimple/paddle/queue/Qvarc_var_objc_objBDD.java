@@ -19,20 +19,22 @@ public final class Qvarc_var_objc_objBDD extends Qvarc_var_objc_obj {
                                                 new PhysicalDomain[] { C1.v(), V1.v(), C2.v(), H1.v() },
                                                 ("add(jedd.internal.Jedd.v().literal(new java.lang.Object[...]" +
                                                  ", new jedd.Attribute[...], new jedd.PhysicalDomain[...])) at" +
-                                                 " /home/research/ccl/olhota/soot-trunk/src/soot/jimple/paddle" +
-                                                 "/queue/Qvarc_var_objc_objBDD.jedd:34,8-11"),
+                                                 " /tmp/fixing-paddle/src/soot/jimple/paddle/queue/Qvarc_var_o" +
+                                                 "bjc_objBDD.jedd:34,8-11"),
                                                 jedd.internal.Jedd.v().literal(new Object[] { _varc, _var, _objc, _obj },
                                                                                new Attribute[] { varc.v(), var.v(), objc.v(), obj.v() },
                                                                                new PhysicalDomain[] { C1.v(), V1.v(), C2.v(), H1.v() })));
     }
     
     public void add(final jedd.internal.RelationContainer in) {
+        if (!jedd.internal.Jedd.v().equals(jedd.internal.Jedd.v().read(in), jedd.internal.Jedd.v().falseBDD()))
+            invalidate();
         for (Iterator it = readers.iterator(); it.hasNext(); ) {
             Rvarc_var_objc_objBDD reader = (Rvarc_var_objc_objBDD) it.next();
-            reader.add(new jedd.internal.RelationContainer(new Attribute[] { var.v(), objc.v(), varc.v(), obj.v() },
-                                                           new PhysicalDomain[] { V1.v(), C2.v(), C1.v(), H1.v() },
-                                                           ("reader.add(in) at /home/research/ccl/olhota/soot-trunk/src/s" +
-                                                            "oot/jimple/paddle/queue/Qvarc_var_objc_objBDD.jedd:39,12-18"),
+            reader.add(new jedd.internal.RelationContainer(new Attribute[] { objc.v(), obj.v(), varc.v(), var.v() },
+                                                           new PhysicalDomain[] { C2.v(), H1.v(), C1.v(), V1.v() },
+                                                           ("reader.add(in) at /tmp/fixing-paddle/src/soot/jimple/paddle/" +
+                                                            "queue/Qvarc_var_objc_objBDD.jedd:40,12-18"),
                                                            in));
         }
     }

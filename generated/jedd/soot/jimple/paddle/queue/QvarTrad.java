@@ -14,15 +14,17 @@ public class QvarTrad extends Qvar {
     
     private ChunkedQueue q = new ChunkedQueue();
     
-    public void add(VarNode _var) { q.add(_var); }
+    public void add(VarNode _var) {
+        q.add(_var);
+        invalidate();
+    }
     
     public void add(final jedd.internal.RelationContainer in) {
         Iterator it =
           new jedd.internal.RelationContainer(new Attribute[] { var.v() },
                                               new PhysicalDomain[] { V1.v() },
-                                              ("in.iterator(new jedd.Attribute[...]) at /home/research/ccl/o" +
-                                               "lhota/soot-trunk/src/soot/jimple/paddle/queue/QvarTrad.jedd:" +
-                                               "37,22-24"),
+                                              ("in.iterator(new jedd.Attribute[...]) at /tmp/fixing-paddle/s" +
+                                               "rc/soot/jimple/paddle/queue/QvarTrad.jedd:38,22-24"),
                                               in).iterator(new Attribute[] { var.v() });
         while (it.hasNext()) {
             Object[] tuple = (Object[]) it.next();

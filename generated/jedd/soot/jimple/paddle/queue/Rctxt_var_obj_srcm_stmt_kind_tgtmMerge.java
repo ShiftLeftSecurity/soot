@@ -40,12 +40,12 @@ public final class Rctxt_var_obj_srcm_stmt_kind_tgtmMerge extends Rctxt_var_obj_
     }
     
     public jedd.internal.RelationContainer get() {
-        return new jedd.internal.RelationContainer(new Attribute[] { var.v(), ctxt.v(), kind.v(), srcm.v(), stmt.v(), tgtm.v(), obj.v() },
-                                                   new PhysicalDomain[] { V1.v(), C2.v(), KD.v(), MS.v(), ST.v(), MT.v(), H1.v() },
+        return new jedd.internal.RelationContainer(new Attribute[] { tgtm.v(), obj.v(), stmt.v(), srcm.v(), var.v(), ctxt.v(), kind.v() },
+                                                   new PhysicalDomain[] { MT.v(), H1.v(), ST.v(), MS.v(), V1.v(), C2.v(), KD.v() },
                                                    ("return jedd.internal.Jedd.v().union(jedd.internal.Jedd.v().r" +
-                                                    "ead(in1.get()), in2.get()); at /home/research/ccl/olhota/soo" +
-                                                    "t-trunk/src/soot/jimple/paddle/queue/Rctxt_var_obj_srcm_stmt" +
-                                                    "_kind_tgtmMerge.jedd:52,8-14"),
+                                                    "ead(in1.get()), in2.get()); at /tmp/fixing-paddle/src/soot/j" +
+                                                    "imple/paddle/queue/Rctxt_var_obj_srcm_stmt_kind_tgtmMerge.je" +
+                                                    "dd:52,8-14"),
                                                    jedd.internal.Jedd.v().union(jedd.internal.Jedd.v().read(in1.get()),
                                                                                 in2.get()));
     }

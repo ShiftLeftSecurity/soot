@@ -46,20 +46,19 @@ public class Rvar_srcm_stmt_signature_kindIter extends Rvar_srcm_stmt_signature_
                                                "mple.paddle.bdddomains.ST, soot.jimple.paddle.bdddomains.sig" +
                                                "nature:soot.jimple.paddle.bdddomains.SG, soot.jimple.paddle." +
                                                "bdddomains.kind:soot.jimple.paddle.bdddomains.KD> ret = jedd" +
-                                               ".internal.Jedd.v().falseBDD(); at /home/research/ccl/olhota/" +
-                                               "soot-trunk/src/soot/jimple/paddle/queue/Rvar_srcm_stmt_signa" +
-                                               "ture_kindIter.jedd:46,58-61"),
+                                               ".internal.Jedd.v().falseBDD(); at /tmp/fixing-paddle/src/soo" +
+                                               "t/jimple/paddle/queue/Rvar_srcm_stmt_signature_kindIter.jedd" +
+                                               ":46,58-61"),
                                               jedd.internal.Jedd.v().falseBDD());
         while (r.hasNext()) {
             ret.eqUnion(jedd.internal.Jedd.v().literal(new Object[] { r.next(), r.next(), r.next(), r.next(), r.next() },
                                                        new Attribute[] { var.v(), srcm.v(), stmt.v(), signature.v(), kind.v() },
                                                        new PhysicalDomain[] { V1.v(), MS.v(), ST.v(), SG.v(), KD.v() }));
         }
-        return new jedd.internal.RelationContainer(new Attribute[] { signature.v(), var.v(), kind.v(), srcm.v(), stmt.v() },
-                                                   new PhysicalDomain[] { SG.v(), V1.v(), KD.v(), MS.v(), ST.v() },
-                                                   ("return ret; at /home/research/ccl/olhota/soot-trunk/src/soot" +
-                                                    "/jimple/paddle/queue/Rvar_srcm_stmt_signature_kindIter.jedd:" +
-                                                    "50,8-14"),
+        return new jedd.internal.RelationContainer(new Attribute[] { stmt.v(), signature.v(), srcm.v(), var.v(), kind.v() },
+                                                   new PhysicalDomain[] { ST.v(), SG.v(), MS.v(), V1.v(), KD.v() },
+                                                   ("return ret; at /tmp/fixing-paddle/src/soot/jimple/paddle/que" +
+                                                    "ue/Rvar_srcm_stmt_signature_kindIter.jedd:50,8-14"),
                                                    ret);
     }
     
