@@ -27,36 +27,41 @@ import soot.options.Options;
 
 
 /**
- *  <p>
- *  Represents a CFG for a Body instance where the nodes are {@link
- *  Unit} instances, and where edges are a conservative indication of
- *  unexceptional and exceptional control flow. <tt>ClassicCompleteUnitGraph</tt>
- *  duplicates the results that would have been produced by Soot's
- *  {@link CompleteUnitGraph} in releases up to Soot 2.0. It is included solely
- *  for testing purposes, and should not be used in actual analyses.</p>
+ *  <p> Represents a CFG for a Body instance where the nodes are
+ *  {@link Unit} instances, and where edges are a conservative
+ *  indication of unexceptional and exceptional control
+ *  flow.</p>
  *
- *  <p>
- *  There are two distinctions between the graphs produced by the 
- *  <tt>ClassicCompleteUnitGraph</tt> and the current <tt>CompleteUnitGraph</tt>:
+ *  <p><tt>ClassicCompleteUnitGraph</tt> duplicates the results
+ *  that would have been produced by Soot's {@link CompleteUnitGraph}
+ *  in releases up to Soot 2.0.1. It is included solely for testing
+ *  purposes, and should not be used in actual analyses.</p>
+ *
+ *  <p> There are two distinctions between the graphs produced by the
+ *  <tt>ClassicCompleteUnitGraph</tt> and the current
+ *  <tt>CompleteUnitGraph</tt>:
  *  <ol>
- *  <li><tt>CompleteUnitGraph</tt> only creates edges to a <tt>Trap</tt> handler
- *  for trapped <tt>Unit</tt>s that have the potential to throw the particular
- *  exception type caught by the handler. 
- *  <tt>ClassicCompleteUnitGraph</tt> creates edges for all trapped <tt>Unit</tt>s,
- *  regardless of what exceptions they may throw.</li>
- *  <li>
- *  When <tt>CompleteUnitGraph</tt> creates edges for a trapped <tt>Unit</tt> that 
- *  may throw a caught exception, it adds 
- *  edges from each predecessor of the excepting <tt>Unit</tt> to the handler. Only if
- *  the excepting <tt>Unit</tt> may have side effects does it also add an edge from
- *  the excepting <tt>Unit</tt> itself to the handler.
- *  <tt>ClassicCompleteUnitGraph</tt>, on the other hand, always adds an edge from
- *  the excepting <tt>Unit</tt> itself to the handler, and adds edges from the 
- *  predecessor only of the first <tt>Unit</tt> covered by a <tt>Trap</tt> (in this
- *  one aspect <tt>ClassicCompleteUnitGraph</tt> is less conservative than 
- *  <tt>CompleteUnitGraph</tt>, since it ignores the possibility of a branch into the  
- *  middle of a protected area, which is possible in arbitrary bytecode, though not in
- *  Java source).</li>
+ *
+ *  <li><tt>CompleteUnitGraph</tt> only creates edges to a
+ *  <tt>Trap</tt> handler for trapped <tt>Unit</tt>s that have the
+ *  potential to throw the particular exception type caught by the
+ *  handler.  <tt>ClassicCompleteUnitGraph</tt> creates edges for all
+ *  trapped <tt>Unit</tt>s, regardless of what exceptions they may
+ *  throw.</li>
+ *
+ *  <li> When <tt>CompleteUnitGraph</tt> creates edges for a trapped
+ *  <tt>Unit</tt> that may throw a caught exception, it adds edges
+ *  from each predecessor of the excepting <tt>Unit</tt> to the
+ *  handler. Only if the excepting <tt>Unit</tt> may have side effects
+ *  does it also add an edge from the excepting <tt>Unit</tt> itself
+ *  to the handler.  <tt>ClassicCompleteUnitGraph</tt>, on the other
+ *  hand, always adds an edge from the excepting <tt>Unit</tt> itself
+ *  to the handler, and adds edges from the predecessor only of the
+ *  first <tt>Unit</tt> covered by a <tt>Trap</tt> (in this one aspect
+ *  <tt>ClassicCompleteUnitGraph</tt> is less conservative than
+ *  <tt>CompleteUnitGraph</tt>, since it ignores the possibility of a
+ *  branch into the middle of a protected area.</li>
+ *
  * </ol></p>
  */
 public class ClassicCompleteUnitGraph extends TrapUnitGraph
@@ -67,27 +72,8 @@ public class ClassicCompleteUnitGraph extends TrapUnitGraph
      */
     public ClassicCompleteUnitGraph(Body body)
     {
+	// The TrapUnitGraph constructor will use our buildExceptionalEdges:
         super(body);
-	int size = unitChain.size();
-
-        if(Options.v().verbose())
-            G.v().out.println("[" + method.getName() + 
-                               "]     Constructing ClassicCompleteUnitGraph...");
-      
-        if(Options.v().time())
-            Timers.v().graphTimer.start();
-
-	unitToSuccs = new HashMap(size * 2 + 1, 0.7f);
-	unitToPreds = new HashMap(size * 2 + 1, 0.7f);
-	buildUnexceptionalEdges(unitToSuccs, unitToPreds);
-	buildExceptionalEdges(unitToSuccs, unitToPreds);
-	makeMappedListsUnmodifiable(unitToSuccs);
-	makeMappedListsUnmodifiable(unitToPreds);
-
-	buildHeadsAndTails();
-
-        if(Options.v().time())
-            Timers.v().graphTimer.end();
     }
 
 
@@ -121,11 +107,10 @@ public class ClassicCompleteUnitGraph extends TrapUnitGraph
 	    Trap trap = (Trap) trapIt.next();
 	    Unit firstTrapped = trap.getBeginUnit();
 	    Unit catcher = trap.getHandlerUnit();
-	    // Make a copy of firstTrapped's predecessors to iterator over,
+	    // Make a copy of firstTrapped's predecessors to iterate over,
 	    // just in case we're about to add new predecessors to this 
 	    // very list, though that can only happen if the handler traps
-	    // itself (which is only possible in bytecode that was not
-	    // compiled from Java source).  And to really allow for that
+	    // itself.  And to really allow for that
 	    // possibility, we should iterate here until we reach a fixed
 	    // point; but the old UnitGraph that we are attempting to
 	    // duplicate did not do that, so we won't either.
