@@ -83,14 +83,14 @@ public abstract class UnitGraph implements DirectedGraph
      *
      * @param unitToSuccs A {@link Map} from {@link Unit}s to 
      *                    {@link List}s of {@link Unit}s. This is
-     *	                  an ``out parameter''; you must pass an empty
+     *	                  an ``out parameter''; callers must pass an empty
      *                    {@link Map}. <tt>buildUnexceptionalEdges</tt> will
      *                    add a mapping for every <tt>Unit</tt> in the
      *                    body to a list of its unexceptional successors.
      *
      * @param unitToPreds A {@link Map} from {@link Unit}s to 
      *                    {@link List}s of {@link Unit}s. This is an 
-     *                    ``out parameter''; you must pass an empty 
+     *                    ``out parameter''; callers must pass an empty 
      *                    {@link Map}. <tt>buildUnexceptionalEdges</tt> will
      *                    add a mapping for every <tt>Unit</tt> in the body
      *                    to a list of its unexceptional predecessors.
@@ -125,9 +125,9 @@ public abstract class UnitGraph implements DirectedGraph
 		for (Iterator targetIt = currentUnit.getUnitBoxes().iterator();
 		     targetIt.hasNext(); ) {
 		    Unit target = ((UnitBox) targetIt.next()).getUnit();
+		    // Arbitrary bytecode can branch to the same
+		    // target it falls through to, so we screen for duplicates:
 		    if (! successors.contains(target)) {
-			// Arbitrary bytecode can branch to the same
-			// target it falls through to.
 			successors.add(target);
 			((List) unitToPreds.get(target)).add(currentUnit);
 		    }
@@ -141,7 +141,7 @@ public abstract class UnitGraph implements DirectedGraph
 
 
     /**
-     * Utility method used in the construction of {@UnitGraph}s, to be
+     * Utility method used in the construction of {@link UnitGraph}s, to be
      * called only after the unitToPreds and unitToSuccs maps have
      * been built. It defines the graph's set of heads to include the
      * first {@link Unit} in the graph's body, together with any other
