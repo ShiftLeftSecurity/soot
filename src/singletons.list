@@ -151,3 +151,5 @@ Shimple
 SConstantPropagatorAndFolder
 NullPointerColorer
 ParityTagger
+ThrowableSet.Manager
+AltClassLoader

@@ -78,6 +78,8 @@ import soot.util.queue.*;
 import soot.shimple.*;
 import soot.shimple.toolkits.scalar.*;
 import soot.relations.*;
+import soot.exceptions.*;
+import soot.util.cfgcmd.*;
 
 /** A class to group together all the global variables in Soot. */
 public class Singletons {
@@ -1002,6 +1004,18 @@ public class Singletons {
     public ParityTagger ParityTagger() {
         if( instanceParityTagger == null ) instanceParityTagger = new ParityTagger( g );
         return instanceParityTagger;
+    }
+
+    private ThrowableSet.Manager instanceThrowableSetManager;
+    public ThrowableSet.Manager ThrowableSetManager() {
+        if( instanceThrowableSetManager == null ) instanceThrowableSetManager = new ThrowableSet.Manager( g );
+        return instanceThrowableSetManager;
+    }
+
+    private AltClassLoader instanceAltClassLoader;
+    public AltClassLoader AltClassLoader() {
+        if( instanceAltClassLoader == null ) instanceAltClassLoader = new AltClassLoader( g );
+        return instanceAltClassLoader;
     }
 
 }

@@ -18,7 +18,7 @@
  */
 
 /*
- * Modified by the Sable Research Group and others 1997-1999.  
+ * Modified by the Sable Research Group and others 1997-2003.  
  * See the 'credits' file distributed with Soot for the complete list of
  * contributors.  (Soot is distributed at http://www.sable.mcgill.ca/soot)
  */
@@ -62,6 +62,15 @@ public class UnreachableCodeEliminator extends BodyTransformer
         if (!body.getUnits().isEmpty())
             visitStmts((Stmt)body.getUnits().getFirst());
 
+	// Create a map from units that start Traps, to their
+	// Traps, so we can recognize when we remove an
+	// unreachable Trap.
+	Map trapHandlers = new HashMap();
+	for (Iterator it = body.getTraps().iterator(); it.hasNext(); ) {
+	    Trap trap = (Trap) it.next();
+	    trapHandlers.put(trap.getHandlerUnit(), trap);
+	}
+
         Iterator stmtIt = body.getUnits().snapshotIterator();
         while (stmtIt.hasNext()) 
         {
@@ -71,7 +80,10 @@ public class UnreachableCodeEliminator extends BodyTransformer
             if (!visited.contains(stmt)) 
             {
                 body.getUnits().remove(stmt);
-		stmt.clearUnitBoxes();
+		Trap trap = (Trap) trapHandlers.get(stmt);
+		if (trap != null) {
+		    body.getTraps().remove(trap);
+		}
                 numPruned++;
             }
         }
@@ -86,10 +98,8 @@ public class UnreachableCodeEliminator extends BodyTransformer
             {
                 Trap t = (Trap) trapIt.next();
                 
-                if(t.getBeginUnit() == t.getEndUnit()){
-                    t.clearUnitBoxes();
+                if(t.getBeginUnit() == t.getEndUnit())
                     trapIt.remove();
-                }
             }
         }
         

@@ -73,13 +73,18 @@ public class DotGraph implements Renderable{
    */
   public void plot() {
     try {
+      String filename = soot.util.SourceLocator.v().getOutputDir();
+      if (filename.length() > 0) {
+	filename = filename + File.separator;
+      }
+      filename = filename + this.graphname.replace(' ', '-') + ".dot";
       BufferedOutputStream out = 
-	new BufferedOutputStream(new FileOutputStream(this.graphname+".dot"));
+	new BufferedOutputStream(new FileOutputStream(filename));
 							  
       render(out, 0);
       out.close();
 
-      G.v().out.println("Generate dot file in "+this.graphname+".dot");
+      G.v().out.println("Generate dot file in "+filename);
 
     } catch (IOException ioe) {
     }

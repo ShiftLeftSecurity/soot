@@ -1,5 +1,5 @@
 /* Soot - a J*va Optimization Framework
- * Copyright (C) 1999 Patrice Pominville, Raja Vallee-Rai
+ * Copyright (C) 2003 John Jorgensen
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,16 +17,6 @@
  * Boston, MA 02111-1307, USA.
  */
 
-/*
- * Modified by the Sable Research Group and others 1997-2003.  
- * See the 'credits' file distributed with Soot for the complete list of
- * contributors.  (Soot is distributed at http://www.sable.mcgill.ca/soot)
- */
-
-
- 
-
-
 
 package soot.toolkits.graph;
 
@@ -39,53 +29,50 @@ import soot.options.Options;
 /**
  *  <p>
  *  Represents a CFG for a Body instance where the nodes are {@link
- *  Unit} instances, and where, in additional to unexceptional control
- *  flow edges, edges are added from every trapped {@link Unit} to the
- *  {@link Trap}'s handler <tt>Unit</tt>, regardless of whether the
- *  trapped <tt>Unit</tt>s may actually throw the exception caught by
- *  the <tt>Trap</tt>.</p>
+ *  Unit} instances, and where edges are a conservative indication of
+ *  unexceptional and exceptional control flow. <tt>ClassicCompleteUnitGraph</tt>
+ *  duplicates the results that would have been produced by Soot's
+ *  {@link CompleteUnitGraph} in releases up to Soot 2.0. It is included solely
+ *  for testing purposes, and should not be used in actual analyses.</p>
  *
  *  <p>
- *  There are three distinctions between the exceptional edges added 
- *  in <tt>TrapUnitGraph</tt> and the exceptional edges added in
- *  {@link CompleteUnitGraph}:
+ *  There are two distinctions between the graphs produced by the 
+ *  <tt>ClassicCompleteUnitGraph</tt> and the current <tt>CompleteUnitGraph</tt>:
  *  <ol>
+ *  <li><tt>CompleteUnitGraph</tt> only creates edges to a <tt>Trap</tt> handler
+ *  for trapped <tt>Unit</tt>s that have the potential to throw the particular
+ *  exception type caught by the handler. 
+ *  <tt>ClassicCompleteUnitGraph</tt> creates edges for all trapped <tt>Unit</tt>s,
+ *  regardless of what exceptions they may throw.</li>
  *  <li>
- *  In <tt>CompleteUnitGraph</tt>, the edges to <tt>Trap</tt>s are 
- *  associated with <tt>Unit</tt>s which may actually throw an 
- *  exception which the <tt>Trap</tt> catches. In <tt>TrapUnitGraph</tt>,
- *  there are edges from every trapped <tt>Unit</tt> to the <tt>Trap</tt>,
- *  regardless of whether it can throw an exception caught by the <tt>Trap</tt>
- *  </li>
- *  <li>
- *  In <tt>CompleteUnitGraph</tt>, when a <tt>Unit</tt> may throw
- *  an exception that is caught by a <tt>Trap</tt>, there are edges from	
- *  every predecessor of the excepting <tt>Unit</tt> to the <tt>Trap</tt>'s
- *  handler.  In <tt>TrapUnitGraph</tt>, edges are not added from the 
- *  predecessors of excepting <tt>Unit</tt>s</li>
- *  <li>
- *  In <tt>CompleteUnitGraph</tt>, when a <tt>Unit</tt> may throw an
- *  exception that is caught by a <tt>Trap</tt>, there is no edge from
- *  the excepting <tt>Unit</tt> itself to the <tt>Trap</tt> if
- *  the excepting <tt>Unit</tt> has no side effects. In
- *  <tt>TrapUnitGraph</tt>, there is always an edge from the excepting
- *  <tt>Unit</tt> to the <tt>Trap</tt>.</li>
- *  </ol>
+ *  When <tt>CompleteUnitGraph</tt> creates edges for a trapped <tt>Unit</tt> that 
+ *  may throw a caught exception, it adds 
+ *  edges from each predecessor of the excepting <tt>Unit</tt> to the handler. Only if
+ *  the excepting <tt>Unit</tt> may have side effects does it also add an edge from
+ *  the excepting <tt>Unit</tt> itself to the handler.
+ *  <tt>ClassicCompleteUnitGraph</tt>, on the other hand, always adds an edge from
+ *  the excepting <tt>Unit</tt> itself to the handler, and adds edges from the 
+ *  predecessor only of the first <tt>Unit</tt> covered by a <tt>Trap</tt> (in this
+ *  one aspect <tt>ClassicCompleteUnitGraph</tt> is less conservative than 
+ *  <tt>CompleteUnitGraph</tt>, since it ignores the possibility of a branch into the  
+ *  middle of a protected area, which is possible in arbitrary bytecode, though not in
+ *  Java source).</li>
+ * </ol></p>
  */
-public class TrapUnitGraph extends UnitGraph
+public class ClassicCompleteUnitGraph extends TrapUnitGraph
 {
     /**
      *  Constructs the graph from a given Body instance.
      *  @param the Body instance from which the graph is built.
      */
-    public TrapUnitGraph(Body body)
+    public ClassicCompleteUnitGraph(Body body)
     {
         super(body);
 	int size = unitChain.size();
 
         if(Options.v().verbose())
             G.v().out.println("[" + method.getName() + 
-                               "]     Constructing TrapUnitGraph...");
+                               "]     Constructing ClassicCompleteUnitGraph...");
       
         if(Options.v().time())
             Timers.v().graphTimer.start();
@@ -125,16 +112,28 @@ public class TrapUnitGraph extends UnitGraph
      *                    that <tt>Trap</tt>.
      */
     protected void buildExceptionalEdges(Map unitToSuccs, Map unitToPreds) {
+	// First, add the same edges as TrapUnitGraph.
+	super.buildExceptionalEdges(unitToSuccs, unitToPreds);
+	// Then add edges from the predecessors of the first
+	// trapped Unit for each Trap.
 	for (Iterator trapIt = body.getTraps().iterator(); 
 	     trapIt.hasNext(); ) {
 	    Trap trap = (Trap) trapIt.next();
-	    Unit first = trap.getBeginUnit();
-	    Unit last = (Unit) unitChain.getPredOf(trap.getEndUnit());
+	    Unit firstTrapped = trap.getBeginUnit();
 	    Unit catcher = trap.getHandlerUnit();
-	    for (Iterator unitIt = unitChain.iterator(first, last);
+	    // Make a copy of firstTrapped's predecessors to iterator over,
+	    // just in case we're about to add new predecessors to this 
+	    // very list, though that can only happen if the handler traps
+	    // itself (which is only possible in bytecode that was not
+	    // compiled from Java source).  And to really allow for that
+	    // possibility, we should iterate here until we reach a fixed
+	    // point; but the old UnitGraph that we are attempting to
+	    // duplicate did not do that, so we won't either.
+	    List origPredsOfTrapped = new ArrayList(getPredsOf(firstTrapped));
+	    for (Iterator unitIt = origPredsOfTrapped.iterator(); 
 		 unitIt.hasNext(); ) {
-		Unit trapped = (Unit) unitIt.next();
-		addEdge(unitToSuccs, unitToPreds, trapped, catcher);
+		Unit pred = (Unit) unitIt.next();
+		addEdge(unitToSuccs, unitToPreds, pred, catcher);
 	    }
 	}
     }

@@ -18,7 +18,7 @@
  */
 
 /*
- * Modified by the Sable Research Group and others 1997-1999.  
+ * Modified by the Sable Research Group and others 1997-2003.  
  * See the 'credits' file distributed with Soot for the complete list of
  * contributors.  (Soot is distributed at http://www.sable.mcgill.ca/soot)
  */
@@ -31,34 +31,50 @@ import soot.*;
 import java.io.*;
 
 /**
- *  Represents a CFG where the nodes are Block instances, and
- *  where control flow associated with exceptions is taken into account.
- *  That is, given a list of Units that have an exception handler in scope,
- *  each one of these units will be considered a Block as control can jump to 
- *  an exception handler at any point while going through the units.
- *
- *  @see Unit
- *  @see Block
- *  @see BlockGraph
- *  @see ZonedBlockGraph
+ *  <p>Represents a CFG where the nodes are {@link Block}s and the
+ *  edges are derived from control flow.  Control flow associated with
+ *  exceptions is taken into account: when a <tt>Unit</tt> may throw
+ *  an exception that is caught by a {@link Trap} within the
+ *  <tt>Body</tt>, the excepting <tt>Unit</tt> starts a new basic
+ *  block.</p>
  */
 
 public class CompleteBlockGraph extends BlockGraph 
 {
-
-
     /**
-     *   Constructs  a graph for the blocks found by partitioning the 
-     *   the unit chain of  the provided
-     *   Body instance. Each node in the graph corresponds to
-     *   a block. The edges are derived from the control flow.
+     *   <p> Constructs a <tt>CompleteBlockGraph</tt> for the blocks
+     *   found by partitioning the the units of the provided
+     *   {@link Body} instance into basic blocks.</p>
      *
-     *   @param body               The underlying body we want to make a
-     *                             graph for.
+     *   <p> Note that this constructor builds a {@link
+     *   CompleteUnitGraph} internally when splitting <tt>body</tt>'s
+     *   {@link Unit}s into {@link Block}s.  Callers who already have
+     *   a {@link CompleteUnitGraph} to hand can use the constructor
+     *   taking a <tt>CompleteUnitGraph</tt> as a parameter, as a
+     *   minor optimization.
+     *
+     *   @param body    The underlying body we want to make a graph for.
      */
     public CompleteBlockGraph(Body body)
     {
-        super(body, COMPLETE);
+        super(new CompleteUnitGraph(body));
+    }
+
+
+    /**
+     *   Constructs a graph for the blocks found by partitioning the
+     *   the units in a {@link CompleteUnitGraph}.  
+     *
+     *   @param body    The underlying body we want to make a graph for.
+     *
+     *   @param unitGraph A {@link CompleteUnitGraph} build from <tt>body</tt>
+     *                  The <tt>CompleteBlockGraph</tt> constructor uses
+     *                  the passed <tt>graph</tt> to split the body into
+     *			blocks. 
+     */
+    public CompleteBlockGraph(CompleteUnitGraph unitGraph)
+    {
+        super(unitGraph);
     }
 }
 
