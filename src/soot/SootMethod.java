@@ -168,9 +168,6 @@ public class SootMethod extends AbstractHost implements ClassMember, Directed
      
     public boolean isConcrete()
     {
-        if (declaringClass.isContextClass())
-	    return false;
-
         return !isPhantom() && !isAbstract() && !isNative();
     }
 
@@ -251,23 +248,13 @@ public class SootMethod extends AbstractHost implements ClassMember, Directed
     }
 
     /**
-     * Returns the active body if present, else constructs an active body and returns that.
-     *
-     * If you called Scene.v().loadClassAndSupport() for a class yourself, it will
-     * not be an application class, so you cannot get retrieve its active body.
-     * Please call setApplicationClass() on the relevant class.
+        Returns the active body if present, else constructs an active body and returns that.
      */
      
     public Body retrieveActiveBody()
     {
-        if (declaringClass.isContextClass())
-	    throw new RuntimeException("cannot get resident body for context class : "
-				       + getSignature()
-				       + "; maybe you want to call c.setApplicationClass() on this class!");
-	if (declaringClass.isPhantomClass())
-            throw new RuntimeException("cannot get resident body for phantom class : " 
-				       + getSignature()
-				       + "; maybe you want to call c.setApplicationClass() on this class!");
+        if (declaringClass.isContextClass() || declaringClass.isPhantomClass())
+            throw new RuntimeException("cannot get resident body for context or phantom class!");
 
         if(!hasActiveBody())
             setActiveBody(this.getBodyFromMethodSource("jb"));

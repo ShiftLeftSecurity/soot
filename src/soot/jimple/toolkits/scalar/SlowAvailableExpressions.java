@@ -34,7 +34,7 @@ import soot.util.*;
 
 /** Provides an user-interface for the AvailableExpressionsAnalysis class.
  * Returns, for each statement, the list of expressions available before and after it. */
-public class SlowAvailableExpressions implements AvailableExpressions
+public class SlowAvailableExpressions
 {
     Map unitToPairsAfter;
     Map unitToPairsBefore;

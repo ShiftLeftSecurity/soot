@@ -111,7 +111,7 @@ public class VTATypeGraph extends HashMutableDirectedGraph implements TypeGraph
                         continue;
 
                     // Get the body & add the locals.
-		    Body b = m.retrieveActiveBody();
+                    Body b = m.getActiveBody();
 
                     Iterator localIt = b.getLocals().iterator();
                     while (localIt.hasNext())
@@ -186,7 +186,7 @@ public class VTATypeGraph extends HashMutableDirectedGraph implements TypeGraph
                         continue;
 
                     // Get the body & add the locals.
-		    Body b = m.retrieveActiveBody();
+                    Body b = m.getActiveBody();
 
                     Iterator localIt = b.getLocals().iterator();
                     while (localIt.hasNext())
@@ -217,12 +217,6 @@ public class VTATypeGraph extends HashMutableDirectedGraph implements TypeGraph
 
                 if (c.isInterface())
                     continue;
-
-		/* solution, report to user that needs -a switch */
-		if (c.isContextClass())
-		{
-		    throw new RuntimeException("VTA needs '-a' or '--analyze-context' switch to run correctly.");
-		}
 
                 // The following are entry points that have to be treated specially
                 SootMethod finalizer = null;
@@ -327,7 +321,7 @@ public class VTATypeGraph extends HashMutableDirectedGraph implements TypeGraph
                     }
 
                     String methodSig = m.getSignature();
-                    JimpleBody b = (JimpleBody)m.retrieveActiveBody();
+                    JimpleBody b = (JimpleBody)m.getActiveBody();
 
                     // Look for assignStmts and method calls.
                     Iterator unitsIt = b.getUnits().iterator();

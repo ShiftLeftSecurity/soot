@@ -6,7 +6,6 @@ import soot.toolkits.graph.*;
 import soot.util.*;
 
 import soot.tagkit.*;
-import soot.jimple.toolkits.annotation.tags.*;
 
 import java.util.*;
 

@@ -153,7 +153,7 @@ class ArrayBoundsCheckerAnalysis
 	Iterator unitIt = dg.iterator();
 	while (unitIt.hasNext())
 	{
-	    Object s = unitIt.next();
+	    Directed s = (Directed)unitIt.next();
 
 	    List preds = graph.getPredsOf(s);
 	    List succs = graph.getSuccsOf(s);
@@ -183,13 +183,13 @@ class ArrayBoundsCheckerAnalysis
     }
     
     
-    public Object getFlowBefore(Object s)
+    public Object getFlowBefore(Directed s)
     {
         return unitToBeforeFlow.get(s);
     }
 
     /* merge all preds' out set */
-    private void mergebunch(Object ins[], Object s, Object prevOut, Object out)
+    private void mergebunch(Object ins[], Directed s, Object prevOut, Object out)
     {
         WeightedDirectedSparseGraph prevgraph = (WeightedDirectedSparseGraph)prevOut,
 	    outgraph = (WeightedDirectedSparseGraph)out;
@@ -249,10 +249,10 @@ class ArrayBoundsCheckerAnalysis
 	if (debug)
 	    System.out.println("Building PseudoTopological order list on "+start);
 
-        LinkedList allUnits = (LinkedList)SlowPseudoTopologicalOrderer.v().newList(this.graph);
+        LinkedList allUnits = (LinkedList)PseudoTopologicalOrderer2.v().newList(this.graph);
 			
-	BoundedPriorityList changedUnits = 
-	    new BoundedPriorityList(allUnits);	    
+	OrderedBoundedList changedUnits = 
+	    new OrderedBoundedList(allUnits);	    
 
 	//       	LinkedList changedUnits = new LinkedList(allUnits);	
 
@@ -275,7 +275,7 @@ class ArrayBoundsCheckerAnalysis
 	    {
 		Block block = (Block)allUnits.get(i);
 		{
-		    Object tail = block.getTail();
+		    Directed tail = block.getTail();
 
 		    HashSet livelocals = (HashSet)ailanalysis.getFlowAfter(tail);
 	
@@ -372,7 +372,7 @@ class ArrayBoundsCheckerAnalysis
 
             while(!changedUnits.isEmpty())
             {
-                Object s = changedUnits.removeFirst();
+                Directed s = (Directed) changedUnits.removeFirst();
                 changedUnitsSet.remove(s);
 
 		// DebugMsg.counter2++;
@@ -459,7 +459,7 @@ class ArrayBoundsCheckerAnalysis
 		{
 		    for (int i = 0; i < changedSuccs.size(); i++)
 		    {
-			Object succ = changedSuccs.get(i);
+			Directed succ = (Directed) changedSuccs.get(i);
 			if (!changedUnitsSet.contains(succ))
 			{
 			    changedUnits.add(succ);
@@ -490,7 +490,7 @@ class ArrayBoundsCheckerAnalysis
     /* Flow go through a node, the output will be put into edgeMap, and also
      * the changed succ will be in a list to return back.
      */
-    private List flowThrough(Object inValue, Object unit)
+    private List flowThrough(Object inValue, Directed unit)
     {	
         ArrayList changedSuccs = new ArrayList();
       

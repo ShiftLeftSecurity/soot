@@ -30,7 +30,6 @@ import soot.*;
 import soot.jimple.*;
 import soot.util.*;
 import java.util.*;
-import java.io.*;
 
 class ConstraintChecker extends AbstractStmtSwitch
 {
@@ -54,11 +53,7 @@ class ConstraintChecker extends AbstractStmtSwitch
       }
     catch(RuntimeTypeException e)
       {
-         StringWriter st = new StringWriter();
-         PrintWriter pw = new PrintWriter(st);
-	 e.printStackTrace(pw);
-	 pw.close();
-         throw new TypeException(st.toString());
+	throw new TypeException(e.getMessage());
       }
   }
 
@@ -226,33 +221,29 @@ class ConstraintChecker extends AbstractStmtSwitch
     if(l instanceof ArrayRef)
       {
 	ArrayRef ref = (ArrayRef) l;
-	Type baset = ((Local) ref.getBase()).getType();
-	if(!(baset instanceof NullType))
-	{
-	  ArrayType base = (ArrayType) baset;
-	  Value index = ref.getIndex();
+	ArrayType base = (ArrayType) ((Local) ref.getBase()).getType();
+	Value index = ref.getIndex();
 	
-	  if((base.numDimensions == 1) &&
-	     (base.baseType instanceof IntegerType))
-	    {
-	      left = ClassHierarchy.typeNode(base.baseType);
-	    }
+	if((base.numDimensions == 1) &&
+	   (base.baseType instanceof IntegerType))
+	  {
+	    left = ClassHierarchy.typeNode(base.baseType);
+	  }
 	
-	  if(index instanceof Local)
-	    {
-	      if(!ClassHierarchy.typeNode((BaseType) ((Local) index).getType()).hasAncestor_1(ClassHierarchy.INT))
-	        {
-		  if(fix)
-		    {
-		      ref.setIndex(insertCast((Local) index, IntType.v(), stmt));
-		    }
-		  else
-		    {
-		      error("Type Error(5)");
-		    }
-	        }
-	    }
-        }
+	if(index instanceof Local)
+	  {
+	    if(!ClassHierarchy.typeNode((BaseType) ((Local) index).getType()).hasAncestor_1(ClassHierarchy.INT))
+	      {
+		if(fix)
+		  {
+		    ref.setIndex(insertCast((Local) index, IntType.v(), stmt));
+		  }
+		else
+		  {
+		    error("Type Error(5)");
+		  }
+	      }
+	  }
       }
     else if(l instanceof Local)
       {
@@ -289,33 +280,29 @@ class ConstraintChecker extends AbstractStmtSwitch
     if(r instanceof ArrayRef)
       {
 	ArrayRef ref = (ArrayRef) r;
-	Type baset = ((Local) ref.getBase()).getType();
-	if(!(baset instanceof NullType))
-	{
-	  ArrayType base = (ArrayType) baset;
-	  Value index = ref.getIndex();
+	ArrayType base = (ArrayType) ((Local) ref.getBase()).getType();
+	Value index = ref.getIndex();
 	
-	  if((base.numDimensions == 1) &&
-	     (base.baseType instanceof IntegerType))
-	    {
-	      right = ClassHierarchy.typeNode(base.baseType);
-	    }
+	if((base.numDimensions == 1) &&
+	   (base.baseType instanceof IntegerType))
+	  {
+	    right = ClassHierarchy.typeNode(base.baseType);
+	  }
 	
-	  if(index instanceof Local)
-	    {
-	      if(!ClassHierarchy.typeNode((BaseType) ((Local) index).getType()).hasAncestor_1(ClassHierarchy.INT))
-	        {
-		  if(fix)
-		    {
-		      ref.setIndex(insertCast((Local) index, IntType.v(), stmt));
-		    }
-		  else
-		    {
-		      error("Type Error(6)");
-		    }
-	        }
-	    }
-	}
+	if(index instanceof Local)
+	  {
+	    if(!ClassHierarchy.typeNode((BaseType) ((Local) index).getType()).hasAncestor_1(ClassHierarchy.INT))
+	      {
+		if(fix)
+		  {
+		    ref.setIndex(insertCast((Local) index, IntType.v(), stmt));
+		  }
+		else
+		  {
+		    error("Type Error(6)");
+		  }
+	      }
+	  }
       }
     else if(r instanceof DoubleConstant)
       {

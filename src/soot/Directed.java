@@ -25,8 +25,7 @@
 
 package soot;
 
-/** An object which can be put into a DirectedGraph.  Then again, so can Object. 
- * @deprecated: use Object instead.  This has no use.*/
+/** An object which can be put into a DirectedGraph. */
 public interface Directed
 {
 }

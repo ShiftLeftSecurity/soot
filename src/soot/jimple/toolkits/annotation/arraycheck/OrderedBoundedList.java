@@ -2,15 +2,12 @@ package soot.jimple.toolkits.annotation.arraycheck;
 
 import java.util.*;
 
-/** BoundedPriorityList keeps a list in a priority queue.
- * The order is decided by the initial list. 
- */
-class BoundedPriorityList
+class OrderedBoundedList
 {
     private List fulllist;
     private LinkedList worklist; 
 
-    public BoundedPriorityList(List list)
+    public OrderedBoundedList(List list)
     {
 	this.fulllist = list;
 	this.worklist = new LinkedList(list);

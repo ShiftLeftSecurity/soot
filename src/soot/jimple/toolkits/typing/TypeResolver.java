@@ -32,7 +32,6 @@ import soot.util.*;
 import java.util.*;
 import soot.toolkits.graph.*;
 import soot.toolkits.scalar.*;
-import java.io.*;
 
 /**
  * This class resolves the type of local variables.
@@ -200,11 +199,7 @@ public class TypeResolver
 	    }
 	    catch(TypeException e3)
 	    {
-	      StringWriter st = new StringWriter();
-	      PrintWriter pw = new PrintWriter(st);
-	      e3.printStackTrace(pw);
-	      pw.close();
-	      throw new RuntimeException(st.toString());
+	      throw new RuntimeException(e3.getMessage());
 	    }
 	  }
       }
@@ -243,7 +238,7 @@ public class TypeResolver
 
   private void resolve_step_1() throws TypeException
   {
-    //    remove_spurious_locals();
+    remove_spurious_locals();
 
     collect_constraints_1_2();
     debug_vars("constraints");
@@ -1029,80 +1024,69 @@ public class TypeResolver
       }
   }
 
-  /*
   private void remove_spurious_locals()
   {
-    boolean repeat;
+    CompleteUnitGraph graph = new CompleteUnitGraph(stmtBody);
+    SimpleLocalDefs defs = new SimpleLocalDefs(graph);
+    SimpleLocalUses uses = new SimpleLocalUses(graph, defs);
+    PatchingChain units = stmtBody.getUnits();
+    Stmt[] stmts = new Stmt[units.size()];
+    int modified = 0;
 
-    do
+    units.toArray(stmts);
+    
+    for(int i = 0; i < stmts.length; i++)
       {
-	CompleteUnitGraph graph = new CompleteUnitGraph(stmtBody);
-	SimpleLocalDefs defs = new SimpleLocalDefs(graph);
-	SimpleLocalUses uses = new SimpleLocalUses(graph, defs);
-	PatchingChain units = stmtBody.getUnits();
-	Stmt[] stmts = new Stmt[units.size()];
-	HashSet deleted = new HashSet();
+	Stmt stmt = stmts[i];
 
-	repeat = false;
-	units.toArray(stmts);
-	
-	for(int i = 0; i < stmts.length; i++)
+	if(stmt instanceof AssignStmt)
 	  {
-	    Stmt stmt = stmts[i];
-	    
-	    if(stmt instanceof AssignStmt)
-	      {
-		AssignStmt assign1 = (AssignStmt) stmt;
-		
-		if(assign1.getLeftOp() instanceof Local)
-		  {
-		    List uselist = uses.getUsesOf(assign1);
-		    
-		    if(uselist.size() == 1)
-		      {
-			UnitValueBoxPair pair = (UnitValueBoxPair) uselist.get(0);
-			
-			List deflist = defs.getDefsOfAt((Local) pair.getValueBox().getValue(), pair.getUnit());
-			
-			if(deflist.size() == 1)
-			  {
-			    if(pair.getValueBox().canContainValue(assign1.getRightOp()))
-			      {
-				// This is definitely a spurious local!
+	    AssignStmt assign1 = (AssignStmt) stmt;
 
-				// Hmm.. use is in a deleted statement.  Must wait till next iteration.
-				if(deleted.contains(pair.getUnit()))
-				  {
-				    repeat = true;
-				    continue;
-				  }
+	    if(assign1.getLeftOp() instanceof Local)
+	      {
+		List uselist = uses.getUsesOf(assign1);
+
+		if(uselist.size() == 1)
+		  {
+		    UnitValueBoxPair pair = (UnitValueBoxPair) uselist.get(0);
+		    
+		    List deflist = defs.getDefsOfAt((Local) pair.getValueBox().getValue(), pair.getUnit());
 				
-				pair.getValueBox().setValue(assign1.getRightOp());
-				deleted.add(assign1);
-				units.remove(assign1);
-				stmtBody.getLocals().remove(assign1.getLeftOp());
-				
-			      }
+		    if(deflist.size() == 1)
+		      {
+			if(pair.getValueBox().canContainValue(assign1.getRightOp()))
+			  {
+			    // This is definitely a spurious local!
+			    // System.out.println(pair.getValueBox().getValue() + ": [" + assign1 + "] <--> [" + pair.getUnit() + "]");
+			    pair.getValueBox().setValue(assign1.getRightOp());
+			    units.remove(assign1);
+			    stmtBody.getLocals().remove(assign1.getLeftOp());
+			    modified++;
+			    // System.out.println(" --> [" + pair.getUnit() + "]");
 			  }
 		      }
 		  }
 	      }
 	  }
       }
-    while(repeat);
+
+    //System.out.println("remove spurious locals done: " + modified);
   }
-  */
 
   private void split_new()
   {
     CompleteUnitGraph graph = new CompleteUnitGraph(stmtBody);
+
     SimpleLocalDefs defs = new SimpleLocalDefs(graph);
     // SimpleLocalUses uses = new SimpleLocalUses(graph, defs);
+
     PatchingChain units = stmtBody.getUnits();
+    
     Stmt[] stmts = new Stmt[units.size()];
 
     units.toArray(stmts);
-    
+
     for(int i = 0; i < stmts.length; i++)
       {
 	Stmt stmt = stmts[i];
@@ -1135,7 +1119,9 @@ public class TypeResolver
 			    else if(assign.getRightOp() instanceof NewExpr)
 			      {			
 				// We split the local.
-				//System.out.println("split: [" + assign + "] and [" + stmt + "]");
+				
+				//  System.out.println("split: [" + assign + "] and [" + stmt + "]");
+
 				Local newlocal = Jimple.v().newLocal("tmp", null);
 				stmtBody.getLocals().add(newlocal);
 				
@@ -1153,3 +1139,4 @@ public class TypeResolver
       }
   }
 }
+
