@@ -25,6 +25,7 @@ import java.util.ResourceBundle;
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.*;
 
+import org.eclipse.jdt.core.*;
 import org.eclipse.jface.text.*;
 import org.eclipse.jface.text.source.*;
 import org.eclipse.swt.graphics.Rectangle;
@@ -87,6 +88,10 @@ public abstract class SootAttributeSelectAction extends ResourceAction {
 		try {
 			IMarker [] markers = rec.findMarkers("ca.mcgill.sable.soot.sootattributemarker", true, IResource.DEPTH_INFINITE);
 			for (int i = 0; i < markers.length; i++){
+				System.out.println("document: "+getDocument());
+				System.out.println("model: "+getModel());
+				System.out.println("model marker pos: "+getModel().getMarkerPosition(markers[i]));
+				if (getModel().getMarkerPosition(markers[i]) == null) continue;
 				setLineNumber(getDocument().getLineOfOffset(getModel().getMarkerPosition(markers[i]).getOffset()));
   
                 
@@ -127,7 +132,7 @@ public abstract class SootAttributeSelectAction extends ResourceAction {
 							System.out.println("offset: "+getModel().getMarkerPosition(markers[i]).getOffset());
 							int pos = getModel().getMarkerPosition(markers[i]).getOffset();
 							pos = pos / getLineNumber();
-							Rectangle rect = new Rectangle(380, 16, 650, 45 );
+							Rectangle rect = new Rectangle(320, 16, 660, 45 );
 							
 							popup.open(rect);
 
@@ -191,36 +196,8 @@ public abstract class SootAttributeSelectAction extends ResourceAction {
 	
 	protected abstract int getLinkLine(LinkAttribute la);
 	
-	public void findClass(String className){
-		//System.out.println("className: "+className);
-		//System.out.println("rec: "+getResource(getEditor()).getName());
-		
-		String resource = removeExt(getResource(getEditor()).getName());
-		//System.out.println(resource);
-		
-		String ext = getResource(getEditor()).getFileExtension();
-		
-		if (!resource.equals(className)){
-			IContainer parent = getResource(getEditor()).getParent();
-			IResource file = parent.findMember(className+"."+ext);
-			if (file == null){
-				// link to file doesn't exist
-				setLinkToEditor(getEditor());
-			}
-			else {
-				try {
-					setLinkToEditor((AbstractTextEditor)SootPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor((IFile)file));
-					//System.out.println("after setting link to editor - diff file");
-				}
-				catch (PartInitException e){
-					
-				}
-			}
-		}
-		else {
-			setLinkToEditor(getEditor());
-		}
-	}
+	public abstract void findClass(String className);
+
 	
 	public String removeExt(String fileName){
 		return fileName.substring(0, fileName.lastIndexOf("."));

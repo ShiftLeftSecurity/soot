@@ -35,7 +35,10 @@ public class SootAttributesHandler {
 	}
 	
 	public void setAttrList(Vector attrList) {
-		this.attrList = attrList;
+		if (this.attrList == null){
+			this.attrList = new Vector();
+		}
+		this.attrList.addAll(attrList);
 	}
 
 	public String getJimpleAttributes(int lnNum) {
@@ -90,9 +93,9 @@ public class SootAttributesHandler {
 			if (sa.attrForJavaLn(lnNum)){
 				if (sa.getAllLinkAttrs() != null){
 				
-					list = sa.getAllLinkAttrs();
+					list.addAll(sa.getAllLinkAttrs());
 				}
-				//System.out.println("list length: "+list);
+				System.out.println("list length: "+list.size());
 			}
 		}
 		return list;

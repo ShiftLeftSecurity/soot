@@ -20,7 +20,10 @@
 package ca.mcgill.sable.soot.attributes;
 
 
+import java.util.ArrayList;
+
 import org.eclipse.jface.text.*;
+import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.ui.*;
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.CoreException;
@@ -54,6 +57,7 @@ public abstract class AbstractSootAttributesHover implements ITextHover {
 	private int lineNum;
 	private String fileName;
 	private String packFileName;
+	private ArrayList packFileNames;
 	private boolean editorHasChanged;
 	private String selectedProj;
 	private SootAttributesHandler attrsHandler;
@@ -69,8 +73,15 @@ public abstract class AbstractSootAttributesHover implements ITextHover {
 	public void setEditor(IEditorPart ed) {
 		System.out.println("editor set");
 		editor = ed;
+		formTextViewer(editor);
 	}
 	
+
+	public void formTextViewer(IEditorPart edPart) {
+		SourceViewer input= (SourceViewer)edPart.getAdapter(SourceViewer.class);
+		System.out.println("text viewer is: "+input);
+	
+	}
 	
 	/**
 	 * Method getAttributes.
@@ -114,7 +125,7 @@ public abstract class AbstractSootAttributesHover implements ITextHover {
 	    try {
 			setLineNum(textViewer.getDocument().getLineOfOffset(offset)+1);
 			System.out.println("getting hover region and setting text viewer.");
-			setViewer(textViewer);
+			handleViewer(textViewer);
 			setDocument(textViewer.getDocument());
 			//System.out.println(getLineNum());
 			return textViewer.getDocument().getLineInformationOfOffset(offset);
@@ -123,7 +134,19 @@ public abstract class AbstractSootAttributesHover implements ITextHover {
 		}
 
 	}
+	
+	public void handleViewer(ITextViewer viewer){
+		if (getViewer() != null) return;
+		setViewer(viewer);
+		computeAttributes();
+		//addSootAttributeMarkers();
+		addColorTags();
+		addSootAttributeMarkers();
+	}
 
+	protected abstract void computeAttributes();
+	protected abstract void addSootAttributeMarkers();
+	protected abstract void addColorTags();
 	protected void removeOldMarkers() {
 		try {
 			
@@ -280,6 +303,20 @@ public abstract class AbstractSootAttributesHover implements ITextHover {
 	 */
 	public void setViewer(ITextViewer viewer) {
 		this.viewer = viewer;
+	}
+
+	/**
+	 * @return
+	 */
+	public ArrayList getPackFileNames() {
+		return packFileNames;
+	}
+
+	/**
+	 * @param list
+	 */
+	public void setPackFileNames(ArrayList list) {
+		packFileNames = list;
 	}
 
 }

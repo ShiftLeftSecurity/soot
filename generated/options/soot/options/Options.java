@@ -1001,6 +1001,7 @@ public class Options extends OptionsBase {
         +padVal("jap.fieldrw", "Field read/write tagger")
         +padVal("jap.cgtagger", "Call graph tagger")
         +padVal("jap.parity", "Parity tagger")
+        +padVal("jap.pat", "Colour-codes method parameters that may be aliased")
         +padOpt("gb", "Creates a GrimpBody for each method")
         +padVal("gb.a1", "Aggregator: removes some copies, pre-folding")
         +padVal("gb.cf", "Constructor folder")
@@ -1161,6 +1162,7 @@ public class Options extends OptionsBase {
                 +padOpt( "field-based (false)", "Use a field-based rather than field-sensitive representation" )
                 +padOpt( "types-for-sites (false)", "Represent objects by their actual type rather than allocation site" )
                 +padOpt( "merge-stringbuffer (true)", "Represent all StringBuffers as one object" )
+                +padOpt( "string-constants (false)", "Propagate all string constants, not just class names" )
                 +padOpt( "simulate-natives (true)", "Simulate effects of native methods in standard class library" )
                 +padOpt( "simple-edges-bidirectional (false)", "Equality-based analysis between variable nodes" )
                 +padOpt( "on-fly-cg (true)", "Build call graph as receiver types become known" )
@@ -1239,6 +1241,7 @@ public class Options extends OptionsBase {
                 +padOpt( "field-based (false)", "Use a field-based rather than field-sensitive representation" )
                 +padOpt( "types-for-sites (false)", "Represent objects by their actual type rather than allocation site" )
                 +padOpt( "merge-stringbuffer (true)", "Represent all StringBuffers as one object" )
+                +padOpt( "string-constants (false)", "Propagate all string constants, not just class names" )
                 +padOpt( "simulate-natives (true)", "Simulate effects of native methods in standard class library" )
                 +padOpt( "simple-edges-bidirectional (false)", "Equality-based analysis between variable nodes" )
                 +padOpt( "on-fly-cg (true)", "Build call graph as receiver types become known" )
@@ -1545,6 +1548,12 @@ public class Options extends OptionsBase {
                 +"\n\nRecognized options (with default values):\n"
                 +padOpt( "enabled (false)", "" );
     
+        if( phaseName.equals( "jap.pat" ) )
+            return "Phase "+phaseName+":\n"+
+                "\nFor each method with parameters of reference type, this tagger \nindicates the aliasing relationships between the parameters \nusing colour tags. Parameters that may be aliased are the same \ncolour. Parameters that may not be aliased are in different \ncolours."
+                +"\n\nRecognized options (with default values):\n"
+                +padOpt( "enabled (false)", "" );
+    
         if( phaseName.equals( "gb" ) )
             return "Phase "+phaseName+":\n"+
                 "\nThe Grimp Body Creation phase creates a GrimpBody for each \nsource method. It is run only if the output format is grimp or \ngrimple, or if class files are being output and the Via Grimp \noption has been specified. "
@@ -1759,6 +1768,7 @@ public class Options extends OptionsBase {
                 +"field-based "
                 +"types-for-sites "
                 +"merge-stringbuffer "
+                +"string-constants "
                 +"simulate-natives "
                 +"simple-edges-bidirectional "
                 +"on-fly-cg "
@@ -1791,6 +1801,7 @@ public class Options extends OptionsBase {
                 +"field-based "
                 +"types-for-sites "
                 +"merge-stringbuffer "
+                +"string-constants "
                 +"simulate-natives "
                 +"simple-edges-bidirectional "
                 +"on-fly-cg "
@@ -1995,6 +2006,10 @@ public class Options extends OptionsBase {
             return ""
                 +"enabled ";
     
+        if( phaseName.equals( "jap.pat" ) )
+            return ""
+                +"enabled ";
+    
         if( phaseName.equals( "gb" ) )
             return ""
                 +"enabled ";
@@ -2175,6 +2190,7 @@ public class Options extends OptionsBase {
               +"field-based:false "
               +"types-for-sites:false "
               +"merge-stringbuffer:true "
+              +"string-constants:false "
               +"simulate-natives:true "
               +"simple-edges-bidirectional:false "
               +"on-fly-cg:true "
@@ -2207,6 +2223,7 @@ public class Options extends OptionsBase {
               +"field-based:false "
               +"types-for-sites:false "
               +"merge-stringbuffer:true "
+              +"string-constants:false "
               +"simulate-natives:true "
               +"simple-edges-bidirectional:false "
               +"on-fly-cg:true "
@@ -2411,6 +2428,10 @@ public class Options extends OptionsBase {
             return ""
               +"enabled:false ";
     
+        if( phaseName.equals( "jap.pat" ) )
+            return ""
+              +"enabled:false ";
+    
         if( phaseName.equals( "gb" ) )
             return ""
               +"enabled:true ";
@@ -2551,6 +2572,7 @@ public class Options extends OptionsBase {
         if( phaseName.equals( "jap.fieldrw" ) ) return;
         if( phaseName.equals( "jap.cgtagger" ) ) return;
         if( phaseName.equals( "jap.parity" ) ) return;
+        if( phaseName.equals( "jap.pat" ) ) return;
         if( phaseName.equals( "gb" ) ) return;
         if( phaseName.equals( "gb.a1" ) ) return;
         if( phaseName.equals( "gb.cf" ) ) return;
@@ -2687,6 +2709,8 @@ public class Options extends OptionsBase {
             G.v().out.println( "Warning: Options exist for non-existent phase jap.cgtagger" );
         if( !PackManager.v().hasPhase( "jap.parity" ) )
             G.v().out.println( "Warning: Options exist for non-existent phase jap.parity" );
+        if( !PackManager.v().hasPhase( "jap.pat" ) )
+            G.v().out.println( "Warning: Options exist for non-existent phase jap.pat" );
         if( !PackManager.v().hasPhase( "gb" ) )
             G.v().out.println( "Warning: Options exist for non-existent phase gb" );
         if( !PackManager.v().hasPhase( "gb.a1" ) )
