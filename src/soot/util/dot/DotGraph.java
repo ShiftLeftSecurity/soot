@@ -57,8 +57,14 @@ public class DotGraph implements Renderable{
   private List    attributes;
 
   /**
+   * The extension added to output files, exported so that
+   * clients can search for the filenames.
+   */
+  public final static String DOT_EXTENSION = ".dot";
+
+  /**
    * Creates a new graph for drawing.
-   * @param graphname, the file name with dot format will be generated
+   * @param graphname, the name used to identify the graph in the dot source.
    */
   public DotGraph(String graphname) {
     this.graphname   = graphname;
@@ -70,14 +76,11 @@ public class DotGraph implements Renderable{
   
   /**
    * Generates the drawing on canvas to the dot file.
+   * @param filename the name for the output file.  By convention, it should
+   * end with DOT_EXTENSION, but this is not enforced.
    */
-  public void plot() {
+  public void plot(String filename) {
     try {
-      String filename = soot.util.SourceLocator.v().getOutputDir();
-      if (filename.length() > 0) {
-	filename = filename + File.separator;
-      }
-      filename = filename + this.graphname.replace(' ', '-') + ".dot";
       BufferedOutputStream out = 
 	new BufferedOutputStream(new FileOutputStream(filename));
 							  
@@ -191,10 +194,22 @@ public class DotGraph implements Renderable{
 
   /**
    * sets any general attributes
+   * @param id is the attribute name.
+   * @param value is the attribute value.
    */
   public void setGraphAttribute(String id, String value){
-    this.attributes.add(new DotGraphAttribute(id, value));    
+    this.setGraphAttribute(new DotGraphAttribute(id, value));    
   }
+
+  /**
+   * sets any general attributes
+   * @param attr a {@link DotGraphAttribute} specifying the
+   * attribute name and value.
+   */
+  public void setGraphAttribute(DotGraphAttribute attr){
+    this.attributes.add(attr);    
+  }
+
   /**
    * draws an undirected edge
    * @param label1, label2
@@ -219,6 +234,8 @@ public class DotGraph implements Renderable{
   /* implements renderable interface. */
   public void render(OutputStream out, int indent) throws IOException{
     // header
+    String graphname = this.graphname;
+
     if (!isSubGraph) {
       DotGraphUtility.renderLine(out, "digraph \""+graphname+"\" {", indent);
     } else {

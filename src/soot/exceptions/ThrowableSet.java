@@ -95,6 +95,7 @@ public final class ThrowableSet {
 	public final RefType NULL_POINTER_EXCEPTION;
 
 	// counts for instrumenting:
+	private int registeredSets = 0;
 	private int addsOfRefType = 0;
 	private int addsOfAnySubType = 0;
 	private int addsOfSet = 0;
@@ -281,6 +282,9 @@ public final class ThrowableSet {
 		    return set;
 		}
 	    }
+	    if (INSTRUMENTING) {
+		registeredSets++;
+	    }
 	    ThrowableSet result = new ThrowableSet(s);
 	    sizeList.add(result);
 	    return result;
@@ -294,28 +298,38 @@ public final class ThrowableSet {
 	 *
 	 * @return a string listing the counts.
 	 */
-	String reportInstrumentation() {
-	    StringBuffer buf = new StringBuffer("addsOfRefType: ");
-	    buf.append(addsOfRefType);
-	    buf.append("\naddsOfAnySubType: ");
-	    buf.append(addsOfAnySubType);
-	    buf.append("\naddsOfSet: ");
-	    buf.append(addsOfSet);
-	    buf.append("\naddsFromMap: ");
-	    buf.append(addsFromMap);
-	    buf.append("\naddsFromMemo: ");
-	    buf.append(addsFromMemo);
-	    buf.append("\naddsNeedingSearch: ");
-	    buf.append(addsNeedingSearch);
-	    buf.append("\nregistrationCalls: ");
-	    buf.append(registrationCalls);
-	    buf.append("\ncatchableAsQueries: ");
-	    buf.append(catchableAsQueries);
-	    buf.append("\ncatchableAsFromMap: ");
-	    buf.append(catchableAsFromMap);
-	    buf.append("\ncatchableAsNeedingSearch: ");
-	    buf.append(catchableAsNeedingSearch);
-	    buf.append('\n');
+	public String reportInstrumentation() {
+	    int setCount = 0;
+	    for (Iterator it = sizeToSets.values().iterator(); it.hasNext(); ) {
+		List sizeList = (List) it.next();
+		setCount += sizeList.size();
+	    }
+	    if (setCount != registeredSets) {
+		throw new IllegalStateException("ThrowableSet.reportInstrumentation() assertion failure: registeredSets != list count");
+	    }
+	    StringBuffer buf = new StringBuffer("registeredSets: ")
+		.append(setCount)
+		.append("\naddsOfRefType: ")
+		.append(addsOfRefType)
+		.append("\naddsOfAnySubType: ")
+		.append(addsOfAnySubType)
+		.append("\naddsOfSet: ")
+		.append(addsOfSet)
+		.append("\naddsFromMap: ")
+		.append(addsFromMap)
+		.append("\naddsFromMemo: ")
+		.append(addsFromMemo)
+		.append("\naddsNeedingSearch: ")
+		.append(addsNeedingSearch)
+		.append("\nregistrationCalls: ")
+		.append(registrationCalls)
+		.append("\ncatchableAsQueries: ")
+		.append(catchableAsQueries)
+		.append("\ncatchableAsFromMap: ")
+		.append(catchableAsFromMap)
+		.append("\ncatchableAsNeedingSearch: ")
+		.append(catchableAsNeedingSearch)
+		.append('\n');
 	    return buf.toString();
 	}
 
@@ -790,6 +804,75 @@ public final class ThrowableSet {
      */
     public String toBriefString() {
 	return super.toString();
+    }
+
+
+    /**
+     * <p>Produce an abbreviated representation of this
+     * <code>ThrowableSet</code>, suitable for human consumption.  The
+     * abbreviations include:</p>
+     * 
+     * <ul> 
+     *
+     * <li>The strings &ldquo;<code>java.lang.</code>&rdquo; is
+     * stripped from the beginning of exception names.</li>
+     *
+     * <li>The string &ldquo;<code>Exception</code>&rdquo; is stripped from
+     * the ends of exception names.</li>
+     *
+     * <li>Instances of <code>AnySubType</code> are indicated by surrounding
+     * the base type name with parantheses, rather than with the string 
+     * &ldquo;<code>Any_subtype_of_</code>&rdquo;</li>
+     *
+     * <li>If all the elements of the asynchronous errors 
+     * are present, they are abbreviated as &ldquo;<code>async</code>&rdquo;
+     * rather than listed individually.</li>
+     * 
+     * @return An abbreviated representation of the contents of this set.
+     */
+    public String toAbbreviatedString() {
+	final String JAVA_LANG = "java.lang.";
+	final int JAVA_LANG_LENGTH = JAVA_LANG.length();
+	final String EXCEPTION = "Exception";
+	final  int EXCEPTION_LENGTH = EXCEPTION.length();
+
+	Collection setsThrowables = this.types();
+	Collection asyncThrowables = ThrowableSet.Manager.v().ASYNC_ERRORS.types();
+	boolean containsAllAsync = setsThrowables.containsAll(asyncThrowables);
+	StringBuffer buf = new StringBuffer();
+
+	if (containsAllAsync) {
+	    buf.append("+async");
+	}
+
+	for (Iterator it = this.types().iterator(); it.hasNext(); ) {
+	    RefLikeType reflikeType = (RefLikeType) it.next();
+	    RefType baseType = null;
+	    if (reflikeType instanceof RefType) {
+		baseType = (RefType)reflikeType;
+		if (asyncThrowables.contains(baseType) && containsAllAsync) {
+		    continue;		// This is already accounted for in "+async".
+		} else {
+		    buf.append('+');
+		}
+	    } else if (reflikeType instanceof AnySubType) {
+		buf.append("+(");
+		baseType = ((AnySubType)reflikeType).getBase();
+	    }
+	    String typeName = baseType.toString();
+	    if (typeName.startsWith(JAVA_LANG)) {
+		typeName = typeName.substring(JAVA_LANG_LENGTH);
+	    }
+	    if (typeName.length() > EXCEPTION_LENGTH && 
+		typeName.endsWith(EXCEPTION)) {
+		typeName = typeName.substring(0, typeName.length()-EXCEPTION_LENGTH);
+	    }
+	    buf.append(typeName);
+	    if (reflikeType instanceof AnySubType) {
+		buf.append(')');
+	    }
+	}
+	return buf.toString();
     }
 
 

@@ -26,29 +26,30 @@
 
 package soot.tools;
 
-import soot.util.dot.*;
-import soot.util.cfgcmd.CFGOptionMatcher;
-import soot.util.cfgcmd.CFGGraphType;
-import soot.util.cfgcmd.CFGIntermediateRep;
-import soot.util.cfgcmd.AltClassLoader;
-import soot.*;
-import soot.toolkits.graph.*;
-import soot.util.*;
-import soot.exceptions.*;
+import java.lang.reflect.Method;
 import java.util.*;
-import soot.jimple.JimpleBody;
+
+import soot.*;
 import soot.baf.Baf;
+import soot.exceptions.*;
+import soot.jimple.JimpleBody;
 import soot.grimp.Grimp;
 import soot.shimple.Shimple;
-import java.lang.reflect.Method;
+import soot.toolkits.graph.*;
+import soot.util.dot.DotGraph;
+import soot.util.cfgcmd.AltClassLoader;
+import soot.util.cfgcmd.CFGGraphType;
+import soot.util.cfgcmd.CFGIntermediateRep;
+import soot.util.cfgcmd.CFGOptionMatcher;
+import soot.util.cfgcmd.CFGToDotGraph;
+import soot.util.*;
 
 /**
  * A utility class for generating dot graph file for a control flow graph
  *
  * @author Feng Qian
  */
-public class CFGViewer extends BodyTransformer 
-  implements CFGGraphType.Viewer {
+public class CFGViewer extends BodyTransformer {
 
   /**
    * An enumeration type for representing the ThrowAnalysis to use. 
@@ -63,13 +64,13 @@ public class CFGViewer extends BodyTransformer
   private final ThrowAnalysisOption PEDANTIC_THROW_ANALYSIS = 
     new ThrowAnalysisOption("pedantic") {
     ThrowAnalysis getAnalysis() { 
-      return new PedanticThrowAnalysis(); 
+      return PedanticThrowAnalysis.v(); 
     }
   };
 
   private final ThrowAnalysisOption UNIT_THROW_ANALYSIS = new ThrowAnalysisOption("unit") {
     ThrowAnalysis getAnalysis() { 
-      return new UnitThrowAnalysis(); 
+      return UnitThrowAnalysis.v(); 
     }
   };
 
@@ -86,13 +87,7 @@ public class CFGViewer extends BodyTransformer
   private CFGGraphType graphtype = CFGGraphType.BRIEF_UNIT_GRAPH;
   private CFGIntermediateRep ir = CFGIntermediateRep.JIMPLE_IR;
   private ThrowAnalysis throwAnalysis = UNIT_THROW_ANALYSIS.getAnalysis();
-
-  private boolean isBrief = false;
- 
-  private boolean onepage = true;  /* in one page or several 8.5x11 pages  */
-
-  private boolean showExceptions = false;
-
+  private CFGToDotGraph drawer = new CFGToDotGraph();
   private Map methodsToPrint = null; // If the user specifies particular
 				     // methods to print, this is a map
 				     // from method name to the class
@@ -196,6 +191,13 @@ throwAnalysisOptions.help(0, 70,
   private String[] parse_options(String[] args){
     List sootArgs = new ArrayList(args.length);
 
+    drawer.setBriefLabels(false);
+    drawer.setOnePage(true);
+    drawer.setShowExceptions(false);
+    drawer.setUnexceptionalControlFlowAttr("color", "black");
+    drawer.setExceptionalControlFlowAttr("color", "red");
+    drawer.setExceptionEdgeAttr("color", "lightgray");
+
     for (int i=0, n=args.length; i<n; i++) {
       if (args[i].equals("--soot-classpath") ||
 	  args[i].equals("--soot-class-path")) {
@@ -210,14 +212,14 @@ throwAnalysisOptions.help(0, 70,
 	ir = 
 	  CFGIntermediateRep.getIR(args[i].substring("--ir=".length()));
       } else if (args[i].equals("--brief")) {
-	isBrief = true;
+	drawer.setBriefLabels(true);
       } else if (args[i].startsWith("--throwAnalysis=")) {
 	throwAnalysis = 
 	  getThrowAnalysis(args[i].substring("--throwAnalysis=".length()));
       } else if (args[i].equals("--showExceptions")) {
-	showExceptions = true;
+	drawer.setShowExceptions(true);
       } else if (args[i].equals("--multipages")) {
-	onepage = false;
+	drawer.setOnePage(false);
       } else if (args[i].equals("--help")) {
 	return new String[0];	// This is a cheesy method to inveigle
 				// our caller into printing the help
@@ -249,300 +251,19 @@ throwAnalysisOptions.help(0, 70,
     return (String[]) sootArgs.toArray(sootArgsArray);
   }
 
-    
   protected void print_cfg(Body body) {
-    SootMethod method = body.getMethod();
-    String graphname = method.getSubSignature();
-
-    DotGraph canvas = new DotGraph(graphname);
-    
-    if (!onepage) {
-      canvas.setPageSize(8.5, 11.0);
-    }
-
-    if (isBrief) {
-      canvas.setNodeShape(DotGraphConstants.NODE_SHAPE_CIRCLE);
-    } else {
-      canvas.setNodeShape(DotGraphConstants.NODE_SHAPE_BOX);
-    }
-    canvas.setGraphLabel(graphname);
-
     DirectedGraph graph = graphtype.buildGraph(body);
-    graphtype.drawNodesAndEdges(this, canvas, graph);
-    canvas.plot();
-  }
+    DotGraph canvas = graphtype.drawGraph(drawer, graph, body);
 
-
-  /**
-   * Add to a {@link DotGraph} the nodes and edges depicting the
-   * control flow in a control flow graph without distinguished
-   * exceptional edges.
-   * 
-   * @param canvas the {@link DotGraph} to which to add the nodes and edges.
-   * @param graph a directed control flow graph (UnitGraph, BlockGraph ...)
-   */
-  public void drawUnexceptionalNodesAndEdges(DotGraph canvas,
-					     DirectedGraph graph) {
-    DotLabeller labeller = new DotLabeller((int)(graph.size()/0.7f), 0.7f);
-
-    Iterator nodesIt = graph.iterator();
-    while (nodesIt.hasNext()) {
-      Object node = nodesIt.next();
-
-      canvas.drawNode(labeller.getLabel(node));
-      Iterator succsIt = graph.getSuccsOf(node).iterator();
-      while (succsIt.hasNext()) {
-        Object succ = succsIt.next();	
-        canvas.drawEdge(labeller.getLabel(node), 
-			labeller.getLabel(succ));
-      }
+    String methodname = body.getMethod().getSubSignature();
+    String filename = soot.util.SourceLocator.v().getOutputDir();
+    if (filename.length() > 0) {
+	filename = filename + java.io.File.separator;
     }
-    setStyle(graph.getHeads(), canvas, labeller,
-	     DotGraphConstants.NODE_STYLE_FILLED);
-    setStyle(graph.getTails(), canvas, labeller, 
-	     DotGraphConstants.NODE_STYLE_FILLED);
-    if (! isBrief) {
-      Body body = null;
-      if (graph instanceof UnitGraph) {
-	body = ((UnitGraph) graph).getBody();
-      } else if (graph instanceof BlockGraph) {
-	body = ((BlockGraph) graph).getBody();
-      }
-      formatNodeText(body, canvas, labeller);
-    }
-  } 
+    filename = filename + 
+      methodname.replace(java.io.File.separatorChar, '.') + 
+      DotGraph.DOT_EXTENSION;
 
-
-  /**
-   * Add to a {@link DotGraph} the nodes and edges depicting the
-   * control flow in a {@link CompleteUnitGraph}, which has
-   * distinguished edges for exceptional control flow.
-   * 
-   * @param canvas the {@link DotGraph} to which to add the nodes and edges.
-   * @param graph the control flow graph
-   */
-  public void drawExceptionalNodesAndEdges(DotGraph canvas,
-					   CompleteUnitGraph graph) {
-
-    DotLabeller labeller = new DotLabeller((int)(graph.size()/0.7f), 0.7f);
-
-    for (Iterator nodesIt = graph.iterator(); nodesIt.hasNext(); ) {
-      Unit node = (Unit) nodesIt.next();
-
-      canvas.drawNode(labeller.getLabel(node));
-
-      for (Iterator succsIt = graph.getUnexceptionalSuccsOf(node).iterator();
-	   succsIt.hasNext(); ) {
-        Object succ = succsIt.next();	
-        DotGraphEdge edge = canvas.drawEdge(labeller.getLabel(node), 
-					    labeller.getLabel(succ));
-	// edge.setStyle("solid");
-	edge.setAttribute("color", "black");
-      }
-
-      for (Iterator succsIt = graph.getExceptionalSuccsOf(node).iterator();
-	   succsIt.hasNext(); ) {
-	Object succ = succsIt.next();
-	DotGraphEdge edge = canvas.drawEdge(labeller.getLabel(node),
-					    labeller.getLabel(succ));
-	// edge.setStyle("dashed");
-	edge.setAttribute("color", "red");
-      }
-
-      if (showExceptions) {
-	for (Iterator destsIt = graph.getExceptionDests(node).iterator();
-	     destsIt.hasNext(); ) {
-	  CompleteUnitGraph.ExceptionDest dest = 
-	    (CompleteUnitGraph.ExceptionDest) destsIt.next();
-	  Object handlerStart = null;
-	  if (dest.trap() == null) {
-	    // Giving each escaping exception its own, invisible
-	    // exceptional exit node produces a less cluttered
-	    // graph.
-	    handlerStart = new Object() {
-	      public String toString() {
-		return "Esc";
-	      }
-	    };
-	    DotGraphNode escapeNode = 
-	      canvas.drawNode(labeller.getLabel(handlerStart));
-	    escapeNode.setStyle(DotGraphConstants.NODE_STYLE_INVISIBLE);
-
-	  } else {
-	    handlerStart = dest.trap().getHandlerUnit();
-	  }
-	  DotGraphEdge edge = canvas.drawEdge(labeller.getLabel(node),
-					      labeller.getLabel(handlerStart));
-	  //edge.setStyle("dotted");
-	  edge.setAttribute("color", "lightgray");
-	  String exceptionsLabel = 
-	    ThrowableSetAbbreviator.abbreviate(dest.throwables());
-	  edge.setLabel(exceptionsLabel);
-	}
-      }
-    }
-    setStyle(graph.getHeads(), canvas, labeller,
-	     DotGraphConstants.NODE_STYLE_FILLED);
-    setStyle(graph.getTails(), canvas, labeller, 
-	     DotGraphConstants.NODE_STYLE_FILLED);
-    if (! isBrief) {
-      formatNodeText(graph.getBody(), canvas, labeller);
-    }
-  }
-
-
-  // A utility class for assigning unique string labels to DotGraph
-  // entities.
-  public static class DotLabeller extends HashMap {
-    private int nodecount = 0;
-
-    DotLabeller(int initialCapacity, float loadFactor) {
-      super(initialCapacity, loadFactor);
-    }
-
-    DotLabeller() {
-      super();
-    }
-
-    void resetCount() {
-      nodecount = 0;
-    }
-
-    String getLabel(Object node) {
-      Integer index = (Integer)this.get(node);
-      if (index == null) {
-	index = new Integer(nodecount++);
-	this.put(node, index);
-      }
-      return index.toString();
-    }
-  }
-
-
-  private void formatNodeText(Body body, DotGraph canvas, 
-			      DotLabeller labeller) {
-
-    LabeledUnitPrinter printer = null;
-    if (body != null) {
-      printer = new BriefUnitPrinter(body);
-      printer.noIndent();
-    }
-
-    for (Iterator nodesIt = labeller.keySet().iterator();
-	 nodesIt.hasNext(); ) {
-      Object node = nodesIt.next();
-      DotGraphNode dotnode = canvas.getNode(labeller.getLabel(node));
-      String nodeLabel = null;
-
-      if (printer == null) {
-	nodeLabel = node.toString();
-      } else {
-	if (node instanceof Unit) {
-	  ((Unit) node).toString(printer);
-	  String targetLabel = (String) printer.labels().get(node);
-	  if (targetLabel == null) {
-	    nodeLabel = printer.toString();
-	  } else {
-	    nodeLabel = targetLabel + ": " + printer.toString();
-	  }
-
-	} else if (node instanceof Block) {
-	  Iterator units = ((Block) node).iterator();
-	  StringBuffer buffer = new StringBuffer();
-	  while (units.hasNext()) {
-	    Unit unit = (Unit) units.next();
-	    String targetLabel = (String) printer.labels().get(unit);
-	    if (targetLabel != null) {
-	      buffer.append(targetLabel)
-		.append(":\\n");
-	    }
-	    unit.toString(printer);
-	    buffer.append(printer.toString())
-	      .append("\\l");
-	  }
-	  nodeLabel = buffer.toString();
-	} else {
-	  nodeLabel = node.toString();
-	}
-      }
-      dotnode.setLabel(nodeLabel);
-    }
-  }
-
-
-  /**
-   * Utility routine for setting some common formatting style for the
-   * {@link DotGraphNode}s corresponding to some collection of objects.
-   * 
-   * @param objects is the collection of {@link Object}s whose
-   *        nodes are to be styled.
-   * @param canvas the {@link DotGraph} containing nodes corresponding
-   *        to the collection.
-   * @param labeller maps from {@link Object} to the strings used
-   *        to identify corresponding {@link DotGraphNode}s.
-   * @param style the style to set for each of the nodes.
-   */
-  private void setStyle(Collection objects, DotGraph canvas, 
-			DotLabeller labeller, String style) {
-    // Fill the entry and exit nodes.
-    for (Iterator it = objects.iterator(); it.hasNext(); ) {
-      Object object = it.next();
-      DotGraphNode objectNode = canvas.getNode(labeller.getLabel(object));
-      objectNode.setStyle(style);
-    }
-  }
-
-
-  // A kludge for shortening the names of exceptions.
-  private static class ThrowableSetAbbreviator {
-    static final private String JAVA_LANG = "java.lang.";
-    static final private int JAVA_LANG_LENGTH = JAVA_LANG.length();
-    static final private String EXCEPTION = "Exception";
-    static final private int EXCEPTION_LENGTH = EXCEPTION.length();
-
-    static String abbreviate(ThrowableSet set) {
-      Collection setsThrowables = set.types();
-      Collection asyncThrowables = ThrowableSet.Manager.v().ASYNC_ERRORS.types();
-      boolean containsAllAsync = setsThrowables.containsAll(asyncThrowables);
-      StringBuffer buf = new StringBuffer();
-
-      if (containsAllAsync) {
-	buf.append("+async");
-      }
-
-      for (Iterator it = set.types().iterator(); it.hasNext(); ) {
-	RefLikeType reflikeType = (RefLikeType) it.next();
-	RefType baseType = null;
-	if (reflikeType instanceof RefType) {
-	  baseType = (RefType)reflikeType;
-	  if (asyncThrowables.contains(baseType) && containsAllAsync) {
-	    continue;		// This is already accounted for in "+async".
-	  } else {
-	    if (buf.length() > 0) {
-	      buf.append("\\l");
-	    }
-	    buf.append('+');
-	  }
-	} else if (reflikeType instanceof AnySubType) {
-	  if (buf.length() > 0) {
-	    buf.append("\\l");
-	  }
-	  buf.append("+(");
-	  baseType = ((AnySubType)reflikeType).getBase();
-	}
-	String typeName = baseType.toString();
-	if (typeName.startsWith(JAVA_LANG)) {
-	  typeName = typeName.substring(JAVA_LANG_LENGTH);
-	}
-	if (typeName.length() > EXCEPTION_LENGTH && typeName.endsWith(EXCEPTION)) {
-	  typeName = typeName.substring(0, typeName.length()-EXCEPTION_LENGTH);
-	}
-	buf.append(typeName);
-	if (reflikeType instanceof AnySubType) {
-	  buf.append(')');
-	}
-      }
-      return buf.toString();
-    }
+    canvas.plot(filename);
   }
 }
