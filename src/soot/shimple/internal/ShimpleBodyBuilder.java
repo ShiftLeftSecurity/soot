@@ -97,8 +97,8 @@ public class ShimpleBodyBuilder
     {
 	// Compute a UnitGraph first, so we can feed it to the
 	// BlockGraph constructor and use it ourselves later.
-	PrunedUnitGraph ucfg = new PrunedUnitGraph(body);
-        cfg = new PrunedBlockGraph(ucfg);
+	ExceptionalUnitGraph ucfg = new ExceptionalUnitGraph(body);
+        cfg = new ExceptionalBlockGraph(ucfg);
         OneHeadBlockGraph.convert(cfg);
 
         dt = new DominatorTree(cfg, true);

@@ -59,7 +59,7 @@ public class ConstructorFolder extends BodyTransformer
 
       Iterator it = stmtList.iterator();
 
-      PrunedUnitGraph graph = new PrunedUnitGraph(body);
+      ExceptionalUnitGraph graph = new ExceptionalUnitGraph(body);
         
       LocalDefs localDefs = new SimpleLocalDefs(graph);
       LocalUses localUses = new SimpleLocalUses(graph, localDefs);

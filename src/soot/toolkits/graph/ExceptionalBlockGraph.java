@@ -39,40 +39,40 @@ import java.io.*;
  *  block.</p>
  */
 
-public class PrunedBlockGraph extends BlockGraph 
+public class ExceptionalBlockGraph extends BlockGraph 
 {
     /**
-     *   <p> Constructs a <tt>PrunedBlockGraph</tt> for the blocks
+     *   <p> Constructs a <tt>ExceptionalBlockGraph</tt> for the blocks
      *   found by partitioning the the units of the provided
      *   {@link Body} instance into basic blocks.</p>
      *
      *   <p> Note that this constructor builds a {@link
-     *   PrunedUnitGraph} internally when splitting <tt>body</tt>'s
+     *   ExceptionalUnitGraph} internally when splitting <tt>body</tt>'s
      *   {@link Unit}s into {@link Block}s.  Callers who already have
-     *   a {@link PrunedUnitGraph} to hand can use the constructor
-     *   taking a <tt>PrunedUnitGraph</tt> as a parameter, as a
+     *   a {@link ExceptionalUnitGraph} to hand can use the constructor
+     *   taking a <tt>ExceptionalUnitGraph</tt> as a parameter, as a
      *   minor optimization.
      *
      *   @param body    The underlying body we want to make a graph for.
      */
-    public PrunedBlockGraph(Body body)
+    public ExceptionalBlockGraph(Body body)
     {
-        super(new PrunedUnitGraph(body));
+        super(new ExceptionalUnitGraph(body));
     }
 
 
     /**
      *   Constructs a graph for the blocks found by partitioning the
-     *   the units in a {@link PrunedUnitGraph}.  
+     *   the units in a {@link ExceptionalUnitGraph}.  
      *
      *   @param body    The underlying body we want to make a graph for.
      *
-     *   @param unitGraph A {@link PrunedUnitGraph} built from <tt>body</tt>
-     *                  The <tt>PrunedBlockGraph</tt> constructor uses
+     *   @param unitGraph A {@link ExceptionalUnitGraph} built from <tt>body</tt>
+     *                  The <tt>ExceptionalBlockGraph</tt> constructor uses
      *                  the passed <tt>graph</tt> to split the body into
      *			blocks. 
      */
-    public PrunedBlockGraph(PrunedUnitGraph unitGraph)
+    public ExceptionalBlockGraph(ExceptionalUnitGraph unitGraph)
     {
         super(unitGraph);
 

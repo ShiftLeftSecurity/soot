@@ -53,7 +53,7 @@ class FastAvailableExpressionsAnalysis extends ForwardFlowAnalysis
         super(dg);
         this.st = st;
 
-        PrunedUnitGraph g = (PrunedUnitGraph)dg;
+        ExceptionalUnitGraph g = (ExceptionalUnitGraph)dg;
         LocalDefs ld = new SimpleLocalDefs(g);
 
         // maps an rhs to its containing stmt.  object equality in rhs.

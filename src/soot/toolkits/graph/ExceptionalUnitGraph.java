@@ -65,7 +65,7 @@ import soot.jimple.NewExpr;
  *  the excepting </tt>Unit</tt> itself to its handlers, since the
  *  side effects might occur before the exception is raised.</p>
  */
-public class PrunedUnitGraph extends UnitGraph
+public class ExceptionalUnitGraph extends UnitGraph
 {
     protected Map unitToUnexceptionalSuccs; // If there are no Traps within
     protected Map unitToUnexceptionalPreds; // the method, these will be the
@@ -91,7 +91,7 @@ public class PrunedUnitGraph extends UnitGraph
      *  @param throwAnalysis the source of information about the exceptions
      *                       which each <tt>Unit</tt>s may throw.
      */
-    public PrunedUnitGraph(Body body, ThrowAnalysis throwAnalysis) {
+    public ExceptionalUnitGraph(Body body, ThrowAnalysis throwAnalysis) {
 	super(body);
 
 	int size = unitChain.size();
@@ -160,7 +160,7 @@ public class PrunedUnitGraph extends UnitGraph
      *  @param body the <tt>Body</tt> from which to build a graph.
      *
      */
-    public PrunedUnitGraph(Body body) {
+    public ExceptionalUnitGraph(Body body) {
 	this(body, UnitThrowAnalysis.v());
     }
 

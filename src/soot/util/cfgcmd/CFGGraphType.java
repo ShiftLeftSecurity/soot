@@ -26,14 +26,14 @@ import soot.Body;
 import soot.toolkits.graph.DirectedGraph;
 import soot.toolkits.graph.UnitGraph;
 import soot.toolkits.graph.BriefUnitGraph;
-import soot.toolkits.graph.PrunedUnitGraph;
+import soot.toolkits.graph.ExceptionalUnitGraph;
 import soot.toolkits.graph.CompleteUnitGraph;
 import soot.toolkits.graph.TrapUnitGraph;
 import soot.toolkits.graph.ClassicCompleteBlockGraph;
 import soot.toolkits.graph.ClassicCompleteUnitGraph;
 import soot.toolkits.graph.BlockGraph;
 import soot.toolkits.graph.BriefBlockGraph;
-import soot.toolkits.graph.PrunedBlockGraph;
+import soot.toolkits.graph.ExceptionalBlockGraph;
 import soot.toolkits.graph.CompleteBlockGraph;
 import soot.toolkits.graph.ArrayRefBlockGraph;
 import soot.toolkits.graph.ZonedBlockGraph;
@@ -131,13 +131,13 @@ public abstract class CFGGraphType extends CFGOptionMatcher.CFGOption {
     }
   };
 
-  public static final CFGGraphType PRUNED_UNIT_GRAPH = 
-    new CFGGraphType("PrunedUnitGraph") {
+  public static final CFGGraphType EXCEPTIONAL_UNIT_GRAPH = 
+    new CFGGraphType("ExceptionalUnitGraph") {
     public DirectedGraph buildGraph(Body b) {
-      return new PrunedUnitGraph(b);
+      return new ExceptionalUnitGraph(b);
     }
     public DotGraph drawGraph(CFGToDotGraph drawer, DirectedGraph g, Body b) {
-      return drawer.drawCFG((PrunedUnitGraph) g);
+      return drawer.drawCFG((ExceptionalUnitGraph) g);
     }
   };
 
@@ -181,13 +181,13 @@ public abstract class CFGGraphType extends CFGOptionMatcher.CFGOption {
     }
   };
 
-  public static final CFGGraphType PRUNED_BLOCK_GRAPH = 
-    new CFGGraphType("PrunedBlockGraph") {
+  public static final CFGGraphType EXCEPTIONAL_BLOCK_GRAPH = 
+    new CFGGraphType("ExceptionalBlockGraph") {
     public DirectedGraph buildGraph(Body b) {
-      return new PrunedBlockGraph(b);
+      return new ExceptionalBlockGraph(b);
     }
     public DotGraph drawGraph(CFGToDotGraph drawer, DirectedGraph g, Body b) {
-      return drawer.drawCFG((PrunedBlockGraph) g, b);
+      return drawer.drawCFG((ExceptionalBlockGraph) g, b);
     }
   };
 
@@ -366,12 +366,12 @@ public abstract class CFGGraphType extends CFGOptionMatcher.CFGOption {
   private final static CFGOptionMatcher graphTypeOptions = 
     new CFGOptionMatcher(new CFGGraphType[] {    
       BRIEF_UNIT_GRAPH,
-      PRUNED_UNIT_GRAPH,
+      EXCEPTIONAL_UNIT_GRAPH,
       COMPLETE_UNIT_GRAPH,
       TRAP_UNIT_GRAPH,
       CLASSIC_COMPLETE_UNIT_GRAPH,
       BRIEF_BLOCK_GRAPH,
-      PRUNED_BLOCK_GRAPH,
+      EXCEPTIONAL_BLOCK_GRAPH,
       COMPLETE_BLOCK_GRAPH,
       CLASSIC_COMPLETE_BLOCK_GRAPH,
       ARRAY_REF_BLOCK_GRAPH,

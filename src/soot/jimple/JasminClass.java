@@ -411,7 +411,7 @@ public class JasminClass
         
         Chain units = body.getUnits();
 
-        PrunedUnitGraph stmtGraph = null;
+        ExceptionalUnitGraph stmtGraph = null;
         LocalDefs ld = null;
         LocalUses lu = null;
 
@@ -427,7 +427,7 @@ public class JasminClass
 
         if (!disablePeephole)
         {
-            stmtGraph = new PrunedUnitGraph(body);
+            stmtGraph = new ExceptionalUnitGraph(body);
             ld = new SimpleLocalDefs(stmtGraph);
             lu = new SimpleLocalUses(stmtGraph, ld);
         }

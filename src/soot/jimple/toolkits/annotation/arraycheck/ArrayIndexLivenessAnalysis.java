@@ -38,7 +38,7 @@ import java.util.*;
 class ArrayIndexLivenessAnalysis extends BackwardFlowAnalysis
 {
     HashSet fullSet = new HashSet();
-    PrunedUnitGraph pug;
+    ExceptionalUnitGraph eug;
 
     /* for each unit, kill set has variables to be killed.
      * gen set was considered with conditionOfGenSet,
@@ -87,14 +87,14 @@ class ArrayIndexLivenessAnalysis extends BackwardFlowAnalysis
         if (Options.v().debug()) 
             G.v().out.println("Enter ArrayIndexLivenessAnalysis");
         
-        pug = (PrunedUnitGraph)dg;
-        retrieveAllArrayLocals(pug.getBody(), fullSet);
+        eug = (ExceptionalUnitGraph)dg;
+        retrieveAllArrayLocals(eug.getBody(), fullSet);
         
         /* compute gen set, kill set, and condition set */
-        genOfUnit = new HashMap(pug.size()*2+1);
-        absGenOfUnit = new HashMap(pug.size()*2+1);
-        killOfUnit = new HashMap(pug.size()*2+1);
-        conditionOfGen = new HashMap(pug.size()*2+1);
+        genOfUnit = new HashMap(eug.size()*2+1);
+        absGenOfUnit = new HashMap(eug.size()*2+1);
+        killOfUnit = new HashMap(eug.size()*2+1);
+        conditionOfGen = new HashMap(eug.size()*2+1);
         
         if (fieldin)
         {
@@ -114,7 +114,7 @@ class ArrayIndexLivenessAnalysis extends BackwardFlowAnalysis
             if (rectarray)
             {
                 multiarraylocals = new HashSet();
-                retrieveMultiArrayLocals(pug.getBody(), multiarraylocals);
+                retrieveMultiArrayLocals(eug.getBody(), multiarraylocals);
             }
         }
         
@@ -123,9 +123,9 @@ class ArrayIndexLivenessAnalysis extends BackwardFlowAnalysis
             localToExpr = new HashMap();
         }
 
-        getAllRelatedMaps(pug.getBody());
+        getAllRelatedMaps(eug.getBody());
 
-        getGenAndKillSet(pug.getBody(), absGenOfUnit, genOfUnit, killOfUnit, conditionOfGen);
+        getGenAndKillSet(eug.getBody(), absGenOfUnit, genOfUnit, killOfUnit, conditionOfGen);
 
         doAnalysis();
 

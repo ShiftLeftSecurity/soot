@@ -32,17 +32,21 @@ import soot.options.Options;
  *  indication of unexceptional and exceptional control
  *  flow.</p>
  *
- *  <p><tt>ClassicCompleteUnitGraph</tt> duplicates the results
- *  that would have been produced by Soot's {@link CompleteUnitGraph}
- *  in releases up to Soot 2.0.1. It is included solely for testing
- *  purposes, and should not be used in actual analyses.</p>
+ *  <p><tt>ClassicCompleteUnitGraph</tt> attempts to duplicate the
+ *  results that would have been produced by Soot's
+ *  <code>CompleteUnitGraph</code> in releases up to Soot 2.0.1 (the
+ *  one known discrepancy is that the 2.0.1
+ *  <code>CompleteUnitGraph</code> could include two edges joining two
+ *  {@link Unit}s if the first both branched to and fell through to
+ *  the second). It is included solely for testing purposes, and
+ *  should not be used in actual analyses.</p>
  *
  *  <p> There are two distinctions between the graphs produced by the
  *  <tt>ClassicCompleteUnitGraph</tt> and 
- *  <tt>PrunedUnitGraph</tt>:
+ *  <tt>ExceptionalUnitGraph</tt>:
  *  <ol>
  *
- *  <li><tt>PrunedUnitGraph</tt> only creates edges to a <tt>Trap</tt>
+ *  <li><tt>ExceptionalUnitGraph</tt> only creates edges to a <tt>Trap</tt>
  *  handler for trapped <tt>Unit</tt>s that have the potential to
  *  throw the particular exception type caught by the handler,
  *  according to the {@link ThrowAnalysis} used to estimate which
@@ -50,7 +54,7 @@ import soot.options.Options;
  *  <tt>ClassicCompleteUnitGraph</tt> creates edges for all trapped
  *  <tt>Unit</tt>s, regardless of what exceptions they may throw.</li>
  *
- *  <li> When <tt>PrunedUnitGraph</tt> creates edges for a trapped
+ *  <li> When <tt>ExceptionalUnitGraph</tt> creates edges for a trapped
  *  <tt>Unit</tt> that may throw a caught exception, it adds edges
  *  from each predecessor of the excepting <tt>Unit</tt> to the
  *  handler. Only if the excepting <tt>Unit</tt> may have side effects
@@ -60,7 +64,7 @@ import soot.options.Options;
  *  to the handler, and adds edges from the predecessor only of the
  *  first <tt>Unit</tt> covered by a <tt>Trap</tt> (in this one aspect
  *  <tt>ClassicCompleteUnitGraph</tt> is less conservative than
- *  <tt>PrunedUnitGraph</tt>, since it ignores the possibility of a
+ *  <tt>ExceptionalUnitGraph</tt>, since it ignores the possibility of a
  *  branch into the middle of a protected area.</li>
  *
  * </ol></p>

@@ -50,7 +50,7 @@ public class FastAvailableExpressions implements AvailableExpressions
                 "] Finding available expressions...");
 
         FastAvailableExpressionsAnalysis analysis = 
-            new FastAvailableExpressionsAnalysis(new PrunedUnitGraph(b),
+            new FastAvailableExpressionsAnalysis(new ExceptionalUnitGraph(b),
 		    b.getMethod(), st);
 
         // Build unitToExprs map

@@ -50,13 +50,13 @@ public class SimpleLiveLocals implements LiveLocals
 
     /**
      *   Computes the analysis given a UnitGraph computed from a
-     *   method body.  It is recommended that a PrunedUnitGraph (or
+     *   method body.  It is recommended that a ExceptionalUnitGraph (or
      *   similar) be provided for correct results in the case of
      *   exceptional control flow.
      *
      *   @param g a graph on which to compute the analysis.
      *   
-     *   @see PrunedUnitGraph
+     *   @see ExceptionalUnitGraph
      */
     public SimpleLiveLocals(UnitGraph graph)
     {

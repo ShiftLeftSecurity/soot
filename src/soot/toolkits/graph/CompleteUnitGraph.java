@@ -26,7 +26,7 @@
 package soot.toolkits.graph;
 
 import soot.Body;
-import soot.toolkits.graph.PrunedUnitGraph;
+import soot.toolkits.graph.ExceptionalUnitGraph;
 import soot.toolkits.exceptions.PedanticThrowAnalysis;
 
 /**
@@ -37,7 +37,7 @@ import soot.toolkits.exceptions.PedanticThrowAnalysis;
  *  {@link Trap} is considered to have the potential to throw an
  *  exception caught by the {@link Trap}.  In other words, the
  *  <code>CompleteUnitGraph(b)</code>, for a given {@link Body}
- *  <code>b</code>, is equivalent to {@link PrunedUnitGraph}</code>(b,
+ *  <code>b</code>, is equivalent to {@link ExceptionalUnitGraph}</code>(b,
  *  </code>{@ PedanticThrowAnalysis}<code>.v())</code> for the same
  *  body, <code>b</code>.</p>
  *
@@ -68,7 +68,7 @@ import soot.toolkits.exceptions.PedanticThrowAnalysis;
  *
  *  </ul></p>
  */
-public class CompleteUnitGraph extends PrunedUnitGraph 
+public class CompleteUnitGraph extends ExceptionalUnitGraph 
 {
     public CompleteUnitGraph(Body b) {
 	super(b, PedanticThrowAnalysis.v());

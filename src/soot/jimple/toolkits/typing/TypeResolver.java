@@ -1032,7 +1032,7 @@ public class TypeResolver
 
     do
       {
-	PrunedUnitGraph graph = new PrunedUnitGraph(stmtBody);
+	ExceptionalUnitGraph graph = new ExceptionalUnitGraph(stmtBody);
 	SimpleLocalDefs defs = new SimpleLocalDefs(graph);
 	SimpleLocalUses uses = new SimpleLocalUses(graph, defs);
 	PatchingChain units = stmtBody.getUnits();
@@ -1091,7 +1091,7 @@ public class TypeResolver
 
   private void split_new()
   {
-    PrunedUnitGraph graph = new PrunedUnitGraph(stmtBody);
+    ExceptionalUnitGraph graph = new ExceptionalUnitGraph(stmtBody);
     SimpleLocalDefs defs = new SimpleLocalDefs(graph);
     // SimpleLocalUses uses = new SimpleLocalUses(graph, defs);
     PatchingChain units = stmtBody.getUnits();

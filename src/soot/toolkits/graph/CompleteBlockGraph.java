@@ -26,7 +26,7 @@
 package soot.toolkits.graph;
 
 import soot.Body;
-import soot.toolkits.graph.PrunedBlockGraph;
+import soot.toolkits.graph.ExceptionalBlockGraph;
 import soot.toolkits.graph.CompleteUnitGraph;
 
 /**
@@ -46,7 +46,7 @@ import soot.toolkits.graph.CompleteUnitGraph;
  *  {@link CompleteUnitGraph} for details of the incompatibilities.
  *  </p>
  */
-public class CompleteBlockGraph extends PrunedBlockGraph 
+public class CompleteBlockGraph extends ExceptionalBlockGraph 
 {
     public CompleteBlockGraph(Body b) {
 	super(new CompleteUnitGraph(b));

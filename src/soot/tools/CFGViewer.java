@@ -128,8 +128,8 @@ for (int i = 0; i < args.length; i++) System.err.println(args[i]);
       "soot.toolkits.graph.BlockGraph",
       "soot.toolkits.graph.BriefBlockGraph",
       "soot.toolkits.graph.BriefUnitGraph",
-      "soot.toolkits.graph.PrunedBlockGraph",
-      "soot.toolkits.graph.PrunedUnitGraph",
+      "soot.toolkits.graph.CompleteBlockGraph",
+      "soot.toolkits.graph.CompleteUnitGraph",
       "soot.toolkits.graph.TrapUnitGraph",
       "soot.toolkits.graph.UnitGraph",
       "soot.toolkits.graph.ZonedBlockGraph",
@@ -170,10 +170,10 @@ CFGIntermediateRep.help(0, 70,
 "       --throwAnalysis={" +
 throwAnalysisOptions.help(0, 70,
 "              ".length()) + "} :\n" +
-"                use the specified throw analysis when creating pruned\n" +
+"                use the specified throw analysis when creating Exceptional\n" +
 "                graphs (UnitThrowAnalysis is the default).\n" +
 "       --showExceptions :\n" +
-"                in pruned graphs, include edges showing the path of\n" +
+"                in Exceptional graphs, include edges showing the path of\n" +
 "                exceptions from thrower to catcher, labeled with the\n" +
 "                possible exception types.\n" +
 "       --multipages :\n" +
