@@ -163,13 +163,16 @@ class GuaranteedDefsAnalysis extends ForwardFlowAnalysis
      **/
     protected void customizeInitialFlowGraph()
     {
-        Iterator headsIt = graph.getHeads().iterator();
+        List heads = graph.getHeads();
 
-        while(headsIt.hasNext()){
-            Object s = headsIt.next();
+        if(heads.size() == 0)
+            return;
 
-            unitToBeforeFlow.put(s, emptySet.clone());
-        }
+        if(heads.size() != 1)
+            throw new RuntimeException("This version of Shimple was built against versions of CompleteBlockGraph and CompleteUnitGraph where only one head is possible.  If this has changed, then Shimple requires an update.");
+
+        Unit entry = (Unit) heads.get(0);
+        unitToBeforeFlow.put(entry, emptySet.clone());
     }
 
     /**

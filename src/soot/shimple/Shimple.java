@@ -32,11 +32,11 @@ import java.io.*;
  * Jimple/Shimple, create Phi nodes, and converting back from
  * Shimple to Jimple.
  *
- * <p> We did not replicate those elements already available from
- * Jimple.v().
+ * <p> This should normally be used in conjunction with the
+ * constructor methods from soot.jimple.Jimple.
  *
  * @author Navindra Umanee
- * @see soot.shimple.Shimple
+ * @see soot.jimple.Jimple
  * @see <a
  * href="http://citeseer.nj.nec.com/cytron91efficiently.html">Efficiently
  * Computing Static Single Assignment Form and the Control Dependence
@@ -85,11 +85,7 @@ public class Shimple
     /**
      * Returns a ShimpleBody constructed from b with given options.
      *
-     * <p> Currently available option is "naive-phi-elimination",
-     * typically specified in the "shimple" phase (eg, -p shimple
-     * naive-phi-elimination) which skips the dead code elimination
-     * and register allocation phase before eliminating Phi nodes.
-     * This can be useful for understanding the effect of analyses.
+     * @see ShimpleOptions
      **/
     public ShimpleBody newBody(Body b, String phase, String optionsString)
     {
@@ -108,7 +104,8 @@ public class Shimple
 
     /**
      * Create a Phi expression with the provided list of Values
-     * (Locals or Constants).
+     * (Locals or Constants) and the corresponding control flow
+     * predecessors.
      **/
     public PhiExpr newPhiExpr(List args, List preds)
     {
@@ -118,11 +115,7 @@ public class Shimple
     /**
      * Constructs a JimpleBody from a ShimpleBody.
      *
-     * <p> Currently available option is "naive-phi-elimination",
-     * typically specified in the "shimple" phase (eg, -p shimple
-     * naive-phi-elimination) which skips the dead code elimination
-     * and register allocation phase before eliminating Phi nodes.
-     * This can be useful for understanding the effect of analyses.
+     * @see ShimpleOptions
      **/
     public JimpleBody newJimpleBody(ShimpleBody body)
     {

@@ -55,7 +55,9 @@ public interface Unit extends Switchable, Host, Serializable
     public void addBoxPointingToThis( UnitBox b );
     /** Removes a box from the list returned by getBoxesPointingToThis. */
     public void removeBoxPointingToThis( UnitBox b );
-
+    /** Clears any pointers to and from this Unit's UnitBoxes. */
+    public void clearUnitBoxes();
+    
     /** Returns a list of Boxes containing any Value either used or defined
      * in this Unit. */
     public List getUseAndDefBoxes();

@@ -348,28 +348,10 @@ public class ShimpleBodyBuilder
         if(heads.size() == 0)
             return;
 
-        Block entry = null;
-
-        // if the CompleteBlockGraph has more than one head, make sure
-        // we have the right one (ie the one that is an actual entry
-        // point and not just dead code)
-        if(heads.size() == 1)
-            entry = (Block) heads.get(0);
-        else{
-            System.out.println("Warning:  Shimple found multiple entry-points in the CFG, assuming only one is reachable.");
-
-            Unit headUnit = (Unit) body.getUnits().getFirst();
-
-            for(int i = 0; i < heads.size(); i++){
-                Block block = (Block) heads.get(i);
-                if(headUnit.equals(block.getHead()))
-                    entry = block;
-            }
-        }
+        if(heads.size() != 1)
+            throw new RuntimeException("This version of Shimple was built against versions of CompleteBlockGraph and CompleteUnitGraph where only one head is possible.  If this has changed, then Shimple requires an update.");
         
-        if(entry == null)
-            throw new RuntimeException("Dazed and confused.");
-        
+        Block entry = (Block) heads.get(0);
         renameLocalsSearch(entry);
     }
 
@@ -680,6 +662,7 @@ public class ShimpleBodyBuilder
         while(phiNodesIt.hasNext()){
             Unit removeMe = (Unit) phiNodesIt.next();
             units.remove(removeMe);
+            removeMe.clearUnitBoxes();
         }
     }
 

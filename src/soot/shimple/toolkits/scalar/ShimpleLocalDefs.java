@@ -31,14 +31,13 @@ import java.util.*;
  * provide Definition/Use and Use/Definition chains in SSA.
  *
  * <p> This implementation can be considered a small demo for how SSA
- * can be put to good use. It is much simpler than
- * soot.toolkits.scalar.SimpleLocalDefs thanks to SSA form.  The
- * lesson to learn?  Shimple can be treated as Jimple with the added
- * benefits of SSA assumptions.
+ * can be put to good use since it is much simpler than
+ * soot.toolkits.scalar.SimpleLocalDefs. Shimple can often be treated
+ * as Jimple with the added benefits of SSA assumptions.
  *
  * <p> In addition to the interface required by LocalDefs,
  * ShimpleLocalDefs also provides a method for obtaining the
- * definition Unit given a Local.
+ * definition Unit given only the Local.
  *
  * @author Navindra Umanee
  * @see soot.toolkits.scalar.SimpleLocalDefs
@@ -62,7 +61,7 @@ public class ShimpleLocalDefs implements LocalDefs
 
         // build localToDefs map simply by iterating through all the
         // units in the body and saving the unique definition site for
-        // each scalar local -- no need for fancy analysis 
+        // each local -- no need for fancy analysis 
         {
             Chain unitsChain = sb.getUnits();
             Iterator unitsIt = unitsChain.iterator();
@@ -74,16 +73,9 @@ public class ShimpleLocalDefs implements LocalDefs
                 while(defBoxesIt.hasNext()){
                     Value value = ((ValueBox)defBoxesIt.next()).getValue();
 
-                    // only map scalars
-                    Type type = value.getType();
-
-                    // only map Shimple-processed locals
-                    if(!(type instanceof PrimType)){
-                        if(sb.isScalarsOnly())
-                            continue;
-                        else if(!(type instanceof RefType))
-                            continue;
-                    }
+                    // only map locals
+                    if(!(value instanceof Local))
+                        continue;
                         
                     localToDefs.put(value, new SingletonList(unit));
                 }
@@ -92,23 +84,14 @@ public class ShimpleLocalDefs implements LocalDefs
     }
 
     /**
-     * Unconditionally returns the definition site of a local and
-     * EMPTY_LIST if local is not a scalar.
+     * Unconditionally returns the definition site of a local.
      *
      * <p> This method is currently not required by the LocalDefs
-     * interface, but we return a singleton List instead of a Unit in
-     * case LocalDefs requires such a method in the future.
+     * interface, but we will return a singleton List instead of a
+     * Unit in case LocalDefs requires such a method in the future.
      **/
     public List getDefsOf(Local l)
     {
-        // only concerned with scalars; for non-scalars we return an
-        // empty list
-        {
-            Type localType = l.getType();
-            if(!(localType instanceof PrimType))
-                return Collections.EMPTY_LIST;
-        }
-
         List defs = (List) localToDefs.get(l);
 
         if(defs == null)
@@ -116,19 +99,7 @@ public class ShimpleLocalDefs implements LocalDefs
 
         return defs;
     }
-    
-    /**
-     * Implementation of LocalDefs interface for scalars.
-     *
-     * <p> It is assumed the programmer knows that ShimpleLocalDefs
-     * only applies to non-scalars.  In an attempt to behave nicely
-     * with some existing code (SimpleLocalUses), ShimpleLocalDefs
-     * silently returns an empty list of definitions for non-scalar
-     * uses.
-     *
-     * <p> If support for non-scalars is required, SimpleLocalDefs can
-     * be used instead.
-     **/
+
     public List getDefsOfAt(Local l, Unit s)
     {
         // For consistency with SimpleLocalDefs, check that the local

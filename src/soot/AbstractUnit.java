@@ -95,6 +95,13 @@ public abstract class AbstractUnit extends AbstractHost implements Unit
         if( boxesPointingToThis != null ) boxesPointingToThis.remove( b );
     }
 
+    public void clearUnitBoxes() {
+        for( Iterator it = getUnitBoxes().iterator(); it.hasNext(); ) {
+            UnitBox ub = (UnitBox) it.next();
+            ub.setUnit(null);
+        }
+    }
+    
     /** Returns a list of ValueBoxes, either used or defined in this Unit. */
     public List getUseAndDefBoxes()
     {

@@ -55,6 +55,18 @@ public class PatchingChain extends AbstractCollection implements Chain
         body = body;
     }
 
+    /**
+     * Returns the innerChain used by the PatchingChain.  It may be
+     * necessary to access the innerChain to perform certain
+     * operations without changing the current targets of a branch or
+     * pointer (e.g. when inserting a goto at the beginning of a
+     * block).
+     **/
+    public Chain getNonPatchingChain()
+    {
+        return innerChain;
+    }
+    
     /** Adds the given object to this Chain. */
     public boolean add(Object o)
     {

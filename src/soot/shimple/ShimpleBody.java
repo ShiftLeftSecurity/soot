@@ -113,9 +113,6 @@ public class ShimpleBody extends StmtBody
      **/
     public void rebuild(boolean hasPhiNodes)
     {
-        // this has to be before the call to ShimpleBodyBuilder
-        sLocalDefs = null;
-        
         new ShimpleBodyBuilder(this, hasPhiNodes);
         setIsSSA(true);
     }
@@ -144,16 +141,6 @@ public class ShimpleBody extends StmtBody
         return jBody;
     }
 
-    private ShimpleLocalDefs sLocalDefs = null;
-    
-    public ShimpleLocalDefs getLocalDefs()
-    {
-        if(sLocalDefs == null)
-            sLocalDefs = new ShimpleLocalDefs(this);
-
-        return sLocalDefs;
-    }
-    
     /**
      * Remove Phi nodes from body. SSA form is no longer a given
      * once done.
