@@ -38,6 +38,9 @@ import soot.jimple.toolkits.annotation.arraycheck.*;
 import soot.jimple.toolkits.annotation.profiling.*;
 import soot.jimple.toolkits.annotation.callgraph.*;
 import soot.jimple.toolkits.annotation.parity.*;
+import soot.jimple.toolkits.annotation.methods.*;
+import soot.jimple.toolkits.annotation.fields.*;
+import soot.jimple.toolkits.annotation.qualifiers.*;
 import soot.jimple.toolkits.annotation.nullcheck.*;
 import soot.jimple.toolkits.annotation.tags.*;
 import soot.jimple.toolkits.pointer.*;
@@ -110,6 +113,9 @@ public class PackManager {
         addPack(p = new ScenePack("wjap"));
         {
             p.add(new Transform("wjap.ra", RectangularArrayFinder.v()));
+            p.add(new Transform("wjap.umt", UnreachableMethodsTagger.v()));
+            p.add(new Transform("wjap.uft", UnreachableFieldsTagger.v()));
+            p.add(new Transform("wjap.tqt", TightestQualifiersTagger.v()));
         }
 
 	// CFG control "pack" (not really a phase, just a place to collect

@@ -153,6 +153,9 @@ EntryPoints
 CallGraphTagger
 NullPointerColorer
 ParityTagger
+UnreachableMethodsTagger
+UnreachableFieldsTagger
+TightestQualifiersTagger
 PhaseDumper
 AltClassLoader
 ThrowableSet.Manager
