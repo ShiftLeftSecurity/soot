@@ -55,6 +55,11 @@ public class UnitThrowAnalysis implements ThrowAnalysis {
     public UnitThrowAnalysis(Singletons.Global g) {}
 
     /**
+     * A protected constructor for use by unit tests.
+     */
+    protected UnitThrowAnalysis() {}
+
+    /**
      * Returns the single instance of <code>UnitThrowAnalysis</code>.
      *
      * @return Soot's <code>UnitThrowAnalysis</code>.

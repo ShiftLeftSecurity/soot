@@ -81,6 +81,22 @@ public class UnitThrowAnalysisTest extends TestCase {
     }
 
 
+    public void testJBreakpointStmt() {
+	Stmt s = Grimp.v().newBreakpointStmt();
+	assertTrue(utility.sameMembers(utility.ASYNC_ERRORS,
+				       unitAnalysis.mightThrow(s)));
+	assertEquals(utility.ASYNC_ERRORS_PLUS_SUPERTYPES, 
+		     utility.catchableSubset(unitAnalysis.mightThrow(s)));
+    }
+
+    public void testGBreakpointStmt() {
+	Stmt s = Grimp.v().newBreakpointStmt();
+	assertTrue(utility.sameMembers(utility.ASYNC_ERRORS,
+				       unitAnalysis.mightThrow(s)));
+	assertEquals(utility.ASYNC_ERRORS_PLUS_SUPERTYPES, 
+		     utility.catchableSubset(unitAnalysis.mightThrow(s)));
+    }
+
     public void testJInvokeStmt() {
 	List voidList = new ArrayList();
 	Stmt s = Jimple.v().newInvokeStmt(Jimple.v().newStaticInvokeExpr(
@@ -200,6 +216,62 @@ public class UnitThrowAnalysisTest extends TestCase {
 		     utility.catchableSubset(unitAnalysis.mightThrow(s)));
     }
 
+    public void testJIdentityStmt() {
+
+	Stmt s = Jimple.v().newIdentityStmt(Grimp.v().newLocal("local0", 
+							       IntType.v()),
+					    Jimple.v().newCaughtExceptionRef());
+	assertTrue(utility.sameMembers(utility.ASYNC_ERRORS,
+				       unitAnalysis.mightThrow(s)));
+	assertEquals(utility.ASYNC_ERRORS_PLUS_SUPERTYPES, 
+		     utility.catchableSubset(unitAnalysis.mightThrow(s)));
+
+	s = Jimple.v().newIdentityStmt(Grimp.v().newLocal("local0",
+							  RefType.v("java.lang.NullPointerException")),
+				       Jimple.v().newThisRef(RefType.v("java.lang.NullPointerException")));
+	assertTrue(utility.sameMembers(utility.ASYNC_ERRORS,
+				       unitAnalysis.mightThrow(s)));
+	assertEquals(utility.ASYNC_ERRORS_PLUS_SUPERTYPES, 
+		     utility.catchableSubset(unitAnalysis.mightThrow(s)));
+
+	s = Jimple.v().newIdentityStmt(Grimp.v().newLocal("local0",
+							  RefType.v("java.lang.NullPointerException")),
+				       Jimple.v().newParameterRef(RefType.v("java.lang.NullPointerException"), 
+								  0));
+	assertTrue(utility.sameMembers(utility.ASYNC_ERRORS,
+				       unitAnalysis.mightThrow(s)));
+	assertEquals(utility.ASYNC_ERRORS_PLUS_SUPERTYPES, 
+		     utility.catchableSubset(unitAnalysis.mightThrow(s)));
+    }
+
+    public void testGIdentityStmt() {
+
+	Stmt s = Grimp.v().newIdentityStmt(Grimp.v().newLocal("local0", 
+							       IntType.v()),
+					    Grimp.v().newCaughtExceptionRef());
+	assertTrue(utility.sameMembers(utility.ASYNC_ERRORS,
+				       unitAnalysis.mightThrow(s)));
+	assertEquals(utility.ASYNC_ERRORS_PLUS_SUPERTYPES, 
+		     utility.catchableSubset(unitAnalysis.mightThrow(s)));
+
+	s = Grimp.v().newIdentityStmt(Grimp.v().newLocal("local0",
+							 RefType.v("java.lang.NullPointerException")),
+				      Grimp.v().newThisRef(RefType.v("java.lang.NullPointerException")));
+	assertTrue(utility.sameMembers(utility.ASYNC_ERRORS,
+				       unitAnalysis.mightThrow(s)));
+	assertEquals(utility.ASYNC_ERRORS_PLUS_SUPERTYPES, 
+		     utility.catchableSubset(unitAnalysis.mightThrow(s)));
+
+	s = Grimp.v().newIdentityStmt(Grimp.v().newLocal("local0",
+							 RefType.v("java.lang.NullPointerException")),
+				      Grimp.v().newParameterRef(RefType.v("java.lang.NullPointerException"),
+								0));
+	assertTrue(utility.sameMembers(utility.ASYNC_ERRORS,
+				       unitAnalysis.mightThrow(s)));
+	assertEquals(utility.ASYNC_ERRORS_PLUS_SUPERTYPES, 
+		     utility.catchableSubset(unitAnalysis.mightThrow(s)));
+    }
+
     public void testJEnterMonitorStmt() {
 	Stmt s = Jimple.v().newEnterMonitorStmt(StringConstant.v("test"));
 
@@ -271,6 +343,24 @@ public class UnitThrowAnalysisTest extends TestCase {
 		     utility.catchableSubset(unitAnalysis.mightThrow(s)));
     }
 
+    public void testJGotoStmt() {
+	Stmt nop = Jimple.v().newNopStmt();
+	Stmt s = Jimple.v().newGotoStmt(nop);
+	assertTrue(utility.sameMembers(utility.ASYNC_ERRORS,
+				       unitAnalysis.mightThrow(s)));
+	assertEquals(utility.ASYNC_ERRORS_PLUS_SUPERTYPES, 
+		     utility.catchableSubset(unitAnalysis.mightThrow(s)));
+    }
+
+    public void testGGotoStmt() {
+	Stmt nop = Grimp.v().newNopStmt();
+	Stmt s = Grimp.v().newGotoStmt(nop);
+	assertTrue(utility.sameMembers(utility.ASYNC_ERRORS,
+				       unitAnalysis.mightThrow(s)));
+	assertEquals(utility.ASYNC_ERRORS_PLUS_SUPERTYPES, 
+		     utility.catchableSubset(unitAnalysis.mightThrow(s)));
+    }
+
     public void testJIfStmt() {
 	IfStmt s = Jimple.v().newIfStmt(Jimple.v().newEqExpr(IntConstant.v(1), 
 							     IntConstant.v(1)),
@@ -309,6 +399,20 @@ public class UnitThrowAnalysisTest extends TestCase {
 				       unitAnalysis.mightThrow(s)));
 	assertEquals(utility.ASYNC_ERRORS_PLUS_SUPERTYPES, 
 		     utility.catchableSubset(unitAnalysis.mightThrow(s)));
+    }
+
+    public void testJNopStmt() {
+	Stmt s = Jimple.v().newNopStmt();
+	Set expectedRep = new ExceptionHashSet(utility.ASYNC_ERRORS);
+	assertTrue(utility.sameMembers(expectedRep,
+				       unitAnalysis.mightThrow(s)));
+    }
+
+    public void testGNopStmt() {
+	Stmt s = Grimp.v().newNopStmt();
+	Set expectedRep = new ExceptionHashSet(utility.ASYNC_ERRORS);
+	assertTrue(utility.sameMembers(expectedRep,
+				       unitAnalysis.mightThrow(s)));
     }
 
     public void testGLookupSwitchStmt() {
