@@ -158,6 +158,7 @@ UnreachableFieldsTagger
 TightestQualifiersTagger
 ParameterAliasTagger
 ReachingDefsTagger
+CFGPrinter
 PhaseDumper
 AltClassLoader
 ThrowableSet.Manager

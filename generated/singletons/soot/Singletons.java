@@ -1052,6 +1052,12 @@ public class Singletons {
         return instanceReachingDefsTagger;
     }
 
+    private CFGPrinter instanceCFGPrinter;
+    public CFGPrinter CFGPrinter() {
+        if( instanceCFGPrinter == null ) instanceCFGPrinter = new CFGPrinter( g );
+        return instanceCFGPrinter;
+    }
+
     private PhaseDumper instancePhaseDumper;
     public PhaseDumper PhaseDumper() {
         if( instancePhaseDumper == null ) instancePhaseDumper = new PhaseDumper( g );

@@ -77,6 +77,8 @@ public class Scene  //extends AbstractHost
 
     boolean allowsPhantomRefs = false;
 
+    public ArrayList cfgList = new ArrayList();
+    
     SootClass mainClass;
     String sootClassPath = null;
 
