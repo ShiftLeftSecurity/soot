@@ -62,7 +62,7 @@ public class XMLStmtPrinter implements StmtPrinter{
 	
         // Create statement name table
         {
-            Iterator boxIt = body.getUnitBoxes().iterator();
+            Iterator boxIt = body.getTargetUnitBoxes().iterator();
 
             Set labelStmts = new HashSet();
 

@@ -181,17 +181,47 @@ public class JAssignStmt extends AbstractDefinitionStmt
 	    return rightBox;
     }
 	  
-    protected String toString(boolean isBrief, Map stmtToName, String indentation)
+    public List getUnitBoxes()
     {
-        if(isBrief)
-        {
-            return indentation + ((ToBriefString) leftBox.getValue()).toBriefString() + " = " + 
-                ((ToBriefString) rightBox.getValue()).toBriefString();
-        }
-        else
-            return indentation + leftBox.getValue().toString() + " = " + rightBox.getValue().toString();
+        // handle possible PhiExpr's
+        Value rValue = rightBox.getValue();
+        if(rValue instanceof UnitBoxOwner)
+            return ((UnitBoxOwner)rValue).getUnitBoxes();
+
+        return super.getUnitBoxes();
     }
 
+    protected String toString(boolean isBrief, Map stmtToName, String indentation)
+    {
+        Value rValue = rightBox.getValue();
+                
+        if(isBrief)
+        {
+            String left = ((ToBriefString) leftBox.getValue()).toBriefString();
+            
+            // handle possible PhiExpr's
+            String right;
+            if(rValue instanceof UnitBoxOwner)
+                right = ((UnitBoxOwner) rValue).toBriefString(stmtToName);
+            else
+                right = ((ToBriefString) rValue).toBriefString();
+            
+            return indentation + left + " = " + right;
+        }
+        else{
+            String left = leftBox.getValue().toString();
+
+            // handle possible PhiExpr's
+            String right;
+            if(rValue instanceof UnitBoxOwner)
+                right = ((UnitBoxOwner) rValue).toString(stmtToName);
+            else
+                right = rValue.toString();
+            
+            return indentation + left + " = " + right;
+        }
+    }
+    
     public Object clone() 
     {
             return new JAssignStmt(Jimple.cloneIfNecessary(getLeftOp()), Jimple.cloneIfNecessary(getRightOp()));

@@ -45,5 +45,19 @@ public interface UnitBox extends Serializable
     public Unit getUnit();
 
     /** Returns true if this box can contain the given Unit. */
-    public boolean canContainUnit(Unit u);    
+    public boolean canContainUnit(Unit u);
+
+    /**
+     * Returns true if the UnitBox is holding a Unit that is the
+     * target of a branch, hence a Unit at the beginning of a CFG
+     * block.  Returns false if the UnitBox is holding a Unit that
+     * indicates the end of a CFG block (currently used for SSA).
+     * Otherwise ignored.
+     **/
+    public boolean isBranchTarget();
+
+    /**
+     * @see #isBranchTarget()
+     **/
+    public void setBranchTarget(boolean branchTarget);
 }

@@ -36,9 +36,22 @@ import java.util.*;
  * add a canContainUnit method. */
 public abstract class AbstractUnitBox implements UnitBox
 {
-    private Unit unit;
+    protected Unit unit;
+
+    // assumes the common case by default
+    protected boolean branchTarget = true;  
     
     public abstract boolean canContainUnit(Unit u);
+
+    public void setBranchTarget(boolean branchTarget)
+    {
+        this.branchTarget = branchTarget;
+    }
+
+    public boolean isBranchTarget()
+    {
+        return branchTarget;
+    }
     
     public void setUnit(Unit unit)
     {

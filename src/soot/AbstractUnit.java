@@ -213,12 +213,53 @@ public abstract class AbstractUnit extends AbstractHost implements Unit
             if(box.getUnit() != this)
                 throw new RuntimeException("Something weird's happening");
 
-            box.setUnit(newLocation);
+            if(box.isBranchTarget())
+                box.setUnit(newLocation);
         }
 
     }
 
+    public boolean redirectPointersToThisTo(Unit newLocation, Body body, boolean branchTarget)
+    {
+        Set trappedUnits = Collections.EMPTY_SET;
 
-    
+        if(body != null)
+            trappedUnits = TrapManager.getTrappedUnitsOf(body);
+        
+        if(branchTarget){
+            if(newLocation.branches())
+                return false;
+
+            if(trappedUnits.contains(newLocation))
+                return false;
+            
+            redirectJumpsToThisTo(newLocation);
+            return true;
+        }
+
+        // this == oldLocation
+        if(this.branches())
+            return false;
+
+        if(trappedUnits.contains(this))
+            return false;
+        
+        List boxesPointing = this.getBoxesPointingToThis();
+
+        Object[] boxes = boxesPointing.toArray();
+        // important to change this to an array to have a static copy
+        
+        for(int i = 0; i < boxes.length; i++)
+        {
+            UnitBox box = (UnitBox) boxes[i];
+
+            if(box.getUnit() != this)
+                throw new RuntimeException("Something weird's happening");
+
+            if(!box.isBranchTarget())
+                box.setUnit(newLocation);
+        }
+
+        return true;
+    }
 }
-

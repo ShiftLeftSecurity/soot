@@ -1,0 +1,38 @@
+SECTION General Options
+#######################
+
+BOPT optimize
+false
+When this option is set to true, Shimple-based optimizations are applied.
+END
+
+SECTION Options for Building Shimple
+#################################################
+
+BOPT scalars-only
+false
+If set to true, SSA will be computed for scalars only (PrimType).  Otherwise,
+SSA is computed for both scalars (PrimType) and objects (RefType. Note: 
+object aliasing is not taken into account).  Arrays are not handled either
+way.
+END
+
+SECTION Options for Leaving Shimple
+#######################################################
+
+BOPT naive-phi-elimination
+false
+If set to true, neither pre-optimization nor post-optimization will be applied
+to the Phi elimination process.  Note that setting this option to true takes
+precedence over other Phi elimination options.
+END
+
+BOPT pre-optimize-phi-elimination
+false
+If set to true, some optimizations are applied before Phi nodes are eliminated.
+END
+
+BOPT post-optimize-phi-elimination
+true
+If set to false, optimizations are not applied after eliminating Phi nodes.
+END

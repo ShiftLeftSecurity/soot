@@ -51,14 +51,20 @@ public class DefaultStmtPrinter implements StmtPrinter
     {
         Chain units = body.getUnits();
 
-        Map stmtToName = new HashMap(units.size() * 2 + 1, 0.7f);
+        // used for branch targets
+        Map stmtToLblName = new HashMap(units.size() * 2 + 1, 0.7f);
+
+        // used for end block pointers
+        Map stmtToPtrName = new HashMap(units.size() * 2 + 1, 0.7f);
+
         UnitGraph unitGraph = new soot.toolkits.graph.BriefUnitGraph(body);
 
         // Create statement name table
         {
-            Iterator boxIt = body.getUnitBoxes().iterator();
+            Iterator boxIt = body.getAllUnitBoxes().iterator();
 
             Set labelStmts = new HashSet();
+            Set pointedAtStmts = new HashSet();
 
             // Build labelStmts
             {
@@ -67,8 +73,11 @@ public class DefaultStmtPrinter implements StmtPrinter
                     {
                         UnitBox box = (UnitBox) boxIt.next();
                         Unit stmt = (Unit) box.getUnit();
-    
-                        labelStmts.add(stmt);
+
+                        if(box.isBranchTarget())
+                            labelStmts.add(stmt);
+                        else
+                            pointedAtStmts.add(stmt);
                     }
                 else
                     labelStmts.addAll(units);
@@ -78,7 +87,8 @@ public class DefaultStmtPrinter implements StmtPrinter
             // Traverse the stmts and assign a label if necessary
             {
                 int labelCount = 0;
-
+                int pointedAtCount = 0;
+                
                 Iterator stmtIt = units.iterator();
                 
                 
@@ -89,16 +99,20 @@ public class DefaultStmtPrinter implements StmtPrinter
                     if(labelStmts.contains(s))
                     {
                         if(isNumbered)
-                            stmtToName.put(s, new Integer(labelCount++).toString());
+                            stmtToLblName.put(s, new Integer(labelCount++).toString());
                         else
-                            stmtToName.put(s, "label" + (labelCount++));
+                            stmtToLblName.put(s, "label" + (labelCount++));
+                    }
+
+                    if(pointedAtStmts.contains(s))
+                    {
+                        if(!isNumbered)
+                            stmtToPtrName.put(s, Integer.toString(pointedAtCount++));
                     }
                 }
             }
         }        
 
-
-        
         Iterator unitIt = units.iterator();
         Unit currentStmt = null, previousStmt;
         String indent = (isNumbered) ? "    " : "        ";
@@ -110,7 +124,7 @@ public class DefaultStmtPrinter implements StmtPrinter
             
             // Print appropriate header.
                 if(isNumbered)
-                    out.print("  " + stmtToName.get(currentStmt) + ":");
+                    out.print("  " + stmtToLblName.get(currentStmt) + ":");
                 else            
                 {
                     // Put an empty line if the previous node was a branch node, the current node is a join node
@@ -121,7 +135,7 @@ public class DefaultStmtPrinter implements StmtPrinter
                         {       
                             if(unitGraph.getSuccsOf(previousStmt).size() != 1 ||
                                unitGraph.getPredsOf(currentStmt).size() != 1 ||
-                               stmtToName.containsKey(currentStmt))
+                               stmtToLblName.containsKey(currentStmt))
                                 out.println();
                             else {
                                 // Or if the previous node does not have body statement as a successor.
@@ -133,16 +147,41 @@ public class DefaultStmtPrinter implements StmtPrinter
                             }
                         }
                     
-                     if(stmtToName.containsKey(currentStmt))
-                         out.println("     " + stmtToName.get(currentStmt) + ":");
+                     if(stmtToLblName.containsKey(currentStmt))
+                         out.println("     " + stmtToLblName.get(currentStmt) + ":");
                 }
-                   
 
-                if(isPrecise)
-                    out.print(currentStmt.toString(stmtToName, indent));
-                else
-                    out.print(currentStmt.toBriefString(stmtToName, indent));
-	
+                if(stmtToPtrName.containsKey(currentStmt)){
+                    String ptrName = (String) stmtToPtrName.get(currentStmt);
+                    String ptrIndent = "(" + ptrName + ")" +
+                        indent.substring(ptrName.length() + 2);
+
+                    // hack to handle PhiExpr
+                    Map stmtToName;
+                    if(currentStmt instanceof AssignStmt)
+                        stmtToName = stmtToPtrName;
+                    else
+                        stmtToName = stmtToLblName;
+                    
+                    if(isPrecise)
+                        out.print(currentStmt.toString(stmtToName, ptrIndent));
+                    else
+                        out.print(currentStmt.toBriefString(stmtToName, ptrIndent));
+                }
+                else{
+                    // hack to handle PhiExpr
+                    Map stmtToName;
+                    if(currentStmt instanceof AssignStmt)
+                        stmtToName = stmtToPtrName;
+                    else
+                        stmtToName = stmtToLblName;
+                    
+                    if(isPrecise)
+                        out.print(currentStmt.toString(stmtToName, indent));
+                    else
+                        out.print(currentStmt.toBriefString(stmtToName, indent));
+                }
+                
 		out.print(";"); 
 		out.println();
 		
@@ -165,8 +204,8 @@ public class DefaultStmtPrinter implements StmtPrinter
                 Trap trap = (Trap) trapIt.next();
 
                 out.println("        catch " + Scene.v().quotedNameOf(trap.getException().getName()) + " from " +
-                    stmtToName.get(trap.getBeginUnit()) + " to " + stmtToName.get(trap.getEndUnit()) +
-                    " with " + stmtToName.get(trap.getHandlerUnit()) + ";");
+                    stmtToLblName.get(trap.getBeginUnit()) + " to " + stmtToLblName.get(trap.getEndUnit()) +
+                    " with " + stmtToLblName.get(trap.getHandlerUnit()) + ";");
             }
         }
 
@@ -179,7 +218,7 @@ public class DefaultStmtPrinter implements StmtPrinter
 
         // Create statement name table
         {
-            Iterator boxIt = b.getUnitBoxes().iterator();
+            Iterator boxIt = b.getTargetUnitBoxes().iterator();
 
             Set labelStmts = new HashSet();
 

@@ -23,7 +23,6 @@
  * contributors.  (Soot is distributed at http://www.sable.mcgill.ca/soot)
  */
 
-
 package soot;
 
 
@@ -36,6 +35,7 @@ import soot.jimple.toolkits.pointer.*;
 import soot.toolkits.scalar.*;
 import soot.jimple.spark.PointsToAnalysis;
 import soot.jimple.spark.SparkTransformer;
+import soot.shimple.toolkits.scalar.*;
 
 /** Manages the SootClasses of the application being analyzed. */
 public class Scene  //extends AbstractHost
@@ -182,6 +182,16 @@ public class Scene  //extends AbstractHost
 
         // Grimp optimization pack
         packNameToPack.put("gop", p = new Pack());
+
+        // Shimple transformation pack
+        packNameToPack.put("stp", p = new Pack());
+
+        // Shimple optimization pack
+        // To activate, use: -p shimple optimize
+        packNameToPack.put("sop", p = new Pack());
+        {
+           p.add(new Transform("sop.cpf", SConstantPropagatorAndFolder.v()));
+        }
 
         // load soot.class.path system property, if defined
         String scp = System.getProperty("soot.class.path");

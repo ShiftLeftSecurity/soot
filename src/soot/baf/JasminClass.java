@@ -433,7 +433,7 @@ public class JasminClass
 
         // Determine the instToLabel map
         {
-            Iterator boxIt = body.getUnitBoxes().iterator();
+            Iterator boxIt = body.getTargetUnitBoxes().iterator();
 
             instToLabel = new HashMap(instList.size() * 2 + 1, 0.7f);
             labelCount = 0;

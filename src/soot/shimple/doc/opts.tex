@@ -1,0 +1,58 @@
+% THIS FILE IS AUTO-GENERATED FROM THE FILE options.
+% DO NOT MODIFY
+\documentclass{article}
+\title{Shimple Options}
+\author{Navindra Umanee}
+\begin{document}
+\maketitle
+This document describes the command-line options to Shimple.
+Values for options are specified on the Soot command-line, following
+the switch \texttt{-p simple}. For example:
+
+\noindent \texttt{java soot.Main -p shimple scalars-only --shimple hello}
+
+Shimple is still under active development, so these options are subject
+to change. For the most current, automatically generated version of
+this document, please see the file
+\texttt{src/soot/shimple/doc/opts.ps}
+in your Soot directory.
+\tableofcontents
+\section{General Options}
+\subsection{Option \tt optimize}
+\begin{itemize}
+\item Allowed values: {\tt  true false}
+\item Default value: {\tt false}
+\end{itemize}
+When this option is set to true, Shimple-based optimizations are applied.
+\section{Options for Building Shimple}
+\subsection{Option \tt scalars-only}
+\begin{itemize}
+\item Allowed values: {\tt  true false}
+\item Default value: {\tt false}
+\end{itemize}
+If set to true, SSA will be computed for scalars only (PrimType).  Otherwise,
+SSA is computed for both scalars (PrimType) and objects (RefType. Note: 
+object aliasing is not taken into account).  Arrays are not handled either
+way.
+\section{Options for Leaving Shimple}
+\subsection{Option \tt naive-phi-elimination}
+\begin{itemize}
+\item Allowed values: {\tt  true false}
+\item Default value: {\tt false}
+\end{itemize}
+If set to true, neither pre-optimization nor post-optimization will be applied
+to the Phi elimination process.  Note that setting this option to true takes
+precedence over other Phi elimination options.
+\subsection{Option \tt pre-optimize-phi-elimination}
+\begin{itemize}
+\item Allowed values: {\tt  true false}
+\item Default value: {\tt false}
+\end{itemize}
+If set to true, some optimizations are applied before Phi nodes are eliminated.
+\subsection{Option \tt post-optimize-phi-elimination}
+\begin{itemize}
+\item Allowed values: {\tt  true false}
+\item Default value: {\tt true}
+\end{itemize}
+If set to false, optimizations are not applied after eliminating Phi nodes.
+\end{document}

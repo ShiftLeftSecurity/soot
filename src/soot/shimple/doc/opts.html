@@ -1,0 +1,198 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2K.1beta (1.48)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Shimple Options</TITLE>
+<META NAME="description" CONTENT="Shimple Options">
+<META NAME="keywords" CONTENT="opts">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2K.1beta">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="opts.css">
+
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<IMG WIDTH="81" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next_inactive"
+ SRC="/usr/share/latex2html/icons/nx_grp_g.png"> 
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="/usr/share/latex2html/icons/up_g.png"> 
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="/usr/share/latex2html/icons/prev_g.png">   
+<BR>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<H1 ALIGN="CENTER">Shimple Options</H1>
+<P ALIGN="CENTER"><STRONG>Navindra Umanee</STRONG></P>
+This document describes the command-line options to Shimple.
+Values for options are specified on the Soot command-line, following
+the switch <TT>-p simple</TT>. For example:
+
+<P>
+<TT>java soot.Main -p shimple scalars-only -shimple hello</TT>
+
+<P>
+Shimple is still under active development, so these options are subject
+to change. For the most current, automatically generated version of
+this document, please see the file
+<TT>src/soot/shimple/doc/opts.ps</TT>
+in your Soot directory.
+<BR>
+
+<H2><A NAME="SECTION00010000000000000000">
+Contents</A>
+</H2>
+<!--Table of Contents-->
+
+<UL>
+<LI><A NAME="tex2html11"
+  HREF="opts.html">General Options</A>
+<UL>
+<LI><A NAME="tex2html12"
+  HREF="#SECTION00021000000000000000">Option <TT>optimize</TT></A>
+</UL>
+<BR>
+<LI><A NAME="tex2html13"
+  HREF="#SECTION00030000000000000000">Options for Building Shimple</A>
+<UL>
+<LI><A NAME="tex2html14"
+  HREF="#SECTION00031000000000000000">Option <TT>scalars-only</TT></A>
+</UL>
+<BR>
+<LI><A NAME="tex2html15"
+  HREF="#SECTION00040000000000000000">Options for Leaving Shimple</A>
+<UL>
+<LI><A NAME="tex2html16"
+  HREF="#SECTION00041000000000000000">Option <TT>naive-phi-elimination</TT></A>
+<LI><A NAME="tex2html17"
+  HREF="#SECTION00042000000000000000">Option <TT>pre-optimize-phi-elimination</TT></A>
+<LI><A NAME="tex2html18"
+  HREF="#SECTION00043000000000000000">Option <TT>post-optimize-phi-elimination</TT></A>
+</UL>
+<BR>
+<LI><A NAME="tex2html19"
+  HREF="#SECTION00050000000000000000">About this document ...</A>
+</UL>
+<!--End of Table of Contents-->
+<H1><A NAME="SECTION00020000000000000000">
+General Options</A>
+</H1>
+
+<H2><A NAME="SECTION00021000000000000000">
+Option <TT>optimize</TT></A>
+</H2>
+
+<UL>
+<LI>Allowed values: <TT>true false</TT>
+</LI>
+<LI>Default value: <TT>false</TT>
+</LI>
+</UL>
+When this option is set to true, Shimple-based optimizations are applied.
+
+<H1><A NAME="SECTION00030000000000000000">
+Options for Building Shimple</A>
+</H1>
+
+<H2><A NAME="SECTION00031000000000000000">
+Option <TT>scalars-only</TT></A>
+</H2>
+
+<UL>
+<LI>Allowed values: <TT>true false</TT>
+</LI>
+<LI>Default value: <TT>false</TT>
+</LI>
+</UL>
+If set to true, SSA will be computed for scalars only (PrimType).  Otherwise,
+SSA is computed for both scalars (PrimType) and objects (RefType. Note: 
+object aliasing is not taken into account).  Arrays are not handled either
+way.
+
+<H1><A NAME="SECTION00040000000000000000">
+Options for Leaving Shimple</A>
+</H1>
+
+<H2><A NAME="SECTION00041000000000000000">
+Option <TT>naive-phi-elimination</TT></A>
+</H2>
+
+<UL>
+<LI>Allowed values: <TT>true false</TT>
+</LI>
+<LI>Default value: <TT>false</TT>
+</LI>
+</UL>
+If set to true, neither pre-optimization nor post-optimization will be applied
+to the Phi elimination process.  Note that setting this option to true takes
+precedence over other Phi elimination options.
+
+<H2><A NAME="SECTION00042000000000000000">
+Option <TT>pre-optimize-phi-elimination</TT></A>
+</H2>
+
+<UL>
+<LI>Allowed values: <TT>true false</TT>
+</LI>
+<LI>Default value: <TT>false</TT>
+</LI>
+</UL>
+If set to true, some optimizations are applied before Phi nodes are eliminated.
+
+<H2><A NAME="SECTION00043000000000000000">
+Option <TT>post-optimize-phi-elimination</TT></A>
+</H2>
+
+<UL>
+<LI>Allowed values: <TT>true false</TT>
+</LI>
+<LI>Default value: <TT>true</TT>
+</LI>
+</UL>
+If set to false, optimizations are not applied after eliminating Phi nodes.
+
+<H1><A NAME="SECTION00050000000000000000">
+About this document ...</A>
+</H1>
+ <STRONG>Shimple Options</STRONG><P>
+This document was generated using the
+<A HREF="http://www-texdev.mpce.mq.edu.au/l2h/docs/manual/"><STRONG>LaTeX</STRONG>2<tt>HTML</tt></A> translator Version 2K.1beta (1.48)
+<P>
+Copyright &#169; 1993, 1994, 1995, 1996,
+<A HREF="http://cbl.leeds.ac.uk/nikos/personal.html">Nikos Drakos</A>, 
+Computer Based Learning Unit, University of Leeds.
+<BR>
+Copyright &#169; 1997, 1998, 1999,
+<A HREF="http://www.maths.mq.edu.au/~ross/">Ross Moore</A>, 
+Mathematics Department, Macquarie University, Sydney.
+<P>
+The command line arguments were: <BR>
+ <STRONG>latex2html</STRONG> <TT>-no_auto_link -no_subdir -split 0 opts.tex</TT>
+<P>
+The translation was initiated by Navindra UMANEE on 2003-05-05<HR>
+<!--Navigation Panel-->
+<IMG WIDTH="81" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next_inactive"
+ SRC="/usr/share/latex2html/icons/nx_grp_g.png"> 
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="/usr/share/latex2html/icons/up_g.png"> 
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="/usr/share/latex2html/icons/prev_g.png">   
+<BR>
+<!--End of Navigation Panel-->
+<ADDRESS>
+Navindra UMANEE
+2003-05-05
+</ADDRESS>
+</BODY>
+</HTML>

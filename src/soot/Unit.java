@@ -73,4 +73,15 @@ public interface Unit extends Switchable, Host, Serializable
     public String toString(Map stmtToName, String indentation);
 
     public void redirectJumpsToThisTo(Unit newLocation);
+
+    /**
+     * Redirects conditionally.  branchTarget indicates if the Unit
+     * should be processed as the target of a jump (hence at the
+     * beginning of a CFG) or as a Unit indicative of the end of a CFG
+     * block (used for SSA).  See {@link UnitBox UnitBox}.  The provided
+     * body may be null, in which case exceptional control flow is ignored.
+     * <p>
+     * Returns true on success, false otherwise.
+     **/
+    public boolean redirectPointersToThisTo(Unit newLocation, Body body, boolean branchTarget);
 }

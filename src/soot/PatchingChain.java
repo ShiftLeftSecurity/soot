@@ -35,11 +35,24 @@ import soot.util.*;
 public class PatchingChain extends AbstractCollection implements Chain 
 {
     private Chain innerChain;
+
+    /**
+     * May be used to find trapped Units.
+     **/
+    private Body body;
     
     /** Constructs a PatchingChain from the given Chain. */
     public PatchingChain(Chain aChain)
     {
         innerChain = aChain;
+        body = null;
+    }
+
+    /** Constructs a PatchingChain from the given Chain. */
+    public PatchingChain(Chain aChain, Body aBody)
+    {
+        innerChain = aChain;
+        body = body;
     }
 
     /** Adds the given object to this Chain. */
@@ -58,6 +71,7 @@ public class PatchingChain extends AbstractCollection implements Chain
     /** Inserts <code>toInsert</code> in the Chain after <code>point</code>. */
     public void insertAfter(Object toInsert, Object point)
     {
+        ((Unit) point).redirectPointersToThisTo((Unit) toInsert, body, false);
         innerChain.insertAfter(toInsert, point);
     }
 
@@ -115,6 +129,9 @@ public class PatchingChain extends AbstractCollection implements Chain
                 successor = (Unit)getPredOf(obj);
             
             res = innerChain.remove(obj);
+
+            // Fix up any PhiExpr's first if necessary.
+            soot.shimple.Shimple.redirectToPreds((Unit)obj, this);
 
             ((Unit)obj).redirectJumpsToThisTo(successor);
         }

@@ -33,6 +33,7 @@ import soot.util.*;
 import soot.gui.*;
 import java.util.*;
 import soot.jimple.*;
+import soot.shimple.*;
 import soot.grimp.*;
 import soot.baf.*;
 import soot.jimple.toolkits.invoke.*;
@@ -118,6 +119,9 @@ public class Main implements Runnable
 
     public static final int XML = 10;
 
+    public static final int SHIMP = 11;
+    public static final int SHIMPLE = 12;
+
     public static String getExtensionFor(int rep)
     {
         String str = null;
@@ -138,6 +142,12 @@ public class Main implements Runnable
             break;
         case NJIMPLE:
             str = ".njimple";
+            break;
+        case SHIMP:
+            str = ".shimp";
+            break;
+        case SHIMPLE:
+            str = ".shimple";
             break;
         case GRIMP:
             str = ".grimp";
@@ -335,6 +345,12 @@ public class Main implements Runnable
     static public long stmtCount;
     static int finalRep = BAF;
     // The final rep to be used is Baf; conclusion of our CC2000 paper!
+
+    /**
+     * Determines whether to add Shimple to the transformation and
+     * optimization path (...->Jimple->Shimple->Jimple->...)
+     **/
+    public static boolean viaShimple = false;
 
     private static List sTagFileList = new ArrayList(); 
 
@@ -751,6 +767,8 @@ public class Main implements Runnable
 	System.out.println("  -B, --baf                    produce .baf code");
 	System.out.println("  -j, --jimp                   produce .jimp (abbreviated .jimple) files");
 	System.out.println("  -J, --jimple                 produce .jimple code");
+        System.out.println("  --shimp                      produce .shimp (abbreviated .shimple) files");
+        System.out.println("  --shimple                    produce .shimple (SSA Jimple) code");
 	System.out.println("  -g, --grimp                  produce .grimp (abbreviated .grimple) files");
 	System.out.println("  -G, --grimple                produce .grimple files");
 	System.out.println("  -s, --jasmin                 produce .jasmin files");
@@ -775,6 +793,9 @@ public class Main implements Runnable
 	System.out.println("  --process-path PATH          process all classes on the PATH");
 	System.out.println("");
 	System.out.println("Construction options:");
+        System.out.println("  --via-shimple                add Shimple (SSA Jimple) to the transformation");
+        System.out.println("                               and optimisation path.");
+        System.out.println("                               (...-->Jimple-->Shimple-->Jimple-->...)");
 	System.out.println("  --final-rep REP              produce classfile/jasmin from REP ");
 	System.out.println("                               (jimple, grimp, or baf)");
 	System.out.println("");
@@ -853,6 +874,13 @@ public class Main implements Runnable
 
 	while (cl.contains("J") || cl.contains("jimple"))
 	    setTargetRep(JIMPLE);
+
+        while (cl.contains("shimp"))
+            setTargetRep(SHIMP);
+        while (cl.contains("shimple"))
+            setTargetRep(SHIMPLE);
+        while (cl.contains("via-shimple"))
+            viaShimple = true;
 
 	while (cl.contains("B") || cl.contains("baf"))
 	    setTargetRep(BAF);
@@ -1076,6 +1104,9 @@ public class Main implements Runnable
 	addGetoptOption(-22, "with-cache", LongOpt.NO_ARGUMENT);
 	addGetoptOption('k', "cache-dir", LongOpt.REQUIRED_ARGUMENT);
 	addGetoptOption(-23, "dynamic-classes", LongOpt.REQUIRED_ARGUMENT);
+        addGetoptOption(-24, "shimp", LongOpt.NO_ARGUMENT);
+        addGetoptOption(-25, "shimple", LongOpt.NO_ARGUMENT);
+        addGetoptOption(-26, "via-shimple", LongOpt.NO_ARGUMENT);
         
 	// options handled elsewhere
 	addGetoptOption('-', "use-Getopt", LongOpt.NO_ARGUMENT);
@@ -1120,6 +1151,15 @@ public class Main implements Runnable
 	    case 'J':
 		setTargetRep(JIMPLE);
 		break;
+            case -24:
+                setTargetRep(SHIMP);
+                break;
+            case -25:
+                setTargetRep(SHIMPLE);
+                break;
+            case -26:
+                viaShimple = true;
+                break;
 	    case 'B':
 		setTargetRep(BAF);
 		break;
@@ -1310,6 +1350,12 @@ public class Main implements Runnable
 		setTargetRep(JASMIN);
 	    else if(arg.equals("-J") || arg.equals("--jimple"))
 		setTargetRep(JIMPLE);
+            else if(arg.equals("--shimp"))
+                setTargetRep(SHIMP);
+            else if(arg.equals("--shimple"))
+                setTargetRep(SHIMPLE);
+            else if(arg.equals("--via-shimple"))
+                viaShimple = true;
 	    else if(arg.equals("-B") || arg.equals("--baf"))
 		setTargetRep(BAF);
 	    else if(arg.equals("-b") || arg.equals("--b"))
@@ -2118,7 +2164,8 @@ public class Main implements Runnable
     boolean 
       produceBaf   = false,
       produceGrimp = false,
-      produceDava  = false;
+      produceDava  = false,
+      produceShimple = false;
         
     switch( targetExtension) {	
     case NO_OUTPUT:
@@ -2126,6 +2173,10 @@ public class Main implements Runnable
     case JIMPLE:
     case NJIMPLE:
     case JIMP:                   
+      break;
+    case SHIMP:
+    case SHIMPLE:
+      produceShimple = true;
       break;
     case DAVA:
       produceDava = true;
@@ -2193,6 +2244,28 @@ public class Main implements Runnable
 	  isOptimizing = wasOptimizing;
 	}
 
+        if(produceShimple || viaShimple) {
+          m.setActiveBody(Shimple.v().newBody(m.getActiveBody(), "shimple"));
+
+          // apply anything in the Shimple Transformation Pack (stp)
+          // nothing by default
+          Scene.v().getPack("stp").apply(m.getActiveBody());
+
+          // -p shimple optimize
+          // apply everything in the Shimple Optimization Pack (sop)
+          optimize:
+          {
+              boolean optimize = (new ShimpleOptions()).optimize();
+
+              if (!optimize) break optimize;
+              
+              Scene.v().getPack("sop").apply(m.getActiveBody());
+          }
+
+          if(viaShimple && !produceShimple)
+              m.setActiveBody(((ShimpleBody)m.getActiveBody()).toJimpleBody());
+        }
+
 	if(produceGrimp) {
 	  boolean wasOptimizing = isOptimizing;
 	  if (produceDava)
@@ -2240,6 +2313,7 @@ public class Main implements Runnable
       else
 	new soot.jimple.JasminClass(c).print(writerOut);
       break;
+    case SHIMP:
     case JIMP:            
       c.printTo(writerOut, PrintJimpleBodyOption.USE_ABBREVIATIONS);
       break;
@@ -2251,6 +2325,7 @@ public class Main implements Runnable
       break;
     case BAF:
     case JIMPLE:
+    case SHIMPLE:
     case GRIMPLE:
       writerOut = 
 	new PrintWriter(new EscapedWriter(new OutputStreamWriter(streamOut)));

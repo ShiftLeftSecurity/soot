@@ -332,36 +332,32 @@ public class BlockGraph implements DirectedGraph
             int blockLength = 1;
             boolean isHandler = false;
 
+            if(it.hasNext())
+                it.next();
+            
             while(it.hasNext()) {
                 Unit  unit = (Unit) it.next();
                 blockLength++;
-                if(leaders.containsKey(unit)){
 
-                    // this happens if the first unit of the method is under an exception context.(ie first unit is a block and has no pred unit)
-                    if((blockTail =(Unit) mUnits.getPredOf(unit)) == null) {
-                        blockTail = blockHead;
-                    }
-                    
-                   
+                if(leaders.containsKey(unit)){
+                    blockTail = (Unit) mUnits.getPredOf(unit);
                     block = new Block(blockHead, blockTail, mBody, indexInMethod++, blockLength -1, this);
                     block.setPreds((List) leaders.get(blockHead));
                     basicBlockList.add(block);
                     blockHead = unit;
                     blockLength = 1;
                 }                
-                
             }
-            
             
             block = new Block(blockHead, (Unit) mUnits.getLast(),mBody, indexInMethod++, blockLength, this);
             block.setPreds((List) leaders.get(blockHead));
             basicBlockList.add(block);
             
-
-            
-            // Important: the predecessor list built previously for each bb, contains
-            // the tail unit of each predecessor block for a given bb. We need to replace each of these
-            // unit references by a reference to the unit's enclosing bb.
+            // Important: the predecessor list built previously for
+            // each bb, contains the tail unit of each predecessor
+            // block for a given bb. We need to replace each of these
+            // unit references by a reference to the unit's enclosing
+            // bb.
             it = basicBlockList.iterator();
             while(it.hasNext() ) {
                 List newl = new ArrayList();
@@ -480,7 +476,7 @@ public class BlockGraph implements DirectedGraph
                     }
                     }
 	    */
-            
+
             mBlocks = basicBlockList;
             
             // build head list
@@ -493,10 +489,13 @@ public class BlockGraph implements DirectedGraph
                 }
                 
                 //                System.out.println("unit first " + mUnits.getFirst());
+                
                 Iterator blockIt =  mBlocks.iterator();
                 while(blockIt.hasNext()) {
                     Block b = (Block) blockIt.next();
-                    if(b.getHead() == mUnits.getFirst() || handlerList.contains(b.getHead())) {
+                    if(b.getHead() == mUnits.getFirst() ||
+                       (type != COMPLETE && handlerList.contains(b.getHead())))
+                    {
                         mHeads.add(b);
                     }
                 }
