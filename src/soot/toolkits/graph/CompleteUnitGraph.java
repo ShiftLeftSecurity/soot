@@ -35,11 +35,9 @@ import soot.toolkits.exceptions.PedanticThrowAnalysis;
  *  exceptions is taken into account. In a
  *  <code>CompleteUnitGraph</code>, every {@link Unit} covered by a
  *  {@link Trap} is considered to have the potential to throw an
- *  exception caught by the {@link Trap}.  In other words, the
- *  <code>CompleteUnitGraph(b)</code>, for a given {@link Body}
- *  <code>b</code>, is equivalent to {@link ExceptionalUnitGraph}</code>(b,
- *  </code>{@ PedanticThrowAnalysis}<code>.v())</code> for the same
- *  body, <code>b</code>.</p>
+ *  exception caught by the {@link Trap}, so there are edges to the
+ *  {@link Trap}'s handler from every trapped {@link Unit} , as well
+ *  as from all the predecessors of the trapped {@link Unit}s.
  *
  *  <p>This implementation of <code>CompleteUnitGraph</code> is included
  *  for backwards compatibility, but the graphs it produces are not
@@ -50,27 +48,19 @@ import soot.toolkits.exceptions.PedanticThrowAnalysis;
  *  <ul>
  * 
  *  <li>If a {@link Body} includes {@link Unit}s which branch into the
- *  middle of the region protected by a {@link Trap} this *
+ *  middle of the region protected by a {@link Trap} this 
  *  implementation of <code>CompleteUnitGraph</code> will include
- *  edges from those branching {@link Unit}s to the * {@link Trap}'s
+ *  edges from those branching {@link Unit}s to the {@link Trap}'s
  *  handler (since they are predecessors of an instruction which may
  *  throw an exception caught by the {@link Trap}.  The 2.0.1
  *  implementation of {@link CompleteUnitGraph} mistakenly omitted
  *  these edges.
- *
- *  <li>If a trapped {@link Unit}, <code>u</code>, has no successors
- *  which are also covered by the same {@link Trap} this
- *  implementation of <code>CompleteUnitGraph</code> will include
- *  edges to the {@link Trap} handler only if <code>u</code> has
- *  potential side-effects.  The 2.0.1 implementation of
- *  <code>CompleteUnitGraph</code> always includes edges from all
- *  trapped {@link Unit}s, even if they had no potential side effects.
  *
  *  </ul></p>
  */
 public class CompleteUnitGraph extends ExceptionalUnitGraph 
 {
     public CompleteUnitGraph(Body b) {
-	super(b, PedanticThrowAnalysis.v());
+	super(b, PedanticThrowAnalysis.v(), true);
     }
 }

@@ -90,8 +90,35 @@ public class ExceptionalUnitGraph extends UnitGraph
      *
      *  @param throwAnalysis the source of information about the exceptions
      *                       which each <tt>Unit</tt>s may throw.
+     *
+     *  @param alwaysAddEdgesFromExceptingUnits indicates whether the CFG
+     *			     should always include edges to a handler
+     *			     from all trapped {@link Unit}s which may throw an
+     *			     exception which the handler catches.</p>
+     *
+     *			     <p>The CFG will contain edges to the
+     *			     handler from all predecessors of the
+     *			     {@link Unit}s which may throw a caught
+     *			     exception regardless of the setting for
+     *			     this parameter. If this parameter is
+     *			     <code>true</code>, there will also be edges to the
+     *			     handler from all the potentially
+     *			     excepting {@link Unit}s themselves. If
+     *			     this parameter is <code>false</code>, there will be
+     *			     edges to the handler only * from the
+     *			     excepting {@link Unit}s themselves if *
+     *			     they have potential side effects.<p>
+     *
+     *			     <p>A setting of <code>false</code> will produce
+     *			     CFGs which allow for more precise analyses, since
+     *			     a {@link Unit} without side effects has no
+     *			     effect on the computational state when it throws
+     *			     an exception.  Use settings of <code>true</code>
+     *			     for compatibility with more conservative analyses,
+     *			     or to cater to conservative bytecode verifiers.</p>
      */
-    public ExceptionalUnitGraph(Body body, ThrowAnalysis throwAnalysis) {
+    public ExceptionalUnitGraph(Body body, ThrowAnalysis throwAnalysis,
+				boolean alwaysAddEdgesFromExceptingUnits) {
 	super(body);
 
 	int size = unitChain.size();
@@ -126,7 +153,8 @@ public class ExceptionalUnitGraph extends UnitGraph
 		new HashMap(body.getTraps().size() * 2 + 1, 0.7f);
 	    trapsThatAreHeads = buildExceptionalEdges(unitToExceptionDests,
 						      unitToExceptionalSuccs, 
-						      unitToExceptionalPreds);
+						      unitToExceptionalPreds,
+						      alwaysAddEdgesFromExceptingUnits);
 	    makeMappedListsUnmodifiable(unitToExceptionalSuccs);
 	    makeMappedListsUnmodifiable(unitToExceptionalPreds);
 
@@ -153,6 +181,18 @@ public class ExceptionalUnitGraph extends UnitGraph
 
 
     /**
+     *  Constructs the graph from a given Body instance.
+     *
+     *  @param body the <tt>Body</tt> from which to build a graph.
+     *
+     *  @param throwAnalysis the source of information about the exceptions
+     *                       which each <tt>Unit</tt>s may throw.
+     */
+    public ExceptionalUnitGraph(Body body, ThrowAnalysis throwAnalysis) {
+	this(body, throwAnalysis, Options.v().always_add_edges_from_excepting_units());
+    }
+
+    /**
      *  Constructs the graph from a given Body instance, using the
      *  {@link Scene}'s default {@link ThrowAnalysis} to estimate the
      *  set of exceptions that each {@link Unit} might throw.
@@ -161,7 +201,8 @@ public class ExceptionalUnitGraph extends UnitGraph
      *
      */
     public ExceptionalUnitGraph(Body body) {
-	this(body, Scene.v().getDefaultThrowAnalysis());
+	this(body, Scene.v().getDefaultThrowAnalysis(),
+	     Options.v().always_add_edges_from_excepting_units());
     }
 
 
@@ -388,6 +429,10 @@ public class ExceptionalUnitGraph extends UnitGraph
      *                    catch an exception to the list of
      *                    <tt>Unit</tt>s whose exceptions it may
      *                    catch.
+     * @param alwaysAddEdgesFromExceptingUnits Indicates whether to add
+     *			  exceptional edges from excepting units which
+     *			  lack side effects
+     *
      * @return a {@link Set} of trap <tt>Unit</tt>s that might catch 
      *         exceptions thrown by the first <tt>Unit</tt> in this
      *         <tt>Body</tt>'s unit chain. Such trap <tt>Unit</tt>s
@@ -397,7 +442,8 @@ public class ExceptionalUnitGraph extends UnitGraph
      *	       execution.
      */
     protected Set buildExceptionalEdges(Map unitToDests, 
-					 Map unitToSuccs, Map unitToPreds) {
+					Map unitToSuccs, Map unitToPreds,
+					boolean alwaysAddEdgesFromExceptingUnits) {
 	Set trapsThatAreHeads = new ArraySet();
 
 	// Add exceptional edges from each predecessor of units that
@@ -423,7 +469,7 @@ public class ExceptionalUnitGraph extends UnitGraph
 			    addEdge(unitToSuccs, unitToPreds, pred, catcher);
 			}
 		    }
-		    if (Options.v().always_add_edges_from_excepting_units() ||
+		    if (alwaysAddEdgesFromExceptingUnits ||
 			thrower instanceof ThrowInst ||
 			thrower instanceof ThrowStmt || 
 			mightHaveSideEffects(thrower)) {

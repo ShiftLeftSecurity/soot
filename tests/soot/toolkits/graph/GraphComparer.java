@@ -24,7 +24,7 @@ import soot.SootMethod;
 import soot.Trap;
 import soot.Unit;
 import soot.options.Options;
-import soot.toolkits.graph.CompleteUnitGraph.ExceptionDest;
+import soot.toolkits.graph.ExceptionalUnitGraph.ExceptionDest;
 import soot.util.ArraySet;
 import soot.util.Chain;
 
@@ -35,7 +35,7 @@ public class GraphComparer {
 
     /**
      * Utility interface for keeping track of graph nodes which
-     * are considered to represent the corresponding entity in
+     * are considered to represent equivalent nodes in
      * the two graphs being compared.  
      */
     interface EquivalenceRegistry {
@@ -120,7 +120,7 @@ public class GraphComparer {
 
 
 	/**
-	 * Return a map from the {@link Unit}s in the body represented by
+	 * Return a map from a {@link Unit} in the body represented by
 	 * a {@link BlockGraph} to the graph node representing the
 	 * block containing that {@link Unit}.
 	 *
@@ -130,7 +130,7 @@ public class GraphComparer {
 	 *          node.
 	 * @return a {@link Map} from {@link Unit}s to {@link Object}s 
 	 *          that are the graph nodes containing those {@link Unit}s.
-	 * @throws IllegalArgumentException should any node of <tt>t</tt>
+	 * @throws IllegalArgumentException should any node of <tt>g</tt>
 	 *         lack an <tt>iterator()</tt> method or should
 	 *         any {@link Unit} appear in
 	 *         more than one node of the graph.
@@ -189,7 +189,7 @@ public class GraphComparer {
 
     /**
      * Utility interface for checking whether two graphs of particular types
-     * differ only in the ways that we would expect from two graphs
+     * differ only in the ways we would expect from two graphs
      * of those types that represent the same {@link Body}.
      */
     interface TypedGraphComparer {
@@ -213,6 +213,7 @@ public class GraphComparer {
 	    // Note that "Alt" graphs are loaded from an alternate
 	    // class path, so we need ugly, fragile, special-purpose
 	    // hacks to recognize them.
+	    ExceptionalUnitGraph exceptionalCompleteUnitGraph = null;
 	    CompleteUnitGraph completeUnitGraph = null;
 	    ClassicCompleteUnitGraph classicCompleteUnitGraph = null;
 	    TrapUnitGraph trapUnitGraph = null;
