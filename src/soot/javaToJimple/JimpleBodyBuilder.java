@@ -93,6 +93,7 @@ public class JimpleBodyBuilder extends AbstractJimpleBodyBuilder {
             soot.jimple.ParameterRef paramRef = soot.jimple.Jimple.v().newParameterRef(outerClass.getType(), formalsCounter);
             paramRefCount++;
             soot.jimple.Stmt stmt = soot.jimple.Jimple.v().newIdentityStmt(outerLocal, paramRef);
+            stmt.addTag(new soot.tagkit.EnclosingTag());
             body.getUnits().add(stmt);
             
             ((soot.javaToJimple.PolyglotMethodSource)sootMethod.getSource()).setOuterClassThisInit(outerLocal);
@@ -370,6 +371,7 @@ public class JimpleBodyBuilder extends AbstractJimpleBodyBuilder {
         soot.jimple.ParameterRef paramRef = soot.jimple.Jimple.v().newParameterRef(sootType, counter);
         paramRefCount++;
         soot.jimple.Stmt stmt = soot.jimple.Jimple.v().newIdentityStmt(formalLocal, paramRef);
+        
         body.getUnits().add(stmt);
         
         Util.addLnPosTags(((soot.jimple.IdentityStmt) stmt).getRightOpBox(), formal.position());
@@ -3859,6 +3861,7 @@ public class JimpleBodyBuilder extends AbstractJimpleBodyBuilder {
 		String name = call.name();
         // handle receiver/target
 		polyglot.ast.Receiver receiver = call.target();
+        //System.out.println("call: "+call+" receiver: "+receiver);
         soot.Local baseLocal;
         if ((receiver instanceof polyglot.ast.Special) && (((polyglot.ast.Special)receiver).kind() == polyglot.ast.Special.SUPER) && (((polyglot.ast.Special)receiver).qualifier() != null)){
             baseLocal = getSpecialSuperQualifierLocal(call);
@@ -3867,6 +3870,7 @@ public class JimpleBodyBuilder extends AbstractJimpleBodyBuilder {
         }
         baseLocal = (soot.Local)base().getBaseLocal(receiver);
         
+        //System.out.println("base local: "+baseLocal);
         
         ArrayList sootParams = getSootParams(call);
         
@@ -4279,6 +4283,7 @@ public class JimpleBodyBuilder extends AbstractJimpleBodyBuilder {
             }
         }
         else if (specialExpr.kind() == polyglot.ast.Special.THIS) {
+            //System.out.println("this is special this: "+specialExpr);
             if (specialExpr.qualifier() == null) {
                 return specialThisLocal;
             }
