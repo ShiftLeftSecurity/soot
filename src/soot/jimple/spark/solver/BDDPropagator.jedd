@@ -36,6 +36,7 @@ public final class BDDPropagator extends Propagator {
     public BDDPropagator( BDDPAG pag ) { this.pag = pag; }
     /** Actually does the propagation. */
     public final void propagate() {
+        final BDDOnFlyCallGraph ofcg = pag.getOnFlyCallGraph();
         <var:V1, obj:H1> oldPointsTo = 0B;
         <var:V1, obj:H1> newPointsTo = 0B;
         <var:V1, obj:H1> tmpPointsTo = 0B;
@@ -56,12 +57,13 @@ public final class BDDPropagator extends Propagator {
         pag.pointsTo = pag.alloc;
         newPointsTo = pag.pointsTo;
 
+        int iterations = 0;
         // start solving 
         do {
 
             // repeat rule (1) in the inner loop
             do {
-                newPointsTo = (dst => var) pag.edgeSet {src} >< newPointsTo {var};
+                newPointsTo = (dst => var) pag.edgeSet {src} <> newPointsTo {var};
                 newPointsTo -= pag.pointsTo;
                 newPointsTo &= typeManager.get();
                 pag.pointsTo |= newPointsTo;
@@ -74,28 +76,33 @@ public final class BDDPropagator extends Propagator {
             } while( newPointsTo != 0B );
 
             newPointsTo = pag.pointsTo - oldPointsTo;
+            if( ofcg != null ) {
+                ofcg.updatedNodes( newPointsTo {obj} <>
+                    typeManager.allocNodeType() {obj} );
+                ofcg.build();
+            }
 
             // apply rule (2)
-            objectsBeingStored = (dst => var) pag.stores {src} >< newPointsTo {var};
+            objectsBeingStored = (dst => var) pag.stores {src} <> newPointsTo {var};
                                           
             newStorePt = objectsBeingStored - oldStorePt;
             oldStorePt |= newStorePt;
 
-            newFieldPt = oldStorePt {var} >< (obj => base) newPointsTo {var};
+            newFieldPt = oldStorePt {var} <> (obj => base) newPointsTo {var};
 
-            tmpFieldPt = newStorePt {var} >< (obj => base) oldPointsTo {var};
+            tmpFieldPt = newStorePt {var} <> (obj => base) oldPointsTo {var};
             newFieldPt |= tmpFieldPt;
                                   
             newFieldPt -= pag.fieldPt;
             pag.fieldPt |= newFieldPt;
 
             // apply rule (3)
-            loadsFromHeap = pag.loads {src} >< (obj => base) newPointsTo {var};
+            loadsFromHeap = pag.loads {src} <> (obj => base) newPointsTo {var};
 
             loadsFromHeap -= loadAss;
                                      
-            newPointsTo = (dst => var) loadAss {base,fld} >< newFieldPt {base,fld};
-            tmpPointsTo = (dst => var) loadsFromHeap {base,fld} >< pag.fieldPt {base,fld};
+            newPointsTo = (dst => var) loadAss {base,fld} <> newFieldPt {base,fld};
+            tmpPointsTo = (dst => var) loadsFromHeap {base,fld} <> pag.fieldPt {base,fld};
             newPointsTo |= tmpPointsTo;
 
             // cache loadAss
@@ -115,7 +122,7 @@ public final class BDDPropagator extends Propagator {
                     G.v().out.println( "Major iteration: "+
                         ((obj=>)newPointsTo).size()+" changed p2sets" );
             }
-        } while(newPointsTo != 0B);
+        } while(newPointsTo != 0B || iterations++ < 10);
     }
 
     /* End of public methods. */
@@ -123,7 +130,6 @@ public final class BDDPropagator extends Propagator {
 
     
     protected BDDPAG pag;
-    protected OnFlyCallGraph ofcg;
 }
 
 

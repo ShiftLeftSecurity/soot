@@ -3,12 +3,12 @@ import jedd.*;
 import soot.*;
 import soot.jimple.spark.pag.*;
 
-public class atp extends Domain {
+public class atp extends Attribute {
     public Numberer numberer() { return Scene.v().getTypeNumberer(); }
     
-    public static Domain v() { return atp.instance; }
+    public static Attribute v() { return atp.instance; }
     
-    private static Domain instance = new atp();
+    private static Attribute instance = new atp();
     
     public atp() { super(); }
 }

@@ -5,7 +5,7 @@ import soot.jimple.*;
 import soot.jimple.spark.*;
 import soot.*;
 import soot.jimple.spark.sets.*;
-import soot.jimple.spark.solver.OnFlyCallGraph;
+import soot.jimple.spark.solver.*;
 import soot.jimple.spark.internal.*;
 import soot.util.*;
 import soot.util.queue.*;
@@ -54,7 +54,7 @@ public class BDDPAG extends AbstractPAG {
         return new jedd.Relation(new jedd.Domain[] { src.v() },
                                  new jedd.PhysicalDomain[] { V1.v() },
                                  jedd.Jedd.v().project(this.stores,
-                                                       new jedd.PhysicalDomain[] { V2.v(), FD.v() })).iterator();
+                                                       new jedd.PhysicalDomain[] { FD.v(), V2.v() })).iterator();
     }
     
     public Iterator loadSourcesIterator() { throw new RuntimeException("NYI"); }
@@ -77,7 +77,7 @@ public class BDDPAG extends AbstractPAG {
         return new jedd.Relation(new jedd.Domain[] { dst.v() },
                                  new jedd.PhysicalDomain[] { V2.v() },
                                  jedd.Jedd.v().project(this.loads,
-                                                       new jedd.PhysicalDomain[] { V1.v(), FD.v() })).iterator();
+                                                       new jedd.PhysicalDomain[] { FD.v(), V1.v() })).iterator();
     }
     
     public boolean doAddSimpleEdge(VarNode from, VarNode to) {
@@ -130,4 +130,12 @@ public class BDDPAG extends AbstractPAG {
     public final jedd.Relation fieldPt =
       new jedd.Relation(new jedd.Domain[] { base.v(), fld.v(), obj.v() },
                         new jedd.PhysicalDomain[] { H1.v(), FD.v(), H2.v() });
+    
+    private BDDOnFlyCallGraph ofcg;
+    
+    public void setOnFlyCallGraph(BDDOnFlyCallGraph ofcg) { this.ofcg = ofcg; }
+    
+    public BDDOnFlyCallGraph getOnFlyCallGraph() { return this.ofcg; }
+    
+    public BDDOnFlyCallGraph ofcg() { return this.ofcg; }
 }

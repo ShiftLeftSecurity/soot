@@ -927,6 +927,19 @@ Builds an object-sensitive call graph.
 This option tells Spark which level of context-sensitivity to use in constructing the call graph.
 </long_desc>
                                 </multiopt>
+                                <boolopt>
+                                        <name>Use BDDs</name>
+                                        <alias>bdd</alias>
+                                        <default>false</default>
+                                        <short_desc>Create call graph in BDDs rather than Java data structures.</short_desc>
+                                        <long_desc>When set to true, the call
+graph is built not in Java data structures, but in BDDs, for interfacing to
+other BDD algorithms (such as BDD Spark). Note that each part of Soot
+is compatible with either the BDD version of the call graph or the Java
+version; if you select this option, you must also set the other parts of
+Soot to use BDDs.
+</long_desc>
+                                </boolopt>
 				<sub_phase>
 					<name>Class Hierarchy Analysis</name>
 					<alias>cg.cha</alias>
@@ -1556,6 +1569,15 @@ before starting the points-to analysis. This allows the Jimplification
 time to be separated from the points-to time. However, it increases the
 total time and memory requirement, because all methods are Jimplified,
 rather than only those deemed reachable by the points-to analysis.
+        </long_desc>
+						</boolopt>
+						<boolopt>
+							<name>Profile</name>
+							<alias>profile</alias>
+							<default>false</default>
+                                                        <short_desc>Profile BDDs using JeddProfiler</short_desc>
+							<long_desc>
+Turns on JeddProfiler for profiling BDD operations.
         </long_desc>
 						</boolopt>
 					</section>

@@ -44,6 +44,7 @@ public class ArrayNumberer implements Numberer {
     }
 
     public int get( Object oo ) {
+        if( oo == null ) return 0;
         Numberable o = (Numberable) oo;
         return o.getNumber();
     }

@@ -91,6 +91,16 @@ public class BDDSparkOptions extends AbstractSparkOptions
         return soot.PhaseOptions.getBoolean( options, "pre-jimplify" );
     }
     
+    /** Profile --
+    
+     * Profile BDDs using JeddProfiler.
+    
+     * Turns on JeddProfiler for profiling BDD operations. 
+     */
+    public boolean profile() {
+        return soot.PhaseOptions.getBoolean( options, "profile" );
+    }
+    
     /** VTA --
     
      * Emulate Variable Type Analysis.

@@ -37,25 +37,31 @@ public final class VirtualCalls
 
     private SootMethod resolveRefType( RefType t, InstanceInvokeExpr iie, NumberedString subSig, SootMethod container ) {
         if( iie instanceof SpecialInvokeExpr ) {
-            SootMethod target = iie.getMethod();
-            /* cf. JVM spec, invokespecial instruction */
-            if( Scene.v().getOrMakeFastHierarchy()
-                    .canStoreType( container.getDeclaringClass().getType(),
-                        target.getDeclaringClass().getType() )
-                && container.getDeclaringClass().getType() !=
-                    target.getDeclaringClass().getType() 
-                && !target.getName().equals( "<init>" ) 
-                && subSig != sigClinit ) {
-
-                t = container.getDeclaringClass().getSuperclass().getType();
-            } else {
-                return target;
-            }
+            return resolveSpecial( (SpecialInvokeExpr) iie, subSig, container );
+        } else {
+            return resolveNonSpecial( t, subSig );
         }
-        return resolveNonSpecial( t, iie, container, subSig );
+    }
+    private SootMethod resolveSpecial( SpecialInvokeExpr iie, NumberedString subSig, SootMethod container ) {
+        SootMethod target = iie.getMethod();
+        /* cf. JVM spec, invokespecial instruction */
+        if( Scene.v().getOrMakeFastHierarchy()
+                .canStoreType( container.getDeclaringClass().getType(),
+                    target.getDeclaringClass().getType() )
+            && container.getDeclaringClass().getType() !=
+                target.getDeclaringClass().getType() 
+            && !target.getName().equals( "<init>" ) 
+            && subSig != sigClinit ) {
+
+            return resolveNonSpecial(
+                    container.getDeclaringClass().getSuperclass().getType(),
+                    subSig );
+        } else {
+            return target;
+        }
     }
 
-    private SootMethod resolveNonSpecial( RefType t, InstanceInvokeExpr iie, SootMethod container, NumberedString subSig ) {
+    private SootMethod resolveNonSpecial( RefType t, NumberedString subSig ) {
         SmallNumberedMap vtbl = (SmallNumberedMap) typeToVtbl.get( t );
         if( vtbl == null ) {
             typeToVtbl.put( t, vtbl =
@@ -71,8 +77,7 @@ public final class VirtualCalls
             }
         } else {
             if( cls.hasSuperclass() ) {
-                ret = resolveNonSpecial( cls.getSuperclass().getType(),
-                        iie, container, subSig );
+                ret = resolveNonSpecial( cls.getSuperclass().getType(), subSig );
             }
         }
         vtbl.put( subSig, ret );

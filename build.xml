@@ -348,7 +348,7 @@
         <apply executable="java" failonerror="true" parallel="true">
             <arg value="-cp"/>
             <arg path="${jedd.translator.jar}:${polyglot.jar}"/>
-            <arg value="-Xmx300m"/>
+            <arg value="-Xmx350m"/>
             <arg value="jedd.Main"/>
             <arg value="-sourcepath"/>
             <arg path="src:generated/options:generated/sablecc:generated/singletons:generated/jj"/>

@@ -50,12 +50,8 @@ public class ContextInsensitiveBuilder {
         }
     }
     /** Creates an empty pointer assignment graph. */
-    public AbstractPAG setup( AbstractSparkOptions opts ) {
-        if( opts instanceof SparkOptions ) {
-            pag = new PAG( (SparkOptions) opts );
-        } else if( opts instanceof BDDSparkOptions ) {
-            pag = new BDDPAG( (BDDSparkOptions) opts );
-        } else throw new RuntimeException();
+    public PAG setup( SparkOptions opts ) {
+        pag = new PAG( opts );
         if( opts.simulate_natives() ) {
             NativeHelper.register( new SparkNativeHelper( pag ) );
         }
@@ -80,50 +76,12 @@ public class ContextInsensitiveBuilder {
             cgb.build();
             reachables = cgb.reachables();
         }
-        for( Iterator cIt = Scene.v().getClasses().iterator(); cIt.hasNext(); ) {
-            final SootClass c = (SootClass) cIt.next();
-	    handleClass( c );
-	}
-        Stmt s = null;
-        while(true) {
-            Edge e = (Edge) callEdges.next();
-            if( e == null ) break;
-            AbstractMethodPAG.v( pag, e.tgt() ).addToPAG(null);
-            pag.addCallTarget( e );
-        }
-
-        if( pag.getOpts().verbose() ) {
-            G.v().out.println( "Total methods: "+totalMethods );
-            G.v().out.println( "Initially reachable methods: "+analyzedMethods );
-            G.v().out.println( "Classes with at least one reachable method: "+classes );
-        }
     }
 
     /* End of public methods. */
     /* End of package methods. */
-    protected void handleClass( SootClass c ) {
-        boolean incedClasses = false;
-	Iterator methodsIt = c.methodIterator();
-	while( methodsIt.hasNext() ) 
-	{
-	    SootMethod m = (SootMethod) methodsIt.next();
-	    if( !m.isConcrete() && !m.isNative() ) continue;
-            totalMethods++;
-            if( reachables.contains( m ) ) {
-                AbstractMethodPAG mpag = AbstractMethodPAG.v( pag, m );
-                mpag.build();
-                mpag.addToPAG(null);
-                analyzedMethods++;
-                if( !incedClasses ) {
-                    incedClasses = true;
-                    classes++;
-                }
-            }
-	}
-    }
 
-
-    private AbstractPAG pag;
+    private PAG pag;
     private CallGraphBuilder cgb;
     private OnFlyCallGraph ofcg;
     private ReachableMethods reachables;

@@ -23,7 +23,7 @@ import soot.jimple.*;
 import soot.jimple.spark.*;
 import soot.*;
 import soot.jimple.spark.sets.*;
-import soot.jimple.spark.solver.OnFlyCallGraph;
+import soot.jimple.spark.solver.*;
 import soot.jimple.spark.internal.*;
 import soot.util.*;
 import soot.util.queue.*;
@@ -48,7 +48,7 @@ public class BDDPAG extends AbstractPAG {
     public PointsToSet reachingObjects( Local l ) {
         VarNode vn = findLocalVarNode( l );
         if( vn == null ) return EmptyPointsToSet.v();
-        return new BDDPointsToSet( (var =>) (pointsTo & new { vn => var }) );
+        return new BDDPointsToSet( (var =>) (pointsTo & (=>obj) new { vn => var }) );
     }
     public PointsToSet reachingObjects( SootField f ) {
         throw new RuntimeException( "NYI" );
@@ -123,5 +123,9 @@ public class BDDPAG extends AbstractPAG {
     // base.fld points to object obj
     public <base:H1, fld:FD, obj:H2> fieldPt;
 
+    private BDDOnFlyCallGraph ofcg;
+    public void setOnFlyCallGraph( BDDOnFlyCallGraph ofcg ) { this.ofcg = ofcg; }
+    public BDDOnFlyCallGraph getOnFlyCallGraph() { return ofcg; }
+    public BDDOnFlyCallGraph ofcg() { return ofcg; }
 }
 

@@ -34,6 +34,8 @@ import java.util.*;
 import soot.jimple.toolkits.invoke.*;
 import soot.jimple.toolkits.callgraph.*;
 import soot.jimple.toolkits.pointer.*;
+import soot.jimple.spark.internal.BDDHierarchy;
+import jedd.*;
 
 /** Manages the SootClasses of the application being analyzed. */
 public class Scene  //extends AbstractHost
@@ -59,6 +61,8 @@ public class Scene  //extends AbstractHost
 
     ArrayNumberer typeNumberer = new ArrayNumberer();
     ArrayNumberer methodNumberer = new ArrayNumberer();
+    Numberer unitNumberer = new MapNumberer();
+    Numberer contextNumberer = new MapNumberer();
     ArrayNumberer fieldNumberer = new ArrayNumberer();
     ArrayNumberer classNumberer = new ArrayNumberer();
     StringNumberer subSigNumberer = new StringNumberer();
@@ -66,6 +70,7 @@ public class Scene  //extends AbstractHost
 
     private Hierarchy activeHierarchy;
     private FastHierarchy activeFastHierarchy;
+    private BDDHierarchy activeBDDHieararchy;
     private CallGraph activeCallGraph;
     private ReachableMethods reachableMethods;
     private PointsToAnalysis activePointsToAnalysis;
@@ -419,6 +424,11 @@ public class Scene  //extends AbstractHost
         activePointsToAnalysis = null;
     }
 
+    public BDDHierarchy getOrMakeBDDHierarchy() {
+        if( activeBDDHieararchy == null ) activeBDDHieararchy = new BDDHierarchy();
+        return activeBDDHieararchy;
+    }
+
     /****************************************************************************/
     /** Makes a new fast hierarchy is none is active, and returns the active
      * fast hierarchy. */
@@ -565,10 +575,14 @@ public class Scene  //extends AbstractHost
     }
     public ArrayNumberer getTypeNumberer() { return typeNumberer; }
     public ArrayNumberer getMethodNumberer() { return methodNumberer; }
+    public Numberer getContextNumberer() { return contextNumberer; }
+    public Numberer getUnitNumberer() { return unitNumberer; }
     public ArrayNumberer getFieldNumberer() { return fieldNumberer; }
     public ArrayNumberer getClassNumberer() { return classNumberer; }
     public StringNumberer getSubSigNumberer() { return subSigNumberer; }
     public ArrayNumberer getLocalNumberer() { return localNumberer; }
+
+    public void setContextNumberer( Numberer n ) { contextNumberer = n; }
 
     private void setReservedNames()
     {

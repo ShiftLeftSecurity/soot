@@ -17,6 +17,7 @@ public final class BDDPropagator extends Propagator {
     }
     
     public final void propagate() {
+        final BDDOnFlyCallGraph ofcg = this.pag.getOnFlyCallGraph();
         final jedd.Relation oldPointsTo =
           new jedd.Relation(new jedd.Domain[] { var.v(), obj.v() },
                             new jedd.PhysicalDomain[] { V1.v(), H1.v() },
@@ -59,9 +60,10 @@ public final class BDDPropagator extends Propagator {
         final BDDTypeManager typeManager = (BDDTypeManager) this.pag.getTypeManager();
         this.pag.pointsTo.eq(this.pag.alloc);
         newPointsTo.eq(this.pag.pointsTo);
+        int iterations = 0;
         do  {
             do  {
-                newPointsTo.eq(jedd.Jedd.v().replace(jedd.Jedd.v().relprod(jedd.Jedd.v().read(this.pag.edgeSet),
+                newPointsTo.eq(jedd.Jedd.v().replace(jedd.Jedd.v().compose(jedd.Jedd.v().read(this.pag.edgeSet),
                                                                            newPointsTo,
                                                                            new jedd.PhysicalDomain[] { V1.v() }),
                                                      new jedd.PhysicalDomain[] { V2.v() },
@@ -79,7 +81,15 @@ public final class BDDPropagator extends Propagator {
                 }
             }while(!jedd.Jedd.v().equals(jedd.Jedd.v().read(newPointsTo), jedd.Jedd.v().falseBDD())); 
             newPointsTo.eq(jedd.Jedd.v().minus(jedd.Jedd.v().read(this.pag.pointsTo), oldPointsTo));
-            objectsBeingStored.eq(jedd.Jedd.v().replace(jedd.Jedd.v().relprod(jedd.Jedd.v().read(this.pag.stores),
+            if (ofcg != null) {
+                ofcg.updatedNodes(new jedd.Relation(new jedd.Domain[] { var.v(), type.v() },
+                                                    new jedd.PhysicalDomain[] { V1.v(), T1.v() },
+                                                    jedd.Jedd.v().compose(jedd.Jedd.v().read(newPointsTo),
+                                                                          typeManager.allocNodeType(),
+                                                                          new jedd.PhysicalDomain[] { H1.v() })));
+                ofcg.build();
+            }
+            objectsBeingStored.eq(jedd.Jedd.v().replace(jedd.Jedd.v().compose(jedd.Jedd.v().read(this.pag.stores),
                                                                               jedd.Jedd.v().replace(newPointsTo,
                                                                                                     new jedd.PhysicalDomain[] { H1.v() },
                                                                                                     new jedd.PhysicalDomain[] { H2.v() }),
@@ -88,29 +98,33 @@ public final class BDDPropagator extends Propagator {
                                                         new jedd.PhysicalDomain[] { V1.v() }));
             newStorePt.eq(jedd.Jedd.v().minus(jedd.Jedd.v().read(objectsBeingStored), oldStorePt));
             oldStorePt.eqUnion(newStorePt);
-            newFieldPt.eq(jedd.Jedd.v().relprod(jedd.Jedd.v().read(oldStorePt),
+            newFieldPt.eq(jedd.Jedd.v().compose(jedd.Jedd.v().read(oldStorePt),
                                                 newPointsTo,
                                                 new jedd.PhysicalDomain[] { V1.v() }));
-            tmpFieldPt.eq(jedd.Jedd.v().relprod(jedd.Jedd.v().read(newStorePt),
+            tmpFieldPt.eq(jedd.Jedd.v().compose(jedd.Jedd.v().read(newStorePt),
                                                 oldPointsTo,
                                                 new jedd.PhysicalDomain[] { V1.v() }));
             newFieldPt.eqUnion(tmpFieldPt);
             newFieldPt.eqMinus(this.pag.fieldPt);
             this.pag.fieldPt.eqUnion(newFieldPt);
-            loadsFromHeap.eq(jedd.Jedd.v().relprod(jedd.Jedd.v().read(this.pag.loads),
+            loadsFromHeap.eq(jedd.Jedd.v().compose(jedd.Jedd.v().read(this.pag.loads),
                                                    newPointsTo,
                                                    new jedd.PhysicalDomain[] { V1.v() }));
             loadsFromHeap.eqMinus(loadAss);
-            newPointsTo.eq(jedd.Jedd.v().replace(jedd.Jedd.v().relprod(jedd.Jedd.v().read(loadAss),
+            newPointsTo.eq(jedd.Jedd.v().replace(jedd.Jedd.v().compose(jedd.Jedd.v().read(jedd.Jedd.v().replace(loadAss,
+                                                                                                                new jedd.PhysicalDomain[] { V2.v() },
+                                                                                                                new jedd.PhysicalDomain[] { V1.v() })),
                                                                        newFieldPt,
                                                                        new jedd.PhysicalDomain[] { H1.v(), FD.v() }),
-                                                 new jedd.PhysicalDomain[] { V2.v(), H2.v() },
-                                                 new jedd.PhysicalDomain[] { V1.v(), H1.v() }));
-            tmpPointsTo.eq(jedd.Jedd.v().replace(jedd.Jedd.v().relprod(jedd.Jedd.v().read(loadsFromHeap),
+                                                 new jedd.PhysicalDomain[] { H2.v() },
+                                                 new jedd.PhysicalDomain[] { H1.v() }));
+            tmpPointsTo.eq(jedd.Jedd.v().replace(jedd.Jedd.v().compose(jedd.Jedd.v().read(jedd.Jedd.v().replace(loadsFromHeap,
+                                                                                                                new jedd.PhysicalDomain[] { V2.v() },
+                                                                                                                new jedd.PhysicalDomain[] { V1.v() })),
                                                                        this.pag.fieldPt,
                                                                        new jedd.PhysicalDomain[] { H1.v(), FD.v() }),
-                                                 new jedd.PhysicalDomain[] { V2.v(), H2.v() },
-                                                 new jedd.PhysicalDomain[] { V1.v(), H1.v() }));
+                                                 new jedd.PhysicalDomain[] { H2.v() },
+                                                 new jedd.PhysicalDomain[] { H1.v() }));
             newPointsTo.eqUnion(tmpPointsTo);
             loadAss.eqUnion(loadsFromHeap);
             oldPointsTo.eq(this.pag.pointsTo);
@@ -125,10 +139,8 @@ public final class BDDPropagator extends Propagator {
                                                                           new jedd.PhysicalDomain[] { H1.v() })).size() +
                                   " changed p2sets");
             }
-        }while(!jedd.Jedd.v().equals(jedd.Jedd.v().read(newPointsTo), jedd.Jedd.v().falseBDD())); 
+        }while(!jedd.Jedd.v().equals(jedd.Jedd.v().read(newPointsTo), jedd.Jedd.v().falseBDD()) || iterations++ < 10); 
     }
     
     protected BDDPAG pag;
-    
-    protected OnFlyCallGraph ofcg;
 }

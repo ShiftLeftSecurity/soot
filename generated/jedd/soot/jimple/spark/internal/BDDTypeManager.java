@@ -13,7 +13,7 @@ import java.util.*;
 public final class BDDTypeManager extends AbstractTypeManager {
     public BDDTypeManager(BDDPAG bddpag) {
         super(bddpag);
-        this.bddhier = new BDDHierarchy();
+        this.bddhier = Scene.v().getOrMakeBDDHierarchy();
     }
     
     public final void clearTypeMask() {
@@ -41,7 +41,7 @@ public final class BDDTypeManager extends AbstractTypeManager {
                             this.bddhier.subtypeRelation());
         return new jedd.Relation(new jedd.Domain[] { var.v(), obj.v() },
                                  new jedd.PhysicalDomain[] { V1.v(), H1.v() },
-                                 jedd.Jedd.v().relprod(jedd.Jedd.v().read(jedd.Jedd.v().relprod(jedd.Jedd.v().read(jedd.Jedd.v().replace(this.varNodeType,
+                                 jedd.Jedd.v().compose(jedd.Jedd.v().read(jedd.Jedd.v().compose(jedd.Jedd.v().read(jedd.Jedd.v().replace(this.varNodeType,
                                                                                                                                          new jedd.PhysicalDomain[] { T1.v() },
                                                                                                                                          new jedd.PhysicalDomain[] { T2.v() })),
                                                                                                 hier,
@@ -106,21 +106,21 @@ public final class BDDTypeManager extends AbstractTypeManager {
           new jedd.Relation(new jedd.Domain[] { var.v(), subt.v() }, new jedd.PhysicalDomain[] { V1.v(), T1.v() });
         final jedd.Relation tmp2 =
           new jedd.Relation(new jedd.Domain[] { var.v(), obj.v() }, new jedd.PhysicalDomain[] { V1.v(), H1.v() });
-        tmp.eq(jedd.Jedd.v().relprod(jedd.Jedd.v().read(this.typeSubtype),
+        tmp.eq(jedd.Jedd.v().compose(jedd.Jedd.v().read(this.typeSubtype),
                                      jedd.Jedd.v().replace(this.newVnType,
                                                            new jedd.PhysicalDomain[] { T1.v() },
                                                            new jedd.PhysicalDomain[] { T2.v() }),
                                      new jedd.PhysicalDomain[] { T2.v() }));
-        tmp2.eq(jedd.Jedd.v().relprod(jedd.Jedd.v().read(this.allocNodeType),
+        tmp2.eq(jedd.Jedd.v().compose(jedd.Jedd.v().read(this.allocNodeType),
                                       tmp,
                                       new jedd.PhysicalDomain[] { T1.v() }));
         this.typeMask.eqUnion(tmp2);
-        tmp.eq(jedd.Jedd.v().relprod(jedd.Jedd.v().read(this.typeSubtype),
+        tmp.eq(jedd.Jedd.v().compose(jedd.Jedd.v().read(this.typeSubtype),
                                      jedd.Jedd.v().replace(this.varNodeType,
                                                            new jedd.PhysicalDomain[] { T1.v() },
                                                            new jedd.PhysicalDomain[] { T2.v() }),
                                      new jedd.PhysicalDomain[] { T2.v() }));
-        tmp2.eq(jedd.Jedd.v().relprod(jedd.Jedd.v().read(this.newAnType), tmp, new jedd.PhysicalDomain[] { T1.v() }));
+        tmp2.eq(jedd.Jedd.v().compose(jedd.Jedd.v().read(this.newAnType), tmp, new jedd.PhysicalDomain[] { T1.v() }));
         this.typeMask.eqUnion(tmp2);
         this.newVnType.eq(jedd.Jedd.v().falseBDD());
         this.newAnType.eq(jedd.Jedd.v().falseBDD());
@@ -172,6 +172,12 @@ public final class BDDTypeManager extends AbstractTypeManager {
     
     final jedd.Relation allocNodeType =
       new jedd.Relation(new jedd.Domain[] { obj.v(), type.v() }, new jedd.PhysicalDomain[] { H1.v(), T1.v() });
+    
+    public jedd.Relation allocNodeType() {
+        return new jedd.Relation(new jedd.Domain[] { obj.v(), type.v() },
+                                 new jedd.PhysicalDomain[] { H1.v(), T1.v() },
+                                 this.allocNodeType);
+    }
     
     final jedd.Relation newAnType =
       new jedd.Relation(new jedd.Domain[] { obj.v(), type.v() }, new jedd.PhysicalDomain[] { H1.v(), T1.v() });

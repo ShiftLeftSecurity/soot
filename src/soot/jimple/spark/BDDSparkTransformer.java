@@ -24,10 +24,13 @@ import soot.jimple.spark.pag.*;
 import soot.jimple.spark.solver.*;
 import soot.jimple.spark.sets.*;
 import soot.jimple.toolkits.callgraph.*;
+import soot.jimple.toolkits.pointer.*;
 import soot.jimple.*;
 import java.util.*;
+import java.util.zip.*;
+import java.io.*;
 import soot.util.*;
-import soot.options.BDDSparkOptions;
+import soot.options.*;
 import soot.tagkit.*;
 import jedd.*;
 import soot.jimple.spark.bdddomains.*;
@@ -46,12 +49,15 @@ public class BDDSparkTransformer extends AbstractSparkTransformer
 
         System.loadLibrary("jeddbuddy");
         Jedd.v();
+        if( opts.profile() ) {
+            Jedd.v().enableProfiling();
+        }
         PhysicalDomain[] v1v2 = { V1.v(), V2.v() };
         Object[] order = { T1.v(), T2.v(), V3.v(), FD.v(), v1v2, H1.v(), H2.v() };
         Jedd.v().setOrder( order, true );
 
         // Build pointer assignment graph
-        ContextInsensitiveBuilder b = new ContextInsensitiveBuilder();
+        BDDContextInsensitiveBuilder b = new BDDContextInsensitiveBuilder();
         if( opts.pre_jimplify() ) b.preJimplify();
         if( opts.force_gc() ) doGC();
         Date startBuild = new Date();
@@ -84,24 +90,33 @@ public class BDDSparkTransformer extends AbstractSparkTransformer
         if( opts.force_gc() ) doGC();
         
         if( !opts.on_fly_cg() || opts.vta() ) {
-            CallGraphBuilder cgb = new CallGraphBuilder( pag );
-            cgb.build();
+            BDDCallGraphBuilder cgb = new BDDCallGraphBuilder( pag );
+            throw new RuntimeException("NYI");
+            // cgb.build();
         }
 
+        /*
         if( opts.verbose() ) {
             G.v().out.println( "[Spark] Number of reachable methods: "
                     +Scene.v().getReachableMethods().size() );
         }
+        */
 
         if( opts.set_mass() ) findSetMass( pag );
         if( opts.add_tags() ) {
             addTags( pag );
         }
-        /*
-        if( opts.verbose() ) {
-            JBuddyProfiler.v().printInfo();
+        if( opts.profile() ) {
+            try {
+                JeddProfiler.v().printInfo( new PrintStream( new GZIPOutputStream(
+                    new FileOutputStream( new File( "profile.sql.gz")))));
+            } catch( IOException e ) {
+                throw new RuntimeException( "Couldn't output Jedd profile "+e );
+            }
         }
-        */
+        new BDDSideEffectAnalysis( pag, pag.ofcg().callGraph(), pag.ofcg().reachableMethods() ).analyze();
+        System.out.println("points-to set is:\n"+ pag.pointsTo.toString() );
+        System.out.println("call graph is:\n"+ pag.ofcg().callGraph().edges.toString() );
     }
 
     private void addTags( BDDPAG pag ) {

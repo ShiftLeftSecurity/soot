@@ -1,0 +1,163 @@
+/* Soot - a J*va Optimization Framework
+ * Copyright (C) 2003 Ondrej Lhotak
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the
+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ * Boston, MA 02111-1307, USA.
+ */
+
+package soot.jimple.toolkits.callgraph;
+import soot.*;
+import soot.options.*;
+import soot.jimple.*;
+import java.util.*;
+import soot.util.*;
+import soot.util.queue.*;
+import soot.jimple.spark.bdddomains.*;
+import jedd.*;
+import soot.jimple.spark.pag.*;
+
+/** Models the call graph.
+ * @author Ondrej Lhotak
+ */
+public final class BDDOnFlyCallGraphBuilder extends AbstractOnFlyCallGraphBuilder
+{ 
+    /** context-insensitive stuff */
+    private BDDCallGraph cicg = new BDDCallGraph();
+
+    /** context-sensitive stuff */
+    //private BDDContextManager cm;
+    private BDDContextInsensitiveContextManager cm;
+
+    private ChunkedQueue targetsQueue = new ChunkedQueue();
+    private QueueReader targets = targetsQueue.reader();
+
+    private BDDReachableMethods rm;
+    private BDDReader worklist;
+
+    private BDDVirtualCalls virtualCalls;
+
+    private BDDPAG pag;
+
+
+    public BDDOnFlyCallGraphBuilder( BDDPAG pag, BDDContextManager cm, BDDReachableMethods rm ) {
+        this(pag, cm, rm, false);
+    }
+    public BDDOnFlyCallGraphBuilder( BDDPAG pag, BDDContextManager cm, BDDReachableMethods rm, boolean appOnly ) {
+        super(appOnly);
+        this.pag = pag;
+        this.cm = (BDDContextInsensitiveContextManager) cm;
+        this.rm = rm;
+        worklist = rm.listener();
+        virtualCalls = new BDDVirtualCalls( Scene.v().getOrMakeBDDHierarchy() );
+    }
+    private ChunkedQueue reachablesQueue = new ChunkedQueue();
+    private QueueReader reachablesListener = reachablesQueue.reader();
+    protected Iterator newReachables() {
+        return reachablesListener;
+    }
+    protected void updateReachables() {
+        rm.update();
+        while( worklist.hasNext() ) {
+            <method:V1, ctxt:T1> methodContext = worklist.next();
+            Iterator it = methodContext.iterator( new Domain[] { method.v(), ctxt.v() } );
+            while( it.hasNext() ) {
+                Object[] pair = (Object[]) it.next();
+                reachablesQueue.add( MethodContext.v( (SootMethod) pair[0], pair[1] ) ); 
+            }
+        }
+    }
+    public void addTypes( <var, type> types ) {
+        <type, stmt, method, signature:H1, kind> signatures =
+            virtualCallSites {var} <> types {var};
+        virtualCalls.addTypes( (stmt=>, method=>, kind=>) signatures );
+        <srcm, stmt, kind, tgtm> edges =
+            (method=>srcm) signatures {type, signature} <>
+            (method=>tgtm) virtualCalls.answer() {type, signature};
+        cm.addVirtualEdges( edges );
+    }
+    
+    protected void addVirtualCallSite( Stmt s, SootMethod m, Local receiver,
+            InstanceInvokeExpr iie, NumberedString subSig, int _kind ) {
+        // TODO: handle edges of kind THREAD specially
+        Scene.v().getUnitNumberer().add(s);
+        LocalVarNode rvn = pag.makeLocalVarNode( receiver, receiver.getType(), m );
+        virtualCallSites |= new {
+            rvn=>var,
+            s=>stmt,
+            m=>method,
+            subSig=>signature,
+            KindNumberer.v().get(_kind)=>kind };
+    }
+
+    public void addType( Local receiver, Object srcContext, Type type, Object typeContext ) {
+        throw new RuntimeException( "shouldn't be called" );
+    }
+    public void addStringConstant( Local l, Object srcContext, String constant ) {
+        for( Iterator siteIt = ((Collection) stringConstToSites.get( l )).iterator(); siteIt.hasNext(); ) {
+            final VirtualCallSite site = (VirtualCallSite) siteIt.next();
+            if( constant == null ) {
+                if( options.verbose() ) {
+                    G.v().out.println( "Warning: Method "+site.container()+
+                        " is reachable, and calls Class.forName on a"+
+                        " non-constant String; graph will be incomplete!"+
+                        " Use safe-forname option for a conservative result." );
+                }
+            } else {
+                if( constant.charAt(0) == '[' ) {
+                    if( constant.length() > 1 && constant.charAt(1) == 'L' 
+                    && constant.charAt(constant.length()-1) == ';' ) {
+                        constant = constant.substring(2,constant.length()-1);
+                    } else continue;
+                }
+                if( !Scene.v().containsClass( constant ) ) {
+                    if( options.verbose() ) {
+                        G.v().out.println( "Warning: Class "+constant+" is"+
+                            " a dynamic class, and you did not specify"+
+                            " it as such; graph will be incomplete!" );
+                    }
+                } else {
+                    SootClass sootcls = Scene.v().getSootClass( constant );
+                    if( !sootcls.isApplicationClass() ) {
+                        sootcls.setLibraryClass();
+                    }
+                    if( sootcls.declaresMethod( sigClinit ) ) {
+                        cm.addStaticEdge(
+                                MethodContext.v( site.container(), srcContext ),
+                                site.stmt(),
+                                sootcls.getMethod(sigClinit),
+                                Edge.CLINIT );
+                    }
+                }
+            }
+        }
+    }
+
+    public boolean wantTypes( Local receiver ) {
+        throw new RuntimeException( "shouldn't get here" );
+    }
+    /* End of public methods. */
+
+    protected void processNewMethodContext( MethodOrMethodContext momc ) {
+        cm.addStaticEdges( momc.context(), (srcc=>, tgtc=>) cicg.edgesOutOf(momc.method()) );
+    }
+
+    protected void addEdge( SootMethod src, Stmt stmt, SootMethod tgt,
+            int kind ) {
+        cicg.addEdge( src, stmt, tgt, kind );
+    }
+
+    private <var:V3, stmt, method, signature, kind> virtualCallSites = 0B;
+}
+

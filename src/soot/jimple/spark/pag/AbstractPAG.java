@@ -330,9 +330,6 @@ public abstract class AbstractPAG implements PointsToAnalysis {
         return typeManager;
     }
 
-    public void setOnFlyCallGraph( OnFlyCallGraph ofcg ) { this.ofcg = ofcg; }
-    public OnFlyCallGraph getOnFlyCallGraph() { return ofcg; }
-    public OnFlyCallGraph ofcg() { return ofcg; }
     /** Adds the base of a dereference to the list of dereferenced 
      * variables. */
     public void addDereference( VarNode base ) {
@@ -573,7 +570,6 @@ public abstract class AbstractPAG implements PointsToAnalysis {
     private Map valToLocalVarNode = new HashMap(1000);
     private Map valToGlobalVarNode = new HashMap(1000);
     private Map valToAllocNode = new HashMap(1000);
-    private OnFlyCallGraph ofcg;
     private ArrayList dereferences = new ArrayList();
     protected AbstractTypeManager typeManager;
     private LargeNumberedMap localToNodeMap = new LargeNumberedMap( Scene.v().getLocalNumberer() );

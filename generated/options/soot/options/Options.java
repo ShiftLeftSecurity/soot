@@ -1075,7 +1075,8 @@ public class Options extends OptionsBase {
                 +padVal( "1cfa", "Builds a 1-CFA call graph" )
                 
                 +padVal( "objsens", "Builds an object-sensitive call graph" )
-                ;
+                
+                +padOpt( "bdd (false)", "Create call graph in BDDs rather than Java data structures." );
     
         if( phaseName.equals( "cg.cha" ) )
             return "Phase "+phaseName+":\n"+
@@ -1171,6 +1172,7 @@ public class Options extends OptionsBase {
                 +padOpt( "ignore-types (false)", "Make Spark completely ignore declared types of variables" )
                 +padOpt( "force-gc (false)", "Force garbage collection for measuring memory usage" )
                 +padOpt( "pre-jimplify (false)", "Jimplify all methods before starting Spark" )
+                +padOpt( "profile (false)", "Profile BDDs using JeddProfiler" )
                 +padOpt( "vta (false)", "Emulate Variable Type Analysis" )
                 +padOpt( "rta (false)", "Emulate Rapid Type Analysis" )
                 +padOpt( "field-based (false)", "Use a field-based rather than field-sensitive representation" )
@@ -1671,7 +1673,8 @@ public class Options extends OptionsBase {
                 +"verbose "
                 +"all-reachable "
                 +"trim-clinit "
-                +"context ";
+                +"context "
+                +"bdd ";
     
         if( phaseName.equals( "cg.cha" ) )
             return ""
@@ -1717,6 +1720,7 @@ public class Options extends OptionsBase {
                 +"ignore-types "
                 +"force-gc "
                 +"pre-jimplify "
+                +"profile "
                 +"vta "
                 +"rta "
                 +"field-based "
@@ -2079,7 +2083,8 @@ public class Options extends OptionsBase {
               +"verbose:false "
               +"all-reachable:false "
               +"trim-clinit:true "
-              +"context:insens ";
+              +"context:insens "
+              +"bdd:false ";
     
         if( phaseName.equals( "cg.cha" ) )
             return ""
@@ -2125,6 +2130,7 @@ public class Options extends OptionsBase {
               +"ignore-types:false "
               +"force-gc:false "
               +"pre-jimplify:false "
+              +"profile:false "
               +"vta:false "
               +"rta:false "
               +"field-based:false "

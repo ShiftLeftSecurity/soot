@@ -1,0 +1,95 @@
+/* Soot - a J*va Optimization Framework
+ * Copyright (C) 2003 Ondrej Lhotak
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the
+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ * Boston, MA 02111-1307, USA.
+ */
+
+package soot.jimple.toolkits.callgraph;
+import soot.*;
+import soot.util.*;
+import soot.jimple.spark.bdddomains.*;
+import soot.jimple.spark.internal.*;
+import java.util.*;
+
+/** A BDD implementation of a virtual call resolver.
+ * @author Ondrej Lhotak
+ */
+
+public final class BDDVirtualCalls {
+    public BDDVirtualCalls( BDDHierarchy hier ) {
+        this.hier = hier;
+        initialize();
+    }
+
+    /** Compute virtual call targets given new pairs of a receiver type and 
+     *  signature. */
+    public void addTypes( <type, signature> newTypes ) {
+        // make sure the hierarchy is up-to-date
+        hier.update();
+
+        // if we've resolved them already, don't resolve them again
+        newTypes -= (method=>) answer;
+
+        // for each tuple [t, s], make it [t, s, t].
+        <subt:T1, signature:H1, supt:T2> toResolve =
+            (type=>subt) newTypes {signature} >< (type=>supt) newTypes {signature};
+
+        // close under AnySubType; that is, if the receiver is AnySubType(t),
+        // replace it with all subtypes of t
+        toResolve |=
+            toResolve {subt} <> (type=>subt)(type=>T3) hier.anySub() {anyst};
+
+        do {
+            // figure out which receivers are already resolved (if the
+            // corresponding class already declares the method)
+            <subt:T1, signature:H1, supt:T2, method:V2> resolved =
+                toResolve {supt, signature} >< declaresMethod {type, signature};
+
+            // remove resolved ones
+            toResolve -= (method=>) resolved;
+
+            // add resolved ones to answer
+            answer |= (subt=>type, supt=>) resolved;
+
+            // move one step up the hierarchy for the other receiver types
+            toResolve = toResolve {supt} <> (supt=>T3) hier.extend() {subt};
+        } while( toResolve != 0B );
+    }
+
+    public <type, signature, method> answer() {
+        return answer;
+    }
+    /* End of public methods. */
+
+    private <type:T2, signature:H1, method:V2> declaresMethod = 0B;
+    private <type:T1, signature:H1, method:V2> answer = 0B;
+    private BDDHierarchy hier;
+
+    private void initialize() {
+        for( Iterator clIt = Scene.v().getClasses().iterator(); clIt.hasNext(); ) {
+            final SootClass cl = (SootClass) clIt.next();
+            for( Iterator mIt = cl.getMethods().iterator(); mIt.hasNext(); ) {
+                final SootMethod m = (SootMethod) mIt.next();
+                if( m.isAbstract() ) continue;
+                declaresMethod |= new {
+                        m.getDeclaringClass().getType() => type,
+                        m.getNumberedSubSignature() => signature,
+                        m => method };
+            }
+        }
+    }
+}
+

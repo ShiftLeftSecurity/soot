@@ -1036,4 +1036,10 @@ public class Singletons {
         return instanceParameterAliasTagger;
     }
 
+    private KindNumberer instanceKindNumberer;
+    public KindNumberer KindNumberer() {
+        if( instanceKindNumberer == null ) instanceKindNumberer = new KindNumberer( g );
+        return instanceKindNumberer;
+    }
+
 }

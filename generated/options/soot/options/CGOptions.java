@@ -129,6 +129,21 @@ public class CGOptions
         return soot.PhaseOptions.getBoolean( options, "trim-clinit" );
     }
     
+    /** Use BDDs --
+    
+     * Create call graph in BDDs rather than Java data structures..
+    
+     * When set to true, the call graph is built not in Java data 
+     * structures, but in BDDs, for interfacing to other BDD algorithms 
+     * (such as BDD Spark). Note that each part of Soot is compatible 
+     * with either the BDD version of the call graph or the Java 
+     * version; if you select this option, you must also set the other 
+     * parts of Soot to use BDDs. 
+     */
+    public boolean bdd() {
+        return soot.PhaseOptions.getBoolean( options, "bdd" );
+    }
+    
     public static final int context_insens = 1;
     public static final int context_1cfa = 2;
     public static final int context_objsens = 3;

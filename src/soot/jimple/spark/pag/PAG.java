@@ -364,5 +364,9 @@ public class PAG extends AbstractPAG {
 
     protected P2SetFactory setFactory;
     protected boolean somethingMerged = false;
+    private OnFlyCallGraph ofcg;
+    public void setOnFlyCallGraph( OnFlyCallGraph ofcg ) { this.ofcg = ofcg; }
+    public OnFlyCallGraph getOnFlyCallGraph() { return ofcg; }
+    public OnFlyCallGraph ofcg() { return ofcg; }
 }
 

@@ -34,7 +34,7 @@ import java.util.*;
 public final class BDDTypeManager extends AbstractTypeManager {
     public BDDTypeManager( BDDPAG bddpag ) {
         super(bddpag);
-        bddhier = new BDDHierarchy();
+        bddhier = Scene.v().getOrMakeBDDHierarchy();
     }
     final public void clearTypeMask() {
         lastAllocNode = 0;
@@ -122,12 +122,12 @@ public final class BDDTypeManager extends AbstractTypeManager {
         <var:V1, subt:T1> tmp;
         <var:V1, obj:H1> tmp2;
 
-        tmp = typeSubtype {supt} >< newVnType {type};
-        tmp2 = allocNodeType {type} >< tmp {subt};
+        tmp = typeSubtype {supt} <> newVnType {type};
+        tmp2 = allocNodeType {type} <> tmp {subt};
         typeMask |= tmp2;
 
-        tmp = typeSubtype {supt} >< varNodeType {type};
-        tmp2 = newAnType {type} >< tmp {subt};
+        tmp = typeSubtype {supt} <> varNodeType {type};
+        tmp2 = newAnType {type} <> tmp {subt};
         typeMask |= tmp2;
 
         newVnType = 0B;
@@ -141,8 +141,8 @@ public final class BDDTypeManager extends AbstractTypeManager {
 
         bddhier.update();
         <subt, supt> bddts = bddhier.subtypeRelation();
-        bddts = bddts & (var=>, type=>supt) varNodeType;
-        bddts = bddts & (obj=>, type=>subt) allocNodeType;
+        bddts = bddts & (var=>, type=>supt, =>subt) varNodeType;
+        bddts = bddts & (obj=>, type=>subt, =>supt) allocNodeType;
         if( bddts == typeSubtype ) {
             System.out.println( "bdd and non-bdd hierarchy match" );
         } else {
@@ -159,6 +159,7 @@ public final class BDDTypeManager extends AbstractTypeManager {
     <var:V1, type:T1> varNodeType;
     <var:V1, type:T1> newVnType;
     <obj:H1, type:T1> allocNodeType;
+    public <obj, type> allocNodeType() { return allocNodeType; }
     <obj:H1, type:T1> newAnType;
     <var:V1, obj:H1> typeMask;
     HashSet seenVTypes = new HashSet();
