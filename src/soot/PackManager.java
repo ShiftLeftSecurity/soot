@@ -50,10 +50,10 @@ import soot.jimple.toolkits.callgraph.*;
 import soot.tagkit.*;
 import soot.options.Options;
 import soot.toolkits.scalar.*;
-import soot.jimple.spark.SparkTransformer;
-import soot.jimple.spark.BDDSparkTransformer;
+//import soot.jimple.spark.SparkTransformer;
+import soot.jimple.paddle.PaddleTransformer;
 import soot.jimple.toolkits.callgraph.CHATransformer;
-import soot.jimple.spark.fieldrw.*;
+//import soot.jimple.spark.fieldrw.*;
 import soot.dava.*;
 import soot.dava.toolkits.base.misc.*;
 import soot.xml.*;
@@ -114,8 +114,8 @@ public class PackManager {
         addPack(p = new CallGraphPack("cg"));
         {
             p.add(new Transform("cg.cha", CHATransformer.v()));
-            p.add(new Transform("cg.spark", SparkTransformer.v()));
-            p.add(new Transform("cg.bdd", BDDSparkTransformer.v()));
+            //p.add(new Transform("cg.spark", SparkTransformer.v()));
+            p.add(new Transform("cg.paddle", PaddleTransformer.v()));
         }
 
         // Whole-Shimple transformation pack
@@ -187,7 +187,7 @@ public class PackManager {
             p.add(new Transform("jap.abc", ArrayBoundsChecker.v()));
             p.add(new Transform("jap.profiling", ProfilingGenerator.v()));
             p.add(new Transform("jap.sea", SideEffectTagger.v()));
-            p.add(new Transform("jap.fieldrw", FieldTagger.v()));
+            //p.add(new Transform("jap.fieldrw", FieldTagger.v()));
             p.add(new Transform("jap.cgtagger", CallGraphTagger.v()));
             p.add(new Transform("jap.parity", ParityTagger.v()));
             p.add(new Transform("jap.pat", ParameterAliasTagger.v()));
@@ -233,7 +233,7 @@ public class PackManager {
             p.add(new Transform("tag.ln", LineNumberTagAggregator.v()));
             p.add(new Transform("tag.an", ArrayNullTagAggregator.v()));
             p.add(new Transform("tag.dep", DependenceTagAggregator.v()));
-            p.add(new Transform("tag.fieldrw", FieldTagAggregator.v()));
+            //p.add(new Transform("tag.fieldrw", FieldTagAggregator.v()));
         }
 
         onlyStandardPacks = true;

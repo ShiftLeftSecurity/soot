@@ -1,7 +1,0 @@
-package soot.jimple.spark.bdddomains;
-import jedd.*;
-import soot.*;
-import soot.jimple.spark.pag.*;
-
-public class dtp(TYPE) extends Attribute {
-}

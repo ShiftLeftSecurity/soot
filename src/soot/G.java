@@ -52,6 +52,7 @@ public class G extends Singletons
     public NativeHelper NativeHelper_helper = null;
     public HashMap Parm_pairToElement = new HashMap();
     public int SparkNativeHelper_tempVar = 0;
+    public int PaddleNativeHelper_tempVar = 0;
     public boolean PointsToSetInternal_warnedAlready = false;
     public HashMap MethodPAG_methodToPag = new HashMap();
     public Set MethodRWSet_allGlobals = new HashSet();

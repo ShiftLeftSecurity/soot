@@ -1076,8 +1076,7 @@ public class Options extends OptionsBase {
         +padVal("jj.uce", "Unreachable code eliminator")
         +padOpt("cg", "Call graph constructor")
         +padVal("cg.cha", "Builds call graph using Class Hierarchy Analysis")
-        +padVal("cg.spark", "Spark points-to analysis framework")
-        +padVal("cg.bdd", "BDD Spark points-to analysis framework")
+        +padVal("cg.spark", "Paddle points-to analysis framework")
         +padOpt("wstp", "Whole-shimple transformation pack")
         +padOpt("wsop", "Whole-shimple optimization pack")
         +padOpt("wjtp", "Whole-jimple transformation pack")
@@ -1339,8 +1338,7 @@ public class Options extends OptionsBase {
                 +padVal( "1cfa", "Builds a 1-CFA call graph" )
                 
                 +padVal( "objsens", "Builds an object-sensitive call graph" )
-                
-                +padOpt( "bdd (false)", "Create call graph in BDDs rather than Java data structures." );
+                ;
     
         if( phaseName.equals( "cg.cha" ) )
             return "Phase "+phaseName+":\n"+
@@ -1354,12 +1352,12 @@ public class Options extends OptionsBase {
                 "\nSpark is a flexible points-to analysis framework. Aside from \nbuilding a call graph, it also generates information about the \ntargets of pointers. For details about Spark, please see Ondrej \nLhotak's M.Sc. thesis."
                 +"\n\nRecognized options (with default values):\n"
                 +padOpt( "enabled (false)", "" )
-                +padOpt( "verbose (false)", "Print detailed information about the execution of Spark" )
-                +padOpt( "bdd (false)", "Use BDD version of Spark" )
+                +padOpt( "verbose (false)", "Print detailed information about the execution of Paddle" )
+                +padOpt( "bdd (false)", "Use BDD version of Paddle" )
                 +padOpt( "profile (false)", "Profile BDDs using JeddProfiler" )
                 +padOpt( "bddq (false)", "Force BDD versions of queues" )
                 +padOpt( "debugq (false)", "Force debug versions of queues" )
-                +padOpt( "trace (false)", "Trace Spark queues for debugging." )
+                +padOpt( "trace (false)", "Trace Paddle queues for debugging." )
                 +padOpt( "backend", "Select BDD backend" )
                 +padVal( "buddy (default)", "BuDDy backend" )
                 
@@ -1371,9 +1369,9 @@ public class Options extends OptionsBase {
                 
                 +padVal( "none", "No BDDs" )
                 
-                +padOpt( "ignore-types (false)", "Make Spark completely ignore declared types of variables" )
+                +padOpt( "ignore-types (false)", "Make Paddle completely ignore declared types of variables" )
                 +padOpt( "force-gc (false)", "Force garbage collection for measuring memory usage" )
-                +padOpt( "pre-jimplify (false)", "Jimplify all methods before starting Spark" )
+                +padOpt( "pre-jimplify (false)", "Jimplify all methods before starting Paddle" )
                 +padOpt( "vta (false)", "Emulate Variable Type Analysis" )
                 +padOpt( "rta (false)", "Emulate Rapid Type Analysis" )
                 +padOpt( "field-based (false)", "Use a field-based rather than field-sensitive representation" )
@@ -1436,38 +1434,6 @@ public class Options extends OptionsBase {
                 
                 +padVal( "shared", "Shared bit-vector representation" )
                 
-                +padOpt( "dump-html (false)", "Dump pointer assignment graph to HTML for debugging" )
-                +padOpt( "dump-pag (false)", "Dump pointer assignment graph for other solvers" )
-                +padOpt( "dump-solution (false)", "Dump final solution for comparison with other solvers" )
-                +padOpt( "topo-sort (false)", "Sort variable nodes in dump" )
-                +padOpt( "dump-types (true)", "Include declared types in dump" )
-                +padOpt( "class-method-var (true)", "In dump, label variables by class and method" )
-                +padOpt( "dump-answer (false)", "Dump computed reaching types for comparison with other solvers" )
-                +padOpt( "add-tags (false)", "Output points-to results in tags for viewing with the Jimple" )
-                +padOpt( "set-mass (false)", "Calculate statistics about points-to set sizes" );
-    
-        if( phaseName.equals( "cg.bdd" ) )
-            return "Phase "+phaseName+":\n"+
-                "\nSpark is a flexible points-to analysis framework. Aside from \nbuilding a call graph, it also generates information about the \ntargets of pointers. For details about Spark, please see Ondrej \nLhotak's M.Sc. thesis. This phase is the new BDD-based version \nof Spark."
-                +"\n\nRecognized options (with default values):\n"
-                +padOpt( "enabled (false)", "" )
-                +padOpt( "verbose (false)", "Print detailed information about the execution of Spark" )
-                +padOpt( "ignore-types (false)", "Make Spark completely ignore declared types of variables" )
-                +padOpt( "force-gc (false)", "Force garbage collection for measuring memory usage" )
-                +padOpt( "pre-jimplify (false)", "Jimplify all methods before starting Spark" )
-                +padOpt( "profile (false)", "Profile BDDs using JeddProfiler" )
-                +padOpt( "vta (false)", "Emulate Variable Type Analysis" )
-                +padOpt( "rta (false)", "Emulate Rapid Type Analysis" )
-                +padOpt( "field-based (false)", "Use a field-based rather than field-sensitive representation" )
-                +padOpt( "types-for-sites (false)", "Represent objects by their actual type rather than allocation site" )
-                +padOpt( "merge-stringbuffer (true)", "Represent all StringBuffers as one object" )
-                +padOpt( "string-constants (false)", "Propagate all string constants, not just class names" )
-                +padOpt( "simulate-natives (true)", "Simulate effects of native methods in standard class library" )
-                +padOpt( "simple-edges-bidirectional (false)", "Equality-based analysis between variable nodes" )
-                +padOpt( "on-fly-cg (true)", "Build call graph as receiver types become known" )
-                +padOpt( "simplify-offline (false)", "Collapse single-entry subgraphs of the PAG" )
-                +padOpt( "simplify-sccs (false)", "Collapse strongly-connected components of the PAG" )
-                +padOpt( "ignore-types-for-sccs (false)", "Ignore declared types when determining node equivalence for SCCs" )
                 +padOpt( "dump-html (false)", "Dump pointer assignment graph to HTML for debugging" )
                 +padOpt( "dump-pag (false)", "Dump pointer assignment graph for other solvers" )
                 +padOpt( "dump-solution (false)", "Dump final solution for comparison with other solvers" )
@@ -2078,8 +2044,7 @@ public class Options extends OptionsBase {
                 +"verbose "
                 +"all-reachable "
                 +"trim-clinit "
-                +"context "
-                +"bdd ";
+                +"context ";
     
         if( phaseName.equals( "cg.cha" ) )
             return ""
@@ -2115,36 +2080,6 @@ public class Options extends OptionsBase {
                 +"set-impl "
                 +"double-set-old "
                 +"double-set-new "
-                +"dump-html "
-                +"dump-pag "
-                +"dump-solution "
-                +"topo-sort "
-                +"dump-types "
-                +"class-method-var "
-                +"dump-answer "
-                +"add-tags "
-                +"set-mass ";
-    
-        if( phaseName.equals( "cg.bdd" ) )
-            return ""
-                +"enabled "
-                +"verbose "
-                +"ignore-types "
-                +"force-gc "
-                +"pre-jimplify "
-                +"profile "
-                +"vta "
-                +"rta "
-                +"field-based "
-                +"types-for-sites "
-                +"merge-stringbuffer "
-                +"string-constants "
-                +"simulate-natives "
-                +"simple-edges-bidirectional "
-                +"on-fly-cg "
-                +"simplify-offline "
-                +"simplify-sccs "
-                +"ignore-types-for-sccs "
                 +"dump-html "
                 +"dump-pag "
                 +"dump-solution "
@@ -2591,8 +2526,7 @@ public class Options extends OptionsBase {
               +"verbose:false "
               +"all-reachable:false "
               +"trim-clinit:true "
-              +"context:insens "
-              +"bdd:false ";
+              +"context:insens ";
     
         if( phaseName.equals( "cg.cha" ) )
             return ""
@@ -2628,36 +2562,6 @@ public class Options extends OptionsBase {
               +"set-impl:double "
               +"double-set-old:hybrid "
               +"double-set-new:hybrid "
-              +"dump-html:false "
-              +"dump-pag:false "
-              +"dump-solution:false "
-              +"topo-sort:false "
-              +"dump-types:true "
-              +"class-method-var:true "
-              +"dump-answer:false "
-              +"add-tags:false "
-              +"set-mass:false ";
-    
-        if( phaseName.equals( "cg.bdd" ) )
-            return ""
-              +"enabled:false "
-              +"verbose:false "
-              +"ignore-types:false "
-              +"force-gc:false "
-              +"pre-jimplify:false "
-              +"profile:false "
-              +"vta:false "
-              +"rta:false "
-              +"field-based:false "
-              +"types-for-sites:false "
-              +"merge-stringbuffer:true "
-              +"string-constants:false "
-              +"simulate-natives:true "
-              +"simple-edges-bidirectional:false "
-              +"on-fly-cg:true "
-              +"simplify-offline:false "
-              +"simplify-sccs:false "
-              +"ignore-types-for-sccs:false "
               +"dump-html:false "
               +"dump-pag:false "
               +"dump-solution:false "
@@ -3000,7 +2904,6 @@ public class Options extends OptionsBase {
         if( phaseName.equals( "cg" ) ) return;
         if( phaseName.equals( "cg.cha" ) ) return;
         if( phaseName.equals( "cg.spark" ) ) return;
-        if( phaseName.equals( "cg.bdd" ) ) return;
         if( phaseName.equals( "wstp" ) ) return;
         if( phaseName.equals( "wsop" ) ) return;
         if( phaseName.equals( "wjtp" ) ) return;
@@ -3128,8 +3031,6 @@ public class Options extends OptionsBase {
             G.v().out.println( "Warning: Options exist for non-existent phase cg.cha" );
         if( !PackManager.v().hasPhase( "cg.spark" ) )
             G.v().out.println( "Warning: Options exist for non-existent phase cg.spark" );
-        if( !PackManager.v().hasPhase( "cg.bdd" ) )
-            G.v().out.println( "Warning: Options exist for non-existent phase cg.bdd" );
         if( !PackManager.v().hasPhase( "wstp" ) )
             G.v().out.println( "Warning: Options exist for non-existent phase wstp" );
         if( !PackManager.v().hasPhase( "wsop" ) )

@@ -1,5 +1,0 @@
-package soot.jimple.spark.bdddomains;
-import jedd.*;
-
-public class ST() extends PhysicalDomain {
-}

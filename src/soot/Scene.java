@@ -35,7 +35,6 @@ import java.io.*;
 import soot.jimple.toolkits.invoke.*;
 import soot.jimple.toolkits.callgraph.*;
 import soot.jimple.toolkits.pointer.*;
-import soot.jimple.spark.*;
 import jedd.*;
 import soot.toolkits.exceptions.ThrowAnalysis;
 import soot.toolkits.exceptions.PedanticThrowAnalysis;
@@ -86,7 +85,6 @@ public class Scene  //extends AbstractHost
 
     private Hierarchy activeHierarchy;
     private FastHierarchy activeFastHierarchy;
-    private BDDHierarchy activeBDDHieararchy;
     private CallGraph activeCallGraph;
     private ReachableMethods reachableMethods;
     private PointsToAnalysis activePointsToAnalysis;
@@ -452,11 +450,6 @@ public class Scene  //extends AbstractHost
     public void releasePointsToAnalysis()
     {
         activePointsToAnalysis = null;
-    }
-
-    public BDDHierarchy getOrMakeBDDHierarchy() {
-        if( activeBDDHieararchy == null ) activeBDDHieararchy = new BDDHierarchy();
-        return activeBDDHieararchy;
     }
 
     /****************************************************************************/

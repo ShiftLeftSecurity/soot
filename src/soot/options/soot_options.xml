@@ -1342,22 +1342,9 @@ Builds an object-sensitive call graph.
                                         </value>
                                         <short_desc>Select context-sensitivity level</short_desc>
                                         <long_desc>
-This option tells Spark which level of context-sensitivity to use in constructing the call graph.
+This option tells Paddle which level of context-sensitivity to use in constructing the call graph.
 </long_desc>
                                 </multiopt>
-                                <boolopt>
-                                        <name>Use BDDs</name>
-                                        <alias>bdd</alias>
-                                        <default>false</default>
-                                        <short_desc>Create call graph in BDDs rather than Java data structures.</short_desc>
-                                        <long_desc>When set to true, the call
-graph is built not in Java data structures, but in BDDs, for interfacing to
-other BDD algorithms (such as BDD Spark). Note that each part of Soot
-is compatible with either the BDD version of the call graph or the Java
-version; if you select this option, you must also set the other parts of
-Soot to use BDDs.
-</long_desc>
-                                </boolopt>
 				<sub_phase>
 					<name>Class Hierarchy Analysis</name>
 					<alias>cg.cha</alias>
@@ -1378,11 +1365,10 @@ Soot to use BDDs.
 					</boolopt>
 				</sub_phase>
 				<sub_phase>
-					<name>Spark</name>
-					<class>SparkOptions</class>
-                                        <extends>AbstractSparkOptions</extends>
+					<name>Paddle</name>
+					<class>PaddleOptions</class>
 					<alias>cg.spark</alias>
-                                        <short_desc>Spark points-to analysis framework</short_desc>
+                                        <short_desc>Paddle points-to analysis framework</short_desc>
                                         <long_desc>Spark is a flexible points-to analysis framework. Aside from building a call graph, it also generates information about the targets of pointers. For details about Spark, please see <a href="http://www.sable.mcgill.ca/publications/thesis/#olhotakMastersThesis">Ondrej Lhotak's M.Sc. thesis</a>.</long_desc>
 					<boolopt>
 						<name>Enabled</name>
@@ -1392,23 +1378,23 @@ Soot to use BDDs.
 						<long_desc/>
 					</boolopt>
 					<section>
-						<name>Spark General Options</name>
+						<name>Paddle General Options</name>
 						<boolopt>
 							<name>Verbose</name>
 							<alias>verbose</alias>
 							<default>false</default>
-                                                        <short_desc>Print detailed information about the execution of Spark</short_desc>
+                                                        <short_desc>Print detailed information about the execution of Paddle</short_desc>
 							<long_desc>
-When this option is set to true, Spark prints detailed information about its execution.
+When this option is set to true, Paddle prints detailed information about its execution.
         </long_desc>
 						</boolopt>
 						<boolopt>
 							<name>Use BDDs</name>
 							<alias>bdd</alias>
 							<default>false</default>
-                                                        <short_desc>Use BDD version of Spark</short_desc>
+                                                        <short_desc>Use BDD version of Paddle</short_desc>
 							<long_desc>
-                                                        Causes Spark to use BDD versions of its components
+                                                        Causes Paddle to use BDD versions of its components
         </long_desc>
 						</boolopt>
 						<boolopt>
@@ -1426,7 +1412,7 @@ Turns on JeddProfiler for profiling BDD operations.
 							<default>false</default>
                                                         <short_desc>Force BDD versions of queues</short_desc>
 							<long_desc>
-                                                        Force Spark to use BDD versions of the queues for communicating between its components
+                                                        Force Paddle to use BDD versions of the queues for communicating between its components
         </long_desc>
 						</boolopt>
 						<boolopt>
@@ -1435,16 +1421,16 @@ Turns on JeddProfiler for profiling BDD operations.
 							<default>false</default>
                                                         <short_desc>Force debug versions of queues</short_desc>
 							<long_desc>
-                                                        Force Spark to use debugging versions of the queues for communicating between its components
+                                                        Force Paddle to use debugging versions of the queues for communicating between its components
         </long_desc>
 						</boolopt>
 						<boolopt>
 							<name>Trace</name>
 							<alias>trace</alias>
 							<default>false</default>
-                                                        <short_desc>Trace Spark queues for debugging.</short_desc>
+                                                        <short_desc>Trace Paddle queues for debugging.</short_desc>
 							<long_desc>
-                                                        Print the contents of all internal Spark queues for debugging.
+                                                        Print the contents of all internal Paddle queues for debugging.
         </long_desc>
 						</boolopt>
 						<multiopt>
@@ -1487,21 +1473,21 @@ Use JavaBDD implementation of BDDs.
 								<alias>none</alias>
                                                                 <short_desc>No BDDs</short_desc>
 <long_desc>
-Don't use any BDD backend. Any attempted use of BDDs will cause Spark to crash.
+Don't use any BDD backend. Any attempted use of BDDs will cause Paddle to crash.
 </long_desc>
 							</value>
                                                         <short_desc>Select BDD backend</short_desc>
 							<long_desc>
-This option tells Spark which implementation of BDDs to use.
+This option tells Paddle which implementation of BDDs to use.
         </long_desc>
 						</multiopt>
 						<boolopt>
 							<name>Ignore Types Entirely</name>
 							<alias>ignore-types</alias>
 							<default>false</default>
-                                                        <short_desc>Make Spark completely ignore declared types of variables</short_desc>
+                                                        <short_desc>Make Paddle completely ignore declared types of variables</short_desc>
 							<long_desc>
-When this option is set to true, all parts of Spark completely ignore
+When this option is set to true, all parts of Paddle completely ignore
 declared types of variables and casts.
         </long_desc>
 						</boolopt>
@@ -1519,9 +1505,9 @@ various points to allow memory usage to be measured.
 							<name>Pre Jimplify</name>
 							<alias>pre-jimplify</alias>
 							<default>false</default>
-                                                        <short_desc>Jimplify all methods before starting Spark</short_desc>
+                                                        <short_desc>Jimplify all methods before starting Paddle</short_desc>
 							<long_desc>
-When this option is set to true, Spark converts all available methods to Jimple
+When this option is set to true, Paddle converts all available methods to Jimple
 before starting the points-to analysis. This allows the Jimplification
 time to be separated from the points-to time. However, it increases the
 total time and memory requirement, because all methods are Jimplified,
@@ -1530,7 +1516,7 @@ rather than only those deemed reachable by the points-to analysis.
 						</boolopt>
 					</section>
 					<section>
-						<name>Spark Pointer Assignment Graph Building Options</name>
+						<name>Paddle Pointer Assignment Graph Building Options</name>
 						<boolopt>
 							<name>VTA</name>
 							<alias>vta</alias>
@@ -1551,7 +1537,7 @@ elements more precisely.
 							<default>false</default>
                                                         <short_desc>Emulate Rapid Type Analysis</short_desc>
 							<long_desc>
-Setting RTA to true sets types-for-sites to true, and causes Spark to use
+Setting RTA to true sets types-for-sites to true, and causes Paddle to use
 a single points-to set for all variables, giving <a href="http://doi.acm.org/10.1145/236337.236371">Rapid Type
 Analysis</a>.
         </long_desc>
@@ -1596,7 +1582,7 @@ allocation site.
 							<default>false</default>
                                                         <short_desc>Propagate all string constants, not just class names</short_desc>
 							<long_desc>
-When this option is set to false, Spark only distinguishes string constants that
+When this option is set to false, Paddle only distinguishes string constants that
 may be the name of a class loaded dynamically using reflection, and all other
 string constants are lumped together into a single string constant node.
 Setting this option to true causes all string constants to be propagated
@@ -1635,7 +1621,7 @@ CHA approximation to the call graph is used.
 						</boolopt>
 					</section>
 					<section>
-						<name>Spark Pointer Assignment Graph Simplification Options</name>
+						<name>Paddle Pointer Assignment Graph Simplification Options</name>
 						<boolopt>
 							<name>Simplify Offline</name>
 							<alias>simplify-offline</alias>
@@ -1677,7 +1663,7 @@ This option has no effect unless <tt>simplify-sccs</tt> is true.
 						</boolopt>
 					</section>
 					<section>
-						<name>Spark Points-To Set Flowing Options</name>
+						<name>Paddle Points-To Set Flowing Options</name>
 						<multiopt>
 							<name>Propagator</name>
 							<alias>propagator</alias>
@@ -1747,7 +1733,7 @@ propagation.
 							</value>
                                                         <short_desc>Select propagation algorithm</short_desc>
 							<long_desc>
-This option tells Spark which propagation algorithm to use.
+This option tells Paddle which propagation algorithm to use.
         </long_desc>
 						</multiopt>
 						<multiopt>
@@ -1814,7 +1800,7 @@ often speeding them up significantly.
 							</value>
                                                         <short_desc>Select points-to set implementation</short_desc>
 							<long_desc>
-Select an implementation of points-to sets for Spark to use.
+Select an implementation of points-to sets for Paddle to use.
 </long_desc>
 						</multiopt>
 						<multiopt>
@@ -1933,7 +1919,7 @@ This option has no effect unless Set Implementation is set to double.
 						</multiopt>
 					</section>
 					<section>
-						<name>Spark Output Options</name>
+						<name>Paddle Output Options</name>
 						<boolopt>
 							<name>Dump HTML</name>
 							<alias>dump-html</alias>
@@ -2039,335 +2025,7 @@ tags and printed with the resulting Jimple code.
 							<default>false</default>
                                                         <short_desc>Calculate statistics about points-to set sizes</short_desc>
 							<long_desc>
-When this option is set to true, Spark computes and prints various
-cryptic statistics about the size of the points-to sets computed.
-        </long_desc>
-						</boolopt>
-					</section>
-				</sub_phase>
-				<sub_phase>
-					<name>Spark</name>
-					<class>BDDSparkOptions</class>
-                                        <extends>AbstractSparkOptions</extends>
-					<alias>cg.bdd</alias>
-                                        <short_desc>BDD Spark points-to analysis framework</short_desc>
-                                        <long_desc>Spark is a flexible points-to analysis framework. Aside from building a call graph, it also generates information about the targets of pointers. For details about Spark, please see <a href="http://www.sable.mcgill.ca/publications/thesis/#olhotakMastersThesis">Ondrej Lhotak's M.Sc. thesis</a>. This phase is the new BDD-based version of Spark.</long_desc>
-					<boolopt>
-						<name>Enabled</name>
-						<alias>enabled</alias>
-						<default>false</default>
-						<short_desc/>
-						<long_desc/>
-					</boolopt>
-					<section>
-						<name>BDD Spark General Options</name>
-						<boolopt>
-							<name>Verbose</name>
-							<alias>verbose</alias>
-							<default>false</default>
-                                                        <short_desc>Print detailed information about the execution of Spark</short_desc>
-							<long_desc>
-When this option is set to true, Spark prints detailed information about its execution.
-        </long_desc>
-						</boolopt>
-						<boolopt>
-							<name>Ignore Types Entirely</name>
-							<alias>ignore-types</alias>
-							<default>false</default>
-                                                        <short_desc>Make Spark completely ignore declared types of variables</short_desc>
-							<long_desc>
-When this option is set to true, all parts of Spark completely ignore
-declared types of variables and casts.
-        </long_desc>
-						</boolopt>
-						<boolopt>
-							<name>Force Garbage Collections</name>
-							<alias>force-gc</alias>
-							<default>false</default>
-                                                        <short_desc>Force garbage collection for measuring memory usage</short_desc>
-							<long_desc>
-When this option is set to true, calls to System.gc() will be made at
-various points to allow memory usage to be measured.
-        </long_desc>
-						</boolopt>
-						<boolopt>
-							<name>Pre Jimplify</name>
-							<alias>pre-jimplify</alias>
-							<default>false</default>
-                                                        <short_desc>Jimplify all methods before starting Spark</short_desc>
-							<long_desc>
-When this option is set to true, Spark converts all available methods to Jimple
-before starting the points-to analysis. This allows the Jimplification
-time to be separated from the points-to time. However, it increases the
-total time and memory requirement, because all methods are Jimplified,
-rather than only those deemed reachable by the points-to analysis.
-        </long_desc>
-						</boolopt>
-						<boolopt>
-							<name>Profile</name>
-							<alias>profile</alias>
-							<default>false</default>
-                                                        <short_desc>Profile BDDs using JeddProfiler</short_desc>
-							<long_desc>
-Turns on JeddProfiler for profiling BDD operations.
-        </long_desc>
-						</boolopt>
-					</section>
-					<section>
-						<name>BDD Spark Pointer Assignment Graph Building Options</name>
-						<boolopt>
-							<name>VTA</name>
-							<alias>vta</alias>
-							<default>false</default>
-                                                        <short_desc>Emulate Variable Type Analysis</short_desc>
-							<long_desc>
-Setting VTA to true has the effect of setting field-based,
-types-for-sites, and simplify-sccs to true, and on-fly-cg to false,
-to simulate Variable Type
-Analysis, described in <a href="http://www.sable.mcgill.ca/publications/papers/#oopsla2000">our OOPSLA 2000 paper</a>. Note that the
-algorithm differs from the original VTA in that it handles array
-elements more precisely.
-        </long_desc>
-						</boolopt>
-						<boolopt>
-							<name>RTA</name>
-							<alias>rta</alias>
-							<default>false</default>
-                                                        <short_desc>Emulate Rapid Type Analysis</short_desc>
-							<long_desc>
-Setting RTA to true sets types-for-sites to true, and causes Spark to use
-a single points-to set for all variables, giving <a href="http://doi.acm.org/10.1145/236337.236371">Rapid Type
-Analysis</a>.
-        </long_desc>
-						</boolopt>
-						<boolopt>
-							<name>Field Based</name>
-							<alias>field-based</alias>
-							<default>false</default>
-                                                        <short_desc>Use a field-based rather than field-sensitive representation</short_desc>
-							<long_desc>
-When this option is set to true, fields are represented by variable
-(Green) nodes, and the object that the field belongs to is ignored
-(all objects are lumped together), giving a field-based analysis. Otherwise, fields are represented by
-field reference (Red) nodes, and the objects that they belong to are
-distinguished, giving a field-sensitive analysis.
-        </long_desc>
-						</boolopt>
-						<boolopt>
-							<name>Types For Sites</name>
-							<alias>types-for-sites</alias>
-							<default>false</default>
-                                                        <short_desc>Represent objects by their actual type rather than allocation site</short_desc>
-							<long_desc>
-When this option is set to true, types rather than allocation sites are
-used as the elements of the points-to sets.
-        </long_desc>
-						</boolopt>
-						<boolopt>
-							<name>Merge String Buffer</name>
-							<alias>merge-stringbuffer</alias>
-							<default>true</default>
-                                                        <short_desc>Represent all StringBuffers as one object</short_desc>
-							<long_desc>
-When this option is set to true, all allocation sites creating
-<tt>java.lang.StringBuffer</tt> objects are grouped together as a single
-allocation site.
-        </long_desc>
-						</boolopt>
-						<boolopt>
-							<name>Propagate All String Constants</name>
-							<alias>string-constants</alias>
-							<default>false</default>
-                                                        <short_desc>Propagate all string constants, not just class names</short_desc>
-							<long_desc>
-When this option is set to false, Spark only distinguishes string constants that
-may be the name of a class loaded dynamically using reflection, and all other
-string constants are lumped together into a single string constant node.
-Setting this option to true causes all string constants to be propagated
-individually.
-        </long_desc>
-						</boolopt>
-						<boolopt>
-							<name>Simulate Natives</name>
-							<alias>simulate-natives</alias>
-							<default>true</default>
-                                                        <short_desc>Simulate effects of native methods in standard class library</short_desc>
-							<long_desc>
-When this option is set to true, the effects of native methods in the standard Java class library are simulated.
-        </long_desc>
-						</boolopt>
-						<boolopt>
-							<name>Simple Edges Bidirectional</name>
-							<alias>simple-edges-bidirectional</alias>
-							<default>false</default>
-                                                        <short_desc>Equality-based analysis between variable nodes</short_desc>
-							<long_desc>
-When this option is set to true, all edges connecting variable (Green)
-nodes are made bidirectional, as in <a href="http://doi.acm.org/10.1145/237721.237727">Steensgaard&apos;s analysis</a>.
-        </long_desc>
-						</boolopt>
-						<boolopt>
-							<name>On Fly Call Graph</name>
-							<alias>on-fly-cg</alias>
-							<default>true</default>
-                                                        <short_desc>Build call graph as receiver types become known</short_desc>
-							<long_desc>
-When this option is set to true, the call graph is computed on-the-fly
-as points-to information is computed. Otherwise, an initial
-CHA approximation to the call graph is used.
-        </long_desc>
-						</boolopt>
-					</section>
-					<section>
-						<name>BDD Spark Pointer Assignment Graph Simplification Options</name>
-						<boolopt>
-							<name>Simplify Offline</name>
-							<alias>simplify-offline</alias>
-							<default>false</default>
-                                                        <short_desc>Collapse single-entry subgraphs of the PAG</short_desc>
-							<long_desc>
-When this option is set to true, variable (Green) nodes which form
-single-entry subgraphs (so they must have the same points-to set) are
-merged before propagation begins.
-        </long_desc>
-						</boolopt>
-						<boolopt>
-							<name>Simplify SCCs</name>
-							<alias>simplify-sccs</alias>
-							<default>false</default>
-                                                        <short_desc>Collapse strongly-connected components of the PAG</short_desc>
-							<long_desc>
-When this option is set to true, variable (Green) nodes which form
-strongly-connected components (so they must have the same points-to set)
-are merged before propagation begins.
-        </long_desc>
-						</boolopt>
-						<boolopt>
-							<name>Ignore Types For SCCs</name>
-							<alias>ignore-types-for-sccs</alias>
-							<default>false</default>
-                                                        <short_desc>Ignore declared types when determining node equivalence for SCCs</short_desc>
-							<long_desc>
-When this option is set to true, when collapsing strongly-connected
-components, nodes forming SCCs are collapsed regardless of their declared type.
-The collapsed SCC is given the most general type of all the nodes in the
-component.
-
-When this option is set to false, only edges connecting nodes of the
-same type are considered when detecting SCCs.
-
-This option has no effect unless <tt>simplify-sccs</tt> is true.
-        </long_desc>
-						</boolopt>
-					</section>
-					<section>
-						<name>BDD Spark Output Options</name>
-						<boolopt>
-							<name>Dump HTML</name>
-							<alias>dump-html</alias>
-							<default>false</default>
-                                                        <short_desc>Dump pointer assignment graph to HTML for debugging</short_desc>
-							<long_desc>
-When this option is set to true, a browseable HTML representation of the
-pointer assignment graph is output to a file called <tt>pag.jar</tt> after the analysis completes. Note
-that this representation is typically very large.
-        </long_desc>
-						</boolopt>
-						<boolopt>
-							<name>Dump PAG</name>
-							<alias>dump-pag</alias>
-							<default>false</default>
-                                                        <short_desc>Dump pointer assignment graph for other solvers</short_desc>
-							<long_desc>
-When this option is set to true, a representation of the pointer assignment graph
-suitable for processing with other solvers (such as the BDD-based solver) is
-output before the analysis begins.
-        </long_desc>
-						</boolopt>
-						<boolopt>
-							<name>Dump Solution</name>
-							<alias>dump-solution</alias>
-							<default>false</default>
-                                                        <short_desc>Dump final solution for comparison with other solvers</short_desc>
-							<long_desc>
-When this option is set to true, a representation of the resulting points-to
-sets is dumped. The format is similar to that of the Dump PAG
-option, and is therefore suitable for comparison with the results of other
-solvers.
-        </long_desc>
-						</boolopt>
-						<boolopt>
-							<name>Topological Sort</name>
-							<alias>topo-sort</alias>
-							<default>false</default>
-                                                        <short_desc>Sort variable nodes in dump</short_desc>
-							<long_desc>
-When this option is set to true, the representation dumped by the
-Dump PAG option
-is dumped with the variable (green) nodes in (pseudo-)topological order.
-
-This option has no effect unless Dump PAG is true.
-        </long_desc>
-						</boolopt>
-						<boolopt>
-							<name>Dump Types</name>
-							<alias>dump-types</alias>
-							<default>true</default>
-                                                        <short_desc>Include declared types in dump</short_desc>
-							<long_desc>
-When this option is set to true, the representation dumped by the
-Dump PAG option
-includes type information for all nodes.
-
-This option has no effect unless Dump PAG is true.
-        </long_desc>
-						</boolopt>
-						<boolopt>
-							<name>Class Method Var</name>
-							<alias>class-method-var</alias>
-							<default>true</default>
-                                                        <short_desc>In dump, label variables by class and method</short_desc>
-							<long_desc>
-When this option is set to true, the representation dumped by the
-Dump PAG option
-represents nodes by numbering each class, method, and variable within
-the method separately, rather than assigning a single integer to each
-node.
-
-This option has no effect unless Dump PAG is true.  Setting Class
-Method Var to true has the effect of setting Topological Sort to
-false.
-        </long_desc>
-						</boolopt>
-						<boolopt>
-							<name>Dump Answer</name>
-							<alias>dump-answer</alias>
-							<default>false</default>
-                                                        <short_desc>Dump computed reaching types for comparison with other solvers</short_desc>
-							<long_desc>
-When this option is set to true, the computed reaching types for each variable are
-dumped to a file, so that they can be compared with the results of
-other analyses (such as the old VTA).
-        </long_desc>
-						</boolopt>
-						<boolopt>
-							<name>Add Tags</name>
-							<alias>add-tags</alias>
-							<default>false</default>
-                                                        <short_desc>Output points-to results in tags for viewing with the Jimple</short_desc>
-							<long_desc>
-        When this option is set to true, the results of the analysis are encoded within
-tags and printed with the resulting Jimple code.
-
-        </long_desc>
-						</boolopt>
-						<boolopt>
-							<name>Calculate Set Mass</name>
-							<alias>set-mass</alias>
-							<default>false</default>
-                                                        <short_desc>Calculate statistics about points-to set sizes</short_desc>
-							<long_desc>
-When this option is set to true, Spark computes and prints various
+When this option is set to true, Paddle computes and prints various
 cryptic statistics about the size of the points-to sets computed.
         </long_desc>
 						</boolopt>

@@ -30,12 +30,13 @@ import soot.tagkit.*;
 import soot.jimple.*;
 import java.util.*;
 import soot.util.*;
-import soot.jimple.spark.SparkField;
+//import soot.jimple.spark.SparkField;
+import soot.jimple.paddle.PaddleField;
 
 /**
     Soot representation of a Java field.  Can be declared to belong to a SootClass.
 */
-public class SootField extends AbstractHost implements ClassMember, SparkField, Numberable
+public class SootField extends AbstractHost implements ClassMember, /*SparkField,*/ Numberable, PaddleField
 {
     String name;
     Type type;
