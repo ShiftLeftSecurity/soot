@@ -401,20 +401,6 @@ public class UnitThrowAnalysisTest extends TestCase {
 		     utility.catchableSubset(unitAnalysis.mightThrow(s)));
     }
 
-    public void testJNopStmt() {
-	Stmt s = Jimple.v().newNopStmt();
-	Set expectedRep = new ExceptionHashSet(utility.ASYNC_ERRORS);
-	assertTrue(utility.sameMembers(expectedRep,
-				       unitAnalysis.mightThrow(s)));
-    }
-
-    public void testGNopStmt() {
-	Stmt s = Grimp.v().newNopStmt();
-	Set expectedRep = new ExceptionHashSet(utility.ASYNC_ERRORS);
-	assertTrue(utility.sameMembers(expectedRep,
-				       unitAnalysis.mightThrow(s)));
-    }
-
     public void testGLookupSwitchStmt() {
 	Stmt target = Grimp.v().newAssignStmt(Grimp.v().newLocal("local0",
 								  IntType.v()),
@@ -431,6 +417,20 @@ public class UnitThrowAnalysisTest extends TestCase {
 				       unitAnalysis.mightThrow(s)));
 	assertEquals(utility.ASYNC_ERRORS_PLUS_SUPERTYPES, 
 		     utility.catchableSubset(unitAnalysis.mightThrow(s)));
+    }
+
+    public void testJNopStmt() {
+	Stmt s = Jimple.v().newNopStmt();
+	Set expectedRep = new ExceptionHashSet(utility.ASYNC_ERRORS);
+	assertTrue(utility.sameMembers(expectedRep,
+				       unitAnalysis.mightThrow(s)));
+    }
+
+    public void testGNopStmt() {
+	Stmt s = Grimp.v().newNopStmt();
+	Set expectedRep = new ExceptionHashSet(utility.ASYNC_ERRORS);
+	assertTrue(utility.sameMembers(expectedRep,
+				       unitAnalysis.mightThrow(s)));
     }
 
     public void testJReturnStmt() {
