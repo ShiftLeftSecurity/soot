@@ -85,6 +85,14 @@ import java.util.*;
 public class BReturnInst extends AbstractOpTypeInst implements ReturnInst
 {
     BReturnInst(Type opType) { super(opType); }
+
+
+    public Object clone() 
+    {
+	return new  BReturnInst(getOpType());
+    }
+
+
     
     public int getInCount()
     {

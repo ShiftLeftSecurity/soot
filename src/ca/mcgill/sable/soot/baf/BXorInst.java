@@ -88,6 +88,11 @@ public class BXorInst extends AbstractOpTypeInst implements XorInst
     {
         super(opType);
     }
+
+    public Object clone() 
+    {
+	return new  BXorInst(getOpType());
+    }
     
     public int getInCount()
     {

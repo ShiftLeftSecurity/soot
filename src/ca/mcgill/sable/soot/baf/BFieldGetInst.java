@@ -92,6 +92,12 @@ public class BFieldGetInst extends AbstractInst implements FieldGetInst
         this.field = field;
     }
 
+
+    public Object clone() 
+    {
+	return new BFieldGetInst(getField());
+    }
+
     public int getInCount()
     {
 	return 0;

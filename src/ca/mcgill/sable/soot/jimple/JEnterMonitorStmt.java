@@ -98,6 +98,11 @@ public class JEnterMonitorStmt extends AbstractStmt implements EnterMonitorStmt
         this.opBox = opBox;
     }
 
+    public Object clone() 
+    {
+	return new JEnterMonitorStmt(Jimple.cloneIfNecessary(getOp()));
+    }
+
     protected String toString(boolean isBrief, Map stmtToName, String indentation)
     {
         if(isBrief)
@@ -135,5 +140,8 @@ public class JEnterMonitorStmt extends AbstractStmt implements EnterMonitorStmt
     {
         ((StmtSwitch) sw).caseEnterMonitorStmt(this);
     }    
+    
+    public boolean fallsThrough(){return true;}
+    public boolean branches() { return false;}
 }
 

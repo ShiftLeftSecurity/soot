@@ -88,6 +88,11 @@ public class BSubInst extends AbstractOpTypeInst implements SubInst
     {
         super(opType);
     }
+
+    public Object clone() 
+    {
+	return new  BSubInst(getOpType());
+    }
     
     public int getInCount()
     {

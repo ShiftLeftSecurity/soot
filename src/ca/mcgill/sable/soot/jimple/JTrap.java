@@ -90,12 +90,15 @@ public class JTrap implements Trap
     protected UnitBox handlerStmtBox;
     protected List stmtBoxes;
 
+
     JTrap(SootClass exception, Unit beginStmt, Unit endStmt, Unit handlerStmt)
     {
         this(exception, Jimple.v().newStmtBox(beginStmt),
               Jimple.v().newStmtBox(endStmt),
               Jimple.v().newStmtBox(handlerStmt));
     }
+
+
 
     protected JTrap(SootClass exception, UnitBox beginStmtBox,
                    UnitBox endStmtBox, UnitBox handlerStmtBox)
@@ -108,6 +111,12 @@ public class JTrap implements Trap
         stmtBoxes.add(endStmtBox);
         stmtBoxes.add(handlerStmtBox);
         stmtBoxes = Collections.unmodifiableList(stmtBoxes);
+    }
+
+   
+    public Object clone() 
+    {
+	return new JTrap(exception, getBeginUnit(), getEndUnit(), getHandlerUnit());
     }
 
     public Unit getBeginUnit()

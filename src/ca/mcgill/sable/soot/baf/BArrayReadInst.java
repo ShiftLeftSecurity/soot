@@ -90,6 +90,12 @@ public class BArrayReadInst extends AbstractOpTypeInst implements ArrayReadInst
         super(opType);
     }
 
+    public Object clone() 
+    {
+	return new BArrayReadInst(getOpType());
+    }
+
+
     public int getInCount()
     {
 	return 2;

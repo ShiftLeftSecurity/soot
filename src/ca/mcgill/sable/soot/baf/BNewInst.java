@@ -88,6 +88,13 @@ public class BNewInst extends AbstractRefTypeInst implements NewInst
     {
         super(opType);
     }
+
+    public Object clone() 
+    {
+	return new  BNewInst(getBaseType());
+    }
+
+    
     public int getInCount()
     {
 	return 0;

@@ -88,6 +88,14 @@ public class BShrInst extends AbstractOpTypeInst implements ShrInst
     {
         super(opType);
     }
+    
+    public Object clone() 
+    {
+	return new  BShrInst(getOpType());
+    }
+
+    
+
     public int getInCount()
     {
 	return 2;

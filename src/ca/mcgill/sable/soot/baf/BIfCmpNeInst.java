@@ -90,6 +90,11 @@ public class BIfCmpNeInst extends AbstractOpTypeBranchInst
         super(opType, Baf.v().newInstBox(target));
     }
 
+    public Object clone() 
+    {
+	return new  BIfCmpNeInst(getOpType(), getTarget());
+    }
+
      public int getInCount()
     {
 	return 2;

@@ -80,4 +80,4 @@ public class GTrap extends JTrap implements Trap
               Grimp.v().newStmtBox(endStmt),
               Grimp.v().newStmtBox(handlerStmt));
     }
-}
+    public Object clone() { return new RuntimeException();}}

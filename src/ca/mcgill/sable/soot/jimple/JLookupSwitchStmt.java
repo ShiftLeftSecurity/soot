@@ -109,6 +109,20 @@ public class JLookupSwitchStmt extends AbstractStmt implements LookupSwitchStmt
              Jimple.v().newStmtBox(defaultTarget));
     }
 
+    // xxx
+    public Object clone() 
+    {
+	int lookupValueCount = lookupValues.size();
+	List clonedLookupValues = new ArrayList(lookupValueCount);
+
+	for( int i = 0; i < lookupValueCount ;i++) {
+	    clonedLookupValues.add(i, new Integer(getLookupValue(i)));
+	}
+	
+	return new JLookupSwitchStmt(getKey(), clonedLookupValues, getTargets(), getDefaultTarget());
+    }
+
+
     protected JLookupSwitchStmt(ValueBox keyBox, List lookupValues, 
                                 UnitBox[] targetBoxes, 
                                 UnitBox defaultTargetBox)
@@ -260,6 +274,14 @@ public class JLookupSwitchStmt extends AbstractStmt implements LookupSwitchStmt
     {
         ((StmtSwitch) sw).caseLookupSwitchStmt(this);
     }    
+
+
+    
+
+    public boolean fallsThrough(){return false;}
+    public boolean branches(){return true;}
+
+
 }
 
 

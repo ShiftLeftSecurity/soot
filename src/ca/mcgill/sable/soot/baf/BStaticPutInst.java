@@ -92,6 +92,13 @@ public class BStaticPutInst extends AbstractInst implements StaticPutInst
         this.field = field;
     }
 
+    public Object clone() 
+    {
+	return new  BStaticPutInst(getField());
+    }
+
+
+
     public int getInCount()
     {
 	return 1;

@@ -92,6 +92,12 @@ public class BStaticGetInst extends AbstractInst implements StaticGetInst
         this.field = field;
     }
     
+    public Object clone() 
+    {
+	return new  BStaticGetInst(getField());
+    }
+
+    
     public int getInCount()
     {
 	return 0;

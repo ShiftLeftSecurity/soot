@@ -139,7 +139,7 @@ public class StmtGraph
         // Build successors
         {
             Map classToHandler = new HashMap(); // list of exceptions being caught, and their handlers
-
+	    
             stmtToSuccs = new HashMap(size * 2 + 1, 0.7f);
             stmtToPreds = new HashMap(size * 2 + 1, 0.7f);
 

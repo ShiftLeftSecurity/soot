@@ -89,6 +89,11 @@ public class BUshrInst extends AbstractOpTypeInst implements UshrInst
         super(opType);
     }
 
+    public Object clone() 
+    {
+	return new  BUshrInst(getOpType());
+    }
+
     public int getInCount()
     {
 	return 2;

@@ -89,6 +89,12 @@ public class BIfLeInst extends AbstractBranchInst implements IfLeInst
         super(Baf.v().newInstBox(target));
     }
 
+    public Object clone() 
+    {
+	return new  BIfLeInst(getTarget());
+    }
+
+
     public int getInCount()
     {
 	return 2;

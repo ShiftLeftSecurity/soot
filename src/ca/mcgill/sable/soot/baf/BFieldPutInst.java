@@ -91,6 +91,11 @@ public class BFieldPutInst extends AbstractInst implements FieldPutInst
     {
         this.field = field;
     }
+
+    public Object clone() 
+    {
+	return new BFieldPutInst(getField());
+    }
     
     public int getInCount()
     {

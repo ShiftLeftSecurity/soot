@@ -91,6 +91,11 @@ public class BArrayWriteInst extends AbstractOpTypeInst
         super(opType);
     }
 
+    public Object clone()
+    {
+	return new BArrayWriteInst(getOpType());
+    }
+    
     public int getInCount()
     {
 	return 3;

@@ -87,7 +87,16 @@ public class BOrInst extends AbstractOpTypeInst implements OrInst
     public BOrInst(Type opType)
     {
         super(opType);
-    }public int getInCount()
+    }
+
+
+    public Object clone() 
+    {
+	return new  BOrInst(getOpType());
+    }
+
+
+    public int getInCount()
     {
 	return 2;
     }

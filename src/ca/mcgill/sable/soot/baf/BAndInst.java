@@ -89,6 +89,12 @@ public class BAndInst extends AbstractOpTypeInst implements AndInst
         super(opType);
     }
 
+
+    public Object clone() 
+    {
+	return new BAndInst(getOpType());
+    }
+
     public int getInCount()
     {
 	return 2;

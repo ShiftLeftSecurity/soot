@@ -89,6 +89,12 @@ public class BCmpInst extends AbstractOpTypeInst implements CmpInst
         super(opType);
 	
     }
+
+
+    public Object clone() 
+    {
+	return new BCmpInst(getOpType());
+    }
     
     public int getInCount()
     {

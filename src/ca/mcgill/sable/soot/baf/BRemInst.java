@@ -88,6 +88,13 @@ public class BRemInst extends AbstractOpTypeInst implements RemInst
     {
         super(opType);
     }
+
+
+    public Object clone() 
+    {
+	return new  BRemInst(getOpType());
+    }
+
     
     public int getInCount()
     {

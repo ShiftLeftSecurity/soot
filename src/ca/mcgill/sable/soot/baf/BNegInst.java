@@ -89,6 +89,11 @@ public class BNegInst extends AbstractOpTypeInst implements NegInst
         super(opType);
     }
 
+    public Object clone() 
+    {
+	return new  BNegInst(getOpType());
+    }
+
     public int getInCount()
     {
 	return 1;

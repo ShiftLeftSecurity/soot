@@ -12,6 +12,11 @@ public class BVirtualInvokeInst extends AbstractInvokeInst implements VirtualInv
 	return getMethod().getParameterCount() + 1;
 	
     }
+
+    public Object clone() 
+    {
+	return new  BVirtualInvokeInst(getMethod());
+    }
     
     public int getOutCount()
     {

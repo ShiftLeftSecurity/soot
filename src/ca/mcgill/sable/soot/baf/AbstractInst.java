@@ -90,6 +90,15 @@ public abstract class AbstractInst extends AbstractUnit implements Inst
         return indentation + getName() + getParameters(isBrief, unitToName);
     }
 
+    public boolean fallsThrough()
+    {
+	return true;
+    }
+    public boolean branches()
+    {
+	return false;
+    }
+    
     public int getInCount()
     {
 	throw new RuntimeException("undefined"+ toString() + "!" );

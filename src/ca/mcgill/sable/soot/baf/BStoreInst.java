@@ -94,6 +94,11 @@ public class BStoreInst extends AbstractOpTypeInst implements StoreInst
         this.local = local;
     }
 
+    public Object clone() 
+    {
+	return new  BStoreInst(getOpType(), getLocal());
+    }
+
     public int getInCount()
     {
 	return 1;

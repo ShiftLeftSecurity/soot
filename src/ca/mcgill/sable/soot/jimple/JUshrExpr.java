@@ -87,4 +87,10 @@ class JUshrExpr extends AbstractJimpleIntLongBinopExpr implements UshrExpr
     JUshrExpr(Value op1, Value op2) { super(op1, op2); }
     public final String getSymbol() { return " >>> "; }
     public void apply(Switch sw) { ((ExprSwitch) sw).caseUshrExpr(this); }
+    
+    public Object clone() 
+    {
+	return new JUshrExpr(Jimple.cloneIfNecessary(getOp1()), Jimple.cloneIfNecessary(getOp2()));
+    }
+
 }

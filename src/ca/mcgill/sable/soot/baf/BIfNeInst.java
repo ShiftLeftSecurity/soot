@@ -88,6 +88,13 @@ public class BIfNeInst extends AbstractBranchInst implements IfNeInst
     {
         super(Baf.v().newInstBox(target));
     }
+
+    public Object clone() 
+    {
+	return new  BIfNeInst(getTarget());
+    }
+
+
     public int getInCount()
     {
 	return 2;

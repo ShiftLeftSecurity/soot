@@ -89,6 +89,13 @@ public class BIfNonNullInst extends AbstractBranchInst implements IfNonNullInst
         super(Baf.v().newInstBox(target));
     }
 
+    public Object clone() 
+    {
+	return new  BIfNonNullInst(getTarget());
+    }
+
+
+
     public int getInCount()
     {
 	return 1;

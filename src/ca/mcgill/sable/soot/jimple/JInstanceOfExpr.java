@@ -96,4 +96,11 @@ class JInstanceOfExpr extends AbstractInstanceOfExpr
     {
         super(Jimple.v().newImmediateBox(op), checkType);
     }
+
+  
+    public Object clone() 
+    {
+	return new JInstanceOfExpr(Jimple.cloneIfNecessary(getOp()), checkType);
+    }
+    
 }

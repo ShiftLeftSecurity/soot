@@ -89,8 +89,10 @@ public class BAddInst extends AbstractOpTypeInst implements AddInst
         super(opType);
     }
     
-
-
+    public Object clone() 
+    {
+	return new BAddInst(getOpType());
+    }
 
     public int getInCount()
     {

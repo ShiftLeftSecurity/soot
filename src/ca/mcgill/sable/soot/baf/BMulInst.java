@@ -89,6 +89,13 @@ public class BMulInst extends AbstractOpTypeInst implements MulInst
         super(opType);
     }
 
+    public Object clone() 
+    {
+	return new  BMulInst(getOpType());
+    }
+
+
+
     public int getInCount()
     {
 	return 2;

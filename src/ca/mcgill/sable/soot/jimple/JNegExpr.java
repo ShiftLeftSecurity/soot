@@ -88,4 +88,10 @@ class JNegExpr extends AbstractNegExpr implements NegExpr
     {
         super(Jimple.v().newImmediateBox(op));
     }
+    
+    public Object clone()  
+    {
+	return new JNegExpr(Jimple.cloneIfNecessary(getOp()));
+    }
+    
 }

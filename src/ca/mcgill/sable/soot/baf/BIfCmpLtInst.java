@@ -89,6 +89,12 @@ public class BIfCmpLtInst extends AbstractOpTypeBranchInst
     {
         super(opType, Baf.v().newInstBox(target));
     }
+
+    public Object clone() 
+    {
+	return new  BIfCmpLtInst(getOpType(), getTarget());
+    }
+
     public int getInCount()
     {
 	return 2;

@@ -93,6 +93,13 @@ public class BLoadInst extends AbstractOpTypeInst implements LoadInst
         
         this.local = local;
     }
+
+
+    public Object clone() 
+    {
+	return new  BLoadInst(getOpType(), getLocal());
+    }
+
     public int getInCount()
     {
 	return 0;

@@ -1,10 +1,9 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+package ca.mcgill.sable.soot;
+
+ /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Jimple, a 3-address code Java(TM) bytecode representation.        *
  * Copyright (C) 1997, 1998 Raja Vallee-Rai (kor@sable.mcgill.ca)    *
  * All rights reserved.                                              *
- *                                                                   *
- * Modifications by Patrick Lam (plam@sable.mcgill.ca) are           *
- * Copyright (C) 1999 Patrick Lam.  All rights reserved.             *
  *                                                                   *
  * This work was done as a project of the Sable Research Group,      *
  * School of Computer Science, McGill University, Canada             *
@@ -64,15 +63,11 @@
 
  B) Changes:
 
- - Modified on February 3, 1999 by Patrick Lam (plam@sable.mcgill.ca) (*)
-   Added changes in support of the Grimp intermediate
-   representation (with aggregated-expressions).
-
  - Modified on November 2, 1998 by Raja Vallee-Rai (kor@sable.mcgill.ca) (*)
    Repackaged all source files and performed extensive modifications.
    First initial release of Soot.
 
- - Modified on 15-Jun-1998 by Raja Vallee-Rai (kor@sable.mcgill.ca). (*)
+ - Modified on October 24, 1998 by Raja Vallee-Rai (kor@sable.mcgill.ca). (*)
    First internal release (Version 0.1).
 */
 
@@ -82,57 +77,12 @@ import ca.mcgill.sable.soot.*;
 import ca.mcgill.sable.util.*;
 import java.util.*;
 
-public class JGotoStmt extends AbstractStmt implements GotoStmt
+public class CompleteUnitGraph extends UnitGraph
 {
-    UnitBox targetBox;
-
-    List targetBoxes;
-
-    JGotoStmt(Unit target)
+    public CompleteUnitGraph(UnitBody body)
     {
-        this.targetBox = Jimple.v().newStmtBox(target);
-
-        targetBoxes = new ArrayList();
-        targetBoxes.add(this.targetBox);
-        targetBoxes = Collections.unmodifiableList(targetBoxes);
+        super(body, true);
     }
-
-    protected String toString(boolean isBrief, Map stmtToName, String indentation)
-    {
-        return indentation + "goto " + (String) stmtToName.get(getTarget());
-    }
-    
-    public Unit getTarget()
-    {
-        return targetBox.getUnit();
-    }
-
-    public void setTarget(Unit target)
-    {
-        targetBox.setUnit(target);
-    }
-
-    public UnitBox getTargetBox()
-    {
-        return targetBox;
-    }
-
-    public List getUnitBoxes()
-    {
-        return targetBoxes;
-    }
-
-    public void apply(Switch sw)
-    {
-        ((StmtSwitch) sw).caseGotoStmt(this);
-    }    
 }
-
-
-
-
-
-
-
 
 

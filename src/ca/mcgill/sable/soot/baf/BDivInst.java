@@ -89,6 +89,12 @@ public class BDivInst extends AbstractOpTypeInst implements DivInst
         super(opType);
     }
 
+
+    public Object clone() 
+    {
+	return new BDivInst(getOpType());
+    }
+
     public int getInCount()
     {
 	return 2;

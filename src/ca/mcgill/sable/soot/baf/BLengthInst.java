@@ -88,6 +88,12 @@ public class BLengthInst extends AbstractOpTypeInst implements LengthInst
     {
         super(opType);
     }
+    
+    public Object clone() 
+    {
+	return new  BLengthInst(getOpType());
+    }
+
 
     public int getInCount()
     {
