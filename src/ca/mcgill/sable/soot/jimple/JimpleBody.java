@@ -127,6 +127,17 @@ public class JimpleBody extends AbstractBody implements StmtBody
         stmtList = new StmtList(this);   
     }
 
+
+    public JimpleBody(UnitBody body)
+    {
+	super(body.getMethod());
+	locals = HashChain.toList(body.getLocals());
+	stmtList = new StmtList(this);
+	stmtList.addAll(HashChain.toList(body.getUnits()));
+	traps = HashChain.toList(body.getTraps());
+    }
+
+
     public JimpleBody(Body body)
     {
         this(body, 0);

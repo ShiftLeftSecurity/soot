@@ -119,4 +119,10 @@ public class BThrowInst extends AbstractInst implements ThrowInst
     {
 	return new BThrowInst();
     }
+
+
+    public boolean fallsThrough()
+    {
+	return false;
+    }
 }

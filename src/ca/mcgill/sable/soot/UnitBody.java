@@ -100,6 +100,7 @@ import ca.mcgill.sable.soot.*;
 import ca.mcgill.sable.util.*;
 import java.util.*;
 import java.io.*;
+import ca.mcgill.sable.soot.toolkit.scalar.*;
 
 
 public class UnitBody 
@@ -108,8 +109,8 @@ public class UnitBody
     /* temp */
     SootMethod method;
 
-    Chain localChain, trapChain, unitChain;
-    
+    Chain localChain, trapChain;
+    PatchingChain unitChain;
 
     public SootMethod getMethod()
     {
@@ -126,7 +127,7 @@ public class UnitBody
     {	
 	localChain = new HashChain();
 	trapChain = new HashChain();
-	unitChain = new HashChain();
+	unitChain = new PatchingChain(new HashChain());
 
 	this.method = body.getMethod();
 	List list;
@@ -216,6 +217,8 @@ public class UnitBody
 	}
 
 	validateLocals();
+
+
     }
     
     public void validateLocals()
@@ -235,6 +238,13 @@ public class UnitBody
 	
     }
     
+
+
+    
+  
+
+
+
         
     public Chain getLocals() {return localChain;} 
     public Chain getTraps() {return trapChain;}
@@ -386,6 +396,9 @@ public class UnitBody
         
         Map stmtToName = new HashMap(unitChain.size() * 2 + 1, 0.7f);
         UnitGraph unitGraph = new BriefUnitGraph(this);
+	
+	CompleteUnitGraph completeUnitGraph = new CompleteUnitGraph(this);
+	SimpleUnitLocalDefs localDefs = new SimpleUnitLocalDefs(completeUnitGraph);
 
         // Create statement name table
         {
@@ -458,7 +471,28 @@ public class UnitBody
             else
                 out.print(currentStmt.toBriefString(stmtToName, "        "));
 
-            out.print(";");
+            out.print(";"); 
+	    ArrayList al = new ArrayList();
+	    //	    al.addAll(liveLocals.getLiveLocalsAfter(currentStmt));
+	    
+	    Iterator it = currentStmt.getUseBoxes().iterator();
+	    while(it.hasNext()) {
+		ValueBox vb = (ValueBox) it.next();
+		if(vb.getValue() instanceof Local) {
+		    out.print("[defs of " + vb.getValue() + ":");
+		    
+		    List defs = localDefs.getDefsOfAt(((Local)vb.getValue()), currentStmt);
+		    Iterator unitsIt = defs.iterator();
+		    while(unitsIt.hasNext()){
+			out.print(unitsIt.next() + " ");
+		    }
+
+		    out.print("]"); 
+		}
+		
+	    }
+
+	    // out.print(al);
             out.println();
         }
 

@@ -196,13 +196,15 @@ public class UnitGraph implements DirectedGraph
                         beginToHandler.put(beginUnit, handlerUnit);
 			
 			Unit u;
+
+			
                         do  {
                             u = (Unit) unitIt.next();
 			    
                             ((List) unitToSuccs.get(u)).add(handlerUnit);
-			    
+			    System.out.println(u);
                         } while(u != endUnit);
-                    
+			
 		    }
                     
                     // Add edges from the predecessors of begin statements directly to the handlers

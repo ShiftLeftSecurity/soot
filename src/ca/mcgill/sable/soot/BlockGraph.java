@@ -3,7 +3,7 @@ package ca.mcgill.sable.soot;
 import java.util.*;
 import ca.mcgill.sable.soot.*;
 import java.io.*;
-
+import ca.mcgill.sable.soot.baf.*;
 
 public class BlockGraph 
 {
@@ -40,7 +40,7 @@ public class BlockGraph
 	mUnits = aBody.getUnits();
 	
 
-	Map trapBeginUnits = null;  // Map a unit to all 
+	Map trapBeginUnits = new HashMap();  // Map a unit to all 
 	List trapsInScope = null;    // List of Trap that can be invoked at a given unit
 	Chain traps = null;          // Traps for this UnitBody
 
@@ -50,38 +50,53 @@ public class BlockGraph
 	 */
 	Map leaders = new HashMap();
 	
-	{
+	
 	    
-	    if(type == COMPLETE) {
-		// Get the list of all traps for this UnitBody
-		traps = mBody.getTraps();
-		trapBeginUnits = new HashMap();
-		trapsInScope = new ArrayList(traps.size());
+	// if(type == COMPLETE) {
+	// Get the list of all traps for this UnitBody
+	traps = mBody.getTraps();
+	trapsInScope = new ArrayList(traps.size());
 	    
-		// Populate the trapBeginUnits Map
-		Iterator trapIt = traps.iterator();
-		while(trapIt.hasNext()) {
-		    Trap someTrap = (Trap) trapIt.next();
-		    Unit firstUnit = someTrap.getBeginUnit();
+	// Populate the trapBeginUnits Map
+	Iterator trapIt = traps.iterator();
+	while(trapIt.hasNext()) {
+	    Trap someTrap = (Trap) trapIt.next();
+	    Unit firstUnit = someTrap.getBeginUnit();
 		    
-		    List trapList = (List) trapBeginUnits.get(firstUnit);
-		    if(trapList == null) {
-			trapList = new ArrayList(4);
-			trapList.add(someTrap);
-			trapBeginUnits.put(firstUnit, trapList);
-		    } else {
-			trapList.add(someTrap);
-		    }
-		}
+	    List trapList = (List) trapBeginUnits.get(firstUnit);
+	    if(trapList == null) {
+		trapList = new ArrayList(4);
+		trapList.add(someTrap);
+		trapBeginUnits.put(firstUnit, trapList);
+	    } else {
+		trapList.add(someTrap);
 	    }
+	}
+	
 
 
+	    
+	List trapHeads = new ArrayList();
+	trapIt = trapBeginUnits.values().iterator();
+	while(trapIt.hasNext() ) {
+	    List l = (List) trapIt.next();
+	    // if(l.size() != 1) {throw new RuntimeException("size != 1");}
+	    Trap someTrap = (Trap) l.get(0);
+	    trapHeads.add(someTrap.getHandlerUnit());
+	    trapHeads.add(someTrap.getBeginUnit());
+	}
+	
+		
+
+
+
+	{
 	    // Iterate over the UnitBody searching for leaders.
 	    Iterator it = mUnits.iterator();
 	    Unit currentUnit, nextUnit; 
 	    nextUnit = it.hasNext() ? (Unit) it.next(): null;
 
-	    while(nextUnit != null) {
+	    while(nextUnit != null) {  //
 		currentUnit = nextUnit;
 		nextUnit = it.hasNext() ? (Unit) it.next(): null;
 		
@@ -100,6 +115,8 @@ public class BlockGraph
 			}
 		    } 
 		}
+		
+
 		
 
 	       
@@ -179,7 +196,7 @@ public class BlockGraph
 			while(trapScopeIt.hasNext()) {
 			    Trap someTrap = (Trap) trapScopeIt.next();
 
-			    // 1) The first unit of the trap handler is a leader.			    
+				// 1) The first unit of the trap handler is a leader.			    
 			    Unit target = someTrap.getHandlerUnit();
 			    if(!leaders.containsKey(target)) {
 				predecessors= new LinkedList();
@@ -194,7 +211,7 @@ public class BlockGraph
 				predecessors.add(currentUnit);
 			    }	    	
 			    
-			    // 2) A unit following a unit having exception handlers in it's scope is a leader.
+				// 2) A unit following a unit having exception handlers in it's scope is a leader.
 			    if(nextUnit != null) {
 				if(!leaders.containsKey(nextUnit)) {
 				    predecessors= new LinkedList();
@@ -208,7 +225,7 @@ public class BlockGraph
 				}
 			    }
 			    
-			    // 3) A unit having exception handlers in it's scope is a leader.
+				// 3) A unit having exception handlers in it's scope is a leader.
 			    if(!leaders.containsKey(currentUnit)) {
 				predecessors= new LinkedList();
 				leaders.put(currentUnit, predecessors);
@@ -235,6 +252,7 @@ public class BlockGraph
 		
 	    }
 	}
+    
 	
 	
 	
@@ -244,25 +262,42 @@ public class BlockGraph
 	 */
 	{
 	    List basicBlockList = new ArrayList(16);
-	    Unit blockHead;    // points to first unit in block
+	    Unit blockHead, blockTail;    // points to first unit in block
 	    Block block;
 	    int indexInMethod = 0;
 
 	    Iterator it = mUnits.iterator();
 	    blockHead = (Unit) mUnits.getFirst();
 	    int blockLength = 1;
-	    
+	    int blockDeltaHeight = 0;
+	    boolean isHandler = false;
+
 	    while(it.hasNext()) {
 		Unit  unit = (Unit) it.next();
 		blockLength++;
 		if(leaders.containsKey(unit)){
-		    block = new Block(blockHead,(Unit) mUnits.getPredOf(unit), mBody, indexInMethod++, blockLength -1, this);
+
+		    // this happens if the first unit of the method is under an exception context.(ie first unit is a block and has no pred unit)
+		    if((blockTail =(Unit) mUnits.getPredOf(unit)) == null) {
+			blockTail = blockHead;
+			blockDeltaHeight = ((Inst)unit).getNetCount();
+		    }
+		    
+		   
+		    block = new Block(blockHead, blockTail, mBody, indexInMethod++, blockLength -1, this);
 		    block.setPreds((List) leaders.get(blockHead));
 		    basicBlockList.add(block);
 		    blockHead = unit;
 		    blockLength = 1;
+		    blockDeltaHeight = 0;
 		}
+		 
+		
+		blockDeltaHeight += ((Inst)unit).getNetCount();
+		
 	    }
+
+	    
 	    block = new Block(blockHead, (Unit) mUnits.getLast(),mBody, indexInMethod++, blockLength, this);
 	    block.setPreds((List) leaders.get(blockHead));
 	    basicBlockList.add(block);
@@ -316,42 +351,89 @@ public class BlockGraph
 		}
 		b.setSuccessors(successorList);
 	    }
-			
-		     
+	    
+	    
 
 	    // temporary check on the structure of the code
 	    // (ie catch goto's pointing to goto's) 
 	    // check if block A  has a unique sucessor B, which itself 
 	    // has, as a unique predecessor, block A 
 	    // Can be deleted in time.
-	    it = basicBlockList.iterator();
-	    while(it.hasNext()) {
-	    	Block currentBlock = (Block) it.next();
-		List blockSuccsList = currentBlock.getSuccessors();
-		if(blockSuccsList.size() == 1) {
+	    /*	    it = basicBlockList.iterator();
+		    while(it.hasNext()) {
+		    Block currentBlock = (Block) it.next();
+		    List blockSuccsList = currentBlock.getSuccessors();
+		    if(blockSuccsList.size() == 1) {
 		    Block succBlock = (Block)  blockSuccsList.get(0);
 		    if(succBlock.getPreds().size() == 1) {
-			if(succBlock.getSuccessors().size() == 1 ) { 
-			    throw new RuntimeException("Code structure error");
-			}
+		    if(succBlock.getSuccessors().size() == 1 || succBlock.getSuccessors().size()==0) { 
+
+		    if(succBlock.getSuccessors().size() == 1) {
+		    Block succBlock2 = (Block)  blockSuccsList.get(0);
+		    if(mUnits.getSuccOf(currentBlock.getTail()) == succBlock2.getHead() ) {
+				    
+
+		    System.out.println("Code structure error dump:");
+		    System.out.println("Current block: " + currentBlock.toString());
+		    System.out.println("Succ block: " + succBlock.toString());
+		    System.out.println("pred: " + succBlock.getPreds().toString() + "succ  :" + succBlock.getSuccessors().toString());
+				
+		    mBlocks = basicBlockList;
+		    System.out.println("Printing basic blocks ...");
+		    it = basicBlockList.iterator();
+		    while(it.hasNext()) {
+		    System.out.println(((Block)it.next()).toBriefString());
 		    }
-		}
-	    }
-		    
+		    throw new RuntimeException("Code structure error");
+		    }
+		    }
+		    System.out.println("Code structure error detected.");
+			    
+		    }
+
+				
+		    else { 
+
+		    System.out.println("Code structure error dump:");
+		    System.out.println("Current block: " + currentBlock.toString());
+		    System.out.println("Succ block: " + succBlock.toString());
+		    System.out.println("pred: " + succBlock.getPreds().toString() + "succ  :" + succBlock.getSuccessors().toString());
+			    
+		    mBlocks = basicBlockList;
+		    System.out.println("Printing basic blocks ...");
+		    it = basicBlockList.iterator();
+		    while(it.hasNext()) {
+		    System.out.println(((Block)it.next()).toBriefString());
+		    }
+		    throw new RuntimeException("Code structure error (interesting case)");      
+		    }
+
+
+		    }
+		    }
+		    }
+	    */    
+	    
 	    mBlocks = basicBlockList;
 	    
-	   
-			
-	    System.out.println("Printing basic blocks ...");
-	    it = basicBlockList.iterator();
-	    while(it.hasNext()) {
-		System.out.println(((Block)it.next()).toBriefString());
-	    }
+	}
+    }    
+    
+	
+	
+    public String toString() {
+       
+	Iterator it = mBlocks.iterator();
+	StringBuffer buf = new StringBuffer();
+	while(it.hasNext()) {
+	    Block someBlock = (Block) it.next();
+	    
+	    buf.append(someBlock.toBriefString() + '\n');
 	}
 	
+	return buf.toString();
     }
 }
-
 
     
 
