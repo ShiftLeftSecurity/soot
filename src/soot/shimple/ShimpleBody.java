@@ -147,6 +147,9 @@ public class ShimpleBody extends StmtBody
         sBody.eliminatePhiNodes();
         JimpleBody jBody = Jimple.v().newBody(sBody.getMethod());
         jBody.importBodyContentsFrom(sBody);
+	// Now that we have no more phi nodes, remove unreachable code
+	// which may be produced by the UnconditionalBranchFolder.
+	soot.jimple.toolkits.scalar.UnreachableCodeEliminator.v().transform(jBody);
         return jBody;
     }
 
