@@ -52,8 +52,14 @@ import soot.util.dot.DotGraph;
 
 
 /**
- * The <tt>PhaseDumper</tt> is a debugging aid.  It maintains a list
- * of phases which 
+ * The <tt>PhaseDumper</tt> is a debugging aid.  It maintains two
+ * lists of phases to be debugged.  If a phase is on the
+ * <code>bodyDumpingPhases</code> list, then the intermediate
+ * representation of the bodies being manipulated by the phase is
+ * dumped before and after the phase is applied.  If a phase is on the
+ * <code>cfgDumpingPhases</code> list, then whenever a CFG is
+ * constructed during the phase, a dot file is dumped representing the
+ * CFG constructed.
  */
 
 public class PhaseDumper {
@@ -380,10 +386,8 @@ public class PhaseDumper {
 		String outputFile = nextGraphFileName(g.getBody(), 
 						      phaseName + "-" + 
 						      getClassIdent(g) + "-");
-		Map cfgOptions = G.v().PhaseOptions().getPhaseOptions("cfgex");
 		CFGToDotGraph drawer = new CFGToDotGraph();
-		drawer.setShowExceptions(PhaseOptions.getBoolean(cfgOptions, 
-								 "show-exceptions"));
+		drawer.setShowExceptions(Options.v().show_exception_dests());
 		DotGraph dotGraph = drawer.drawCFG(g);
 		dotGraph.plot(outputFile);
 
