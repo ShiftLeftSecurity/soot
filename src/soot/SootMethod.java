@@ -740,9 +740,9 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable
 	    Type t = (Type) typeIt.next();
 	    
 	    buffer.append( t);
-	    buffer.append( " ");
 
 	    if (Main.getJavaStyle()) {
+                buffer.append( " ");
 		if (hasActiveBody()) 
 		    buffer.append( ((DavaBody) getActiveBody()).get_ParamMap().get( new Integer( count++)));
 		else {
