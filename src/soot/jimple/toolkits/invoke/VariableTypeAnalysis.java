@@ -207,6 +207,8 @@ public class VariableTypeAnalysis
         if (Main.isVerbose)
             System.out.println("[vta] Trimming active invoke graph.");
 
+	Date trimStart = new Date();
+
         // Is there a better way to do this?
 
         List appAndLibClasses = new ArrayList();
@@ -315,10 +317,18 @@ public class VariableTypeAnalysis
             }
         }
 
+	Date trimEnd = new Date();
+	
+	long trimtime = trimEnd.getTime() - trimStart.getTime();
+    
+	System.out.println("[vta] Trimming invoke graph takes "
+			   +(trimtime/60000)+" min "
+			   +((trimtime%60000)/1000)+" sec.");
+
         VTAFinish = new Date();
 
         long runtime = VTAFinish.getTime() - VTAStart.getTime();
-        System.out.println("[vta] VTA has run for "+(runtime/60000)+" min. "+
+        System.out.println("[vta] VTA has run for "+(runtime/60000)+" min "+
                            ((runtime%60000)/1000)+" sec.");
         System.out.println();
     }
