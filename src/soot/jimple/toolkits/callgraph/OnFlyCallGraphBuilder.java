@@ -399,8 +399,6 @@ public final class OnFlyCallGraphBuilder
         findOrAdd( "java.lang.Object run()" );
     private final NumberedString sigForName = Scene.v().getSubSigNumberer().
         findOrAdd( "java.lang.Class forName(java.lang.String)" );
-    private final RefType clPrivilegedAction = RefType.v("java.security.PrivilegedAction");
-    private final RefType clPrivilegedExceptionAction = RefType.v("java.security.PrivilegedExceptionAction");
     private final RefType clRunnable = RefType.v("java.lang.Runnable");
 
 }

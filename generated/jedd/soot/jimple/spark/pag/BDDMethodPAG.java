@@ -80,7 +80,10 @@ public final class BDDMethodPAG extends AbstractMethodPAG {
     }
     
     private jedd.Relation addEdge(Node srcN, Node dstN, final jedd.Relation edgeSet) {
-        if (srcN == null) return edgeSet;
+        if (srcN == null)
+            return new jedd.Relation(new jedd.Domain[] { src.v(), dst.v() },
+                                     new jedd.PhysicalDomain[] { V1.v(), V2.v() },
+                                     edgeSet);
         if (srcN instanceof VarNode) {
             if (dstN instanceof VarNode) {
                 edgeSet.eqUnion(jedd.Jedd.v().literal(new Object[] { srcN, dstN },
@@ -103,7 +106,9 @@ public final class BDDMethodPAG extends AbstractMethodPAG {
                                                          new jedd.Domain[] { obj.v(), var.v() },
                                                          new jedd.PhysicalDomain[] { H1.v(), V1.v() }));
             }
-        return edgeSet;
+        return new jedd.Relation(new jedd.Domain[] { src.v(), dst.v() },
+                                 new jedd.PhysicalDomain[] { V1.v(), V2.v() },
+                                 edgeSet);
     }
     
     public final jedd.Relation internalEdgeSet =

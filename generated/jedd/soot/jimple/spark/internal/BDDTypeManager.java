@@ -11,7 +11,10 @@ import soot.jimple.spark.bdddomains.*;
 import java.util.*;
 
 public final class BDDTypeManager extends AbstractTypeManager {
-    public BDDTypeManager(BDDPAG bddpag) { super(bddpag); }
+    public BDDTypeManager(BDDPAG bddpag) {
+        super(bddpag);
+        this.bddhier = new BDDHierarchy();
+    }
     
     public final void clearTypeMask() {
         this.lastAllocNode = 0;
@@ -31,7 +34,20 @@ public final class BDDTypeManager extends AbstractTypeManager {
     
     public final jedd.Relation get() {
         this.update();
-        return this.typeMask;
+        this.bddhier.update();
+        final jedd.Relation hier =
+          new jedd.Relation(new jedd.Domain[] { subt.v(), supt.v() },
+                            new jedd.PhysicalDomain[] { T1.v(), T2.v() },
+                            this.bddhier.subtypeRelation());
+        return new jedd.Relation(new jedd.Domain[] { var.v(), obj.v() },
+                                 new jedd.PhysicalDomain[] { V1.v(), H1.v() },
+                                 jedd.Jedd.v().relprod(jedd.Jedd.v().read(jedd.Jedd.v().relprod(jedd.Jedd.v().read(jedd.Jedd.v().replace(this.varNodeType,
+                                                                                                                                         new jedd.PhysicalDomain[] { T1.v() },
+                                                                                                                                         new jedd.PhysicalDomain[] { T2.v() })),
+                                                                                                hier,
+                                                                                                new jedd.PhysicalDomain[] { T2.v() })),
+                                                       this.allocNodeType,
+                                                       new jedd.PhysicalDomain[] { T1.v() }));
     }
     
     int lastAllocNode = 0;
@@ -112,6 +128,37 @@ public final class BDDTypeManager extends AbstractTypeManager {
         this.lastVarNode = vnNumb.size();
         tmp.eq(jedd.Jedd.v().falseBDD());
         tmp2.eq(jedd.Jedd.v().falseBDD());
+        this.bddhier.update();
+        final jedd.Relation bddts =
+          new jedd.Relation(new jedd.Domain[] { subt.v(), supt.v() },
+                            new jedd.PhysicalDomain[] { T1.v(), T2.v() },
+                            this.bddhier.subtypeRelation());
+        bddts.eq(jedd.Jedd.v().intersect(jedd.Jedd.v().read(bddts),
+                                         jedd.Jedd.v().project(jedd.Jedd.v().replace(this.varNodeType,
+                                                                                     new jedd.PhysicalDomain[] { T1.v() },
+                                                                                     new jedd.PhysicalDomain[] { T2.v() }),
+                                                               new jedd.PhysicalDomain[] { V1.v() })));
+        bddts.eq(jedd.Jedd.v().intersect(jedd.Jedd.v().read(bddts),
+                                         jedd.Jedd.v().project(this.allocNodeType,
+                                                               new jedd.PhysicalDomain[] { H1.v() })));
+        if (jedd.Jedd.v().equals(jedd.Jedd.v().read(bddts), this.typeSubtype)) {
+            System.out.println("bdd and non-bdd hierarchy match");
+        } else {
+            System.out.println("bdd and non-bdd hierarchy don\'t match");
+            System.out.println("size of bdd: " +
+                               new jedd.Relation(new jedd.Domain[] { supt.v(), subt.v() },
+                                                 new jedd.PhysicalDomain[] { T2.v(), T1.v() },
+                                                 bddts).size() +
+                               " size of non-bdd: " +
+                               new jedd.Relation(new jedd.Domain[] { supt.v(), subt.v() },
+                                                 new jedd.PhysicalDomain[] { T2.v(), T1.v() },
+                                                 this.typeSubtype).size());
+            System.out.println("missing pairs: ");
+            System.out.println(new jedd.Relation(new jedd.Domain[] { supt.v(), subt.v() },
+                                                 new jedd.PhysicalDomain[] { T2.v(), T1.v() },
+                                                 jedd.Jedd.v().minus(jedd.Jedd.v().read(bddts),
+                                                                     this.typeSubtype)).toString());
+        }
     }
     
     final jedd.Relation typeSubtype =
@@ -135,4 +182,6 @@ public final class BDDTypeManager extends AbstractTypeManager {
     HashSet seenVTypes = new HashSet();
     
     HashSet seenATypes = new HashSet();
+    
+    private BDDHierarchy bddhier;
 }

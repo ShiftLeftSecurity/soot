@@ -34,6 +34,7 @@ import java.util.*;
 public final class BDDTypeManager extends AbstractTypeManager {
     public BDDTypeManager( BDDPAG bddpag ) {
         super(bddpag);
+        bddhier = new BDDHierarchy();
     }
     final public void clearTypeMask() {
         lastAllocNode = 0;
@@ -51,9 +52,17 @@ public final class BDDTypeManager extends AbstractTypeManager {
         }
         update();
     }
+    /*
     final public <var:V1, obj:H1> get() {
         update();
         return typeMask;
+    }
+    */
+    final public <var:V1, obj:H1> get() {
+        update();
+        bddhier.update();
+        <subt, supt> hier = bddhier.subtypeRelation();
+        return varNodeType {type} <> hier {supt} {subt} <> allocNodeType {type};
     }
 
     int lastAllocNode = 0;
@@ -129,6 +138,21 @@ public final class BDDTypeManager extends AbstractTypeManager {
 
         tmp = 0B;
         tmp2 = 0B;
+
+        bddhier.update();
+        <subt, supt> bddts = bddhier.subtypeRelation();
+        bddts = bddts & (var=>, type=>supt) varNodeType;
+        bddts = bddts & (obj=>, type=>subt) allocNodeType;
+        if( bddts == typeSubtype ) {
+            System.out.println( "bdd and non-bdd hierarchy match" );
+        } else {
+            System.out.println( "bdd and non-bdd hierarchy don't match" );
+            System.out.println( "size of bdd: "+bddts.size()+" size of non-bdd: "+typeSubtype.size() );
+            System.out.println( "missing pairs: " );
+            System.out.println( (bddts-typeSubtype).toString() );
+        }
+
+
     }
 
     <subt:T1, supt:T2> typeSubtype;
@@ -139,6 +163,9 @@ public final class BDDTypeManager extends AbstractTypeManager {
     <var:V1, obj:H1> typeMask;
     HashSet seenVTypes = new HashSet();
     HashSet seenATypes = new HashSet();
+
+
+    private BDDHierarchy bddhier;
 
 }
 

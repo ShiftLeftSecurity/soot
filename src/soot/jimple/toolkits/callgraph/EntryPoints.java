@@ -50,9 +50,6 @@ public class EntryPoints
         findOrAdd( "java.lang.Object run()" );
     final NumberedString sigForName = Scene.v().getSubSigNumberer().
         findOrAdd( "java.lang.Class forName(java.lang.String)" );
-    final RefType clPrivilegedAction = RefType.v("java.security.PrivilegedAction");
-    final RefType clPrivilegedExceptionAction = RefType.v("java.security.PrivilegedExceptionAction");
-    final RefType clRunnable = RefType.v("java.lang.Runnable");
     private final void addMethod( List set, SootClass cls, NumberedString methodSubSig ) {
         if( cls.declaresMethod( methodSubSig ) ) {
             set.add( cls.getMethod( methodSubSig ) );
