@@ -95,7 +95,6 @@ public class SootMethod
     List exceptions = new ArrayList();
 
     Body activeBody;
-    boolean isPhantom;
     
     /**
      * Hooks for coffi.  Do not use!
@@ -163,26 +162,6 @@ public class SootMethod
     public String getName()
     {
         return name;
-    }
-
-    
-    /**
-        Is this method a phantom method?
-    */
-
-    public boolean isPhantom()
-    {
-        return isPhantom;
-    }
-
-    
-    /**
-        Set the phantom nature of the method.
-    */
-
-    public void setPhantom(boolean value)
-    {
-        isPhantom = value;
     }
 
     public SootClass getDeclaringClass() throws NotDeclaredException
@@ -321,12 +300,8 @@ public class SootMethod
         Returns the Soot signature of this method.  Used to refer to methods unambiguously.
      */
 
-    public MethodSignature getSignature()
+    public String getSignature()
     {
-        return new MethodSignature(getDeclaringClass().getName(), getName(), getParameterTypes(), getReturnType());
-    }
-    
-        /*
         StringBuffer buffer = new StringBuffer();
 
         buffer.append("<'" + getDeclaringClass().getName() + "'");
@@ -350,13 +325,12 @@ public class SootMethod
 
         buffer.append(":" + getReturnType().toString() + ">");
 
-        return buffer.toString(); 
+        return buffer.toString();
     }
-*/
 
     public String toString()
     {
-        return getSignature().toString();
+        return getSignature();
     }
 
     /**

@@ -112,20 +112,17 @@ public class SootClass
 {
     private static char fileSeparator = System.getProperty("file.separator").charAt(0);
 
-    private String name;
-    private int modifiers;
-    private List fields = new ArrayList();
-    private List methods = new ArrayList();
-    private List interfaces = new ArrayList();
+    String name;
+    int modifiers;
+    List fields = new ArrayList();
+    List methods = new ArrayList();
+    List interfaces = new ArrayList();
 
     SootClassManager manager;
     boolean isManaged;
 
-    private SootClass superClass;
+    SootClass superClass;
 
-    private boolean isPhantom;
-
-        
     /**
         Constructs an empty SootClass with the given name and modifiers.
     */
@@ -156,27 +153,6 @@ public class SootClass
         return isManaged;
     }
 
-    
-    /**
-        Is this class a phantom class?
-    */
-
-    public boolean isPhantom()
-    {
-        return isPhantom;
-    }
-
-    
-    /**
-        Set the phantom nature of the class
-    */
-
-    public void setPhantom(boolean value)
-    {
-        isPhantom = value;
-    }
-
-    
     /**
         Returns the SootClassManager of this class.
     */
@@ -220,7 +196,7 @@ public class SootClass
         if(f.isDeclared())
             throw new AlreadyDeclaredException(f.getName());
 
-   /*     
+            /*
         if(declaresField(f.getName()))
             throw new DuplicateNameException(f.getName());
  */
@@ -229,8 +205,6 @@ public class SootClass
 
         f.isDeclared = true;
         f.declaringClass = this;
-        
-        manager.fieldSignatureToField.put(f.getSignature(), f);
     }
 
     /**
@@ -242,7 +216,6 @@ public class SootClass
         if(!f.isDeclared() || f.getDeclaringClass() != this)
             throw new IncorrectDeclarerException(f.getName());
 
-        manager.fieldSignatureToField.remove(f.getSignature());
         fields.remove(f);
         f.isDeclared = false;
     }
@@ -253,11 +226,17 @@ public class SootClass
 
     public SootField getField(String name, Type type) throws ca.mcgill.sable.soot.NoSuchFieldException
     {
-        if(!declaresField(name, type))
-            throw new ca.mcgill.sable.soot.NoSuchFieldException("No field " + name + " in class " + getName());
+        Iterator fieldIt = getFields().iterator();
 
-        else
-            return (SootField) manager.fieldSignatureToField.get(new FieldSignature(getName(), name, type));
+        while(fieldIt.hasNext())
+        {
+            SootField field = (SootField) fieldIt.next();
+
+            if(field.name.equals(name) && field.type.equals(type))
+                return field;
+        }
+
+        throw new ca.mcgill.sable.soot.NoSuchFieldException("No field " + name + " in class " + getName());
     }
 
     /**
@@ -318,56 +297,25 @@ public class SootClass
 
     public boolean declaresField(String name, Type type)
     {
-        return manager.fieldSignatureToField.containsKey(new FieldSignature(getName(), name, type));
-    }
-    
-    public String getFieldSignatureOf(String fieldName, Type type)
-    {
-        StringBuffer buffer = new StringBuffer();
+        Iterator fieldIt = getFields().iterator();
 
-        buffer.append("<'" + getName() + "'");
-        buffer.append(":" + "'" + fieldName + "'");
-        buffer.append(":" + type + ">");
-
-        return buffer.toString();
-    }
-
-    
-    public String getMethodSignatureOf(String methodName, List parameterTypes,
-        Type returnType)
-    {
-        StringBuffer buffer = new StringBuffer();
-
-        buffer.append("<'" + getName() + "'");
-        buffer.append(":'" + methodName + "'");
-        buffer.append(":(");
-
-        Iterator typeIt = parameterTypes.iterator();
-
-        if(typeIt.hasNext())
+        while(fieldIt.hasNext())
         {
-            buffer.append(typeIt.next());
+            SootField field = (SootField) fieldIt.next();
 
-            while(typeIt.hasNext())
-            {
-                buffer.append(",");
-                buffer.append(typeIt.next());
-            }
+            if(field.name.equals(name) &&
+                field.type.equals(type))
+                return true;
         }
 
-        buffer.append(")");
-
-        buffer.append(":" + returnType + ">");
-
-        return buffer.toString();
+        return false;
     }
-    
-    
+
     /**
         Returns the number of methods in this class.
     */
 
-    public int getMethodsCount()
+    public int getMethodCount()
     {
         return methods.size();
     }
@@ -391,11 +339,22 @@ public class SootClass
         ca.mcgill.sable.soot.NoSuchMethodException
     {
 
-        if(!declaresMethod(name, parameterTypes, returnType))
-            throw new ca.mcgill.sable.soot.NoSuchMethodException(getName() + "." + name + "(" + 
-                parameterTypes + ")" + " : " + returnType);
-        else
-            return (SootMethod) manager.methodSignatureToMethod.get(new MethodSignature(getName(), name, parameterTypes, returnType));
+        Iterator methodIt = getMethods().iterator();
+
+        while(methodIt.hasNext())
+        {
+            SootMethod method = (SootMethod) methodIt.next();
+
+            if(method.getName().equals(name) &&
+                parameterTypes.equals(method.getParameterTypes()) &&
+                returnType.equals(method.getReturnType()))
+            {
+                return method;
+            }
+        }
+
+        throw new ca.mcgill.sable.soot.NoSuchMethodException(getName() + "." + name + "(" + 
+            parameterTypes + ")" + " : " + returnType);
     }
 
     /**
@@ -496,7 +455,20 @@ public class SootClass
 
     public boolean declaresMethod(String name, List parameterTypes, Type returnType)
     {
-        return manager.methodSignatureToMethod.containsKey(new MethodSignature(getName(), name, parameterTypes, returnType));
+        Iterator methodIt = getMethods().iterator();
+
+        while(methodIt.hasNext())
+        {
+            SootMethod method = (SootMethod) methodIt.next();
+
+            if(method.getName().equals(name) &&
+                method.getParameterTypes().equals(parameterTypes) &&
+                method.getReturnType().equals(returnType))
+                
+                return true;
+        }
+        
+        return false;
     }
 
     /**
@@ -542,8 +514,6 @@ public class SootClass
         methods.add(m);
         m.isDeclared = true;
         m.declaringClass = this;
-        
-        manager.methodSignatureToMethod.put(m.getSignature(), m);
     }
 
     /**
@@ -555,8 +525,6 @@ public class SootClass
         if(!m.isDeclared() || m.getDeclaringClass() != this)
             throw new IncorrectDeclarerException(m.getName());
 
-        manager.methodSignatureToMethod.remove(m.getSignature());
-        
         methods.remove(m);
         m.isDeclared = false;
     }

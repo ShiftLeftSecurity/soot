@@ -79,6 +79,26 @@ public class SootField
 
     boolean isDeclared = false;
     SootClass declaringClass;
+    boolean isPhantom;
+        
+    /**
+        Is this field a phantom?
+    */
+
+    public boolean isPhantom()
+    {
+        return isPhantom;
+    }
+
+    
+    /**
+        Set the phantom nature of the field.
+    */
+
+    public void setPhantom(boolean value)
+    {
+        isPhantom = value;
+    }
 
     public SootField(String name, Type type, int modifiers)
     {
@@ -99,6 +119,14 @@ public class SootField
         return name;
     }
 
+    
+    public FieldSignature getSignature()
+    {
+        return new FieldSignature(getDeclaringClass().getName(),
+            getName(), getType());
+    }
+    
+/*
     public String getSignature()
     {
         StringBuffer buffer = new StringBuffer();
@@ -108,8 +136,9 @@ public class SootField
         buffer.append(":" + getType() + ">");
 
         return buffer.toString();
-
     }
+  */
+    
     public SootClass getDeclaringClass() throws NotDeclaredException
     {
         if(!isDeclared)
@@ -150,7 +179,7 @@ public class SootField
 
     public String toString()
     {
-        return getSignature();
+        return getSignature().toString();
     }
 
     public String getDeclaration()
