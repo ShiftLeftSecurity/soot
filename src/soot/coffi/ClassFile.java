@@ -36,7 +36,6 @@ import java.io.*;
 import java.util.*;
 import java.util.Enumeration;
 import java.util.Vector;
-import soot.util.SourceLocator;
 import java.util.*;
 import soot.*;
 
@@ -168,35 +167,6 @@ public class ClassFile {
     /** Returns the name of this Class. */
     public String toString() {
 	return (constant_pool[this_class].toString(constant_pool));
-    }
-
-   /** Main entry point for reading in a class file.
-    * The file name is given in the constructor; this opens the
-    * file and reads in the contents, building the representation.
-    * @return <i>true</i> on success.
-    */
-    public boolean loadClassFile() {
-	InputStream f = null;
-	InputStream classFileStream;
-	DataInputStream d;
-	boolean b;
-
-	Timers.v().locatorTimer.start();
-      
-	try {   
-            String cp = soot.Scene.v().getSootClassPath();
-	    if(cp != null)
-		classFileStream = SourceLocator.v().getInputStreamOf(cp, fn);
-	    else
-		classFileStream = SourceLocator.v().getInputStreamOf(fn);
-	} catch(ClassNotFoundException e) {   
-	    Timers.v().locatorTimer.end();
-	    return false;      
-	}
-	
-	Timers.v().locatorTimer.end();
-
-	return loadClassFile(classFileStream);
     }
 
     public boolean loadClassFile(InputStream is) 
@@ -557,7 +527,7 @@ public class ClassFile {
             CONSTANT_Utf8_info cputf8 = new CONSTANT_Utf8_info(d);
             // If an equivalent CONSTANT_Utf8 already exists, we return
             // the pre-existing one and allow cputf8 to be GC'd.
-            cp = (cp_info) G.v().CONSTANT_Utf8_collector().add(cputf8);
+            cp = (cp_info) CONSTANT_Utf8_collector.v().add(cputf8);
             if (debug)
                G.v().out.println("Constant pool[" + i + "]: Utf8 = \"" +
                                   cputf8.convert() + "\"");

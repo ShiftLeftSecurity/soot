@@ -121,12 +121,10 @@ public final class PropBDD extends AbsPropagator {
             outputtedPointsTo.eq(pointsTo);
             SparkScene.v().updateCallGraph();
             objectsBeingStored.eq(jedd.internal.Jedd.v().replace(jedd.internal.Jedd.v().compose(jedd.internal.Jedd.v().read(pag.allStore().get()),
-                                                                                                jedd.internal.Jedd.v().replace(pointsTo,
-                                                                                                                               new PhysicalDomain[] { H1.v() },
-                                                                                                                               new PhysicalDomain[] { H2.v() }),
+                                                                                                pointsTo,
                                                                                                 new PhysicalDomain[] { V1.v() }),
-                                                                 new PhysicalDomain[] { V2.v() },
-                                                                 new PhysicalDomain[] { V1.v() }));
+                                                                 new PhysicalDomain[] { V2.v(), H1.v() },
+                                                                 new PhysicalDomain[] { V1.v(), H2.v() }));
             fieldPt.eqUnion(jedd.internal.Jedd.v().compose(jedd.internal.Jedd.v().read(objectsBeingStored),
                                                            pointsTo,
                                                            new PhysicalDomain[] { V1.v() }));

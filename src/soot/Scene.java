@@ -31,6 +31,7 @@ import soot.options.*;
 
 import soot.util.*;
 import java.util.*;
+import java.io.*;
 import soot.jimple.toolkits.invoke.*;
 import soot.jimple.toolkits.callgraph.*;
 import soot.jimple.toolkits.pointer.*;
@@ -64,7 +65,7 @@ public class Scene  //extends AbstractHost
         kindNumberer.add( Kind.PRIVILEGED );
         kindNumberer.add( Kind.NEWINSTANCE );
     }
-    public static Scene  v() { return G.v().Scene (); }
+    public static Scene  v() { return G.v().soot_Scene (); }
 
     Chain classes = new HashChain();
     Chain applicationClasses = new HashChain();
@@ -153,6 +154,11 @@ public class Scene  //extends AbstractHost
             String optionscp = Options.v().soot_classpath();
             if( optionscp.length() > 0 )
                 sootClassPath = optionscp;
+        }
+        if( sootClassPath == null ) {
+            sootClassPath = System.getProperty("java.class.path")+File.pathSeparator+
+                System.getProperty("java.home")+File.separator+
+                "lib"+File.separator+"rt.jar";
         }
         return sootClassPath;
     }
@@ -279,7 +285,8 @@ public class Scene  //extends AbstractHost
         */
         
         Scene.v().setPhantomRefs(true);
-        SootResolver resolver = new SootResolver();
+        //SootResolver resolver = new SootResolver();
+        SootResolver resolver = SootResolver.v();
         SootClass toReturn = resolver.resolveClassAndSupportClasses(className);
         Scene.v().setPhantomRefs(false);
 
@@ -325,7 +332,7 @@ public class Scene  //extends AbstractHost
 	    return c;
 	}
 	else {          
-	    throw new RuntimeException( System.getProperty("line.separator") + "Aborting: can't find classfile" + className );            
+	    throw new RuntimeException( System.getProperty("line.separator") + "Aborting: can't find classfile " + className );            
 	}
     }
 

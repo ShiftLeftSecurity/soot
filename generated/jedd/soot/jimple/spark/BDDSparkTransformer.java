@@ -17,7 +17,7 @@ import soot.jimple.spark.bdddomains.*;
 public class BDDSparkTransformer extends AbstractSparkTransformer {
     public BDDSparkTransformer(Singletons.Global g) { super(); }
     
-    public static BDDSparkTransformer v() { return G.v().BDDSparkTransformer(); }
+    public static BDDSparkTransformer v() { return G.v().soot_jimple_spark_BDDSparkTransformer(); }
     
     protected void internalTransform(String phaseName, Map options) {  }
 }

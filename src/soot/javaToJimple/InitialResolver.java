@@ -1,4 +1,5 @@
 package soot.javaToJimple;
+import soot.*;
 import java.util.*;
 
 public class InitialResolver {
@@ -19,10 +20,12 @@ public class InitialResolver {
     private HashMap privateAccessMap;
     private HashMap finalsMap;
     private HashMap newToOuterMap;    
+   
     
-    public InitialResolver(){
-    }
+    public  InitialResolver(){}
+    
 
+    
     /**
      * Invokes polyglot and gets the AST for the source given in fullPath
      */
@@ -33,6 +36,7 @@ public class InitialResolver {
         polyglot.frontend.ExtensionInfo extInfo = jtj.initExtInfo(fullPath, locations);
         // only have one compiler - for memory issues
         if (compiler == null) {
+            //System.out.println("make new polyglot compiler");
 		    compiler = new polyglot.frontend.Compiler(extInfo);
         }
         // build ast
@@ -54,9 +58,9 @@ public class InitialResolver {
         }
 
         // all classes may be in map 
-        if (soot.util.SourceLocator.v().getSourceToClassMap() != null) {
-            if (soot.util.SourceLocator.v().getSourceToClassMap().get(name) != null) {
-                name = (String)soot.util.SourceLocator.v().getSourceToClassMap().get(name);
+        if (soot.SourceLocator.v().getSourceToClassMap() != null) {
+            if (soot.SourceLocator.v().getSourceToClassMap().get(name) != null) {
+                name = (String)soot.SourceLocator.v().getSourceToClassMap().get(name);
             }
         }
 
@@ -67,7 +71,7 @@ public class InitialResolver {
     }
     
     // resolves all types and deals with .class literals and asserts
-    public void resolveFromJavaFile(soot.SootClass sc, soot.SootResolver resolver) {
+    public void resolveFromJavaFile(soot.SootClass sc) {
         sootClass = sc;
 
         // add sourcefile tag to Soot class
@@ -102,7 +106,7 @@ public class InitialResolver {
                 className = classType.fullName();
                 
                 while (classType.isNested()){
-                    resolver.assertResolvedClass(classType.outer().toString());
+                    SootResolver.v().assertResolvedClass(classType.outer().toString());
                     StringBuffer sb = new StringBuffer(className);
                     
                     int lastDot = className.lastIndexOf(".");
@@ -122,20 +126,20 @@ public class InitialResolver {
             if (!className.equals("java.lang.String[]")) {
                     
                 //System.out.println("Will resolve class: "+className);    
-                resolver.assertResolvedClass(className);
+                SootResolver.v().assertResolvedClass(className);
             }
             
         }
         
         // resolve Object, StrungBuffer and inner classes
-        resolver.assertResolvedClass("java.lang.Object");
-        resolver.assertResolvedClass("java.lang.StringBuffer");
-        resolver.assertResolvedClass("java.lang.Throwable");
+        SootResolver.v().assertResolvedClass("java.lang.Object");
+        SootResolver.v().assertResolvedClass("java.lang.StringBuffer");
+        SootResolver.v().assertResolvedClass("java.lang.Throwable");
         
         // find and resolve anonymous classes
-        resolveAnonClasses(resolver);
+        resolveAnonClasses(SootResolver.v());
         // find and resolve local classes
-        resolveLocalClasses(resolver);
+        resolveLocalClasses(SootResolver.v());
         
         // determine is ".class" literal is used
         ClassLiteralChecker classLitChecker = new ClassLiteralChecker();
@@ -275,6 +279,7 @@ public class InitialResolver {
     private void createSource(polyglot.ast.SourceFile source){
         
         String simpleName = sootClass.getName();
+        //System.out.println("trying to create source for: "+simpleName);
         if (sootClass.getPackageName() != null) {
             simpleName = simpleName.substring(simpleName.lastIndexOf(".")+1, simpleName.length());
         }
@@ -294,8 +299,9 @@ public class InitialResolver {
                 }
                 else {
                     // if not already there put cdecl name in class to source file map
-                    //System.out.println("class to src map: "+((polyglot.ast.ClassDecl)next).name()+" and "+sootClass.getName());
-                    addToClassToSourceMap(((polyglot.ast.ClassDecl)next).name(), sootClass.getName());                
+                    //System.out.println("class to src map: "+((polyglot.ast.ClassDecl)next).name()+" and "+sootClass.getName()+" reversed");
+                    // its actually a map from class names to the corresponding source file
+                    addToClassToSourceMap(sootClass.getName(), ((polyglot.ast.ClassDecl)next).name());                
                 }
 		    }
 		}
@@ -337,11 +343,17 @@ public class InitialResolver {
 
             if (!found) {
                 // assume its anon class (only option left) 
-                //System.out.println("sootClass name: "+sootClass.getName());
+                //System.out.println("assuming anon inner sootClass name: "+sootClass.getName());
                 int index = sootClass.getName().indexOf("$");
                 int length = sootClass.getName().length();
-                int count = (new Integer(sootClass.getName().substring(index+1, length))).intValue();
+                int count = 0;
+                try {
+                    count = (new Integer(sootClass.getName().substring(index+1, length))).intValue();
                
+                }
+                catch(NumberFormatException e){
+                    throw new RuntimeException("Trying to process: "+sootClass.getName()+" as an anonymous inner class and it fails!");
+                }
                 int counter = 1;
 
                 Iterator anonIt = nestedClassBuilder.getAnonClassBodyList().iterator();
@@ -371,12 +383,13 @@ public class InitialResolver {
             sourceToClassMap = new HashMap();
         }
             
-        if (soot.util.SourceLocator.v().getSourceToClassMap() == null) {
-            soot.util.SourceLocator.v().setSourceToClassMap(sourceToClassMap);
+        if (soot.SourceLocator.v().getSourceToClassMap() == null) {
+            soot.SourceLocator.v().setSourceToClassMap(sourceToClassMap);
         }
             
-        if (!soot.util.SourceLocator.v().getSourceToClassMap().containsKey(className)) {
-            soot.util.SourceLocator.v().addToSourceToClassMap(className, sourceName);
+        if (!soot.SourceLocator.v().getSourceToClassMap().containsKey(className)) {
+            //System.out.println("adding to classSource map className: "+className+" and source: "+sourceName);
+            soot.SourceLocator.v().addToSourceToClassMap(className, sourceName);
         }
     }
     
@@ -395,38 +408,43 @@ public class InitialResolver {
         else {
             sootClass.setSuperclass(typeClass);
         }
-        // add this field
-        soot.SootField field = new soot.SootField("this$0", soot.Scene.v().getSootClass(outerName).getType(), soot.Modifier.FINAL | soot.Modifier.PRIVATE);
-        sootClass.addField(field);
-        
-        // anon classes need to be able to access locals from the outer methods
-        // in which they are declared
         ArrayList finalLocalsFields = new ArrayList();
+        ArrayList params = new ArrayList();
+        ArrayList allParams = new ArrayList();
+        AnonLocalClassInfo info = null;
         if (finalsMap != null){
             if (finalsMap.containsKey(next)){
-                ArrayList finalLocals = (ArrayList)finalsMap.get(next);
-                Iterator fIt = finalLocals.iterator();
-                while (fIt.hasNext()){
-                    polyglot.types.LocalInstance li = (polyglot.types.LocalInstance)((polyglot.util.IdentityKey)fIt.next()).object();
-                    
-                    soot.SootField sf = new soot.SootField("val$"+li.name(), Util.getSootType(li.type()), soot.Modifier.FINAL | soot.Modifier.PRIVATE);
-                    finalLocalsFields.add(sf);
-                    sootClass.addField(sf);
-                }
+                info = (AnonLocalClassInfo)finalsMap.get(next);
             }
+        }
+                
+        // add this field
+        if (!info.inStaticMethod()){ 
+            //only if enclosing method is not static
+            soot.SootField field = new soot.SootField("this$0", soot.Scene.v().getSootClass(outerName).getType(), soot.Modifier.FINAL | soot.Modifier.PRIVATE);
+            sootClass.addField(field);
+        }
+        
+        // anon classes need to be able to access locals from 
+        // the outer methods
+        // in which they are declared
+        Iterator fIt = info.finalFields().iterator();
+        while (fIt.hasNext()){
+            polyglot.types.LocalInstance li = (polyglot.types.LocalInstance)((polyglot.util.IdentityKey)fIt.next()).object();
+                    
+            soot.SootField sf = new soot.SootField("val$"+li.name(), Util.getSootType(li.type()), soot.Modifier.FINAL | soot.Modifier.PRIVATE);
+            finalLocalsFields.add(sf);
+            sootClass.addField(sf);
         }
        
         // handle parameters
-        ArrayList params = new ArrayList();
-        params.add(soot.Scene.v().getSootClass(outerName).getType());
-        if (finalsMap != null){
-            if (finalsMap.containsKey(next)){
-                ArrayList finalLocals = (ArrayList)finalsMap.get(next);
-                Iterator fIt = finalLocals.iterator();
-                while (fIt.hasNext()){
-                    params.add(Util.getSootType(((polyglot.types.LocalInstance)((polyglot.util.IdentityKey)fIt.next()).object()).type()));
-                }
-            }
+        if (!info.inStaticMethod()){
+            params.add(soot.Scene.v().getSootClass(outerName).getType());
+        }
+        ArrayList finalLocals = info.finalFields();
+        Iterator fIt2 = finalLocals.iterator();
+        while (fIt2.hasNext()){
+            params.add(Util.getSootType(((polyglot.types.LocalInstance)((polyglot.util.IdentityKey)fIt2.next()).object()).type()));
         }
        
         // if interface there are no extra params
@@ -434,32 +452,34 @@ public class InitialResolver {
             soot.SootMethod method = new soot.SootMethod("<init>", params, soot.VoidType.v());
             AnonClassInitMethodSource src = new AnonClassInitMethodSource();
             src.outerClassType(soot.Scene.v().getSootClass(outerName).getType());
+            src.inStaticMethod(info.inStaticMethod());
             method.setSource(src);
             sootClass.addMethod(method);
         }
         else {
-            // otherwise add outer class param
-            ArrayList allParams = new ArrayList();
-            allParams.add(soot.Scene.v().getSootClass(outerName).getType());
+            // otherwise add outer class param if not in static meth
+            if (!info.inStaticMethod()){
+                allParams.add(soot.Scene.v().getSootClass(outerName).getType());
+            }
             Iterator aIt = next.arguments().iterator();
             while (aIt.hasNext()){
                 polyglot.types.Type pType = ((polyglot.ast.Expr)aIt.next()).type();
                 allParams.add(Util.getSootType(pType));
             }
-            if (finalsMap != null){
-                if (finalsMap.containsKey(next)){
-                    ArrayList finalLocals = (ArrayList)finalsMap.get(next);
-                    Iterator fIt = finalLocals.iterator();
-                    while (fIt.hasNext()){
-                        allParams.add(Util.getSootType(((polyglot.types.LocalInstance)((polyglot.util.IdentityKey)fIt.next()).object()).type()));
-                    }
-                }
+            ArrayList finalLocals2 = info.finalFields();
+
+                    
+            Iterator fIt3 = finalLocals2.iterator();
+            while (fIt3.hasNext()){
+                allParams.add(Util.getSootType(((polyglot.types.LocalInstance)((polyglot.util.IdentityKey)fIt3.next()).object()).type()));
             }
             soot.SootMethod method = new soot.SootMethod("<init>", allParams, soot.VoidType.v());
         
             AnonClassInitMethodSource src = new AnonClassInitMethodSource();
             src.outerClassType(soot.Scene.v().getSootClass(outerName).getType());
             src.setFieldList(finalLocalsFields);
+            System.out.println("in static: "+info.inStaticMethod());
+            src.inStaticMethod(info.inStaticMethod());
             method.setSource(src);
             sootClass.addMethod(method);
                     
@@ -779,12 +799,18 @@ public class InitialResolver {
             }
         }
         if ((mfc.getLocals() != null) && (mfc.getClassNames() != null)){
-            if (finalsMap == null) {
+            if (finalsMap == null) {// this should maybe always be made new here
                 finalsMap = new HashMap();
             }
+            
             Iterator it = mfc.getClassNames().iterator();
             while (it.hasNext()){
+                AnonLocalClassInfo alci = new AnonLocalClassInfo();
                 ArrayList finalLocals = new ArrayList();
+                // add as first param indictator of method being static
+                if (soot.Modifier.isStatic(sootMethod.getModifiers())){
+                    alci.inStaticMethod(true);
+                }
                 polyglot.ast.New key = (polyglot.ast.New)it.next();
                 LocalUsesChecker luc = new LocalUsesChecker();
                 key.body().visit(luc);
@@ -795,7 +821,8 @@ public class InitialResolver {
                         finalLocals.add(new polyglot.util.IdentityKey(testLocal));
                     }
                 }
-                finalsMap.put(key, finalLocals);
+                alci.finalFields(finalLocals);
+                finalsMap.put(key, alci);
             }
         }
 

@@ -34,7 +34,7 @@ import java.io.*;
 public class SparkScene 
 { 
     public SparkScene( Singletons.Global g ) {}
-    public static SparkScene v() { return G.v().SparkScene(); }
+    public static SparkScene v() { return G.v().soot_jimple_spark_SparkScene(); }
 
     public AbsReachableMethods rm;
     public AbsStaticCallBuilder scgb;

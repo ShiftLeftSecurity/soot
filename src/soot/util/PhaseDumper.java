@@ -113,7 +113,7 @@ public class PhaseDumper {
      * @return Soot's <code>PhaseDumper</code>.
      */
     public static PhaseDumper v() { 
-	return G.v().PhaseDumper(); 
+	return G.v().soot_util_PhaseDumper(); 
     }
 
 
@@ -132,7 +132,7 @@ public class PhaseDumper {
     private static java.io.File makeDirectoryIfMissing(Body b) 
 	throws java.io.IOException {
 	StringBuffer buf = 
-	    new StringBuffer(soot.util.SourceLocator.v().getOutputDir());
+	    new StringBuffer(soot.SourceLocator.v().getOutputDir());
 	buf.append(File.separatorChar);
 	String className = b.getMethod().getDeclaringClass().getName();
 	buf.append(className);

@@ -24,22 +24,35 @@ import soot.toolkits.graph.*;
 import soot.toolkits.scalar.*;
 import soot.tagkit.*;
 import soot.jimple.*;
+import soot.options.*;
 
 /** A body transformer that records parity analysis 
  * information in tags. */
 public class ParityTagger extends BodyTransformer
 { 
 	public ParityTagger( Singletons.Global g ) {}
-    public static ParityTagger v() { return G.v().ParityTagger(); }
+    public static ParityTagger v() { return G.v().soot_jimple_toolkits_annotation_parity_ParityTagger(); }
 
     protected void internalTransform(
             Body b, String phaseName, Map options)
     {
 
         //System.out.println("parity tagger for method: "+b.getMethod().getName());
-        ParityAnalysis a = new ParityAnalysis(
-		new BriefUnitGraph( b ) );
-
+        boolean isInteractive = Options.v().interactive_mode();
+        Options.v().set_interactive_mode(false);
+        ParityAnalysis a;
+        
+        if (isInteractive){
+            SimpleLiveLocals sll = new SimpleLiveLocals(new BriefUnitGraph(b));
+            Options.v().set_interactive_mode(isInteractive);
+        
+            a = new ParityAnalysis(
+		        new BriefUnitGraph( b ) , sll);
+        }
+        else {
+            a = new ParityAnalysis(new BriefUnitGraph(b));
+        }
+        
         Iterator sIt = b.getUnits().iterator();
         while( sIt.hasNext() ) {
 

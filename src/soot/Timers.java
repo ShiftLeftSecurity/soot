@@ -32,7 +32,7 @@ import soot.options.Options;
 public class Timers
 {
     public Timers( Singletons.Global g ) {}
-    public static Timers v() { return G.v().Timers(); }
+    public static Timers v() { return G.v().soot_Timers(); }
 
      public int totalFlowNodes;
 
@@ -143,7 +143,7 @@ public class Timers
 	public Timer readTimer = new soot.Timer();
 
 
-     public void printProfilingInformation()
+    public void printProfilingInformation()
     {                                                   
         long totalTime = totalTimer.getTime();
                 

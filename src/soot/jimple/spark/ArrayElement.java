@@ -29,7 +29,7 @@ public class ArrayElement implements SparkField {
     public ArrayElement( Singletons.Global g ) {
         Scene.v().getFieldNumberer().add(this);
     }
-    public static ArrayElement v() { return G.v().ArrayElement(); }
+    public static ArrayElement v() { return G.v().soot_jimple_spark_ArrayElement(); }
 
     private int number;
 

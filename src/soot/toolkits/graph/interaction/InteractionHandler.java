@@ -7,7 +7,7 @@ import soot.jimple.toolkits.annotation.callgraph.*;
 public class InteractionHandler {
    
     public InteractionHandler(Singletons.Global g){}
-    public static InteractionHandler v() { return G.v().InteractionHandler();}
+    public static InteractionHandler v() { return G.v().soot_toolkits_graph_interaction_InteractionHandler();}
 
     public void handleNewAnalysis(Transform t, Body b){
         // here save current phase name and only send if actual data flow analysis exists
@@ -69,9 +69,11 @@ public class InteractionHandler {
     }
    
     public void handleCallGraphNextMethod(){
-        getGrapher().setNextMethod(getNextMethod());
-        System.out.println("about to handle next method: "+getNextMethod());
-        getGrapher().handleNextMethod();
+        if (!cgDone()){
+            getGrapher().setNextMethod(getNextMethod());
+            System.out.println("about to handle next method: "+getNextMethod());
+            getGrapher().handleNextMethod();
+        }
     }
 
     public void handleCallGraphPart(Object info){
@@ -149,6 +151,14 @@ public class InteractionHandler {
     }
     public boolean currentPhaseEnabled(){
         return currentPhaseEnabled;
+    }
+
+    private boolean cgDone = false;
+    public void cgDone(boolean b){
+        cgDone = b;
+    }
+    public boolean cgDone(){
+        return cgDone;
     }
 
     private boolean doneCurrent;

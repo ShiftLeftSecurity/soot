@@ -193,11 +193,9 @@ public final class BDDHierarchy {
                                                                                      new jedd.PhysicalDomain[] { T2.v(), T3.v() }),
                                                       new jedd.PhysicalDomain[] { T3.v() }));
         closure.eqUnion(jedd.internal.Jedd.v().replace(jedd.internal.Jedd.v().compose(jedd.internal.Jedd.v().read(anySub),
-                                                                                      jedd.internal.Jedd.v().replace(jedd.internal.Jedd.v().replace(closure,
-                                                                                                                                                    new jedd.PhysicalDomain[] { T2.v() },
-                                                                                                                                                    new jedd.PhysicalDomain[] { T3.v() }),
-                                                                                                                     new jedd.PhysicalDomain[] { T1.v() },
-                                                                                                                     new jedd.PhysicalDomain[] { T2.v() }),
+                                                                                      jedd.internal.Jedd.v().replace(closure,
+                                                                                                                     new jedd.PhysicalDomain[] { T1.v(), T2.v() },
+                                                                                                                     new jedd.PhysicalDomain[] { T2.v(), T3.v() }),
                                                                                       new jedd.PhysicalDomain[] { T2.v() }),
                                                        new jedd.PhysicalDomain[] { T3.v() },
                                                        new jedd.PhysicalDomain[] { T2.v() }));

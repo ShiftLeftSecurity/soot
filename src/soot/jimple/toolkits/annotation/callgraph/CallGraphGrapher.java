@@ -15,7 +15,7 @@ import soot.options.*;
 public class CallGraphGrapher extends SceneTransformer
 { 
     public CallGraphGrapher(Singletons.Global g){}
-    public static CallGraphGrapher v() { return G.v().CallGraphGrapher();}
+    public static CallGraphGrapher v() { return G.v().soot_jimple_toolkits_annotation_callgraph_CallGraphGrapher();}
 
     private MethodToContexts methodToContexts;
     private CallGraph cg;
@@ -82,7 +82,7 @@ public class CallGraphGrapher extends SceneTransformer
         G.v().out.println("Running call graph grapher"); 
         if (Options.v().interactive_mode()){
             SootClass sc = Scene.v().getMainClass();
-            SootMethod sm = (SootMethod)sc.getMethods().get(0);
+            SootMethod sm = getFirstMethod(sc);
             ArrayList tgts = getTgtMethods(sm);
             ArrayList srcs = getSrcMethods(sm);
             CallGraphInfo info = new CallGraphInfo(sm, tgts, srcs);
@@ -90,6 +90,17 @@ public class CallGraphGrapher extends SceneTransformer
         }
     }
 
+    private SootMethod getFirstMethod(SootClass sc){
+        ArrayList paramTypes = new ArrayList();
+        paramTypes.add(soot.ArrayType.v(soot.RefType.v("java.lang.String"), 1));
+        if (sc.declaresMethod("main", paramTypes, soot.VoidType.v())){
+            return sc.getMethod("main", paramTypes, soot.VoidType.v());
+        }
+        else {
+            return (SootMethod)sc.getMethods().get(0);
+        }
+    }
+    
     public void handleNextMethod(){
         if (!getNextMethod().hasActiveBody()) return;
         ArrayList tgts = getTgtMethods(getNextMethod());

@@ -27,7 +27,7 @@ import soot.util.*;
 
 public class SparkNumberers {
     public SparkNumberers( Singletons.Global g ) {}
-    public static SparkNumberers v() { return G.v().SparkNumberers(); }
+    public static SparkNumberers v() { return G.v().soot_jimple_spark_SparkNumberers(); }
 
     private ArrayNumberer allocNodeNumberer = new ArrayNumberer();
     public ArrayNumberer allocNodeNumberer() { return allocNodeNumberer; }

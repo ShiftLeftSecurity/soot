@@ -33,7 +33,7 @@ public class DavaPrinter {
     public DavaPrinter(Singletons.Global g) {
     }
     public static DavaPrinter v() {
-        return G.v().DavaPrinter();
+        return G.v().soot_dava_DavaPrinter();
     }
 
     /** Prints the given <code>JimpleBody</code> to the specified <code>PrintWriter</code>. */
@@ -363,7 +363,7 @@ public class DavaPrinter {
             out.println("    " + decl);
             for( Iterator tIt = b.getMethod().getTags().iterator(); tIt.hasNext(); ) {
                 final Tag t = (Tag) tIt.next();
-                if (!Options.v().xml_attributes()){
+                if (Options.v().print_tags_in_output()){
                     out.println(t);
                 }
             }
