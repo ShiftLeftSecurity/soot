@@ -24,8 +24,8 @@ public class Qvar_srcm_stmt_tgtmTrad extends Qvar_srcm_stmt_tgtm {
     
     public void add(final jedd.internal.RelationContainer in) {
         Iterator it =
-          new jedd.internal.RelationContainer(new Attribute[] { stmt.v(), tgtm.v(), var.v(), srcm.v() },
-                                              new PhysicalDomain[] { ST.v(), MT.v(), V1.v(), MS.v() },
+          new jedd.internal.RelationContainer(new Attribute[] { srcm.v(), tgtm.v(), var.v(), stmt.v() },
+                                              new PhysicalDomain[] { MS.v(), MT.v(), V1.v(), ST.v() },
                                               ("in.iterator(new jedd.Attribute[...]) at /tmp/fixing-paddle/s" +
                                                "rc/soot/jimple/paddle/queue/Qvar_srcm_stmt_tgtmTrad.jedd:41," +
                                                "22-24"),

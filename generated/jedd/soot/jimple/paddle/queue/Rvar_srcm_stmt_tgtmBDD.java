@@ -25,8 +25,8 @@ public final class Rvar_srcm_stmt_tgtmBDD extends Rvar_srcm_stmt_tgtm {
     
     public Rvar_srcm_stmt_tgtmBDD(final jedd.internal.RelationContainer bdd, String name) {
         this(name);
-        add(new jedd.internal.RelationContainer(new Attribute[] { stmt.v(), tgtm.v(), var.v(), srcm.v() },
-                                                new PhysicalDomain[] { ST.v(), MT.v(), V1.v(), MS.v() },
+        add(new jedd.internal.RelationContainer(new Attribute[] { srcm.v(), tgtm.v(), var.v(), stmt.v() },
+                                                new PhysicalDomain[] { MS.v(), MT.v(), V1.v(), ST.v() },
                                                 ("add(bdd) at /tmp/fixing-paddle/src/soot/jimple/paddle/queue/" +
                                                  "Rvar_srcm_stmt_tgtmBDD.jedd:33,104-107"),
                                                 bdd));
@@ -52,8 +52,8 @@ public final class Rvar_srcm_stmt_tgtmBDD extends Rvar_srcm_stmt_tgtm {
             public Object next() {
                 if (it == null || !it.hasNext()) {
                     it =
-                      new jedd.internal.RelationContainer(new Attribute[] { stmt.v(), tgtm.v(), var.v(), srcm.v() },
-                                                          new PhysicalDomain[] { ST.v(), MT.v(), V1.v(), MS.v() },
+                      new jedd.internal.RelationContainer(new Attribute[] { srcm.v(), tgtm.v(), var.v(), stmt.v() },
+                                                          new PhysicalDomain[] { MS.v(), MT.v(), V1.v(), ST.v() },
                                                           ("bdd.iterator(new jedd.Attribute[...]) at /tmp/fixing-paddle/" +
                                                            "src/soot/jimple/paddle/queue/Rvar_srcm_stmt_tgtmBDD.jedd:45," +
                                                            "25-28"),
@@ -84,8 +84,8 @@ public final class Rvar_srcm_stmt_tgtmBDD extends Rvar_srcm_stmt_tgtm {
                                                ".jedd:55,44-47"),
                                               bdd);
         bdd.eq(jedd.internal.Jedd.v().falseBDD());
-        return new jedd.internal.RelationContainer(new Attribute[] { stmt.v(), tgtm.v(), var.v(), srcm.v() },
-                                                   new PhysicalDomain[] { ST.v(), MT.v(), V1.v(), MS.v() },
+        return new jedd.internal.RelationContainer(new Attribute[] { srcm.v(), tgtm.v(), var.v(), stmt.v() },
+                                                   new PhysicalDomain[] { MS.v(), MT.v(), V1.v(), ST.v() },
                                                    ("return ret; at /tmp/fixing-paddle/src/soot/jimple/paddle/que" +
                                                     "ue/Rvar_srcm_stmt_tgtmBDD.jedd:57,8-14"),
                                                    ret);

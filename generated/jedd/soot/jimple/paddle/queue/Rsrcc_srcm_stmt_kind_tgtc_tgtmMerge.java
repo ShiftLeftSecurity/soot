@@ -39,8 +39,8 @@ public final class Rsrcc_srcm_stmt_kind_tgtc_tgtmMerge extends Rsrcc_srcm_stmt_k
     }
     
     public jedd.internal.RelationContainer get() {
-        return new jedd.internal.RelationContainer(new Attribute[] { stmt.v(), tgtm.v(), kind.v(), srcm.v(), srcc.v(), tgtc.v() },
-                                                   new PhysicalDomain[] { ST.v(), MT.v(), KD.v(), MS.v(), C1.v(), C2.v() },
+        return new jedd.internal.RelationContainer(new Attribute[] { srcm.v(), srcc.v(), tgtm.v(), stmt.v(), kind.v(), tgtc.v() },
+                                                   new PhysicalDomain[] { MS.v(), C1.v(), MT.v(), ST.v(), KD.v(), C2.v() },
                                                    ("return jedd.internal.Jedd.v().union(jedd.internal.Jedd.v().r" +
                                                     "ead(in1.get()), in2.get()); at /tmp/fixing-paddle/src/soot/j" +
                                                     "imple/paddle/queue/Rsrcc_srcm_stmt_kind_tgtc_tgtmMerge.jedd:" +

@@ -23,8 +23,8 @@ public final class Rsrc_dst_fldBDD extends Rsrc_dst_fld {
     
     public Rsrc_dst_fldBDD(final jedd.internal.RelationContainer bdd, String name) {
         this(name);
-        add(new jedd.internal.RelationContainer(new Attribute[] { fld.v(), src.v(), dst.v() },
-                                                new PhysicalDomain[] { FD.v(), V1.v(), V2.v() },
+        add(new jedd.internal.RelationContainer(new Attribute[] { dst.v(), src.v(), fld.v() },
+                                                new PhysicalDomain[] { V2.v(), V1.v(), FD.v() },
                                                 ("add(bdd) at /tmp/fixing-paddle/src/soot/jimple/paddle/queue/" +
                                                  "Rsrc_dst_fldBDD.jedd:33,86-89"),
                                                 bdd));
@@ -50,8 +50,8 @@ public final class Rsrc_dst_fldBDD extends Rsrc_dst_fld {
             public Object next() {
                 if (it == null || !it.hasNext()) {
                     it =
-                      new jedd.internal.RelationContainer(new Attribute[] { fld.v(), src.v(), dst.v() },
-                                                          new PhysicalDomain[] { FD.v(), V1.v(), V2.v() },
+                      new jedd.internal.RelationContainer(new Attribute[] { dst.v(), src.v(), fld.v() },
+                                                          new PhysicalDomain[] { V2.v(), V1.v(), FD.v() },
                                                           ("bdd.iterator(new jedd.Attribute[...]) at /tmp/fixing-paddle/" +
                                                            "src/soot/jimple/paddle/queue/Rsrc_dst_fldBDD.jedd:45,25-28"),
                                                           bdd).iterator(new Attribute[] { src.v(), dst.v(), fld.v() });
@@ -76,8 +76,8 @@ public final class Rsrc_dst_fldBDD extends Rsrc_dst_fld {
                                                "c/soot/jimple/paddle/queue/Rsrc_dst_fldBDD.jedd:55,33-36"),
                                               bdd);
         bdd.eq(jedd.internal.Jedd.v().falseBDD());
-        return new jedd.internal.RelationContainer(new Attribute[] { fld.v(), src.v(), dst.v() },
-                                                   new PhysicalDomain[] { FD.v(), V1.v(), V2.v() },
+        return new jedd.internal.RelationContainer(new Attribute[] { dst.v(), src.v(), fld.v() },
+                                                   new PhysicalDomain[] { V2.v(), V1.v(), FD.v() },
                                                    ("return ret; at /tmp/fixing-paddle/src/soot/jimple/paddle/que" +
                                                     "ue/Rsrc_dst_fldBDD.jedd:57,8-14"),
                                                    ret);

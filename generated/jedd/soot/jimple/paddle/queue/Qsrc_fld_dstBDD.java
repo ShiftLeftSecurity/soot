@@ -31,8 +31,8 @@ public final class Qsrc_fld_dstBDD extends Qsrc_fld_dst {
             invalidate();
         for (Iterator it = readers.iterator(); it.hasNext(); ) {
             Rsrc_fld_dstBDD reader = (Rsrc_fld_dstBDD) it.next();
-            reader.add(new jedd.internal.RelationContainer(new Attribute[] { fld.v(), src.v(), dst.v() },
-                                                           new PhysicalDomain[] { FD.v(), V1.v(), V2.v() },
+            reader.add(new jedd.internal.RelationContainer(new Attribute[] { dst.v(), src.v(), fld.v() },
+                                                           new PhysicalDomain[] { V2.v(), V1.v(), FD.v() },
                                                            ("reader.add(in) at /tmp/fixing-paddle/src/soot/jimple/paddle/" +
                                                             "queue/Qsrc_fld_dstBDD.jedd:40,12-18"),
                                                            in));

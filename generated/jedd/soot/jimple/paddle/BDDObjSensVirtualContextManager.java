@@ -25,8 +25,8 @@ public class BDDObjSensVirtualContextManager extends AbsVirtualContextManager {
                                                "/BDDObjSensVirtualContextManager.jedd:35,45-51"),
                                               jedd.internal.Jedd.v().project(in.get(),
                                                                              new jedd.PhysicalDomain[] { V1.v() }));
-        out.add(new jedd.internal.RelationContainer(new jedd.Attribute[] { stmt.v(), tgtm.v(), kind.v(), srcm.v(), srcc.v(), tgtc.v() },
-                                                    new jedd.PhysicalDomain[] { ST.v(), MT.v(), KD.v(), MS.v(), C1.v(), C2.v() },
+        out.add(new jedd.internal.RelationContainer(new jedd.Attribute[] { srcm.v(), srcc.v(), tgtm.v(), stmt.v(), kind.v(), tgtc.v() },
+                                                    new jedd.PhysicalDomain[] { MS.v(), C1.v(), MT.v(), ST.v(), KD.v(), C2.v() },
                                                     ("out.add(jedd.internal.Jedd.v().replace(newOut, new jedd.Phys" +
                                                      "icalDomain[...], new jedd.PhysicalDomain[...])) at /tmp/fixi" +
                                                      "ng-paddle/src/soot/jimple/paddle/BDDObjSensVirtualContextMan" +

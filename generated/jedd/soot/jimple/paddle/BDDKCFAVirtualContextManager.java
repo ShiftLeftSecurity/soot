@@ -45,19 +45,19 @@ public class BDDKCFAVirtualContextManager extends AbsVirtualContextManager {
                                               jedd.internal.Jedd.v().copy(jedd.internal.Jedd.v().project(jedd.internal.Jedd.v().replace(in.get(),
                                                                                                                                         new PhysicalDomain[] { C2.v() },
                                                                                                                                         new PhysicalDomain[] { C1.v() }),
-                                                                                                         new PhysicalDomain[] { V1.v(), H1.v() }),
+                                                                                                         new PhysicalDomain[] { H1.v(), V1.v() }),
                                                                           new PhysicalDomain[] { ST.v() },
                                                                           new PhysicalDomain[] { C2.v() }));
         newEdges.eq(jedd.internal.Jedd.v().cast((jedd.internal.RelationContainer)
-                                                  new jedd.internal.RelationContainer(new Attribute[] { stmt.v(), tgtm.v(), kind.v(), srcm.v(), srcc.v(), tgtc.v() },
-                                                                                      new PhysicalDomain[] { ST.v(), MT.v(), KD.v(), MS.v(), C1.v(), C2.v() },
+                                                  new jedd.internal.RelationContainer(new Attribute[] { srcm.v(), srcc.v(), tgtm.v(), stmt.v(), kind.v(), tgtc.v() },
+                                                                                      new PhysicalDomain[] { MS.v(), C1.v(), MT.v(), ST.v(), KD.v(), C2.v() },
                                                                                       ("newEdges.applyShifter(shifter) at /tmp/fixing-paddle/src/soo" +
                                                                                        "t/jimple/paddle/BDDKCFAVirtualContextManager.jedd:52,12-20"),
                                                                                       newEdges).applyShifter(shifter),
                                                 new Attribute[] { srcc.v(), srcm.v(), stmt.v(), kind.v(), tgtc.v(), tgtm.v() },
                                                 new PhysicalDomain[] { C1.v(), MS.v(), ST.v(), KD.v(), C2.v(), MT.v() }));
-        out.add(new jedd.internal.RelationContainer(new Attribute[] { stmt.v(), tgtm.v(), kind.v(), srcm.v(), srcc.v(), tgtc.v() },
-                                                    new PhysicalDomain[] { ST.v(), MT.v(), KD.v(), MS.v(), C1.v(), C2.v() },
+        out.add(new jedd.internal.RelationContainer(new Attribute[] { srcm.v(), srcc.v(), tgtm.v(), stmt.v(), kind.v(), tgtc.v() },
+                                                    new PhysicalDomain[] { MS.v(), C1.v(), MT.v(), ST.v(), KD.v(), C2.v() },
                                                     ("out.add(newEdges) at /tmp/fixing-paddle/src/soot/jimple/padd" +
                                                      "le/BDDKCFAVirtualContextManager.jedd:53,8-11"),
                                                     newEdges));

@@ -39,8 +39,8 @@ public final class Rsrcc_src_fld_dstc_dstMerge extends Rsrcc_src_fld_dstc_dst {
     }
     
     public jedd.internal.RelationContainer get() {
-        return new jedd.internal.RelationContainer(new Attribute[] { fld.v(), src.v(), dstc.v(), srcc.v(), dst.v() },
-                                                   new PhysicalDomain[] { FD.v(), V1.v(), C2.v(), C1.v(), V2.v() },
+        return new jedd.internal.RelationContainer(new Attribute[] { dst.v(), src.v(), srcc.v(), fld.v(), dstc.v() },
+                                                   new PhysicalDomain[] { V2.v(), V1.v(), C1.v(), FD.v(), C2.v() },
                                                    ("return jedd.internal.Jedd.v().union(jedd.internal.Jedd.v().r" +
                                                     "ead(in1.get()), in2.get()); at /tmp/fixing-paddle/src/soot/j" +
                                                     "imple/paddle/queue/Rsrcc_src_fld_dstc_dstMerge.jedd:52,8-14"),

@@ -24,8 +24,8 @@ public class Qctxt_methodDebug extends Qctxt_method {
     
     public void add(final jedd.internal.RelationContainer in) {
         Iterator it =
-          new jedd.internal.RelationContainer(new Attribute[] { ctxt.v(), method.v() },
-                                              new PhysicalDomain[] { C1.v(), MS.v() },
+          new jedd.internal.RelationContainer(new Attribute[] { method.v(), ctxt.v() },
+                                              new PhysicalDomain[] { MS.v(), C1.v() },
                                               ("in.iterator(new jedd.Attribute[...]) at /tmp/fixing-paddle/s" +
                                                "rc/soot/jimple/paddle/queue/Qctxt_methodDebug.jedd:40,22-24"),
                                               in).iterator(new Attribute[] { ctxt.v(), method.v() });
