@@ -144,6 +144,7 @@ public class PackManager {
             p.add(new Transform("wjap.umt", UnreachableMethodsTagger.v()));
             p.add(new Transform("wjap.uft", UnreachableFieldsTagger.v()));
             p.add(new Transform("wjap.tqt", TightestQualifiersTagger.v()));
+            p.add(new Transform("wjap.cgg", CallGraphGrapher.v()));
         }
 
         // Shimple pack
@@ -193,7 +194,7 @@ public class PackManager {
             p.add(new Transform("jap.rdtagger", ReachingDefsTagger.v()));
             p.add(new Transform("jap.lvtagger", LiveVarsTagger.v()));
             p.add(new Transform("jap.che", CastCheckEliminatorDumper.v()));
-	    
+	       
         }
 
         // CFG Viewer 
@@ -509,7 +510,7 @@ public class PackManager {
                 }
             }
             
-            PackManager.v().getPack("cfg").apply(m.retrieveActiveBody());
+            //PackManager.v().getPack("cfg").apply(m.retrieveActiveBody());
 
             if (produceGrimp) {
                 m.setActiveBody(Grimp.v().newBody(m.getActiveBody(), "gb"));

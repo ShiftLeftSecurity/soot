@@ -27,7 +27,8 @@ public class InitialResolver {
      * Invokes polyglot and gets the AST for the source given in fullPath
      */
     public void formAst(String fullPath, List locations){
-   
+    
+        //System.out.println("full source path: "+fullPath);
         JavaToJimple jtj = new JavaToJimple();
         polyglot.frontend.ExtensionInfo extInfo = jtj.initExtInfo(fullPath, locations);
         // only have one compiler - for memory issues
@@ -37,11 +38,41 @@ public class InitialResolver {
         // build ast
         astNode = jtj.compile(compiler, fullPath, extInfo);
     }
+
+    public void setAst(polyglot.ast.Node ast) {
+	astNode = ast;
+    }
    
+    private void addSourceFileTag(soot.SootClass sc){
+        if (sc.getTag("SourceFileTag") != null) return;
+        String name = sc.getName();
+
+        // inner classes are found in outer class source files
+        int index = name.indexOf("$");
+        if (index != -1){
+            name = sc.getName().substring(0, index);
+        }
+
+        // all classes may be in map 
+        if (soot.util.SourceLocator.v().getSourceToClassMap() != null) {
+            if (soot.util.SourceLocator.v().getSourceToClassMap().get(name) != null) {
+                name = (String)soot.util.SourceLocator.v().getSourceToClassMap().get(name);
+            }
+        }
+
+        // add file extension
+        name += ".java";
+        sc.addTag(new soot.tagkit.SourceFileTag(name));
+        //System.out.println("added to sc: "+sc.getName()+" sourcefiletag: "+name);
+    }
+    
     // resolves all types and deals with .class literals and asserts
     public void resolveFromJavaFile(soot.SootClass sc, soot.SootResolver resolver) {
         sootClass = sc;
 
+        // add sourcefile tag to Soot class
+        addSourceFileTag(sc);
+        
         // get types and resolve them in the Scene
         TypeListBuilder typeListBuilder = new TypeListBuilder();
         
@@ -90,7 +121,7 @@ public class InitialResolver {
             
             if (!className.equals("java.lang.String[]")) {
                     
-                    
+                //System.out.println("Will resolve class: "+className);    
                 resolver.assertResolvedClass(className);
             }
             
@@ -247,7 +278,8 @@ public class InitialResolver {
         if (sootClass.getPackageName() != null) {
             simpleName = simpleName.substring(simpleName.lastIndexOf(".")+1, simpleName.length());
         }
-        
+       
+        //System.out.println("soot class name: " +simpleName);
         Iterator declsIt = source.decls().iterator();
        
         boolean found = false;
@@ -255,12 +287,14 @@ public class InitialResolver {
 		while (declsIt.hasNext()){
 			Object next = declsIt.next();
 			if (next instanceof polyglot.ast.ClassDecl) {
+                //System.out.println("source decl: "+next);
                 if (((polyglot.ast.ClassDecl)next).name().equals(simpleName)){
 				    createClassDecl((polyglot.ast.ClassDecl)next);
                     found = true;
                 }
                 else {
                     // if not already there put cdecl name in class to source file map
+                    //System.out.println("class to src map: "+((polyglot.ast.ClassDecl)next).name()+" and "+sootClass.getName());
                     addToClassToSourceMap(((polyglot.ast.ClassDecl)next).name(), sootClass.getName());                
                 }
 		    }
@@ -275,7 +309,9 @@ public class InitialResolver {
             while (nestedDeclsIt.hasNext() && !found){
                 
                 polyglot.ast.ClassDecl nextDecl = (polyglot.ast.ClassDecl)nestedDeclsIt.next();
+                //System.out.println("nextDecl: "+nextDecl);
                 polyglot.types.ClassType type = (polyglot.types.ClassType)nextDecl.type();
+                //System.out.println("nested class type: "+type);
                 if (type.isLocal() && !type.isAnonymous()) {
                    
                     if (localClassMap.containsKey(sootClass.getName())){
@@ -291,6 +327,7 @@ public class InitialResolver {
                         type = type.outer();
                     }
                     String realName = outerName+"$"+nextDecl.name();
+                    //System.out.println("realName: "+realName);
                     if (realName.equals(sootClass.getName())){
                         createClassDecl(nextDecl);
                         found = true;
@@ -300,6 +337,7 @@ public class InitialResolver {
 
             if (!found) {
                 // assume its anon class (only option left) 
+                //System.out.println("sootClass name: "+sootClass.getName());
                 int index = sootClass.getName().indexOf("$");
                 int length = sootClass.getName().length();
                 int count = (new Integer(sootClass.getName().substring(index+1, length))).intValue();
@@ -705,7 +743,7 @@ public class InitialResolver {
 		addProcedureToClass(sootMethod);
 	
         if (procedure.position() != null){
-            if (procedure.position() instanceof soot.javaToJimple.jj.DPosition){
+            /*if (procedure.position() instanceof soot.javaToJimple.jj.DPosition){
                 soot.javaToJimple.jj.DPosition dpos = (soot.javaToJimple.jj.DPosition)procedure.position();
         
                 if (procedure.body() != null) {
@@ -715,12 +753,13 @@ public class InitialResolver {
                         Util.addLnPosTags(sootMethod, dpos.line(), bodyDpos.endLine(), dpos.column(), bodyDpos.endCol());
                         }
                     }
+                }*/
+                if (procedure.body() != null) {
+                    if (procedure.body().position() != null) {
+                        Util.addLnPosTags(sootMethod, procedure.position().line(), procedure.body().position().endLine(), procedure.position().column(), procedure.body().position().endColumn());
+                    }
                 }
-            }
-            else {
-            }
-        }
-        else {
+                
         }
 
         //handle final local map for local and anon classes

@@ -2,6 +2,7 @@ package soot.toolkits.graph.interaction;
 
 import soot.*;
 import soot.toolkits.graph.*;
+import soot.jimple.toolkits.annotation.callgraph.*;
 
 public class InteractionHandler {
    
@@ -14,6 +15,7 @@ public class InteractionHandler {
             String name = t.getPhaseName()+" for method: "+b.getMethod().getName();
             currentPhaseName(name);
             currentPhaseEnabled(true);
+            doneCurrent(false);
         }
         else {
             currentPhaseEnabled(false);
@@ -23,6 +25,7 @@ public class InteractionHandler {
 
     public void handleCfgEvent(DirectedGraph g){
         if (currentPhaseEnabled()){
+            G.v().out.println("Analyzing: "+currentPhaseName());
             doInteraction(new InteractionEvent(IInteractionConstants.NEW_ANALYSIS, currentPhaseName()));
         }
         if (isInteractThisAnalysis()){
@@ -32,16 +35,66 @@ public class InteractionHandler {
 
     public void handleBeforeAnalysisEvent(Object beforeFlow){
         if (isInteractThisAnalysis()){
-            doInteraction(new InteractionEvent(IInteractionConstants.NEW_BEFORE_ANALYSIS_INFO, beforeFlow));
+            if (autoCon()){
+                doInteraction(new InteractionEvent(IInteractionConstants.NEW_BEFORE_ANALYSIS_INFO_AUTO, beforeFlow));
+            }
+            else{
+                doInteraction(new InteractionEvent(IInteractionConstants.NEW_BEFORE_ANALYSIS_INFO, beforeFlow));
+            }
         }
     }
 
     public void handleAfterAnalysisEvent(Object afterFlow){
         if (isInteractThisAnalysis()){
-            doInteraction(new InteractionEvent(IInteractionConstants.NEW_AFTER_ANALYSIS_INFO, afterFlow));
+            if (autoCon()){
+                doInteraction(new InteractionEvent(IInteractionConstants.NEW_AFTER_ANALYSIS_INFO_AUTO, afterFlow));
+            }
+            else {
+                doInteraction(new InteractionEvent(IInteractionConstants.NEW_AFTER_ANALYSIS_INFO, afterFlow));
+            }
         }
     }
 
+    public void handleTransformDone(Transform t, Body b){
+        doneCurrent(true);
+        if (isInteractThisAnalysis()){
+            doInteraction(new InteractionEvent(IInteractionConstants.DONE, null));
+        }
+    }
+   
+    public void handleCallGraphStart(Object info, CallGraphGrapher grapher){
+        setGrapher(grapher);
+        doInteraction(new InteractionEvent(IInteractionConstants.CALL_GRAPH_START, info));
+        handleCallGraphNextMethod();
+    }
+   
+    public void handleCallGraphNextMethod(){
+        getGrapher().setNextMethod(getNextMethod());
+        System.out.println("about to handle next method: "+getNextMethod());
+        getGrapher().handleNextMethod();
+    }
+
+    public void handleCallGraphPart(Object info){
+        doInteraction(new InteractionEvent(IInteractionConstants.CALL_GRAPH_PART, info));
+        handleCallGraphNextMethod();
+    }
+        
+    private CallGraphGrapher grapher;
+    private void setGrapher(CallGraphGrapher g){
+        grapher = g;
+    }
+    private CallGraphGrapher getGrapher(){
+        return grapher;
+    }
+
+    private SootMethod nextMethod;
+    public void setNextMethod(SootMethod m){
+        nextMethod = m;
+    }
+    private SootMethod getNextMethod(){
+        return nextMethod;
+    }
+    
     private synchronized void doInteraction(InteractionEvent event){
         getInteractionListener().setEvent(event);
         getInteractionListener().handleEvent();
@@ -96,5 +149,21 @@ public class InteractionHandler {
     }
     public boolean currentPhaseEnabled(){
         return currentPhaseEnabled;
+    }
+
+    private boolean doneCurrent;
+    public void doneCurrent(boolean b){
+        doneCurrent = b;
+    }
+    public boolean doneCurrent(){
+        return doneCurrent;
+    }
+
+    private boolean autoCon;
+    public void autoCon(boolean b){
+        autoCon = b;
+    }
+    public boolean autoCon(){
+        return autoCon;
     }
 }

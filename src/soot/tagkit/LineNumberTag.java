@@ -49,6 +49,11 @@ public class LineNumberTag implements Tag
 	return v;
     }
 
+    public int getLineNumber()
+    {
+	return line_number;
+    }
+
     public String toString()
     {
    	return ""+line_number;

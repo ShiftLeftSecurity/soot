@@ -17,7 +17,10 @@ import org.eclipse.swt.widgets.*;
 import org.eclipse.jface.dialogs.*;
 import org.eclipse.swt.*;
 import ca.mcgill.sable.soot.*;
+import ca.mcgill.sable.soot.callgraph.*;
 import ca.mcgill.sable.soot.cfg.*;
+import soot.jimple.toolkits.annotation.callgraph.*;
+import soot.*;
 
 /**
  * @author jlhotak
@@ -35,6 +38,7 @@ public class InteractionController /*extends Thread*/ implements IInteractionCon
 	private SootRunner parent;
 	private soot.toolkits.graph.DirectedGraph currentGraph;
 	private ModelCreator mc;
+	private CallGraphGenerator generator;
 	
 	/**
 	 * 
@@ -79,8 +83,19 @@ public class InteractionController /*extends Thread*/ implements IInteractionCon
 			handleAfterFlowEvent(getEvent().info());
 			// process and update graph ui
 		}
+		else if (getEvent().type() == IInteractionConstants.NEW_BEFORE_ANALYSIS_INFO_AUTO){
+			
+			handleBeforeFlowEventAuto(getEvent().info());
+			// process and update graph ui
+		}
+		else if (getEvent().type() == IInteractionConstants.NEW_AFTER_ANALYSIS_INFO_AUTO){
+			handleAfterFlowEventAuto(getEvent().info());
+			// process and update graph ui
+		}
 		else if (getEvent().type() == IInteractionConstants.DONE){
 			// remove controller and listener from soot
+			System.out.println("done event has occured");
+			waitForContinue();
 		}
 		else if (getEvent().type() == IInteractionConstants.CLEARTO){
 			handleClearEvent(getEvent().info());
@@ -89,7 +104,17 @@ public class InteractionController /*extends Thread*/ implements IInteractionCon
 			handleReplaceEvent(getEvent().info());
 		}
 		
+		else if (getEvent().type() == IInteractionConstants.CALL_GRAPH_START){
+			handleCallGraphStartEvent(getEvent().info());
+		}
 		
+		else if (getEvent().type() == IInteractionConstants.CALL_GRAPH_NEXT_METHOD){
+			handleCallGraphNextMethodEvent(getEvent().info());
+		}
+		
+		else if (getEvent().type() == IInteractionConstants.CALL_GRAPH_PART){
+			handleCallGraphPartEvent(getEvent().info());
+		}
 	}	
 	
 	private Shell getShell(){
@@ -107,7 +132,7 @@ public class InteractionController /*extends Thread*/ implements IInteractionCon
 		
 		SootPlugin.getDefault().setDataKeeper(new DataKeeper(this));
 		
-		final Shell myShell = getShell();
+		/*final Shell myShell = getShell();
 		
 		final boolean [] result = new boolean[1];
 		final String analysisName = info.toString();
@@ -118,8 +143,8 @@ public class InteractionController /*extends Thread*/ implements IInteractionCon
 		boolean res = msgDialog.getReturnCode() == 0 ? true: false;
 		result[0] = res;
 			};
-		});
-		InteractionHandler.v().setInteractThisAnalysis(result[0]);
+		});*/
+		InteractionHandler.v().setInteractThisAnalysis(true);//result[0]);
 		
 	}
 	
@@ -133,8 +158,8 @@ public class InteractionController /*extends Thread*/ implements IInteractionCon
 				
 		if (cfg instanceof soot.toolkits.graph.UnitGraph){
 			soot.Body body = ((soot.toolkits.graph.UnitGraph)cfg).getBody();
-			System.out.println("method: "+body.getMethod().getName()+" class: "+body.getMethod().getDeclaringClass().getName());
-			editorName = body.getMethod().getDeclaringClass().getName()+"::"+body.getMethod().getName();
+			//System.out.println("method: "+body.getMethod().getName()+" class: "+body.getMethod().getDeclaringClass().getName());
+			editorName = body.getMethod().getDeclaringClass().getName()+"."+body.getMethod().getName();
 		}
 		mc.setEditorName(editorName);
 		
@@ -145,6 +170,7 @@ public class InteractionController /*extends Thread*/ implements IInteractionCon
 				mc.displayModel();
 			}
 		});
+		InteractionHandler.v().autoCon(false);
 		
 		waitForContinue();
 		
@@ -155,6 +181,12 @@ public class InteractionController /*extends Thread*/ implements IInteractionCon
 	}
 	
 	private void handleBeforeFlowEvent(Object info){
+		handleBeforeEvent(info);
+		waitForContinue();
+		
+	}
+	
+	private void handleBeforeEvent(Object info){
 		FlowInfo fi = (FlowInfo)info;
 		SootPlugin.getDefault().getDataKeeper().addFlowInfo(info);
 		
@@ -169,11 +201,20 @@ public class InteractionController /*extends Thread*/ implements IInteractionCon
 				mc.updateNode(flowBefore);
 		};
 		});
-		waitForContinue();
+	}
+	
+	private void handleBeforeFlowEventAuto(Object info){
+		handleBeforeEvent(info);
 		
 	}
 	
 	private void handleAfterFlowEvent(Object fi){
+		handleAfterEvent(fi);
+		waitForContinue();
+		
+	}
+	
+	private void handleAfterEvent(Object fi){
 		final Shell myShell = getShell();
 		//final String flowInfo = ((FlowInfo)fi).info().toString();
 		SootPlugin.getDefault().getDataKeeper().addFlowInfo(fi);
@@ -187,8 +228,11 @@ public class InteractionController /*extends Thread*/ implements IInteractionCon
 				mc.updateNode(flowAfter);
 			};
 		});
-		waitForContinue();
 		
+	}
+	
+	private void handleAfterFlowEventAuto(Object fi){
+		handleAfterEvent(fi);
 	}
 	
 	private void handleClearEvent(Object info){
@@ -210,6 +254,42 @@ public class InteractionController /*extends Thread*/ implements IInteractionCon
 			public void run(){
 				mc.updateNode(fi);
 			};
+		});
+		//waitForContinue();
+	}
+	
+	
+	private void handleCallGraphStartEvent(Object info){
+		System.out.println("about to make new Generator");
+        setGenerator(new CallGraphGenerator());
+		System.out.println("made new call graph generator");
+        System.out.println("info :"+info.getClass());
+        getGenerator().setInfo((CallGraphInfo)info);
+		getGenerator().setController(this);
+		final CallGraphGenerator cgg = getGenerator();
+		getDisplay().syncExec(new Runnable(){
+			public void run(){
+				cgg.run();
+			}
+		});
+		waitForContinue();
+	}
+	
+	private void handleCallGraphNextMethodEvent(Object info){
+		SootMethod meth = (SootMethod)info;
+		InteractionHandler.v().setNextMethod(meth);
+		System.out.println("next meth: "+meth.getName());
+		InteractionHandler.v().setInteractionCon();
+	}
+	
+	private void handleCallGraphPartEvent(Object info){
+		final CallGraphGenerator cgg = getGenerator();
+		final Object cgInfo = info;
+		getDisplay().syncExec(new Runnable(){
+			public void run(){
+				System.out.println("received next meth");
+				cgg.addToGraph(cgInfo);
+		}
 		});
 		waitForContinue();
 	}
@@ -319,6 +399,20 @@ public class InteractionController /*extends Thread*/ implements IInteractionCon
 	 */
 	public void setMc(ModelCreator creator) {
 		mc = creator;
+	}
+
+	/**
+	 * @return
+	 */
+	public CallGraphGenerator getGenerator() {
+		return generator;
+	}
+
+	/**
+	 * @param generator
+	 */
+	public void setGenerator(CallGraphGenerator generator) {
+		this.generator = generator;
 	}
 
 }

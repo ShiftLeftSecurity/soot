@@ -8,9 +8,9 @@
 
    <runtime>
       <library name="soot-plugin.jar"/>
-      <library name="sootclasses-2.1.0-custom.jar"/>
+      <library name="soot/classes/"/>
       <library name="jasminclasses-sable-1.2.jar"/>
-      <library name="polyglot-1.1.0.jar"/>
+      <library name="polyglot-1.2.0.jar"/>
       <library name="myclasses/"/>
    </runtime>
    <requires>
@@ -32,6 +32,7 @@
       <import plugin="org.eclipse.swt"/>
       <import plugin="org.eclipse.draw2d"/>
       <import plugin="org.eclipse.gef"/>
+      <import plugin="ca.mcgill.sable.graph"/>
    </requires>
 
 	
@@ -270,7 +271,7 @@
                enablesFor="+"
                id="CFG Tests">
          </action>
-         <action
+         <!--<action
    			label="Continue"
    			style="push"
    			icon="icons/resume_co.gif"
@@ -287,7 +288,7 @@
    			toolbarPath="Normal/Soot"
    			class="ca.mcgill.sable.soot.interaction.InteractionBackStepper"
    			id="ca.mcgill.sable.soot.stepback">
-   		</action>
+   		</action>-->
         <!-- <action
                label="Visualiztion Manipulations"
                class="ca.mcgill.sable.soot.attributes.VisManLauncher"

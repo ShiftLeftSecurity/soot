@@ -168,3 +168,4 @@ ThrowableSet.Manager
 UnitThrowAnalysis
 PedanticThrowAnalysis
 TrapTightener
+CallGraphGrapher

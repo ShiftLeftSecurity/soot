@@ -1109,4 +1109,10 @@ public class Singletons {
         return instanceTrapTightener;
     }
 
+    private CallGraphGrapher instanceCallGraphGrapher;
+    public CallGraphGrapher CallGraphGrapher() {
+        if( instanceCallGraphGrapher == null ) instanceCallGraphGrapher = new CallGraphGrapher( g );
+        return instanceCallGraphGrapher;
+    }
+
 }

@@ -1,4 +1,4 @@
-/*
+	/*
  * Created on Jan 15, 2004
  *
  * To change the template for this generated file go to
@@ -14,6 +14,7 @@ import org.eclipse.ui.*;
 import org.eclipse.core.runtime.*;
 import org.eclipse.core.resources.*;
 import soot.toolkits.graph.interaction.*;
+import soot.toolkits.scalar.*;
 
 /**
  * @author jlhotak
@@ -47,9 +48,9 @@ public class ModelCreator {
 			CFGNode cfgNode;
 			if (!getNodeMap().containsKey(node)){
 				cfgNode = new CFGNode();
-				initializeNode(node, cfgNode);
+				initializeNode(node, cfgNode, cfgGraph);
 				getNodeMap().put(node, cfgNode);
-				cfgGraph.addChild(cfgNode);
+				//cfgGraph.addChild(cfgNode);
 			}
 			else {
 				cfgNode = (CFGNode)getNodeMap().get(node);
@@ -60,9 +61,9 @@ public class ModelCreator {
 				CFGNode cfgSucc;
 				if (!getNodeMap().containsKey(succ)){
 					cfgSucc = new CFGNode();
-					initializeNode(succ, cfgSucc);	
+					initializeNode(succ, cfgSucc, cfgGraph);	
 					getNodeMap().put(succ, cfgSucc);
-					cfgGraph.addChild(cfgSucc);
+					//cfgGraph.addChild(cfgSucc);
 					
 				}
 				else {
@@ -77,18 +78,29 @@ public class ModelCreator {
 		while (headsIt.hasNext()){
 			Object next = headsIt.next();
 			CFGNode node = (CFGNode)getNodeMap().get(next);
-			node.setHead(true);
+			node.getData().setHead(true);
 		}
 		
 		Iterator tailsIt = getSootGraph().getTails().iterator();
 		while (tailsIt.hasNext()){
 			Object next = tailsIt.next();
 			CFGNode node = (CFGNode)getNodeMap().get(next);
-			node.setTail(true);
+			node.getData().setTail(true);
 		}
 		
 		setModel(cfgGraph);
 		
+	}
+	
+	private boolean canFit(CFGPartialFlowData pFlow, int length){
+		Iterator it = pFlow.getChildren().iterator();
+		int total = 0;
+		while (it.hasNext()){
+			String next = ((CFGFlowInfo)it.next()).getText();
+			total += next.length();
+		}
+		if (total + length < 60) return true;
+		return false;
 	}
 	
 	public void updateNode(FlowInfo fi){
@@ -98,17 +110,88 @@ public class ModelCreator {
 			if (next.equals(fi.unit())){
 				CFGNode node = (CFGNode)getNodeMap().get(next);
 				getModel().newFlowData();
+				//System.out.println("flow info type: "+fi.info().getClass());
+				CFGFlowData data = new CFGFlowData();
 				if (fi.isBefore()){
-					node.setBefore(fi.info().toString());
+					node.setBefore(data);
 				}
 				else{
-					node.setAfter(fi.info().toString());
+					node.setAfter(data);
 				}
+				if (fi.info() instanceof FlowSet){
+					FlowSet fs = (FlowSet)fi.info();
+					Iterator fsIt = fs.iterator();
+					CFGFlowInfo startBrace = new CFGFlowInfo();
+					CFGPartialFlowData nextFlow = new CFGPartialFlowData();
+					data.addChild(nextFlow);
+					nextFlow.addChild(startBrace);
+					//data.addChild(startBrace);
+					startBrace.setText("{");
+					
+					while (fsIt.hasNext()){
+						Object elem = fsIt.next();
+						CFGFlowInfo info = new CFGFlowInfo();
+						if (canFit(nextFlow, elem.toString().length())){
+							nextFlow.addChild(info);
+						}
+						else {
+							nextFlow = new CFGPartialFlowData();
+							data.addChild(nextFlow);
+							nextFlow.addChild(info);
+						}
+						
+						//data.addChild(info);
+						info.setText(elem.toString());
+						if(fsIt.hasNext()){
+							CFGFlowInfo comma = new CFGFlowInfo();
+							nextFlow.addChild(comma);
+							//data.addChild(comma);
+							comma.setText(", ");
+						}
+					}
+					CFGFlowInfo endBrace = new CFGFlowInfo();
+					nextFlow.addChild(endBrace);
+					//data.addChild(endBrace);
+					endBrace.setText("}");
+				}
+				else {
+					String text = fi.info().toString();
+					ArrayList textGroups = new ArrayList();
+					int last = 0;
+					for (int i = 0; i < text.length()/50; i++){
+						if (last+50 < text.length()){
+							int nextComma = text.indexOf(",", last+50);
+							if (nextComma != -1){
+								textGroups.add(text.substring(last, nextComma+1));
+								last = nextComma+2;
+							}
+						}
+					}
+					if (last < text.length()){
+						textGroups.add(text.substring(last));
+					}
+					
+					Iterator itg = textGroups.iterator();
+					while (itg.hasNext()){
+						String nextGroup = (String)itg.next();
+						CFGFlowInfo info = new CFGFlowInfo();
+						CFGPartialFlowData pFlow = new CFGPartialFlowData();
+						data.addChild(pFlow);
+						pFlow.addChild(info);
+						info.setText(nextGroup);
+					}
+					
+					
+					//CFGFlowInfo info = new CFGFlowInfo();
+					//data.addChild(info);
+					//info.setText(fi.info().toString());
+				}
+				
 			}
 		}
 	}
 	
-	private void initializeNode(Object sootNode, CFGNode cfgNode){
+	private void initializeNode(Object sootNode, CFGNode cfgNode, CFGGraph cfgGraph){
 		ArrayList textList = new ArrayList();
 		int width = 0;
 		if (sootNode instanceof soot.toolkits.graph.Block){
@@ -126,8 +209,18 @@ public class ModelCreator {
 			textList.add(sootNode.toString());
 			width = sootNode.toString().length();
 		}
-		cfgNode.setText(textList);
-		cfgNode.setWidth(width*7);
+		
+		cfgGraph.addChild(cfgNode);
+		
+		CFGNodeData nodeData = new CFGNodeData();
+		cfgNode.setData(nodeData);
+		
+		nodeData.setText(textList);
+		//cfgNode.setData(nodeData);
+		
+		//cfgNode.setData(nodeData);
+		//cfgNode.setText(textList);
+		//cfgNode.setWidth(width*7);
 	}
 
 	public void displayModel(){

@@ -200,6 +200,8 @@ Composite wjapwjap_uftChild = wjapwjap_uftCreate(getPageContainer());
 
 Composite wjapwjap_tqtChild = wjapwjap_tqtCreate(getPageContainer());
 
+Composite wjapwjap_cggChild = wjapwjap_cggCreate(getPageContainer());
+
 Composite sopsop_cpfChild = sopsop_cpfCreate(getPageContainer());
 
 Composite jopjop_cseChild = jopjop_cseCreate(getPageContainer());
@@ -973,6 +975,18 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		addToEnableGroup("wjap", "wjap.tqt", getwjapwjap_tqtenabled_widget(), "enabled");
 		
 		getwjapwjap_tqtenabled_widget().getButton().addSelectionListener(this);
+		
+		
+		makeNewEnableGroup("wjap", "wjap.cgg");
+		
+		
+		addToEnableGroup("wjap", "wjap.cgg", getwjapwjap_cggenabled_widget(), "enabled");
+		
+		addToEnableGroup("wjap", "wjap.cgg", getwjapwjap_cggshow_lib_meths_widget(), "show-lib-meths");
+		
+		getwjapwjap_cggenabled_widget().getButton().addSelectionListener(this);
+		
+		getwjapwjap_cggshow_lib_meths_widget().getButton().addSelectionListener(this);
 		
 		
 		makeNewEnableGroup("shimple");
@@ -3143,6 +3157,26 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 			getConfig().put(getwjapwjap_tqtenabled_widget().getAlias(), new Boolean(boolRes));
 		}
 		
+		boolRes = getwjapwjap_cggenabled_widget().getButton().getSelection();
+		
+		
+		defBoolRes = false;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getwjapwjap_cggenabled_widget().getAlias(), new Boolean(boolRes));
+		}
+		
+		boolRes = getwjapwjap_cggshow_lib_meths_widget().getButton().getSelection();
+		
+		
+		defBoolRes = false;
+		
+
+		if (boolRes != defBoolRes) {
+			getConfig().put(getwjapwjap_cggshow_lib_meths_widget().getAlias(), new Boolean(boolRes));
+		}
+		
 		boolRes = getshimpleenabled_widget().getButton().getSelection();
 		
 		
@@ -4635,6 +4669,16 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 
 			
 			subSectParent = wjap_wjap_tqt_branch;
+			
+			
+			SootOption wjap_wjap_cgg_branch = new SootOption("Call Graph Grapher", "wjapwjap_cgg");
+			subParent.addChild(wjap_wjap_cgg_branch);
+
+
+			
+
+			
+			subSectParent = wjap_wjap_cgg_branch;
 			
 			
 			//Shimple Control
@@ -6754,6 +6798,26 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 		return wjapwjap_tqtenabled_widget;
 	}	
 	
+	private BooleanOptionWidget wjapwjap_cggenabled_widget;
+	
+	private void setwjapwjap_cggenabled_widget(BooleanOptionWidget widget) {
+		wjapwjap_cggenabled_widget = widget;
+	}
+	
+	public BooleanOptionWidget getwjapwjap_cggenabled_widget() {
+		return wjapwjap_cggenabled_widget;
+	}	
+	
+	private BooleanOptionWidget wjapwjap_cggshow_lib_meths_widget;
+	
+	private void setwjapwjap_cggshow_lib_meths_widget(BooleanOptionWidget widget) {
+		wjapwjap_cggshow_lib_meths_widget = widget;
+	}
+	
+	public BooleanOptionWidget getwjapwjap_cggshow_lib_meths_widget() {
+		return wjapwjap_cggshow_lib_meths_widget;
+	}	
+	
 	private BooleanOptionWidget shimpleenabled_widget;
 	
 	private void setshimpleenabled_widget(BooleanOptionWidget widget) {
@@ -8260,7 +8324,7 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 			
 		}
 
-		setOutput_Optionsdump_body_widget(new ListOptionWidget(editGroupOutput_Options, SWT.NONE, new OptionData("Body Dumping Phases",  "", "","dump-body", "\nSpecify that PHASENAME is one of the phases to be dumped. For \nexample -dump-body jb -dump-body jb.a would dump each method \nbefore and after the jb and jb.a phases. The pseudo phase name \n``ALL'' causes all phases to be dumped.For this option to have \nany effect, the soot.Pack and soot.SceneTransformer classes must \nhave been compiled with debugging enabled. Output files appear \nin subdirectories under the soot output directory, with names \nlike className/methodSignature/phasename-graphType-number.in and \nclassName/methodSignature/phasename-graphType-number.out. The \n``in'' and ``out'' suffixes distinguish the internal \nrepresentations of the method before and after the phase \nexecuted.", defaultString)));
+		setOutput_Optionsdump_body_widget(new ListOptionWidget(editGroupOutput_Options, SWT.NONE, new OptionData("Body Dumping Phases",  "", "","dump-body", "\nSpecify that PHASENAME is one of the phases to be dumped. For \nexample -dump-body jb -dump-body jb.a would dump each method \nbefore and after the jb and jb.a phases. The pseudo phase name \n``ALL'' causes all phases to be dumped. Output files appear in \nsubdirectories under the soot output directory, with names like \nclassName/methodSignature/phasename-graphType-number.in and \nclassName/methodSignature/phasename-graphType-number.out. The \n``in'' and ``out'' suffixes distinguish the internal \nrepresentations of the method before and after the phase \nexecuted.", defaultString)));
 		
 
 		defKey = ""+" "+""+" "+"dump-cfg";
@@ -8275,7 +8339,7 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 			
 		}
 
-		setOutput_Optionsdump_cfg_widget(new ListOptionWidget(editGroupOutput_Options, SWT.NONE, new OptionData("CFG Dumping Phases",  "", "","dump-cfg", "\nSpecify that any control flow graphs constructed during the \nPHASENAME phases should be dumped. For example -dump-cfg jb \n-dump-cfg bb.lso would dump all CFGs constructed during the jb \nand bb.lso phases. The pseudo phase name ``ALL'' causes CFGs \nconstructed in all phases to be dumped.This option has no effect \nif the CFG constructing classes were compiled with debugging \ndisabled.The control flow graphs are dumped in the form of a \nfile containing input to dot graph visualization tool. Output \ndot files are stored beneath the soot output directory, in files \nwith names like: \nclassName/methodSignature/phasename-graphType-number.dot, where \nnumber serves to distinguish graphs in phases that produce more \nthan one (for example, the Aggregator may produce multiple \nExceptionalUnitGraphs).", defaultString)));
+		setOutput_Optionsdump_cfg_widget(new ListOptionWidget(editGroupOutput_Options, SWT.NONE, new OptionData("CFG Dumping Phases",  "", "","dump-cfg", "\nSpecify that any control flow graphs constructed during the \nPHASENAME phases should be dumped. For example -dump-cfg jb \n-dump-cfg bb.lso would dump all CFGs constructed during the jb \nand bb.lso phases. The pseudo phase name ``ALL'' causes CFGs \nconstructed in all phases to be dumped.The control flow graphs \nare dumped in the form of a file containing input to dot graph \nvisualization tool. Output dot files are stored beneath the \nsoot output directory, in files with names like: \nclassName/methodSignature/phasename-graphType-number.dot, where \nnumber serves to distinguish graphs in phases that produce more \nthan one (for example, the Aggregator may produce multiple \nExceptionalUnitGraphs).", defaultString)));
 		
 		
 		defKey = ""+" "+""+" "+"d";
@@ -12290,6 +12354,68 @@ Composite tagtag_fieldrwChild = tagtag_fieldrwCreate(getPageContainer());
 
 		
 		return editGroupwjapwjap_tqt;
+	}
+
+
+
+	private Composite wjapwjap_cggCreate(Composite parent) {
+		String defKey;
+		String defaultString;
+		boolean defaultBool = false;
+	    String defaultArray;
+       
+		Group editGroupwjapwjap_cgg = new Group(parent, SWT.NONE);
+		GridLayout layout = new GridLayout();
+		editGroupwjapwjap_cgg.setLayout(layout);
+	
+	 	editGroupwjapwjap_cgg.setText("Call Graph Grapher");
+	 	
+		editGroupwjapwjap_cgg.setData("id", "wjapwjap_cgg");
+		
+		String descwjapwjap_cgg = "Creates graphical call graph.";	
+		if (descwjapwjap_cgg.length() > 0) {
+			Label descLabelwjapwjap_cgg = new Label(editGroupwjapwjap_cgg, SWT.WRAP);
+			descLabelwjapwjap_cgg.setText(descwjapwjap_cgg);
+		}
+		OptionData [] data;	
+		
+		
+		
+		
+		defKey = "p"+" "+"wjap.cgg"+" "+"enabled";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = false;
+			
+		}
+
+		setwjapwjap_cggenabled_widget(new BooleanOptionWidget(editGroupwjapwjap_cgg, SWT.NONE, new OptionData("Enabled", "p", "wjap.cgg","enabled", "\n", defaultBool)));
+		
+		
+		
+		defKey = "p"+" "+"wjap.cgg"+" "+"show-lib-meths";
+		defKey = defKey.trim();
+
+		if (isInDefList(defKey)) {
+			defaultBool = getBoolDef(defKey);	
+		}
+		else {
+			
+			defaultBool = false;
+			
+		}
+
+		setwjapwjap_cggshow_lib_meths_widget(new BooleanOptionWidget(editGroupwjapwjap_cgg, SWT.NONE, new OptionData("Show Library Methods", "p", "wjap.cgg","show-lib-meths", "\n", defaultBool)));
+		
+		
+
+		
+		return editGroupwjapwjap_cgg;
 	}
 
 
