@@ -103,6 +103,16 @@ $(TARGETS): classes/%.class: src/%.java
 	$(JC) $<
 
 
+#
+#
+##########################################################################
+#
+# ensure Singletons.java is up-to-date.
+#
+src/soot/Singletons.java: src/package.list src/singletons.list src/make_singletons
+	(cd src ; ./make_singletons > soot/Singletons.java)
+
+
 classes/soot/jimple/parser/parser/parser.dat: src/soot/jimple/parser/parser/parser.dat
 	cp src/soot/jimple/parser/parser/parser.dat classes/soot/jimple/parser/parser
 
@@ -127,11 +137,26 @@ foo: classes/soot/jimple/parser/parser/parser.dat classes/soot/jimple/parser/lex
 #
 #
 
+# If you want to enable links to Java library documentation,
+# invoke make with a definition of JAVALIB_DOC, that specifies
+# the location of a copy of the javadoc for the Java API
+# specification. Something like
+#
+#   make JAVALIB_DOC="-link file:///usr/localcc/pkgs/j2sdk1.4.1_01/docs/api" javadoc
+#
+# to link to a local copy of the API javadoc, or 
+#
+#   make JAVALIB_DOC="-link http://java.sun.com/j2se/1.4/docs/api" javadoc
+#
+# to link over the web.
+#
+JAVALIB_DOC=
+
 javadoc: document
 
 document: 
 	find src -name '*.java' | xargs grep ^package | sed 's/.*package //' | sed 's/;//' | sort -u > src/packageList
-	javadoc -J-Xmx200m -d doc -sourcepath src -windowtitle "Soot API" @src/packageList
+	javadoc -J-Xmx200m -d doc $(JAVALIB_DOC) -sourcepath src -windowtitle "Soot API" @src/packageList
 
 badfields: all
 	java -Xmx200m soot.tools.BadFields -w -f none -process-dir classes soot.Main
