@@ -8,8 +8,7 @@ import java.util.Iterator;
 import soot.util.queue.*;
 import soot.Type;
 import soot.options.SparkOptions;
-import soot.relations.*;
-import soot.jbuddy.JBuddy;
+import soot.jimple.spark.bdddomains.*;
 
 public final class BDDTypeManager extends AbstractTypeManager {
     public BDDTypeManager(BDDPAG bddpag) { super(bddpag); }
@@ -17,18 +16,18 @@ public final class BDDTypeManager extends AbstractTypeManager {
     public final void clearTypeMask() {
         this.lastAllocNode = 0;
         this.lastVarNode = 0;
-        this.typeMask.makeEmpty();
-        this.varNodeType.makeEmpty();
-        this.allocNodeType.makeEmpty();
-        this.typeSubtype.makeEmpty();
+        this.typeMask.eq(jedd.Jedd.v().falseBDD());
+        this.varNodeType.eq(jedd.Jedd.v().falseBDD());
+        this.allocNodeType.eq(jedd.Jedd.v().falseBDD());
+        this.typeSubtype.eq(jedd.Jedd.v().falseBDD());
     }
     
     public final void makeTypeMask() {
-        if (this.fh == null) { this.typeMask.makeFull(); }
+        if (this.fh == null) { this.typeMask.eq(jedd.Jedd.v().trueBDD()); }
         this.update();
     }
     
-    public final Relation get() {
+    public final jedd.Relation get() {
         this.update();
         return this.typeMask;
     }
@@ -39,110 +38,85 @@ public final class BDDTypeManager extends AbstractTypeManager {
     
     private void update() {
         if (this.fh == null) return;
-        Numberer anNumb = this.pag.getAllocNodeNumberer();
-        Numberer vnNumb = this.pag.getVarNodeNumberer();
-        for (int i = 1; i <= vnNumb.size(); i++) {
-            for (int j = this.lastAllocNode + 1; j <= anNumb.size(); j++) {
-                this.updatePair((VarNode) vnNumb.get(i), (AllocNode) anNumb.get(j));
-            }
+        System.out.println("called update");
+        ArrayNumberer anNumb = this.pag.getAllocNodeNumberer();
+        ArrayNumberer vnNumb = this.pag.getVarNodeNumberer();
+        for (int j = this.lastAllocNode + 1; j <= anNumb.size(); j++) {
+            AllocNode an = (AllocNode) anNumb.get(j);
+            this.newAnType.eqUnion(jedd.Jedd.v().literal(new Object[] { an, an.getType() },
+                                                         new jedd.Domain[] { obj.v(), type.v() },
+                                                         new jedd.PhysicalDomain[] { H1.v(), T1.v() }));
+            for (int i = 1; i <= vnNumb.size(); i++) { this.updatePair((VarNode) vnNumb.get(i), an); }
         }
         for (int i = this.lastVarNode + 1; i <= vnNumb.size(); i++) {
-            for (int j = 1; j <= this.lastAllocNode; j++) {
-                this.updatePair((VarNode) vnNumb.get(i), (AllocNode) anNumb.get(j));
-            }
+            VarNode vn = (VarNode) vnNumb.get(i);
+            this.newVnType.eqUnion(jedd.Jedd.v().literal(new Object[] { vn, vn.getType() },
+                                                         new jedd.Domain[] { var.v(), type.v() },
+                                                         new jedd.PhysicalDomain[] { V1.v(), T1.v() }));
+            for (int j = 1; j <= this.lastAllocNode; j++) { this.updatePair(vn, (AllocNode) anNumb.get(j)); }
         }
-        this.varNodeType.eqUnion(this.varNodeType, this.newVnType);
-        this.allocNodeType.eqUnion(this.allocNodeType, this.newAnType);
-        final Relation tmp = new Relation(this.var, this.subt, this.v1, this.t1);
-        final Relation tmp2 = new Relation(this.var, this.obj, this.v1, this.h1);
-        tmp.eqRelprod(this.typeSubtype,
-                      this.supt,
-                      this.newVnType,
-                      this.type,
-                      this.var,
-                      this.newVnType,
-                      this.var,
-                      this.subt,
-                      this.typeSubtype,
-                      this.subt);
-        tmp2.eqRelprod(this.allocNodeType,
-                       this.type,
-                       tmp,
-                       this.subt,
-                       this.var,
-                       tmp,
-                       this.var,
-                       this.obj,
-                       this.allocNodeType,
-                       this.obj);
-        this.typeMask.eqUnion(this.typeMask, tmp2);
-        tmp.eqRelprod(this.typeSubtype,
-                      this.supt,
-                      this.varNodeType,
-                      this.type,
-                      this.var,
-                      this.varNodeType,
-                      this.var,
-                      this.subt,
-                      this.typeSubtype,
-                      this.subt);
-        tmp2.eqRelprod(this.newAnType,
-                       this.type,
-                       tmp,
-                       this.subt,
-                       this.var,
-                       tmp,
-                       this.var,
-                       this.obj,
-                       this.newAnType,
-                       this.obj);
-        this.typeMask.eqUnion(this.typeMask, tmp2);
-        this.newVnType.makeEmpty();
-        this.newAnType.makeEmpty();
+        this.varNodeType.eqUnion(this.newVnType);
+        this.allocNodeType.eqUnion(this.newAnType);
+        final jedd.Relation tmp =
+          new jedd.Relation(new jedd.Domain[] { var.v(), subt.v() }, new jedd.PhysicalDomain[] { V1.v(), T1.v() });
+        final jedd.Relation tmp2 =
+          new jedd.Relation(new jedd.Domain[] { var.v(), obj.v() }, new jedd.PhysicalDomain[] { V1.v(), H1.v() });
+        tmp.eq(jedd.Jedd.v().relprod(jedd.Jedd.v().read(this.typeSubtype),
+                                     jedd.Jedd.v().replace(this.newVnType,
+                                                           new jedd.PhysicalDomain[] { T1.v() },
+                                                           new jedd.PhysicalDomain[] { T2.v() }),
+                                     new jedd.PhysicalDomain[] { T2.v() }));
+        tmp2.eq(jedd.Jedd.v().relprod(jedd.Jedd.v().read(this.allocNodeType),
+                                      tmp,
+                                      new jedd.PhysicalDomain[] { T1.v() }));
+        this.typeMask.eqUnion(tmp2);
+        tmp.eq(jedd.Jedd.v().relprod(jedd.Jedd.v().read(this.typeSubtype),
+                                     jedd.Jedd.v().replace(this.varNodeType,
+                                                           new jedd.PhysicalDomain[] { T1.v() },
+                                                           new jedd.PhysicalDomain[] { T2.v() }),
+                                     new jedd.PhysicalDomain[] { T2.v() }));
+        tmp2.eq(jedd.Jedd.v().relprod(jedd.Jedd.v().read(this.newAnType), tmp, new jedd.PhysicalDomain[] { T1.v() }));
+        this.typeMask.eqUnion(tmp2);
+        this.newVnType.eq(jedd.Jedd.v().falseBDD());
+        this.newAnType.eq(jedd.Jedd.v().falseBDD());
         this.lastAllocNode = anNumb.size();
         this.lastVarNode = vnNumb.size();
-        tmp.makeEmpty();
-        tmp2.makeEmpty();
+        tmp.eq(jedd.Jedd.v().falseBDD());
+        tmp2.eq(jedd.Jedd.v().falseBDD());
     }
     
     private void updatePair(VarNode vn, AllocNode an) {
         Type vtype = vn.getType();
         Type atype = an.getType();
-        if (this.varNodeType.restrict(this.type, vtype).isEmpty() ||
-              this.allocNodeType.restrict(this.type, atype).isEmpty()) {
-            if (this.castNeverFails(atype, vtype)) { this.typeSubtype.add(this.subt, atype, this.supt, vtype); }
+        final jedd.Relation pair =
+          new jedd.Relation(new jedd.Domain[] { atp.v(), dtp.v() },
+                            new jedd.PhysicalDomain[] { T1.v(), T2.v() },
+                            jedd.Jedd.v().literal(new Object[] { atype, vtype },
+                                                  new jedd.Domain[] { atp.v(), dtp.v() },
+                                                  new jedd.PhysicalDomain[] { T1.v(), T2.v() }));
+        if (!jedd.Jedd.v().equals(jedd.Jedd.v().read(this.seenPairs), this.seenPairs.eqUnion(pair))) {
+            if (this.castNeverFails(atype, vtype)) { this.typeSubtype.eqUnion(pair); }
         }
-        this.newVnType.add(this.var, vn, this.type, vtype);
-        this.newAnType.add(this.obj, an, this.type, atype);
     }
     
-    private final PhysicalDomain t1 = ((BDDPAG) this.pag).t1;
+    final jedd.Relation typeSubtype =
+      new jedd.Relation(new jedd.Domain[] { subt.v(), supt.v() }, new jedd.PhysicalDomain[] { T1.v(), T2.v() });
     
-    private final PhysicalDomain t2 = ((BDDPAG) this.pag).t2;
+    final jedd.Relation varNodeType =
+      new jedd.Relation(new jedd.Domain[] { var.v(), type.v() }, new jedd.PhysicalDomain[] { V1.v(), T1.v() });
     
-    private final PhysicalDomain v1 = ((BDDPAG) this.pag).v1;
+    final jedd.Relation newVnType =
+      new jedd.Relation(new jedd.Domain[] { var.v(), type.v() }, new jedd.PhysicalDomain[] { V1.v(), T1.v() });
     
-    private final PhysicalDomain h1 = ((BDDPAG) this.pag).h1;
+    final jedd.Relation allocNodeType =
+      new jedd.Relation(new jedd.Domain[] { obj.v(), type.v() }, new jedd.PhysicalDomain[] { H1.v(), T1.v() });
     
-    private final Domain subt = new Domain(Scene.v().getTypeNumberer(), "subt");
+    final jedd.Relation newAnType =
+      new jedd.Relation(new jedd.Domain[] { obj.v(), type.v() }, new jedd.PhysicalDomain[] { H1.v(), T1.v() });
     
-    private final Domain supt = new Domain(Scene.v().getTypeNumberer(), "supt");
+    final jedd.Relation typeMask =
+      new jedd.Relation(new jedd.Domain[] { var.v(), obj.v() }, new jedd.PhysicalDomain[] { V1.v(), H1.v() });
     
-    private final Domain type = new Domain(Scene.v().getTypeNumberer(), "type");
-    
-    private final Domain var = ((BDDPAG) this.pag).var;
-    
-    private final Domain obj = ((BDDPAG) this.pag).obj;
-    
-    private final Relation typeSubtype = new Relation(this.subt, this.supt, this.t1, this.t2);
-    
-    private final Relation varNodeType = new Relation(this.var, this.type, this.v1, this.t1);
-    
-    private final Relation newVnType = this.varNodeType.sameDomains();
-    
-    private final Relation allocNodeType = new Relation(this.obj, this.type, this.h1, this.t1);
-    
-    private final Relation newAnType = this.allocNodeType.sameDomains();
-    
-    private final Relation typeMask = new Relation(this.var, this.obj, this.v1, this.h1);
+    final jedd.Relation seenPairs =
+      new jedd.Relation(new jedd.Domain[] { atp.v(), dtp.v() }, new jedd.PhysicalDomain[] { T1.v(), T2.v() });
 }

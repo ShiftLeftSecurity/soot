@@ -26,8 +26,7 @@ import java.util.Iterator;
 import soot.util.queue.*;
 import soot.Type;
 import soot.options.SparkOptions;
-import soot.relations.*;
-import soot.jbuddy.JBuddy;
+import soot.jimple.spark.bdddomains.*;
 
 /** A map of bit-vectors representing subtype relationships.
  * @author Ondrej Lhotak
@@ -39,18 +38,18 @@ public final class BDDTypeManager extends AbstractTypeManager {
     final public void clearTypeMask() {
         lastAllocNode = 0;
         lastVarNode = 0;
-        typeMask.makeEmpty();
-        varNodeType.makeEmpty();
-        allocNodeType.makeEmpty();
-        typeSubtype.makeEmpty();
+        typeMask = 0B;
+        varNodeType = 0B;
+        allocNodeType = 0B;
+        typeSubtype = 0B;
     }
     final public void makeTypeMask() {
         if( fh == null ) {
-            typeMask.makeFull();
+            typeMask = 1B;
         }
         update();
     }
-    final public Relation get() {
+    final public <var:V1, obj:H1> get() {
         update();
         return typeMask;
     }
@@ -59,92 +58,69 @@ public final class BDDTypeManager extends AbstractTypeManager {
     int lastVarNode = 0;
     private void update() {
         if( fh == null ) return;
+        System.out.println( "called update" );
 
-        Numberer anNumb = pag.getAllocNodeNumberer();
-        Numberer vnNumb = pag.getVarNodeNumberer();
-        for( int i = 1; i <= vnNumb.size(); i++ ) {
-            for( int j = lastAllocNode+1; j <= anNumb.size(); j++ ) {
-                updatePair( (VarNode) vnNumb.get( i ), (AllocNode) anNumb.get( j ) );
+        ArrayNumberer anNumb = pag.getAllocNodeNumberer();
+        ArrayNumberer vnNumb = pag.getVarNodeNumberer();
+        for( int j = lastAllocNode+1; j <= anNumb.size(); j++ ) {
+            AllocNode an = (AllocNode) anNumb.get(j);
+            newAnType |= new { an => obj, an.getType() => type };
+            for( int i = 1; i <= vnNumb.size(); i++ ) {
+                updatePair( (VarNode) vnNumb.get( i ), an );
             }
         }
         for( int i = lastVarNode+1; i <= vnNumb.size(); i++ ) {
+            VarNode vn = (VarNode) vnNumb.get(i);
+            newVnType |= new { vn => var, vn.getType() => type };
             for( int j = 1; j <= lastAllocNode; j++ ) {
-                updatePair( (VarNode) vnNumb.get( i ), (AllocNode) anNumb.get( j ) );
+                updatePair( vn, (AllocNode) anNumb.get( j ) );
             }
         }
 
-        varNodeType.eqUnion( varNodeType, newVnType );
-        allocNodeType.eqUnion( allocNodeType, newAnType );
+        varNodeType |= newVnType;
+        allocNodeType |= newAnType;
 
-        final Relation tmp = new Relation( var, subt,
-                                           v1,  t1 );
-        final Relation tmp2 = new Relation( var, obj,
-                                            v1,  h1 );
-        tmp.eqRelprod( typeSubtype, supt, newVnType, type,
-                       var, newVnType,   var,
-                       subt,  typeSubtype, subt );
-        tmp2.eqRelprod( allocNodeType, type, tmp, subt,
-                        var, tmp,           var,
-                        obj, allocNodeType, obj );
-        typeMask.eqUnion( typeMask, tmp2 );
+        <var:V1, subt:T1> tmp;
+        <var:V1, obj:H1> tmp2;
 
-        tmp.eqRelprod( typeSubtype, supt, varNodeType, type,
-                       var, varNodeType,   var,
-                       subt,  typeSubtype, subt );
-        tmp2.eqRelprod( newAnType, type, tmp, subt,
-                        var, tmp,       var,
-                        obj, newAnType, obj );
-        typeMask.eqUnion( typeMask, tmp2 );
+        tmp = typeSubtype {supt} >< newVnType {type};
+        tmp2 = allocNodeType {type} >< tmp {subt};
+        typeMask |= tmp2;
 
-        newVnType.makeEmpty();
-        newAnType.makeEmpty();
+        tmp = typeSubtype {supt} >< varNodeType {type};
+        tmp2 = newAnType {type} >< tmp {subt};
+        typeMask |= tmp2;
+
+        newVnType = 0B;
+        newAnType = 0B;
 
         lastAllocNode = anNumb.size();
         lastVarNode = vnNumb.size();
 
-        tmp.makeEmpty();
-        tmp2.makeEmpty();
+        tmp = 0B;
+        tmp2 = 0B;
     }
 
     private void updatePair( VarNode vn, AllocNode an ) {
         Type vtype = vn.getType();
         Type atype = an.getType();
 
-        if( varNodeType.restrict( type, vtype ).isEmpty()
-        ||  allocNodeType.restrict( type, atype ).isEmpty() ) {
+        <atp, dtp> pair = new { atype => atp, vtype => dtp };
+        if( seenPairs != (seenPairs |= pair) ) {
             // never seen this pair of types before
             if( castNeverFails( atype, vtype ) ) {
-                typeSubtype.add( subt, atype,
-                                 supt, vtype );
+                typeSubtype |= (atp=>subt, dtp=>supt) pair;
             }
         }
-        newVnType.add( var, vn,
-                       type,  vtype );
-        newAnType.add( obj, an,
-                       type,  atype );
     }
 
-    final private PhysicalDomain t1 = ((BDDPAG)pag).t1;
-    final private PhysicalDomain t2 = ((BDDPAG)pag).t2;
-    final private PhysicalDomain v1 = ((BDDPAG)pag).v1;
-    final private PhysicalDomain h1 = ((BDDPAG)pag).h1;
-
-    final private Domain subt = new Domain( Scene.v().getTypeNumberer(), "subt" );
-    final private Domain supt = new Domain( Scene.v().getTypeNumberer(), "supt" );
-    final private Domain type = new Domain( Scene.v().getTypeNumberer(), "type" );
-    final private Domain var = ((BDDPAG)pag).var;
-    final private Domain obj = ((BDDPAG)pag).obj;
-
-    final private Relation typeSubtype = new Relation( subt, supt,
-                                                       t1,   t2 );
-    final private Relation varNodeType = new Relation( var, type,
-                                                       v1,  t1 );
-    final private Relation newVnType = varNodeType.sameDomains();
-    final private Relation allocNodeType = new Relation( obj, type,
-                                                         h1,  t1 );
-    final private Relation newAnType = allocNodeType.sameDomains();
-    final private Relation typeMask = new Relation( var, obj,
-                                                    v1,  h1 );
+    <subt:T1, supt:T2> typeSubtype;
+    <var:V1, type:T1> varNodeType;
+    <var:V1, type:T1> newVnType;
+    <obj:H1, type:T1> allocNodeType;
+    <obj:H1, type:T1> newAnType;
+    <var:V1, obj:H1> typeMask;
+    <atp:T1, dtp:T2> seenPairs;
 
 }
 

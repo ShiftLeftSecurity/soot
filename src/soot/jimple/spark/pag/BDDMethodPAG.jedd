@@ -29,7 +29,8 @@ import soot.util.*;
 import soot.util.queue.*;
 import soot.toolkits.scalar.Pair;
 import soot.jimple.toolkits.pointer.util.NativeMethodDriver;
-import soot.relations.*;
+import soot.jimple.spark.bdddomains.*;
+
 
 
 /** Part of a pointer assignment graph for a single method.
@@ -51,12 +52,6 @@ public final class BDDMethodPAG extends AbstractMethodPAG {
         this.pag = pag;
         this.method = m;
         this.nodeFactory = new MethodNodeFactory( pag, this );
-	internalEdgeSet = pag.edgeSet.sameDomains();
-	inEdgeSet = pag.edgeSet.sameDomains();
-	outEdgeSet = pag.edgeSet.sameDomains();
-        stores = pag.stores.sameDomains();
-        loads = pag.loads.sameDomains();
-        alloc = pag.alloc.sameDomains();
     }
 
     /** Adds this method to the main PAG, with all VarNodes parameterized by
@@ -65,12 +60,12 @@ public final class BDDMethodPAG extends AbstractMethodPAG {
         if( varNodeParameter != null ) throw new RuntimeException( "NYI" );
         if( hasBeenAdded ) return;
         hasBeenAdded = true;
-        pag.edgeSet.eqUnion( pag.edgeSet, internalEdgeSet );
-        pag.edgeSet.eqUnion( pag.edgeSet, inEdgeSet );
-        pag.edgeSet.eqUnion( pag.edgeSet, outEdgeSet );
-        pag.stores.eqUnion( pag.stores, stores );
-        pag.loads.eqUnion( pag.loads, loads );
-        pag.alloc.eqUnion( pag.alloc, alloc );
+        pag.edgeSet |= internalEdgeSet;
+        pag.edgeSet |= inEdgeSet;
+        pag.edgeSet |= outEdgeSet;
+        pag.stores  |= stores;
+        pag.loads   |= loads;
+        pag.alloc   |= alloc;
     }
     private static Numberable[] box ( Numberable n1, Numberable n2 ) {
         Numberable[] ret = { n1, n2 };
@@ -80,46 +75,44 @@ public final class BDDMethodPAG extends AbstractMethodPAG {
         Numberable[] ret = { n1, n2, n3 };
         return ret;
     }
-    public void addInternalEdge( Node src, Node dst ) {
-        addEdge( src, dst, internalEdgeSet );
+    public void addInternalEdge( Node srcN, Node dstN ) {
+        internalEdgeSet = addEdge( srcN, dstN, internalEdgeSet );
     }
 
-    public void addInEdge( Node src, Node dst ) {
-        addEdge( src, dst, inEdgeSet );
+    public void addInEdge( Node srcN, Node dstN ) {
+        inEdgeSet = addEdge( srcN, dstN, inEdgeSet );
     }
 
-    public void addOutEdge( Node src, Node dst ) {
-        addEdge( src, dst, outEdgeSet );
+    public void addOutEdge( Node srcN, Node dstN ) {
+        outEdgeSet = addEdge( srcN, dstN, outEdgeSet );
     }
 
-    private void addEdge( Node src, Node dst, Relation edgeSet ) {
-        if( src instanceof VarNode ) {
-            if( dst instanceof VarNode ) {
-                edgeSet.add( pag.src, (VarNode) src,
-                             pag.dst, (VarNode) dst );
+    private <src, dst> addEdge( Node srcN, Node dstN, <src:V1, dst:V2> edgeSet ) {
+        if( srcN == null ) return edgeSet;
+        if( srcN instanceof VarNode ) {
+            if( dstN instanceof VarNode ) {
+                edgeSet |= new { srcN => src, dstN => dst };
             } else {
-                FieldRefNode fdst = (FieldRefNode) dst;
-                stores.add( pag.src, (VarNode) src,
-                            pag.dst, fdst.getBase(),
-                            pag.fld, fdst.getField() );
+                FieldRefNode fdst = (FieldRefNode) dstN;
+                stores |= new
+                    { srcN => src, fdst.getBase() => dst, fdst.getField() => fld };
             }
-        } else if( src instanceof FieldRefNode ) {
-            FieldRefNode fsrc = (FieldRefNode) src;
-            loads.add( pag.src, fsrc.getBase(),
-                       pag.fld, fsrc.getField(),
-                       pag.dst, (VarNode) dst );
+        } else if( srcN instanceof FieldRefNode ) {
+            FieldRefNode fsrc = (FieldRefNode) srcN;
+            loads |= new
+                { fsrc.getBase() => src, fsrc.getField() => fld, dstN => dst };
         } else {
-            alloc.add( pag.obj, (AllocNode) src,
-                       pag.var, (VarNode) dst );
+            alloc |= new { srcN => obj, dstN => var };
         }
+        return edgeSet;
     }
 
-    final public Relation internalEdgeSet;
-    final public Relation inEdgeSet;
-    final public Relation outEdgeSet;
-    final public Relation stores;
-    final public Relation loads;
-    final public Relation alloc;
+    public <src:V1, dst:V2> internalEdgeSet;
+    public <src:V1, dst:V2> inEdgeSet;
+    public <src:V1, dst:V2> outEdgeSet;
+    public <src:V1, dst:V2, fld:FD> stores;
+    public <src:V1, fld:FD, dst:V2> loads;
+    public <obj:H1, var:V1> alloc;
 
 }
 

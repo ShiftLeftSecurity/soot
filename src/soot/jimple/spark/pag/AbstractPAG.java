@@ -378,14 +378,14 @@ public abstract class AbstractPAG implements PointsToAnalysis {
     public abstract Iterator storeInvSourcesIterator();
     public abstract Iterator loadInvSourcesIterator();
 
-    private Numberer allocNodeNumberer = new Numberer();
-    public Numberer getAllocNodeNumberer() { return allocNodeNumberer; }
-    private Numberer varNodeNumberer = new Numberer();
-    public Numberer getVarNodeNumberer() { return varNodeNumberer; }
-    private Numberer fieldRefNodeNumberer = new Numberer();
-    public Numberer getFieldRefNodeNumberer() { return fieldRefNodeNumberer; }
-    private Numberer allocDotFieldNodeNumberer = new Numberer();
-    public Numberer getAllocDotFieldNodeNumberer() { return allocDotFieldNodeNumberer; }
+    private ArrayNumberer allocNodeNumberer = new ArrayNumberer();
+    public ArrayNumberer getAllocNodeNumberer() { return allocNodeNumberer; }
+    private ArrayNumberer varNodeNumberer = new ArrayNumberer();
+    public ArrayNumberer getVarNodeNumberer() { return varNodeNumberer; }
+    private ArrayNumberer fieldRefNodeNumberer = new ArrayNumberer();
+    public ArrayNumberer getFieldRefNodeNumberer() { return fieldRefNodeNumberer; }
+    private ArrayNumberer allocDotFieldNodeNumberer = new ArrayNumberer();
+    public ArrayNumberer getAllocDotFieldNodeNumberer() { return allocDotFieldNodeNumberer; }
 
 
     /** Returns SparkOptions for this graph. */

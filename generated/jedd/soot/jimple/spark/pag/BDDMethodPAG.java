@@ -10,7 +10,7 @@ import soot.util.*;
 import soot.util.queue.*;
 import soot.toolkits.scalar.Pair;
 import soot.jimple.toolkits.pointer.util.NativeMethodDriver;
-import soot.relations.*;
+import soot.jimple.spark.bdddomains.*;
 
 public final class BDDMethodPAG extends AbstractMethodPAG {
     private BDDPAG pag;
@@ -31,24 +31,18 @@ public final class BDDMethodPAG extends AbstractMethodPAG {
         this.pag = pag;
         this.method = m;
         this.nodeFactory = new MethodNodeFactory(pag, this);
-        this.internalEdgeSet = pag.edgeSet.sameDomains();
-        this.inEdgeSet = pag.edgeSet.sameDomains();
-        this.outEdgeSet = pag.edgeSet.sameDomains();
-        this.stores = pag.stores.sameDomains();
-        this.loads = pag.loads.sameDomains();
-        this.alloc = pag.alloc.sameDomains();
     }
     
     public void addToPAG(Object varNodeParameter) {
         if (varNodeParameter != null) throw new RuntimeException("NYI");
         if (this.hasBeenAdded) return;
         this.hasBeenAdded = true;
-        this.pag.edgeSet.eqUnion(this.pag.edgeSet, this.internalEdgeSet);
-        this.pag.edgeSet.eqUnion(this.pag.edgeSet, this.inEdgeSet);
-        this.pag.edgeSet.eqUnion(this.pag.edgeSet, this.outEdgeSet);
-        this.pag.stores.eqUnion(this.pag.stores, this.stores);
-        this.pag.loads.eqUnion(this.pag.loads, this.loads);
-        this.pag.alloc.eqUnion(this.pag.alloc, this.alloc);
+        this.pag.edgeSet.eqUnion(this.internalEdgeSet);
+        this.pag.edgeSet.eqUnion(this.inEdgeSet);
+        this.pag.edgeSet.eqUnion(this.outEdgeSet);
+        this.pag.stores.eqUnion(this.stores);
+        this.pag.loads.eqUnion(this.loads);
+        this.pag.alloc.eqUnion(this.alloc);
     }
     
     private static Numberable[] box(Numberable n1, Numberable n2) {
@@ -61,48 +55,74 @@ public final class BDDMethodPAG extends AbstractMethodPAG {
         return ret;
     }
     
-    public void addInternalEdge(Node src, Node dst) { this.addEdge(src, dst, this.internalEdgeSet); }
-    
-    public void addInEdge(Node src, Node dst) { this.addEdge(src, dst, this.inEdgeSet); }
-    
-    public void addOutEdge(Node src, Node dst) { this.addEdge(src, dst, this.outEdgeSet); }
-    
-    private void addEdge(Node src, Node dst, Relation edgeSet) {
-        if (src instanceof VarNode) {
-            if (dst instanceof VarNode) {
-                edgeSet.add(this.pag.src, (VarNode) src, this.pag.dst, (VarNode) dst);
-            } else {
-                FieldRefNode fdst = (FieldRefNode) dst;
-                this.stores.add(this.pag.src,
-                                (VarNode) src,
-                                this.pag.dst,
-                                fdst.getBase(),
-                                this.pag.fld,
-                                fdst.getField());
-            }
-        } else
-            if (src instanceof FieldRefNode) {
-                FieldRefNode fsrc = (FieldRefNode) src;
-                this.loads.add(this.pag.src,
-                               fsrc.getBase(),
-                               this.pag.fld,
-                               fsrc.getField(),
-                               this.pag.dst,
-                               (VarNode) dst);
-            } else {
-                this.alloc.add(this.pag.obj, (AllocNode) src, this.pag.var, (VarNode) dst);
-            }
+    public void addInternalEdge(Node srcN, Node dstN) {
+        this.internalEdgeSet.eq(this.addEdge(srcN,
+                                             dstN,
+                                             new jedd.Relation(new jedd.Domain[] { src.v(), dst.v() },
+                                                               new jedd.PhysicalDomain[] { V1.v(), V2.v() },
+                                                               this.internalEdgeSet)));
     }
     
-    public final Relation internalEdgeSet;
+    public void addInEdge(Node srcN, Node dstN) {
+        this.inEdgeSet.eq(this.addEdge(srcN,
+                                       dstN,
+                                       new jedd.Relation(new jedd.Domain[] { src.v(), dst.v() },
+                                                         new jedd.PhysicalDomain[] { V1.v(), V2.v() },
+                                                         this.inEdgeSet)));
+    }
     
-    public final Relation inEdgeSet;
+    public void addOutEdge(Node srcN, Node dstN) {
+        this.outEdgeSet.eq(this.addEdge(srcN,
+                                        dstN,
+                                        new jedd.Relation(new jedd.Domain[] { src.v(), dst.v() },
+                                                          new jedd.PhysicalDomain[] { V1.v(), V2.v() },
+                                                          this.outEdgeSet)));
+    }
     
-    public final Relation outEdgeSet;
+    private jedd.Relation addEdge(Node srcN, Node dstN, final jedd.Relation edgeSet) {
+        if (srcN == null) return edgeSet;
+        if (srcN instanceof VarNode) {
+            if (dstN instanceof VarNode) {
+                edgeSet.eqUnion(jedd.Jedd.v().literal(new Object[] { srcN, dstN },
+                                                      new jedd.Domain[] { src.v(), dst.v() },
+                                                      new jedd.PhysicalDomain[] { V1.v(), V2.v() }));
+            } else {
+                FieldRefNode fdst = (FieldRefNode) dstN;
+                this.stores.eqUnion(jedd.Jedd.v().literal(new Object[] { srcN, fdst.getBase(), fdst.getField() },
+                                                          new jedd.Domain[] { src.v(), dst.v(), fld.v() },
+                                                          new jedd.PhysicalDomain[] { V1.v(), V2.v(), FD.v() }));
+            }
+        } else
+            if (srcN instanceof FieldRefNode) {
+                FieldRefNode fsrc = (FieldRefNode) srcN;
+                this.loads.eqUnion(jedd.Jedd.v().literal(new Object[] { fsrc.getBase(), fsrc.getField(), dstN },
+                                                         new jedd.Domain[] { src.v(), fld.v(), dst.v() },
+                                                         new jedd.PhysicalDomain[] { V1.v(), FD.v(), V2.v() }));
+            } else {
+                this.alloc.eqUnion(jedd.Jedd.v().literal(new Object[] { srcN, dstN },
+                                                         new jedd.Domain[] { obj.v(), var.v() },
+                                                         new jedd.PhysicalDomain[] { H1.v(), V1.v() }));
+            }
+        return edgeSet;
+    }
     
-    public final Relation stores;
+    public final jedd.Relation internalEdgeSet =
+      new jedd.Relation(new jedd.Domain[] { src.v(), dst.v() }, new jedd.PhysicalDomain[] { V1.v(), V2.v() });
     
-    public final Relation loads;
+    public final jedd.Relation inEdgeSet =
+      new jedd.Relation(new jedd.Domain[] { src.v(), dst.v() }, new jedd.PhysicalDomain[] { V1.v(), V2.v() });
     
-    public final Relation alloc;
+    public final jedd.Relation outEdgeSet =
+      new jedd.Relation(new jedd.Domain[] { src.v(), dst.v() }, new jedd.PhysicalDomain[] { V1.v(), V2.v() });
+    
+    public final jedd.Relation stores =
+      new jedd.Relation(new jedd.Domain[] { src.v(), dst.v(), fld.v() },
+                        new jedd.PhysicalDomain[] { V1.v(), V2.v(), FD.v() });
+    
+    public final jedd.Relation loads =
+      new jedd.Relation(new jedd.Domain[] { src.v(), fld.v(), dst.v() },
+                        new jedd.PhysicalDomain[] { V1.v(), FD.v(), V2.v() });
+    
+    public final jedd.Relation alloc =
+      new jedd.Relation(new jedd.Domain[] { obj.v(), var.v() }, new jedd.PhysicalDomain[] { H1.v(), V1.v() });
 }

@@ -57,12 +57,12 @@ public class Scene  //extends AbstractHost
     
     private Map nameToClass = new HashMap();
 
-    Numberer typeNumberer = new Numberer();
-    Numberer methodNumberer = new Numberer();
-    Numberer fieldNumberer = new Numberer();
-    Numberer classNumberer = new Numberer();
+    ArrayNumberer typeNumberer = new ArrayNumberer();
+    ArrayNumberer methodNumberer = new ArrayNumberer();
+    ArrayNumberer fieldNumberer = new ArrayNumberer();
+    ArrayNumberer classNumberer = new ArrayNumberer();
     StringNumberer subSigNumberer = new StringNumberer();
-    Numberer localNumberer = new Numberer();
+    ArrayNumberer localNumberer = new ArrayNumberer();
 
     private Hierarchy activeHierarchy;
     private FastHierarchy activeFastHierarchy;
@@ -563,12 +563,12 @@ public class Scene  //extends AbstractHost
     {
         return getPhantomRefs();
     }
-    public Numberer getTypeNumberer() { return typeNumberer; }
-    public Numberer getMethodNumberer() { return methodNumberer; }
-    public Numberer getFieldNumberer() { return fieldNumberer; }
-    public Numberer getClassNumberer() { return classNumberer; }
+    public ArrayNumberer getTypeNumberer() { return typeNumberer; }
+    public ArrayNumberer getMethodNumberer() { return methodNumberer; }
+    public ArrayNumberer getFieldNumberer() { return fieldNumberer; }
+    public ArrayNumberer getClassNumberer() { return classNumberer; }
     public StringNumberer getSubSigNumberer() { return subSigNumberer; }
-    public Numberer getLocalNumberer() { return localNumberer; }
+    public ArrayNumberer getLocalNumberer() { return localNumberer; }
 
     private void setReservedNames()
     {

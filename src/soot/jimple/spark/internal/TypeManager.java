@@ -75,7 +75,7 @@ public final class TypeManager extends AbstractTypeManager {
         if( pag.getOpts().verbose() )
             G.v().out.println( "Total types: "+numTypes );
 
-        Numberer allocNodes = pag.getAllocNodeNumberer();
+        ArrayNumberer allocNodes = pag.getAllocNodeNumberer();
         for( Iterator tIt = Scene.v().getTypeNumberer().iterator(); tIt.hasNext(); ) {
             final Type t = (Type) tIt.next();
             if( !(t instanceof RefLikeType) ) continue;

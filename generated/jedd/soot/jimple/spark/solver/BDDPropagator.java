@@ -8,7 +8,7 @@ import soot.*;
 import soot.util.queue.*;
 import java.util.*;
 import soot.options.SparkOptions;
-import soot.relations.*;
+import soot.jimple.spark.bdddomains.*;
 
 public final class BDDPropagator extends Propagator {
     public BDDPropagator(BDDPAG pag) {
@@ -17,129 +17,105 @@ public final class BDDPropagator extends Propagator {
     }
     
     public final void propagate() {
-        final Domain var = this.pag.var;
-        final Domain src = this.pag.src;
-        final Domain dst = this.pag.dst;
-        final Domain base = this.pag.base;
-        final Domain obj = this.pag.obj;
-        final Domain fld = this.pag.fld;
-        final PhysicalDomain v1 = this.pag.v1;
-        final PhysicalDomain v2 = this.pag.v2;
-        final PhysicalDomain h1 = this.pag.h1;
-        final PhysicalDomain h2 = this.pag.h2;
-        final PhysicalDomain fd = this.pag.fd;
-        final Relation edgeSet = this.pag.edgeSet;
-        final Relation pointsTo = this.pag.pointsTo;
-        final Relation alloc = this.pag.alloc;
-        final Relation loads = this.pag.loads;
-        final Relation stores = this.pag.stores;
-        final Relation fieldPt = this.pag.fieldPt;
-        final Relation oldPointsTo = pointsTo.sameDomains();
-        final Relation newPointsTo = pointsTo.sameDomains();
-        final Relation tmpPointsTo = newPointsTo.sameDomains();
-        final Relation objectsBeingStored = new Relation(obj, var, fld, h2, v1, fd);
-        final Relation oldStorePt = objectsBeingStored.sameDomains();
-        final Relation newStorePt = objectsBeingStored.sameDomains();
-        final Relation newFieldPt = fieldPt.sameDomains();
-        final Relation tmpFieldPt = fieldPt.sameDomains();
-        final Relation loadsFromHeap = new Relation(base, fld, dst, h1, fd, v2);
-        final Relation loadAss = loadsFromHeap.sameDomains();
+        final jedd.Relation oldPointsTo =
+          new jedd.Relation(new jedd.Domain[] { var.v(), obj.v() },
+                            new jedd.PhysicalDomain[] { V1.v(), H1.v() },
+                            jedd.Jedd.v().falseBDD());
+        final jedd.Relation newPointsTo =
+          new jedd.Relation(new jedd.Domain[] { var.v(), obj.v() },
+                            new jedd.PhysicalDomain[] { V1.v(), H1.v() },
+                            jedd.Jedd.v().falseBDD());
+        final jedd.Relation tmpPointsTo =
+          new jedd.Relation(new jedd.Domain[] { var.v(), obj.v() },
+                            new jedd.PhysicalDomain[] { V1.v(), H1.v() },
+                            jedd.Jedd.v().falseBDD());
+        final jedd.Relation objectsBeingStored =
+          new jedd.Relation(new jedd.Domain[] { obj.v(), var.v(), fld.v() },
+                            new jedd.PhysicalDomain[] { H2.v(), V1.v(), FD.v() });
+        final jedd.Relation oldStorePt =
+          new jedd.Relation(new jedd.Domain[] { obj.v(), var.v(), fld.v() },
+                            new jedd.PhysicalDomain[] { H2.v(), V1.v(), FD.v() },
+                            jedd.Jedd.v().falseBDD());
+        final jedd.Relation newStorePt =
+          new jedd.Relation(new jedd.Domain[] { obj.v(), var.v(), fld.v() },
+                            new jedd.PhysicalDomain[] { H2.v(), V1.v(), FD.v() },
+                            jedd.Jedd.v().falseBDD());
+        final jedd.Relation newFieldPt =
+          new jedd.Relation(new jedd.Domain[] { base.v(), fld.v(), obj.v() },
+                            new jedd.PhysicalDomain[] { H1.v(), FD.v(), H2.v() },
+                            jedd.Jedd.v().falseBDD());
+        final jedd.Relation tmpFieldPt =
+          new jedd.Relation(new jedd.Domain[] { base.v(), fld.v(), obj.v() },
+                            new jedd.PhysicalDomain[] { H1.v(), FD.v(), H2.v() },
+                            jedd.Jedd.v().falseBDD());
+        final jedd.Relation loadsFromHeap =
+          new jedd.Relation(new jedd.Domain[] { base.v(), fld.v(), dst.v() },
+                            new jedd.PhysicalDomain[] { H1.v(), FD.v(), V2.v() },
+                            jedd.Jedd.v().falseBDD());
+        final jedd.Relation loadAss =
+          new jedd.Relation(new jedd.Domain[] { base.v(), fld.v(), dst.v() },
+                            new jedd.PhysicalDomain[] { H1.v(), FD.v(), V2.v() },
+                            jedd.Jedd.v().falseBDD());
         final BDDTypeManager typeManager = (BDDTypeManager) this.pag.getTypeManager();
-        pointsTo.eqUnion(pointsTo, alloc);
-        newPointsTo.eqUnion(newPointsTo, pointsTo);
+        this.pag.pointsTo.eq(this.pag.alloc);
+        newPointsTo.eq(this.pag.pointsTo);
         do  {
             do  {
-                newPointsTo.eqRelprod(edgeSet, src, newPointsTo, var, var, edgeSet, dst, obj, newPointsTo, obj);
-                newPointsTo.eqMinus(newPointsTo, pointsTo);
-                newPointsTo.eqIntersect(newPointsTo, typeManager.get());
-                pointsTo.eqUnion(pointsTo, newPointsTo);
-                if (this.pag.getOpts().verbose()) {
-                    G.v().out.println("Minor iteration: " + newPointsTo.projectDownTo(var).size() + " changed p2sets");
-                }
-            }while(!newPointsTo.isEmpty()); 
-            newPointsTo.eqMinus(pointsTo, oldPointsTo);
-            objectsBeingStored.eqRelprod(stores,
-                                         src,
-                                         newPointsTo,
-                                         var,
-                                         obj,
-                                         newPointsTo,
-                                         obj,
-                                         var,
-                                         stores,
-                                         dst,
-                                         fld,
-                                         stores,
-                                         fld);
-            newStorePt.eqMinus(objectsBeingStored, oldStorePt);
-            oldStorePt.eqUnion(oldStorePt, newStorePt);
-            newFieldPt.eqRelprod(oldStorePt,
-                                 var,
-                                 newPointsTo,
-                                 var,
-                                 base,
-                                 newPointsTo,
-                                 obj,
-                                 fld,
-                                 oldStorePt,
-                                 fld,
-                                 obj,
-                                 oldStorePt,
-                                 obj);
-            tmpFieldPt.eqRelprod(newStorePt,
-                                 var,
-                                 oldPointsTo,
-                                 var,
-                                 base,
-                                 oldPointsTo,
-                                 obj,
-                                 fld,
-                                 newStorePt,
-                                 fld,
-                                 obj,
-                                 newStorePt,
-                                 obj);
-            newFieldPt.eqUnion(newFieldPt, tmpFieldPt);
-            newFieldPt.eqMinus(newFieldPt, fieldPt);
-            fieldPt.eqUnion(fieldPt, newFieldPt);
-            loadsFromHeap.eqRelprod(loads,
-                                    src,
-                                    newPointsTo,
-                                    var,
-                                    base,
-                                    newPointsTo,
-                                    obj,
-                                    fld,
-                                    loads,
-                                    fld,
-                                    dst,
-                                    loads,
-                                    dst);
-            loadsFromHeap.eqMinus(loadsFromHeap, loadAss);
-            newPointsTo.eqRelprod(loadAss, base, fld, newFieldPt, base, fld, var, loadAss, dst, obj, newFieldPt, obj);
-            tmpPointsTo.eqRelprod(loadsFromHeap,
-                                  base,
-                                  fld,
-                                  fieldPt,
-                                  base,
-                                  fld,
-                                  var,
-                                  loadsFromHeap,
-                                  dst,
-                                  obj,
-                                  fieldPt,
-                                  obj);
-            newPointsTo.eqUnion(newPointsTo, tmpPointsTo);
-            loadAss.eqUnion(loadAss, loadsFromHeap);
-            oldPointsTo.eq(pointsTo);
-            newPointsTo.eqMinus(newPointsTo, pointsTo);
-            newPointsTo.eqIntersect(newPointsTo, typeManager.get());
-            pointsTo.eqUnion(pointsTo, newPointsTo);
-            if (this.pag.getOpts().verbose()) {
-                G.v().out.println("Major iteration: " + newPointsTo.projectDownTo(this.pag.var).size() +
-                                  " changed p2sets");
-            }
-        }while(!newPointsTo.isEmpty()); 
+                newPointsTo.eq(jedd.Jedd.v().replace(jedd.Jedd.v().relprod(jedd.Jedd.v().read(this.pag.edgeSet),
+                                                                           newPointsTo,
+                                                                           new jedd.PhysicalDomain[] { V1.v() }),
+                                                     new jedd.PhysicalDomain[] { V2.v() },
+                                                     new jedd.PhysicalDomain[] { V1.v() }));
+                newPointsTo.eqMinus(this.pag.pointsTo);
+                newPointsTo.eqIntersect(typeManager.get());
+                this.pag.pointsTo.eqUnion(newPointsTo);
+                if (this.pag.getOpts().verbose()) G.v().out.println("Minor iteration");
+            }while(!jedd.Jedd.v().equals(jedd.Jedd.v().read(newPointsTo), jedd.Jedd.v().falseBDD())); 
+            newPointsTo.eq(jedd.Jedd.v().minus(jedd.Jedd.v().read(this.pag.pointsTo), oldPointsTo));
+            objectsBeingStored.eq(jedd.Jedd.v().replace(jedd.Jedd.v().relprod(jedd.Jedd.v().read(this.pag.stores),
+                                                                              jedd.Jedd.v().replace(newPointsTo,
+                                                                                                    new jedd.PhysicalDomain[] { H1.v() },
+                                                                                                    new jedd.PhysicalDomain[] { H2.v() }),
+                                                                              new jedd.PhysicalDomain[] { V1.v() }),
+                                                        new jedd.PhysicalDomain[] { V2.v() },
+                                                        new jedd.PhysicalDomain[] { V1.v() }));
+            newStorePt.eq(jedd.Jedd.v().minus(jedd.Jedd.v().read(objectsBeingStored), oldStorePt));
+            oldStorePt.eqUnion(newStorePt);
+            newFieldPt.eq(jedd.Jedd.v().relprod(jedd.Jedd.v().read(oldStorePt),
+                                                newPointsTo,
+                                                new jedd.PhysicalDomain[] { V1.v() }));
+            tmpFieldPt.eq(jedd.Jedd.v().relprod(jedd.Jedd.v().read(newStorePt),
+                                                oldPointsTo,
+                                                new jedd.PhysicalDomain[] { V1.v() }));
+            newFieldPt.eqUnion(tmpFieldPt);
+            newFieldPt.eqMinus(this.pag.fieldPt);
+            this.pag.fieldPt.eqUnion(newFieldPt);
+            loadsFromHeap.eq(jedd.Jedd.v().relprod(jedd.Jedd.v().read(this.pag.loads),
+                                                   newPointsTo,
+                                                   new jedd.PhysicalDomain[] { V1.v() }));
+            loadsFromHeap.eqMinus(loadAss);
+            newPointsTo.eq(jedd.Jedd.v().replace(jedd.Jedd.v().relprod(jedd.Jedd.v().read(jedd.Jedd.v().replace(loadAss,
+                                                                                                                new jedd.PhysicalDomain[] { V2.v() },
+                                                                                                                new jedd.PhysicalDomain[] { V1.v() })),
+                                                                       newFieldPt,
+                                                                       new jedd.PhysicalDomain[] { H1.v(), FD.v() }),
+                                                 new jedd.PhysicalDomain[] { H2.v() },
+                                                 new jedd.PhysicalDomain[] { H1.v() }));
+            tmpPointsTo.eq(jedd.Jedd.v().replace(jedd.Jedd.v().relprod(jedd.Jedd.v().read(jedd.Jedd.v().replace(loadsFromHeap,
+                                                                                                                new jedd.PhysicalDomain[] { V2.v() },
+                                                                                                                new jedd.PhysicalDomain[] { V1.v() })),
+                                                                       this.pag.fieldPt,
+                                                                       new jedd.PhysicalDomain[] { H1.v(), FD.v() }),
+                                                 new jedd.PhysicalDomain[] { H2.v() },
+                                                 new jedd.PhysicalDomain[] { H1.v() }));
+            newPointsTo.eqUnion(tmpPointsTo);
+            loadAss.eqUnion(loadsFromHeap);
+            oldPointsTo.eq(this.pag.pointsTo);
+            newPointsTo.eqMinus(this.pag.pointsTo);
+            newPointsTo.eqIntersect(typeManager.get());
+            this.pag.pointsTo.eqUnion(newPointsTo);
+            if (this.pag.getOpts().verbose()) G.v().out.println("Major iteration");
+        }while(!jedd.Jedd.v().equals(jedd.Jedd.v().read(newPointsTo), jedd.Jedd.v().falseBDD())); 
     }
     
     protected BDDPAG pag;

@@ -12,7 +12,7 @@
     <target name="compile" depends="settings,sablecc,copypeephole,settings,singletons,options,jflex-lexer,ppg-parser,jedd">
         <javac
             destdir="classes"
-            classpath="classes:${polyglot.jar}:${jasmin.jar}"
+            classpath="classes:${polyglot.jar}:${jasmin.jar}:${jedd.runtime.jar}"
             debug="true"
         >
             <src path="src"/>
@@ -109,7 +109,7 @@
             classname="soot.tools.BadFields"
             maxmemory="200m"
             fork="true"
-            classpath="classes:${polyglot.jar}:${jasmin.jar}"
+            classpath="classes:${polyglot.jar}:${jasmin.jar}:${jedd.runtime.jar}"
         >
             <arg value="-w"/>
             <arg value="-f"/>
@@ -125,7 +125,7 @@
         <javac
             srcdir="tests"
             destdir="testclasses"
-            classpath="classes:${polyglot.jar}:${jasmin.jar}"
+            classpath="classes:${polyglot.jar}:${jasmin.jar}:${jedd.runtime.jar}"
             debug="true"
             />
     </target>
@@ -137,6 +137,7 @@
                 <pathelement location="classes"/>
                 <pathelement location="${polyglot.jar}"/>
                 <pathelement location="${jasmin.jar}"/>
+                <pathelement location="${jedd.runtime.jar}"/>
             </classpath>
 
             <formatter type="plain"/>

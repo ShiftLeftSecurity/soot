@@ -26,7 +26,7 @@ import soot.*;
 import soot.util.queue.*;
 import java.util.*;
 import soot.options.SparkOptions;
-import soot.relations.*;
+import soot.jimple.spark.bdddomains.*;
 
 /** Propagates points-to sets along pointer assignment graph using BDDs.
  * @author Ondrej Lhotak
@@ -36,129 +36,91 @@ public final class BDDPropagator extends Propagator {
     public BDDPropagator( BDDPAG pag ) { this.pag = pag; }
     /** Actually does the propagation. */
     public final void propagate() {
-        final Domain var = pag.var;
-        final Domain src = pag.src;
-        final Domain dst = pag.dst;
-        final Domain base = pag.base;
-        final Domain obj = pag.obj;
-        final Domain fld = pag.fld;
+        <var:V1, obj:H1> oldPointsTo = 0B;
+        <var:V1, obj:H1> newPointsTo = 0B;
+        <var:V1, obj:H1> tmpPointsTo = 0B;
 
-        final PhysicalDomain v1 = pag.v1;
-        final PhysicalDomain v2 = pag.v2;
-        final PhysicalDomain h1 = pag.h1;
-        final PhysicalDomain h2 = pag.h2;
-        final PhysicalDomain fd = pag.fd;
+        <obj:H2, var:V1, fld:FD> objectsBeingStored;
+        <obj:H2, var:V1, fld:FD> oldStorePt = 0B;
+        <obj:H2, var:V1, fld:FD> newStorePt = 0B;
 
-        final Relation edgeSet = pag.edgeSet;
-        final Relation pointsTo = pag.pointsTo;
-        final Relation alloc = pag.alloc;
-        final Relation loads = pag.loads;
-        final Relation stores = pag.stores;
-        final Relation fieldPt = pag.fieldPt;
-
-        // Variable var points to object obj
-        final Relation oldPointsTo = pointsTo.sameDomains();
-        final Relation newPointsTo = pointsTo.sameDomains();
-        final Relation tmpPointsTo = newPointsTo.sameDomains();
-
-
-        // Object obj is being stored into var.fld
-        final Relation objectsBeingStored = new Relation( obj, var, fld,
-                                                          h2,  v1,  fd );
-        final Relation oldStorePt = objectsBeingStored.sameDomains();
-        final Relation newStorePt = objectsBeingStored.sameDomains();
-
-        final Relation newFieldPt = fieldPt.sameDomains();
-        final Relation tmpFieldPt = fieldPt.sameDomains();
+        <base:H1, fld:FD, obj:H2> newFieldPt = 0B;
+        <base:H1, fld:FD, obj:H2> tmpFieldPt = 0B;
 
         // The objects pointed to by base.fld are being loaded into dst
-        final Relation loadsFromHeap = new Relation( base, fld, dst,
-                                                     h1,   fd,  v2 );
-        final Relation loadAss = loadsFromHeap.sameDomains();
+        <base:H1, fld:FD, dst:V2> loadsFromHeap = 0B;
+        <base:H1, fld:FD, dst:V2> loadAss = 0B;
 
         final BDDTypeManager typeManager = (BDDTypeManager) pag.getTypeManager();
 
-        pointsTo.eqUnion( pointsTo, alloc );
-        newPointsTo.eqUnion( newPointsTo, pointsTo );
+        pag.pointsTo = pag.alloc;
+        newPointsTo = pag.pointsTo;
 
         // start solving 
         do {
 
             // repeat rule (1) in the inner loop
             do {
-                newPointsTo.eqRelprod( edgeSet, src, newPointsTo, var,
-                                       var, edgeSet,     dst,
-                                       obj, newPointsTo, obj );
-                newPointsTo.eqMinus( newPointsTo, pointsTo );
-                newPointsTo.eqIntersect( newPointsTo, typeManager.get() );
-                pointsTo.eqUnion( pointsTo, newPointsTo );
+                newPointsTo = (dst => var) pag.edgeSet {src} >< newPointsTo {var};
+                newPointsTo -= pag.pointsTo;
+                newPointsTo &= typeManager.get();
+                pag.pointsTo |= newPointsTo;
 
+                if( pag.getOpts().verbose() ) G.v().out.println( "Minor iteration" );
+                /*
                 if( pag.getOpts().verbose() ) {
                     G.v().out.println( "Minor iteration: "+newPointsTo.
                             projectDownTo( var ).size()+" changed p2sets" );
                 }
+                */
 
-            } while( !newPointsTo.isEmpty() );
+            } while( newPointsTo != 0B );
 
-            newPointsTo.eqMinus( pointsTo, oldPointsTo );
+            newPointsTo = pag.pointsTo - oldPointsTo;
 
             // apply rule (2)
-            objectsBeingStored.eqRelprod( stores, src, newPointsTo, var,
-                                          obj, newPointsTo, obj,
-                                          var, stores,      dst, 
-                                          fld, stores,      fld );
+            objectsBeingStored = (dst => var) pag.stores {src} >< newPointsTo {var};
                                           
-            newStorePt.eqMinus( objectsBeingStored, oldStorePt );
-            oldStorePt.eqUnion( oldStorePt, newStorePt );
+            newStorePt = objectsBeingStored - oldStorePt;
+            oldStorePt |= newStorePt;
 
-            newFieldPt.eqRelprod( oldStorePt, var, newPointsTo, var,
-                                  base, newPointsTo, obj,
-                                  fld,  oldStorePt,  fld,
-                                  obj,  oldStorePt,  obj );
+            newFieldPt = oldStorePt {var} >< (obj => base) newPointsTo {var};
 
-            tmpFieldPt.eqRelprod( newStorePt, var, oldPointsTo, var,
-                                  base, oldPointsTo, obj,
-                                  fld,  newStorePt,  fld,
-                                  obj,  newStorePt,  obj );
-            newFieldPt.eqUnion( newFieldPt, tmpFieldPt );
+            tmpFieldPt = newStorePt {var} >< (obj => base) oldPointsTo {var};
+            newFieldPt |= tmpFieldPt;
                                   
-            newFieldPt.eqMinus( newFieldPt, fieldPt );
-            fieldPt.eqUnion( fieldPt, newFieldPt );
+            newFieldPt -= pag.fieldPt;
+            pag.fieldPt |= newFieldPt;
 
             // apply rule (3)
-            loadsFromHeap.eqRelprod( loads, src, newPointsTo, var,
-                                     base, newPointsTo, obj,
-                                     fld,  loads,       fld,
-                                     dst,  loads,       dst );
+            loadsFromHeap = pag.loads {src} >< (obj => base) newPointsTo {var};
 
-            loadsFromHeap.eqMinus( loadsFromHeap, loadAss );
+            loadsFromHeap -= loadAss;
                                      
-            newPointsTo.eqRelprod( loadAss, base, fld, newFieldPt, base, fld,
-                                   var, loadAss,    dst,
-                                   obj, newFieldPt, obj );
-            tmpPointsTo.eqRelprod( loadsFromHeap, base, fld, fieldPt, base, fld,
-                                   var, loadsFromHeap, dst,
-                                   obj, fieldPt,       obj );
-
-            newPointsTo.eqUnion( newPointsTo, tmpPointsTo );
+            newPointsTo = (dst => var) loadAss {base,fld} >< newFieldPt {base,fld};
+            tmpPointsTo = (dst => var) loadsFromHeap {base,fld} >< pag.fieldPt {base,fld};
+            newPointsTo |= tmpPointsTo;
 
             // cache loadAss
-            loadAss.eqUnion( loadAss, loadsFromHeap );
+            loadAss |= loadsFromHeap;
             
             // update oldPointsTo
-            oldPointsTo.eq( pointsTo ); 
+            oldPointsTo = pag.pointsTo;
 
             // convert new points-to relation to normal type
-            newPointsTo.eqMinus( newPointsTo, pointsTo );
+            newPointsTo -= pag.pointsTo;
     
             // apply typeFilter
-            newPointsTo.eqIntersect( newPointsTo, typeManager.get() );
-            pointsTo.eqUnion( pointsTo, newPointsTo );
+            newPointsTo &= typeManager.get();
+            pag.pointsTo |= newPointsTo;
 
+            if( pag.getOpts().verbose() ) G.v().out.println( "Major iteration" );
+            /*
             if( pag.getOpts().verbose() ) {
                 G.v().out.println( "Major iteration: "+newPointsTo.projectDownTo( pag.var ).size()+" changed p2sets" );
             }
-        } while(!newPointsTo.isEmpty());
+            */
+        } while(newPointsTo != 0B);
     }
 
     /* End of public methods. */

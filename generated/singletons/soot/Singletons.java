@@ -80,7 +80,6 @@ import soot.util.*;
 import soot.util.queue.*;
 import soot.shimple.*;
 import soot.shimple.toolkits.scalar.*;
-import soot.relations.*;
 
 /** A class to group together all the global variables in Soot. */
 public class Singletons {
@@ -88,12 +87,6 @@ public class Singletons {
         private Global() {}
     }
     private Global g = new Global();
-
-    private JBuddyProfiler instanceJBuddyProfiler;
-    public JBuddyProfiler JBuddyProfiler() {
-        if( instanceJBuddyProfiler == null ) instanceJBuddyProfiler = new JBuddyProfiler( g );
-        return instanceJBuddyProfiler;
-    }
 
     private PhaseOptions instancePhaseOptions;
     public PhaseOptions PhaseOptions() {
