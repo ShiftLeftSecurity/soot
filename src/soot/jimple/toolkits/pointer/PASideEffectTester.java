@@ -24,6 +24,9 @@ import soot.jimple.*;
 import java.util.*;
 import soot.jimple.spark.*;
 
+// only because PointsToSet.size() does not exist
+import soot.jimple.spark.sets.PointsToSetInternal;
+
 //  ArrayRef, 
 //  CaughtExceptionRef, 
 //  FieldRef, 
@@ -91,7 +94,7 @@ public class PASideEffectTester implements SideEffectTester
 	return valueTouchesRWSet( readSet( u ), v, u.getUseBoxes() );
     }
 
-    /** Returns true if the unit can read from v.
+    /** Returns true if the unit can write to v.
      * Does not deal with expressions; deals with Refs. */
     public boolean unitCanWriteTo(Unit u, Value v)
     {
@@ -118,7 +121,7 @@ public class PASideEffectTester implements SideEffectTester
 	    if( boxed.equivTo( v ) ) return true;
 	}
 
-	if (v instanceof Local) {
+	if (v instanceof Local || v instanceof IdentityRef) {
 	    return false;
 	}
 
@@ -142,6 +145,105 @@ public class PASideEffectTester implements SideEffectTester
 	    return o1.hasNonEmptyIntersection( o2 );
 	}
 
+	if( v instanceof StaticFieldRef ) {
+	    StaticFieldRef sfr = (StaticFieldRef) v;
+	    if( s == null ) return false;
+	    return s.getGlobals().contains( sfr.getField() );
+	}
+
+	throw new RuntimeException( "Forgot to handle value "+v );
+    }
+
+    /** Returns true if the unit will read from v.
+     * Does not deal with expressions; deals with Refs. */
+    public boolean unitWillReadFrom(Unit u, Value v)
+    {
+	return valueTouchesRWSetUniquely( readSet( u ), v, u.getUseBoxes() );
+    }
+
+    /** Returns true if the unit will write to v.
+     * Does not deal with expressions; deals with Refs. */
+    public boolean unitWillWriteTo(Unit u, Value v)
+    {
+	return valueTouchesRWSetUniquely( writeSet( u ), v, u.getDefBoxes() );
+    }
+
+    protected boolean valueTouchesRWSetUniquely(RWSet s, Value v, List boxes)
+    {
+
+	// I'm not sure what to do here.  Maybe it should only return true
+	// if valueTouchesRWSetUniquely() for all uses in useIt.
+	{
+	    boolean allTouched = true;
+
+	    for (Iterator useIt = v.getUseBoxes().iterator(); useIt.hasNext();) {
+		final ValueBox use = (ValueBox) useIt.next();
+		if (!valueTouchesRWSetUniquely(s, use.getValue(), boxes)) {
+		    allTouched = false;
+		}
+	    }
+           
+	    if (allTouched) {
+		return true;
+	    }
+	}
+
+	// This doesn't really make any sense, but we need to return something.
+	if (v instanceof Constant)
+	    return false;
+
+	if (v instanceof Expr)
+	    throw new RuntimeException("can't deal with expr"+v);
+
+	// I think that for the unique case we should only return
+	// true here for Locals and IdentityRefs, and let the other three
+	// cases be handled below, but I could be wrong.
+	for( Iterator boxIt = boxes.iterator(); boxIt.hasNext(); ) {
+
+	    final ValueBox box = (ValueBox) boxIt.next();
+	    Value boxed = box.getValue();
+	    if( boxed.equivTo( v ) && 
+		((boxed instanceof Local) ||
+		 (boxed instanceof IdentityRef))) {
+		return true;
+	    }
+	}
+
+	if ((v instanceof Local) || (v instanceof IdentityRef)) {
+	    return false;
+	}
+       
+	if( v instanceof InstanceFieldRef ) {
+	    /* we can't say for now! */
+	    if (true) {
+		return false;
+	    }
+	    InstanceFieldRef ifr = (InstanceFieldRef) v;
+	    if( s == null ) return false;
+	    PointsToSet o1 = s.getBaseForField( ifr.getField() );
+	    if( o1 == null ) return false;
+	    PointsToSetInternal o2 = 
+		(PointsToSetInternal) reachingObjects( (Local) ifr.getBase() );
+	    if( o2 == null ) return false;
+	    return o1.hasNonEmptyIntersection( o2 ) && o2.size() == 1;
+	}
+
+	if( v instanceof ArrayRef ) {
+	    /* we can't say for now! */
+	    if (true) {
+		return false;
+	    }
+	    ArrayRef ar = (ArrayRef) v;
+	    if( s == null ) return false;
+	    PointsToSet o1 = s.getBaseForField( PointsToAnalysis.ARRAY_ELEMENTS_NODE );
+	    if( o1 == null ) return false;
+	    PointsToSetInternal o2 = 
+		(PointsToSetInternal) reachingObjects( (Local) ar.getBase() );
+	    if( o2 == null ) return false;
+	    return o1.hasNonEmptyIntersection( o2 ) && o2.size() == 1;
+	}
+	
+	// If I'm not mistaken it's always unique for statics
 	if( v instanceof StaticFieldRef ) {
 	    StaticFieldRef sfr = (StaticFieldRef) v;
 	    if( s == null ) return false;

@@ -162,7 +162,7 @@ public class SimpleLocalUses implements LocalUses
      *  a list of UnitValueBoxPairs each containing a Unit that use the
      *  local and the Local itself wrapped in a ValueBox.
      *  @param s a unit that we want to query for the uses of the Local it (may) define.
-     *  @return a UnitValueBoxPair of the Units that use the Local.
+     *  @return a List of UnitValueBoxPairs of the Units that use the Local.
      */
     public List getUsesOf(Unit s)
     {

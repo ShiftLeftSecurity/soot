@@ -524,6 +524,32 @@ Attribute(s) = (Unknown attribute ArrayNullCheckAttribute: 00 05 00)
 We can see that an {\tt ArrayNullCheckAttribute} has been added to
 the class file, and we can read the attribute data in hexadecimal.
 
+\section{Code Attribute Format}
+\label{sec:format}
+
+When Soot adds aggregated tags as sub-attributes to a method's {\tt
+  Code_attribute}, they have the following format:
+
+\begin{verbatim}
+some_attribute
+{
+  u2 attribute_name_index;
+  u4 attribute_length;
+  u2 some_attribute_table_length;
+  uN some_attribute_table[some_attribute_table_length];
+} 
+\end{verbatim}
+
+where {\tt uN == 2 + n}, and where {\tt n} is the number of bytes in
+ach table entry.  The 2 initial bytes in each entry are for the PC,
+and {\tt n} is the length of the {\tt byte[]} array returned by {\tt
+  Tag.getValue()}.  In the case of the ArrayNullCheckAttribute, {\tt N
+  == 3} and {\tt n == 1}.  This differs from the format published in
+our technical report and CASCON paper, which omits the
+attribute_table_length field.  It might seem like the 2 length bytes
+are wasted, but they are necessary when the table entries have
+irregular sizes.
+ 
 \section*{Known shortcomings}
 Soot cannot currently preserve existing attributes in a class file
 when transforming and annotating it.  In the {\tt foo} example,

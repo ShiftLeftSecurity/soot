@@ -71,6 +71,36 @@ public class EntryPoints
         addMethod( ret, Scene.v().getMainClass(), sigClinit );
         return ret;
     }
+    /** Returns additional entry points invoked by SableVM */
+    public List sableVMImplicit() {
+	List ret = new ArrayList();
+	addMethod( ret, "<java.lang.ClassFormatError: void <init>(java.lang.String)>");
+	addMethod( ret, "<java.lang.VMClass: boolean isInitialized(java.lang.Class)>");
+	addMethod( ret, "<java.lang.VMClass: void step7(java.lang.Class)>");
+	addMethod( ret, "<java.lang.VMClass: void step8(java.lang.Class)>");
+	addMethod( ret, "<java.lang.StringCreator: java.lang.String createString(byte[])>");
+	addMethod( ret, "<java.lang.VMClass: void setInitialized(java.lang.Class)>");
+	addMethod( ret, "<java.lang.StringCreator: int getUTFLength(java.lang.String)>");
+	addMethod( ret, "<java.lang.StringCreator: int getUTFLength(java.lang.String,int,int)>");
+	addMethod( ret, "<java.util.Hashtable: void putAllInternal(java.util.Map)>");
+	addMethod( ret, "<gnu.java.io.decode.DecoderEightBitLookup: void <init>(java.io.InputStream,java.lang.String,char[])>");
+	addMethod( ret, "<gnu.java.io.decode.Decoder: void <init>(java.io.InputStream,java.lang.String)>");
+	addMethod( ret, "<gnu.java.io.encode.EncoderEightBitLookup: void <init>(java.io.OutputStream,java.lang.String,char[])>");
+	addMethod( ret, "<gnu.java.io.encode.Encoder: void <init>(java.io.OutputStream,java.lang.String)>");
+	addMethod( ret, "<gnu.java.io.encode.EncoderEightBitLookup: byte[] loadTable(char[])>");
+	addMethod( ret, "<gnu.java.io.encode.Encoder: void setBadCharValue(char)>");
+	addMethod( ret, "<gnu.java.io.encode.Encoder: byte[] convertToBytes(char[])>");
+	addMethod( ret, "<gnu.java.io.encode.Encoder: byte[] convertToBytes(char[],int,int)>");
+	addMethod( ret, "<gnu.java.io.encode.EncoderEightBitLookup: int bytesInCharArray(char[],int,int)>");
+	addMethod( ret, "<gnu.java.io.encode.EncoderEightBitLookup: byte[] convertToBytes(char[],int,int,byte[],int)>");
+	addMethod( ret, "<java.lang.VirtualMachine: void invokeMain(java.lang.Class,java.lang.String[])>");
+	addMethod( ret, "<gnu.java.io.decode.DecoderEightBitLookup: int read(char[],int,int)>");
+	addMethod( ret, "<java.io.Writer: void write(java.lang.String,int,int)>");
+	addMethod( ret, "<gnu.java.io.encode.EncoderEightBitLookup: void write(char[],int,int)>");
+	addMethod( ret, "<java.io.FilterOutputStream: void write(byte[])>");
+	addMethod( ret, "<gnu.java.io.encode.Encoder: void flush()>"); 
+	return ret;
+    }
     /** Returns only the entry points invoked implicitly by the VM. */
     public List implicit() {
         List ret = new ArrayList();
@@ -87,6 +117,7 @@ public class EntryPoints
         addMethod( ret, "<java.lang.ref.Finalizer: void register(java.lang.Object)>");
         addMethod( ret, "<java.lang.ref.Finalizer: void runFinalizer()>");
         addMethod( ret, "<java.lang.String: byte[] getBytes()>");
+	ret.addAll( sableVMImplicit() );
         return ret;
     }
     /** Returns all the entry points. */

@@ -42,13 +42,14 @@ import java.util.*;
 public interface LocalUses
 {
     /**
-     *   Returns a list of the Units that use the Local that is 
-     *   defined by a given Unit. 
-     *   
-     *   @param s  the unit we wish to query for the use of the Local
-     *             it defines.
-     *   @return  a list of the Local's uses.
-     */    
+     * Uses for a Local defined at a given Unit are returned as a list
+     * of UnitValueBoxPairs each containing a Unit that use the local
+     * and the Local itself wrapped in a ValueBox.
+     * 
+     *  @param s a unit that we want to query for the uses of the
+     *           Local it (may) define.
+     *  @return a List of UnitValueBoxPairs of the Units that use the Local.
+     */
     public List getUsesOf(Unit s);
 }
 

@@ -226,6 +226,9 @@ public class PackManager {
 
         // Baf optimization pack
         addPack(p = new BodyPack("bop"));
+	
+	/* added by CJFP */
+	addPack(p = new ScenePack("wbap")); 
 
         // Code attribute tag aggregation pack
         addPack(p = new BodyPack("tag"));
@@ -520,6 +523,10 @@ public class PackManager {
                 m.setActiveBody(Baf.v().newBody
                                 ((JimpleBody) m.getActiveBody()));
                 PackManager.v().getPack("bop").apply(m.getActiveBody());
+
+		/* added by CJFP -- wrong place for a whole-program pack ... */
+		PackManager.v().getPack("wbap").apply();
+		
                 PackManager.v().getPack("tag").apply(m.getActiveBody());
             }
         }
