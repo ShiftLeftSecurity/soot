@@ -1026,67 +1026,76 @@ public class TypeResolver
 
   private void remove_spurious_locals()
   {
-    CompleteUnitGraph graph = new CompleteUnitGraph(stmtBody);
-    SimpleLocalDefs defs = new SimpleLocalDefs(graph);
-    SimpleLocalUses uses = new SimpleLocalUses(graph, defs);
-    PatchingChain units = stmtBody.getUnits();
-    Stmt[] stmts = new Stmt[units.size()];
-    int modified = 0;
+    boolean repeat;
 
-    units.toArray(stmts);
-    
-    for(int i = 0; i < stmts.length; i++)
+    do
       {
-	Stmt stmt = stmts[i];
+	CompleteUnitGraph graph = new CompleteUnitGraph(stmtBody);
+	SimpleLocalDefs defs = new SimpleLocalDefs(graph);
+	SimpleLocalUses uses = new SimpleLocalUses(graph, defs);
+	PatchingChain units = stmtBody.getUnits();
+	Stmt[] stmts = new Stmt[units.size()];
+	HashSet deleted = new HashSet();
 
-	if(stmt instanceof AssignStmt)
+	repeat = false;
+	units.toArray(stmts);
+	
+	for(int i = 0; i < stmts.length; i++)
 	  {
-	    AssignStmt assign1 = (AssignStmt) stmt;
-
-	    if(assign1.getLeftOp() instanceof Local)
+	    Stmt stmt = stmts[i];
+	    
+	    if(stmt instanceof AssignStmt)
 	      {
-		List uselist = uses.getUsesOf(assign1);
-
-		if(uselist.size() == 1)
+		AssignStmt assign1 = (AssignStmt) stmt;
+		
+		if(assign1.getLeftOp() instanceof Local)
 		  {
-		    UnitValueBoxPair pair = (UnitValueBoxPair) uselist.get(0);
+		    List uselist = uses.getUsesOf(assign1);
 		    
-		    List deflist = defs.getDefsOfAt((Local) pair.getValueBox().getValue(), pair.getUnit());
-				
-		    if(deflist.size() == 1)
+		    if(uselist.size() == 1)
 		      {
-			if(pair.getValueBox().canContainValue(assign1.getRightOp()))
+			UnitValueBoxPair pair = (UnitValueBoxPair) uselist.get(0);
+			
+			List deflist = defs.getDefsOfAt((Local) pair.getValueBox().getValue(), pair.getUnit());
+			
+			if(deflist.size() == 1)
 			  {
-			    // This is definitely a spurious local!
-			    // System.out.println(pair.getValueBox().getValue() + ": [" + assign1 + "] <--> [" + pair.getUnit() + "]");
-			    pair.getValueBox().setValue(assign1.getRightOp());
-			    units.remove(assign1);
-			    stmtBody.getLocals().remove(assign1.getLeftOp());
-			    modified++;
-			    // System.out.println(" --> [" + pair.getUnit() + "]");
+			    if(pair.getValueBox().canContainValue(assign1.getRightOp()))
+			      {
+				// This is definitely a spurious local!
+
+				// Hmm.. use is in a deleted statement.  Must wait till next iteration.
+				if(deleted.contains(pair.getUnit()))
+				  {
+				    repeat = true;
+				    continue;
+				  }
+				
+				pair.getValueBox().setValue(assign1.getRightOp());
+				deleted.add(assign1);
+				units.remove(assign1);
+				stmtBody.getLocals().remove(assign1.getLeftOp());
+				
+			      }
 			  }
 		      }
 		  }
 	      }
 	  }
       }
-
-    //System.out.println("remove spurious locals done: " + modified);
+    while(repeat);
   }
 
   private void split_new()
   {
     CompleteUnitGraph graph = new CompleteUnitGraph(stmtBody);
-
     SimpleLocalDefs defs = new SimpleLocalDefs(graph);
     // SimpleLocalUses uses = new SimpleLocalUses(graph, defs);
-
     PatchingChain units = stmtBody.getUnits();
-    
     Stmt[] stmts = new Stmt[units.size()];
 
     units.toArray(stmts);
-
+    
     for(int i = 0; i < stmts.length; i++)
       {
 	Stmt stmt = stmts[i];
@@ -1119,9 +1128,7 @@ public class TypeResolver
 			    else if(assign.getRightOp() instanceof NewExpr)
 			      {			
 				// We split the local.
-				
-				//  System.out.println("split: [" + assign + "] and [" + stmt + "]");
-
+				//System.out.println("split: [" + assign + "] and [" + stmt + "]");
 				Local newlocal = Jimple.v().newLocal("tmp", null);
 				stmtBody.getLocals().add(newlocal);
 				
@@ -1139,4 +1146,3 @@ public class TypeResolver
       }
   }
 }
-
