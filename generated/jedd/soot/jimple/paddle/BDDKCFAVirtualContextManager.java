@@ -37,17 +37,14 @@ public class BDDKCFAVirtualContextManager extends AbsVirtualContextManager {
                                                "omains.tgtc:soot.jimple.paddle.bdddomains.C2, soot.jimple.pa" +
                                                "ddle.bdddomains.tgtm:soot.jimple.paddle.bdddomains.MT> newEd" +
                                                "ges = jedd.internal.Jedd.v().copy(jedd.internal.Jedd.v().pro" +
-                                               "ject(jedd.internal.Jedd.v().replace(in.get(), new jedd.Physi" +
-                                               "calDomain[...], new jedd.PhysicalDomain[...]), new jedd.Phys" +
-                                               "icalDomain[...]), new jedd.PhysicalDomain[...], new jedd.Phy" +
-                                               "sicalDomain[...]); at /tmp/fixing-paddle/src/soot/jimple/pad" +
-                                               "dle/BDDKCFAVirtualContextManager.jedd:49,51-59"),
-                                              jedd.internal.Jedd.v().copy(jedd.internal.Jedd.v().project(jedd.internal.Jedd.v().replace(in.get(),
-                                                                                                                                        new PhysicalDomain[] { C2.v(), ST.v() },
-                                                                                                                                        new PhysicalDomain[] { C1.v(), C2.v() }),
+                                               "ject(in.get(), new jedd.PhysicalDomain[...]), new jedd.Physi" +
+                                               "calDomain[...], new jedd.PhysicalDomain[...]); at /tmp/fixin" +
+                                               "g-paddle/src/soot/jimple/paddle/BDDKCFAVirtualContextManager" +
+                                               ".jedd:49,51-59"),
+                                              jedd.internal.Jedd.v().copy(jedd.internal.Jedd.v().project(in.get(),
                                                                                                          new PhysicalDomain[] { H1.v(), V1.v() }),
-                                                                          new PhysicalDomain[] { C2.v() },
-                                                                          new PhysicalDomain[] { ST.v() }));
+                                                                          new PhysicalDomain[] { ST.v() },
+                                                                          new PhysicalDomain[] { C2.v() }));
         newEdges.eq(jedd.internal.Jedd.v().cast((jedd.internal.RelationContainer)
                                                   new jedd.internal.RelationContainer(new Attribute[] { tgtc.v(), srcm.v(), srcc.v(), tgtm.v(), stmt.v(), kind.v() },
                                                                                       new PhysicalDomain[] { C2.v(), MS.v(), C1.v(), MT.v(), ST.v(), KD.v() },

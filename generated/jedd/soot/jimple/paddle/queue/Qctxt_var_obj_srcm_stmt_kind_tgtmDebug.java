@@ -30,8 +30,8 @@ public class Qctxt_var_obj_srcm_stmt_kind_tgtmDebug extends Qctxt_var_obj_srcm_s
     
     public void add(final jedd.internal.RelationContainer in) {
         Iterator it =
-          new jedd.internal.RelationContainer(new Attribute[] { ctxt.v(), srcm.v(), tgtm.v(), obj.v(), var.v(), stmt.v(), kind.v() },
-                                              new PhysicalDomain[] { C2.v(), MS.v(), MT.v(), H1.v(), V1.v(), ST.v(), KD.v() },
+          new jedd.internal.RelationContainer(new Attribute[] { srcm.v(), obj.v(), var.v(), ctxt.v(), tgtm.v(), stmt.v(), kind.v() },
+                                              new PhysicalDomain[] { MS.v(), H1.v(), V1.v(), C1.v(), MT.v(), ST.v(), KD.v() },
                                               ("in.iterator(new jedd.Attribute[...]) at /tmp/fixing-paddle/s" +
                                                "rc/soot/jimple/paddle/queue/Qctxt_var_obj_srcm_stmt_kind_tgt" +
                                                "mDebug.jedd:40,22-24"),

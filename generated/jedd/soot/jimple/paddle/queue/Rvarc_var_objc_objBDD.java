@@ -25,8 +25,8 @@ public final class Rvarc_var_objc_objBDD extends Rvarc_var_objc_obj {
     
     public Rvarc_var_objc_objBDD(final jedd.internal.RelationContainer bdd, String name) {
         this(name);
-        add(new jedd.internal.RelationContainer(new Attribute[] { obj.v(), var.v(), objc.v(), varc.v() },
-                                                new PhysicalDomain[] { H1.v(), V1.v(), C2.v(), C1.v() },
+        add(new jedd.internal.RelationContainer(new Attribute[] { obj.v(), var.v(), varc.v(), objc.v() },
+                                                new PhysicalDomain[] { H1.v(), V1.v(), C1.v(), C2.v() },
                                                 ("add(bdd) at /tmp/fixing-paddle/src/soot/jimple/paddle/queue/" +
                                                  "Rvarc_var_objc_objBDD.jedd:33,102-105"),
                                                 bdd));
@@ -52,8 +52,8 @@ public final class Rvarc_var_objc_objBDD extends Rvarc_var_objc_obj {
             public Object next() {
                 if (it == null || !it.hasNext()) {
                     it =
-                      new jedd.internal.RelationContainer(new Attribute[] { obj.v(), var.v(), objc.v(), varc.v() },
-                                                          new PhysicalDomain[] { H1.v(), V1.v(), C2.v(), C1.v() },
+                      new jedd.internal.RelationContainer(new Attribute[] { obj.v(), var.v(), varc.v(), objc.v() },
+                                                          new PhysicalDomain[] { H1.v(), V1.v(), C1.v(), C2.v() },
                                                           ("bdd.iterator(new jedd.Attribute[...]) at /tmp/fixing-paddle/" +
                                                            "src/soot/jimple/paddle/queue/Rvarc_var_objc_objBDD.jedd:45,2" +
                                                            "5-28"),
@@ -84,8 +84,8 @@ public final class Rvarc_var_objc_objBDD extends Rvarc_var_objc_obj {
                                                "edd:55,43-46"),
                                               bdd);
         bdd.eq(jedd.internal.Jedd.v().falseBDD());
-        return new jedd.internal.RelationContainer(new Attribute[] { obj.v(), var.v(), objc.v(), varc.v() },
-                                                   new PhysicalDomain[] { H1.v(), V1.v(), C2.v(), C1.v() },
+        return new jedd.internal.RelationContainer(new Attribute[] { obj.v(), var.v(), varc.v(), objc.v() },
+                                                   new PhysicalDomain[] { H1.v(), V1.v(), C1.v(), C2.v() },
                                                    ("return ret; at /tmp/fixing-paddle/src/soot/jimple/paddle/que" +
                                                     "ue/Rvarc_var_objc_objBDD.jedd:57,8-14"),
                                                    ret);

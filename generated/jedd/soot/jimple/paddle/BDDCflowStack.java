@@ -149,8 +149,8 @@ public class BDDCflowStack {
                                                    ".paddle.bdddomains.MT> targets = targetsOfShadow(new jedd.in" +
                                                    "ternal.RelationContainer(...)); at /tmp/fixing-paddle/src/so" +
                                                    "ot/jimple/paddle/BDDCflowStack.jedd:94,29-36"),
-                                                  targetsOfShadow(new jedd.internal.RelationContainer(new jedd.Attribute[] { shadow.v(), stmt.v() },
-                                                                                                      new jedd.PhysicalDomain[] { V1.v(), ST.v() },
+                                                  targetsOfShadow(new jedd.internal.RelationContainer(new jedd.Attribute[] { stmt.v(), shadow.v() },
+                                                                                                      new jedd.PhysicalDomain[] { ST.v(), V1.v() },
                                                                                                       ("targetsOfShadow(ret) at /tmp/fixing-paddle/src/soot/jimple/p" +
                                                                                                        "addle/BDDCflowStack.jedd:94,39-54"),
                                                                                                       ret)));
@@ -162,8 +162,8 @@ public class BDDCflowStack {
                                                                                                             targets)))))
                 break;
         }
-        return new jedd.internal.RelationContainer(new jedd.Attribute[] { shadow.v(), stmt.v() },
-                                                   new jedd.PhysicalDomain[] { V1.v(), ST.v() },
+        return new jedd.internal.RelationContainer(new jedd.Attribute[] { stmt.v(), shadow.v() },
+                                                   new jedd.PhysicalDomain[] { ST.v(), V1.v() },
                                                    ("return ret; at /tmp/fixing-paddle/src/soot/jimple/paddle/BDD" +
                                                     "CflowStack.jedd:97,8-14"),
                                                    ret);

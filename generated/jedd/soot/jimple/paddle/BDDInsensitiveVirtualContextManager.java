@@ -28,7 +28,7 @@ public class BDDInsensitiveVirtualContextManager extends AbsVirtualContextManage
                                                "src/soot/jimple/paddle/BDDInsensitiveVirtualContextManager.j" +
                                                "edd:35,45-51"),
                                               jedd.internal.Jedd.v().join(jedd.internal.Jedd.v().read(jedd.internal.Jedd.v().project(in.get(),
-                                                                                                                                     new jedd.PhysicalDomain[] { C2.v(), H1.v(), V1.v() })),
+                                                                                                                                     new jedd.PhysicalDomain[] { H1.v(), V1.v(), C1.v() })),
                                                                           jedd.internal.Jedd.v().literal(new Object[] { null, null },
                                                                                                          new jedd.Attribute[] { srcc.v(), tgtc.v() },
                                                                                                          new jedd.PhysicalDomain[] { C1.v(), C2.v() }),

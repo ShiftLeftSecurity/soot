@@ -21,17 +21,14 @@ public class BDD1CFAVirtualContextManager extends AbsVirtualContextManager {
                                                "omains.tgtc:soot.jimple.paddle.bdddomains.C2, soot.jimple.pa" +
                                                "ddle.bdddomains.tgtm:soot.jimple.paddle.bdddomains.MT> newOu" +
                                                "t = jedd.internal.Jedd.v().copy(jedd.internal.Jedd.v().proje" +
-                                               "ct(jedd.internal.Jedd.v().replace(in.get(), new jedd.Physica" +
-                                               "lDomain[...], new jedd.PhysicalDomain[...]), new jedd.Physic" +
-                                               "alDomain[...]), new jedd.PhysicalDomain[...], new jedd.Physi" +
-                                               "calDomain[...]); at /tmp/fixing-paddle/src/soot/jimple/paddl" +
-                                               "e/BDD1CFAVirtualContextManager.jedd:35,45-51"),
-                                              jedd.internal.Jedd.v().copy(jedd.internal.Jedd.v().project(jedd.internal.Jedd.v().replace(in.get(),
-                                                                                                                                        new jedd.PhysicalDomain[] { C2.v(), ST.v() },
-                                                                                                                                        new jedd.PhysicalDomain[] { C1.v(), C2.v() }),
+                                               "ct(in.get(), new jedd.PhysicalDomain[...]), new jedd.Physica" +
+                                               "lDomain[...], new jedd.PhysicalDomain[...]); at /tmp/fixing-" +
+                                               "paddle/src/soot/jimple/paddle/BDD1CFAVirtualContextManager.j" +
+                                               "edd:35,45-51"),
+                                              jedd.internal.Jedd.v().copy(jedd.internal.Jedd.v().project(in.get(),
                                                                                                          new jedd.PhysicalDomain[] { H1.v(), V1.v() }),
-                                                                          new jedd.PhysicalDomain[] { C2.v() },
-                                                                          new jedd.PhysicalDomain[] { ST.v() }));
+                                                                          new jedd.PhysicalDomain[] { ST.v() },
+                                                                          new jedd.PhysicalDomain[] { C2.v() }));
         out.add(new jedd.internal.RelationContainer(new jedd.Attribute[] { tgtc.v(), srcm.v(), srcc.v(), tgtm.v(), stmt.v(), kind.v() },
                                                     new jedd.PhysicalDomain[] { C2.v(), MS.v(), C1.v(), MT.v(), ST.v(), KD.v() },
                                                     ("out.add(newOut) at /tmp/fixing-paddle/src/soot/jimple/paddle" +

@@ -42,8 +42,8 @@ public class BDDCallGraph extends AbsCallGraph {
     }
     
     public Rsrcc_srcm_stmt_kind_tgtc_tgtm edgesOutOf(Rctxt_method methods) {
-        return new Rsrcc_srcm_stmt_kind_tgtc_tgtmBDD(new jedd.internal.RelationContainer(new jedd.Attribute[] { srcc.v(), srcm.v(), tgtc.v(), tgtm.v(), stmt.v(), kind.v() },
-                                                                                         new jedd.PhysicalDomain[] { C1.v(), MS.v(), C2.v(), MT.v(), ST.v(), KD.v() },
+        return new Rsrcc_srcm_stmt_kind_tgtc_tgtmBDD(new jedd.internal.RelationContainer(new jedd.Attribute[] { srcm.v(), tgtc.v(), srcc.v(), tgtm.v(), stmt.v(), kind.v() },
+                                                                                         new jedd.PhysicalDomain[] { MS.v(), C2.v(), C1.v(), MT.v(), ST.v(), KD.v() },
                                                                                          ("new soot.jimple.paddle.queue.Rsrcc_srcm_stmt_kind_tgtc_tgtmB" +
                                                                                           "DD(...) at /tmp/fixing-paddle/src/soot/jimple/paddle/BDDCall" +
                                                                                           "Graph.jedd:42,15-18"),
@@ -54,8 +54,8 @@ public class BDDCallGraph extends AbsCallGraph {
     }
     
     public Rsrcc_srcm_stmt_kind_tgtc_tgtm edgesOutOf(MethodOrMethodContext m) {
-        return new Rsrcc_srcm_stmt_kind_tgtc_tgtmBDD(new jedd.internal.RelationContainer(new jedd.Attribute[] { srcc.v(), srcm.v(), tgtc.v(), tgtm.v(), stmt.v(), kind.v() },
-                                                                                         new jedd.PhysicalDomain[] { C1.v(), MS.v(), C2.v(), MT.v(), ST.v(), KD.v() },
+        return new Rsrcc_srcm_stmt_kind_tgtc_tgtmBDD(new jedd.internal.RelationContainer(new jedd.Attribute[] { srcm.v(), tgtc.v(), srcc.v(), tgtm.v(), stmt.v(), kind.v() },
+                                                                                         new jedd.PhysicalDomain[] { MS.v(), C2.v(), C1.v(), MT.v(), ST.v(), KD.v() },
                                                                                          ("new soot.jimple.paddle.queue.Rsrcc_srcm_stmt_kind_tgtc_tgtmB" +
                                                                                           "DD(...) at /tmp/fixing-paddle/src/soot/jimple/paddle/BDDCall" +
                                                                                           "Graph.jedd:47,15-18"),

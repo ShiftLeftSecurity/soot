@@ -24,8 +24,8 @@ public final class Rvar_method_typeBDD extends Rvar_method_type {
     
     public Rvar_method_typeBDD(final jedd.internal.RelationContainer bdd, String name) {
         this(name);
-        add(new jedd.internal.RelationContainer(new Attribute[] { method.v(), var.v(), type.v() },
-                                                new PhysicalDomain[] { MS.v(), V1.v(), T1.v() },
+        add(new jedd.internal.RelationContainer(new Attribute[] { var.v(), type.v(), method.v() },
+                                                new PhysicalDomain[] { V1.v(), T1.v(), MS.v() },
                                                 ("add(bdd) at /tmp/fixing-paddle/src/soot/jimple/paddle/queue/" +
                                                  "Rvar_method_typeBDD.jedd:33,94-97"),
                                                 bdd));
@@ -51,8 +51,8 @@ public final class Rvar_method_typeBDD extends Rvar_method_type {
             public Object next() {
                 if (it == null || !it.hasNext()) {
                     it =
-                      new jedd.internal.RelationContainer(new Attribute[] { method.v(), var.v(), type.v() },
-                                                          new PhysicalDomain[] { MS.v(), V1.v(), T1.v() },
+                      new jedd.internal.RelationContainer(new Attribute[] { var.v(), type.v(), method.v() },
+                                                          new PhysicalDomain[] { V1.v(), T1.v(), MS.v() },
                                                           ("bdd.iterator(new jedd.Attribute[...]) at /tmp/fixing-paddle/" +
                                                            "src/soot/jimple/paddle/queue/Rvar_method_typeBDD.jedd:45,25-" +
                                                            "28"),
@@ -79,8 +79,8 @@ public final class Rvar_method_typeBDD extends Rvar_method_type {
                                                "7-40"),
                                               bdd);
         bdd.eq(jedd.internal.Jedd.v().falseBDD());
-        return new jedd.internal.RelationContainer(new Attribute[] { method.v(), var.v(), type.v() },
-                                                   new PhysicalDomain[] { MS.v(), V1.v(), T1.v() },
+        return new jedd.internal.RelationContainer(new Attribute[] { var.v(), type.v(), method.v() },
+                                                   new PhysicalDomain[] { V1.v(), T1.v(), MS.v() },
                                                    ("return ret; at /tmp/fixing-paddle/src/soot/jimple/paddle/que" +
                                                     "ue/Rvar_method_typeBDD.jedd:57,8-14"),
                                                    ret);

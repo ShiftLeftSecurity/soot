@@ -31,8 +31,8 @@ public final class Qvarc_var_objc_objBDD extends Qvarc_var_objc_obj {
             invalidate();
         for (Iterator it = readers.iterator(); it.hasNext(); ) {
             Rvarc_var_objc_objBDD reader = (Rvarc_var_objc_objBDD) it.next();
-            reader.add(new jedd.internal.RelationContainer(new Attribute[] { obj.v(), var.v(), objc.v(), varc.v() },
-                                                           new PhysicalDomain[] { H1.v(), V1.v(), C2.v(), C1.v() },
+            reader.add(new jedd.internal.RelationContainer(new Attribute[] { obj.v(), var.v(), varc.v(), objc.v() },
+                                                           new PhysicalDomain[] { H1.v(), V1.v(), C1.v(), C2.v() },
                                                            ("reader.add(in) at /tmp/fixing-paddle/src/soot/jimple/paddle/" +
                                                             "queue/Qvarc_var_objc_objBDD.jedd:40,12-18"),
                                                            in));

@@ -85,8 +85,8 @@ public class BDDCflow {
                                            "soot/jimple/paddle/BDDCflow.jedd:59,12-26"));
     
     jedd.internal.RelationContainer stmtMethod() {
-        return new jedd.internal.RelationContainer(new jedd.Attribute[] { method.v(), stmt.v() },
-                                                   new jedd.PhysicalDomain[] { MT.v(), ST.v() },
+        return new jedd.internal.RelationContainer(new jedd.Attribute[] { stmt.v(), method.v() },
+                                                   new jedd.PhysicalDomain[] { ST.v(), MT.v() },
                                                    ("return stmtMethod; at /tmp/fixing-paddle/src/soot/jimple/pad" +
                                                     "dle/BDDCflow.jedd:60,34-40"),
                                                    stmtMethod);

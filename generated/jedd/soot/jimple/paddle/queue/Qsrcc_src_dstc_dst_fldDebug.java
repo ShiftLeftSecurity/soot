@@ -24,8 +24,8 @@ public class Qsrcc_src_dstc_dst_fldDebug extends Qsrcc_src_dstc_dst_fld {
     
     public void add(final jedd.internal.RelationContainer in) {
         Iterator it =
-          new jedd.internal.RelationContainer(new Attribute[] { dst.v(), src.v(), srcc.v(), fld.v(), dstc.v() },
-                                              new PhysicalDomain[] { V2.v(), V1.v(), C1.v(), FD.v(), C2.v() },
+          new jedd.internal.RelationContainer(new Attribute[] { dst.v(), src.v(), dstc.v(), srcc.v(), fld.v() },
+                                              new PhysicalDomain[] { V2.v(), V1.v(), C2.v(), C1.v(), FD.v() },
                                               ("in.iterator(new jedd.Attribute[...]) at /tmp/fixing-paddle/s" +
                                                "rc/soot/jimple/paddle/queue/Qsrcc_src_dstc_dst_fldDebug.jedd" +
                                                ":40,22-24"),

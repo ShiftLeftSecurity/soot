@@ -24,8 +24,8 @@ public class Qsrcm_stmt_kind_tgtm_src_dstDebug extends Qsrcm_stmt_kind_tgtm_src_
     
     public void add(final jedd.internal.RelationContainer in) {
         Iterator it =
-          new jedd.internal.RelationContainer(new Attribute[] { dst.v(), src.v(), srcm.v(), tgtm.v(), stmt.v(), kind.v() },
-                                              new PhysicalDomain[] { V2.v(), V1.v(), MS.v(), MT.v(), ST.v(), KD.v() },
+          new jedd.internal.RelationContainer(new Attribute[] { dst.v(), srcm.v(), src.v(), tgtm.v(), stmt.v(), kind.v() },
+                                              new PhysicalDomain[] { V2.v(), MS.v(), V1.v(), MT.v(), ST.v(), KD.v() },
                                               ("in.iterator(new jedd.Attribute[...]) at /tmp/fixing-paddle/s" +
                                                "rc/soot/jimple/paddle/queue/Qsrcm_stmt_kind_tgtm_src_dstDebu" +
                                                "g.jedd:40,22-24"),

@@ -23,8 +23,8 @@ public class Qvar_method_typeTrad extends Qvar_method_type {
     
     public void add(final jedd.internal.RelationContainer in) {
         Iterator it =
-          new jedd.internal.RelationContainer(new Attribute[] { method.v(), var.v(), type.v() },
-                                              new PhysicalDomain[] { MS.v(), V1.v(), T1.v() },
+          new jedd.internal.RelationContainer(new Attribute[] { var.v(), type.v(), method.v() },
+                                              new PhysicalDomain[] { V1.v(), T1.v(), MS.v() },
                                               ("in.iterator(new jedd.Attribute[...]) at /tmp/fixing-paddle/s" +
                                                "rc/soot/jimple/paddle/queue/Qvar_method_typeTrad.jedd:40,22-" +
                                                "24"),
