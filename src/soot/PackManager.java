@@ -442,6 +442,13 @@ public class PackManager {
                 throw new CompilationDeathException("Cannot output file " + fileName);
             }
 
+
+	    /*
+	     * Nomair A. Naeem 5-Jun-2005
+	     * Added to remove the *final* bug in Dava (often seen in AspectJ programs)
+	     */
+	    DavaStaticBlockCleaner.v().staticBlockInlining(s);
+	    
             G.v().out.print("Generating " + fileName + "... ");
             G.v().out.flush();
 
