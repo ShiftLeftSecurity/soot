@@ -42,7 +42,7 @@ public class JjNodeFactory_c extends JL5NodeFactory_c implements JjNodeFactory {
         return n;
     }
    
-    public JjAccessField_c JjAccessField(Position pos, Call getMeth, Call setMeth, Field field){
+    /*public JjAccessField_c JjAccessField(Position pos, Call getMeth, Call setMeth, Field field){
         JjAccessField_c n = new JjAccessField_c(pos, getMeth, setMeth, field);
         return n;
     }
@@ -135,6 +135,6 @@ public class JjNodeFactory_c extends JL5NodeFactory_c implements JjNodeFactory {
         n = (Return)n.ext(extFactory().extReturn());
         n = (Return)n.del(delFactory().delReturn());
         return n;
-    }
+    }*/
         
 }

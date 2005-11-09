@@ -24,10 +24,10 @@ import soot.jl5j.*;
 
 public class ClassResolver extends AbstractClassResolver {
 
-    private ArrayList staticFieldInits; 
-    private ArrayList fieldInits;
-    private ArrayList initializerBlocks;
-    private ArrayList staticInitializerBlocks;
+    //private ArrayList staticFieldInits; 
+    //private ArrayList fieldInits;
+    //private ArrayList initializerBlocks;
+    //private ArrayList staticInitializerBlocks;
    
     /**
      *  adds source file tag to each sootclass
@@ -80,7 +80,7 @@ public class ClassResolver extends AbstractClassResolver {
     
         // modifiers
         polyglot.types.Flags flags = cDecl.flags();
-        addModifiers(flags, cDecl);
+        base().addModifiers(flags, cDecl);
         
         // super class
         if (cDecl.superClass() == null) {
@@ -108,7 +108,7 @@ public class ClassResolver extends AbstractClassResolver {
         }
         
         findReferences(cDecl);
-        createClassBody(cDecl.body());
+        base().createClassBody(cDecl.body());
     
         // handle initialization of fields 
         // static fields init in clinit
@@ -200,13 +200,13 @@ public class ClassResolver extends AbstractClassResolver {
             Object next = it.next();
             
             if (next instanceof polyglot.ast.MethodDecl) {
-                createMethodDecl((polyglot.ast.MethodDecl)next);
+                base().createMethodDecl((polyglot.ast.MethodDecl)next);
             }
             else if (next instanceof polyglot.ast.FieldDecl) {
-                createFieldDecl((polyglot.ast.FieldDecl)next);
+                base().createFieldDecl((polyglot.ast.FieldDecl)next);
             }
             else if (next instanceof polyglot.ast.ConstructorDecl){
-                createConstructorDecl((polyglot.ast.ConstructorDecl)next);
+                base().createConstructorDecl((polyglot.ast.ConstructorDecl)next);
             }
             else if (next instanceof polyglot.ast.ClassDecl){
                 // this handles inner class tags for immediately enclosed
@@ -217,7 +217,7 @@ public class ClassResolver extends AbstractClassResolver {
                 createInitializer((polyglot.ast.Initializer)next);
             }
             else {
-                throw new RuntimeException("Class Body Member not implemented");
+                throw new RuntimeException("Class Body Member not implemented: "+next.getClass());
             }
         }
         handleInnerClassTags(classBody);
@@ -577,7 +577,7 @@ public class ClassResolver extends AbstractClassResolver {
     public void createConstructorDecl(polyglot.ast.ConstructorDecl constructor){
         String name = "<init>";
     
-        ArrayList parameters = createParameters(constructor);
+        ArrayList parameters = base().createParameters(constructor);
     
         ArrayList exceptions = createExceptions(constructor);
     
@@ -593,7 +593,7 @@ public class ClassResolver extends AbstractClassResolver {
         String name = createName(method);
             
         // parameters
-        ArrayList parameters = createParameters(method);
+        ArrayList parameters = base().createParameters(method);
                   
         // exceptions
         ArrayList exceptions = createExceptions(method);
@@ -776,7 +776,7 @@ public class ClassResolver extends AbstractClassResolver {
                     polyglot.ast.New aNew = (polyglot.ast.New)InitialResolver.v().getAnonClassMap().getKey(simpleName);
                     createAnonClassDecl(aNew);
                     findReferences(aNew.body());
-                    createClassBody(aNew.body());
+                    base().createClassBody(aNew.body());
                     handleFieldInits();
     
                 }                    
@@ -873,7 +873,7 @@ public class ClassResolver extends AbstractClassResolver {
     public void createFieldDecl(polyglot.ast.FieldDecl field){
    
         //System.out.println("field decl: "+field);
-        int modifiers = Util.getModifier(field.fieldInstance().flags());
+        int modifiers = base().getModifiers(field.fieldInstance().flags());
         String name = field.fieldInstance().name();
         soot.Type sootType = Util.getSootType(field.fieldInstance().type());
         soot.SootField sootField = new soot.SootField(name, sootType, modifiers);
@@ -984,6 +984,9 @@ public class ClassResolver extends AbstractClassResolver {
 
         return method;
     }
-    
+   
+    public int getModifiers(polyglot.types.Flags flags){
+        return Util.getModifier(flags);
+    }
 }
 

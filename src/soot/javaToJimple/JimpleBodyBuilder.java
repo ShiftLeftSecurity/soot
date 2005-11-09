@@ -2264,7 +2264,7 @@ public class JimpleBodyBuilder extends AbstractJimpleBodyBuilder {
             // in this case don't return fieldRef but a string constant
         }
         else {
-
+            System.out.println("field: "+field);
             soot.jimple.FieldRef fieldRef = getFieldRef(field);
             soot.Local baseLocal = generateLocal(field.type());
             soot.jimple.AssignStmt fieldAssignStmt = soot.jimple.Jimple.v().newAssignStmt(baseLocal, fieldRef);
@@ -2455,7 +2455,8 @@ public class JimpleBodyBuilder extends AbstractJimpleBodyBuilder {
      *  creates a field ref
      */
     protected soot.jimple.FieldRef getFieldRef(polyglot.ast.Field field) {
-       
+      
+        System.out.println("field target: "+field.target());
         soot.SootClass receiverClass = ((soot.RefType)Util.getSootType(field.target().type())).getSootClass();
         soot.SootFieldRef receiverField = soot.Scene.v().makeFieldRef(receiverClass, field.name(), Util.getSootType(field.type()), field.flags().isStatic());
          
@@ -3244,7 +3245,10 @@ public class JimpleBodyBuilder extends AbstractJimpleBodyBuilder {
         }
         else {
             // need to reverse right part of conditional or expr
-            if (!trueNoop.empty() && inLeftOr == 0){
+            System.out.println("need to reverse: "+binary.right());
+            System.out.println("trueNoop empty: "+trueNoop.isEmpty());
+            System.out.println("inLeftOr: "+inLeftOr);
+            if (/*!trueNoop.empty() &&*/ inLeftOr == 0){
                 rVal = reverseCondition((soot.jimple.ConditionExpr)rVal);
             }
             rVal = handleDFLCond((soot.jimple.ConditionExpr)rVal);
@@ -4457,7 +4461,8 @@ public class JimpleBodyBuilder extends AbstractJimpleBodyBuilder {
      */
     private soot.Local getArrayInitLocal(polyglot.ast.ArrayInit arrInit, polyglot.types.Type lhsType) {
   
-        //System.out.println("lhs type: "+lhsType);
+        System.out.println("lhs type: "+lhsType);
+        System.out.println("arr init: "+arrInit);
                 
         soot.Local local = generateLocal(lhsType);
 
