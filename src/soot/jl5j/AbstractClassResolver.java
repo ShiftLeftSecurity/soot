@@ -33,6 +33,10 @@ public abstract class AbstractClassResolver {
 
     protected SootClass sootClass;
     protected List references;
+    protected ArrayList staticFieldInits; 
+    protected ArrayList fieldInits;
+    protected ArrayList initializerBlocks;
+    protected ArrayList staticInitializerBlocks;
     
     public void addSourceFileTag(soot.SootClass sc){
         ext().addSourceFileTag(sc);
@@ -150,4 +154,7 @@ public abstract class AbstractClassResolver {
         return ext().createSootConstructor(name, flags, parameters, exceptions);
     }
 
+    public int getModifiers(polyglot.types.Flags flags){
+        return ext().getModifiers(flags);
+    }
 }
