@@ -709,18 +709,10 @@ public class ClassResolver extends AbstractClassResolver {
         // add absolute path to sourceFileTag
         if (sootClass.hasTag("SourceFileTag")){
             soot.tagkit.SourceFileTag t = (soot.tagkit.SourceFileTag)sootClass.getTag("SourceFileTag");
-            /*System.out.println("source: "+source);
-            System.out.println("source.source(): "+source.source());
-            System.out.println("source path: "+source.source().path());
-            System.out.println("source name: "+source.source().name());*/
             t.setAbsolutePath(source.source().path());
         }
         else {
             soot.tagkit.SourceFileTag t = new soot.tagkit.SourceFileTag();
-            /*System.out.println("source: "+source);
-            System.out.println("source.source(): "+source.source());
-            System.out.println("source path: "+source.source().path());
-            System.out.println("source name: "+source.source().name());*/
             t.setAbsolutePath(source.source().path());
             sootClass.addTag(t);
         }
@@ -850,11 +842,8 @@ public class ClassResolver extends AbstractClassResolver {
             sootField.addTag(new soot.tagkit.LongConstantValueTag(((Long)field.fieldInstance().constantValue()).longValue()));
         }
         else if (field.fieldInstance().constantValue() instanceof Double){
-            //System.out.println("const val: "+field.fieldInstance().constantValue());
             sootField.addTag(new soot.tagkit.DoubleConstantValueTag((long)((Double)field.fieldInstance().constantValue()).doubleValue()));
-            //System.out.println(((Double)field.fieldInstance().constantValue()).doubleValue());
             soot.tagkit.DoubleConstantValueTag tag = (soot.tagkit.DoubleConstantValueTag)sootField.getTag("DoubleConstantValueTag");
-            //System.out.println("tag: "+tag);
         }
         else if (field.fieldInstance().constantValue() instanceof Float){
             sootField.addTag(new soot.tagkit.FloatConstantValueTag(((Float)field.fieldInstance().constantValue()).floatValue()));
@@ -872,7 +861,6 @@ public class ClassResolver extends AbstractClassResolver {
      */
     public void createFieldDecl(polyglot.ast.FieldDecl field){
    
-        //System.out.println("field decl: "+field);
         int modifiers = base().getModifiers(field.fieldInstance().flags());
         String name = field.fieldInstance().name();
         soot.Type sootType = Util.getSootType(field.fieldInstance().type());
@@ -883,7 +871,6 @@ public class ClassResolver extends AbstractClassResolver {
         if (field.fieldInstance().flags().isStatic()) {
             if (field.init() != null) {
                 if (field.flags().isFinal() && (field.type().type().isPrimitive() || (field.type().type().toString().equals("java.lang.String"))) && field.fieldInstance().isConstant()){
-                    //System.out.println("adding constantValtag: to field: "+sootField);
                     addConstValTag(field, sootField);
                 }
                 else {
