@@ -118,4 +118,8 @@ public abstract class AbstractJimpleBodyBuilder {
     protected soot.jimple.Constant  getConstant(soot.Type sootType, int val){
         return ext().getConstant(sootType, val);
     }
+
+    public boolean needsOuterClassRef(polyglot.types.ClassType typeToInvoke){
+        return ext().needsOuterClassRef(typeToInvoke);
+    }
 }

@@ -226,7 +226,6 @@ public class Util {
         
         soot.FastHierarchy fh = InitialResolver.v().hierarchy();
        
-        //System.out.println("getting this for type: "+sootType);
         // if this for type already created return it from map
         //if (getThisMap.containsKey(sootType)){
         //    return (soot.Local)getThisMap.get(sootType);
@@ -400,9 +399,38 @@ public class Util {
             throw new RuntimeException("Trying to get soot type for null polyglot type");
         }
 		soot.Type sootType = null;
-	
-		if (type.isInt()){
-			sootType = soot.IntType.v();
+
+        if (type.isPrimitive()){
+            if (type.isInt()){
+                sootType = soot.IntType.v();
+            }
+            else if (type.isBoolean()){
+                sootType = soot.BooleanType.v();
+            }
+            else if (type.isByte()){
+                sootType = soot.ByteType.v();
+            }
+            else if (type.isChar()){
+                sootType = soot.CharType.v();
+            }
+            else if (type.isDouble()){
+                sootType = soot.DoubleType.v();
+            }
+            else if (type.isFloat()){
+                sootType = soot.FloatType.v();
+            }
+            else if (type.isLong()){
+                sootType = soot.LongType.v();
+            }
+            else if (type.isShort()){
+                sootType = soot.ShortType.v();
+            }
+            else if (type.isVoid()){
+                sootType = soot.VoidType.v();
+            }
+        }
+		else if (type.isNull()){
+			sootType = soot.NullType.v();
 		}
 		else if (type.isArray()){
 
@@ -415,33 +443,6 @@ public class Util {
 
             // do something here if baseType is still an array
 			sootType = soot.ArrayType.v(baseType, dims);
-		}
-		else if (type.isBoolean()){
-			sootType = soot.BooleanType.v();
-		}
-		else if (type.isByte()){
-			sootType = soot.ByteType.v();
-		}
-		else if (type.isChar()){
-			sootType = soot.CharType.v();
-		}
-		else if (type.isDouble()){
-			sootType = soot.DoubleType.v();
-		}
-		else if (type.isFloat()){
-			sootType = soot.FloatType.v();
-		}
-		else if (type.isLong()){
-			sootType = soot.LongType.v();
-		}
-		else if (type.isShort()){
-			sootType = soot.ShortType.v();
-		}
-		else if (type.isNull()){
-			sootType = soot.NullType.v();
-		}
-		else if (type.isVoid()){
-			sootType = soot.VoidType.v();
 		}
 		else if (type.isClass()){
             polyglot.types.ClassType classType = (polyglot.types.ClassType)type;

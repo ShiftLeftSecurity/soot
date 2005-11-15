@@ -43,8 +43,8 @@ public class JavaToJimple {
             public List passes(Job job) {
                 List passes = super.passes(job);
                 //beforePass(passes, Pass.EXIT_CHECK, new VisitorPass(polyglot.frontend.Pass.FOLD, job, new polyglot.visit.ConstantFolder(ts, nf)));
-                //beforePass(passes, Pass.EXIT_CHECK, new VisitorPass(CAST_INSERTION, job, new CastInsertionVisitor(job, ts, nf)));
-                beforePass(passes, Pass.EXIT_CHECK, new VisitorPass(STRICTFP_PROP, job, new StrictFPPropagator(false)));
+                beforePass(passes, Pass.PRE_OUTPUT_ALL, new VisitorPass(CAST_INSERTION, job, new CastInsertionVisitor(job, ts, nf)));
+                beforePass(passes, Pass.PRE_OUTPUT_ALL, new VisitorPass(STRICTFP_PROP, job, new StrictFPPropagator(false)));
                 afterPass(passes, Pass.PRE_OUTPUT_ALL, new SaveASTVisitor(SAVE_AST, job, this));
                 removePass(passes, Pass.OUTPUT);
                 return passes;

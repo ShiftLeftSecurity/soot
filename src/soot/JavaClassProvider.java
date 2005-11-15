@@ -29,6 +29,9 @@ public class JavaClassProvider implements ClassProvider
      * or null if it was not found. */
     public ClassSource find( String className ) {
 
+        if (soot.options.Options.v().source_level() == soot.options.Options.source_level_java_five){
+            soot.javaToJimple.InitialResolver.v().setJBBFactory(new soot.jl5j.JL5JimpleBodyBuilderFactory());
+        }
         if (soot.javaToJimple.InitialResolver.v().hasASTForSootName(className)){
             soot.javaToJimple.InitialResolver.v().setASTForSootName(className);
             return new JavaClassSource(className);
