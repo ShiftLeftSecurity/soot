@@ -54,11 +54,11 @@ public abstract class AbstractJimpleBodyBuilder {
         return ext().createJimpleBody(block, formals, sootMethod);
     }
     
-    protected soot.Value createExpr(polyglot.ast.Expr expr){
+    public soot.Value createExpr(polyglot.ast.Expr expr){
         return ext().createExpr(expr);
     }
     
-    protected void createStmt(polyglot.ast.Stmt stmt){
+    public void createStmt(polyglot.ast.Stmt stmt){
         ext().createStmt(stmt);
     }
 
@@ -121,5 +121,9 @@ public abstract class AbstractJimpleBodyBuilder {
 
     public boolean needsOuterClassRef(polyglot.types.ClassType typeToInvoke){
         return ext().needsOuterClassRef(typeToInvoke);
+    }
+
+    public soot.Type getSootType(polyglot.types.Type polyglotType){
+        return ext().getSootType(polyglotType);
     }
 }

@@ -26,7 +26,7 @@ public class CommaJBB extends AbstractJimpleBodyBuilder{
         //base(this);
     }
 
-    protected soot.Value createExpr(polyglot.ast.Expr expr){
+    public soot.Value createExpr(polyglot.ast.Expr expr){
         if (expr instanceof soot.javaToJimple.jj.ast.JjComma_c){
             return getCommaLocal((soot.javaToJimple.jj.ast.JjComma_c)expr);
         }

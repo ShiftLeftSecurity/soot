@@ -156,6 +156,24 @@ public class JL5ClassResolver extends AbstractClassResolver {
         if (!classAnnots.isEmpty()){
             sootClass.addTag(createRuntimeInvisibleAnnotationTag(classAnnots));
         }
+
+        if (needsClassSignature((JL5ClassDecl)cDecl)){
+            StringBuffer sig = new StringBuffer();
+            sig.append(createParamTypesSig(((JL5ClassDecl)cDecl).paramTypes()));
+            sig.append(((polyglot.ext.jl5.types.SignatureType)cDecl.type().superType()).signature());
+            for (Iterator it = cDecl.interfaces().iterator(); it.hasNext(); ){
+                sig.append(((polyglot.ext.jl5.types.SignatureType)((TypeNode)it.next()).type()).signature());
+            }
+            sootClass.addTag(new SignatureTag(sig.toString()));
+        }
+    }
+
+    private boolean needsClassSignature(JL5ClassDecl classDecl){
+        if (!classDecl.paramTypes().isEmpty()) return true;
+        // not sure that a super class can be an intersection type
+        if (classDecl.type().superType() instanceof polyglot.ext.jl5.types.IntersectionType || classDecl.type().superType() instanceof polyglot.ext.jl5.types.ParameterizedType) return true;
+        if (typeNodeListNeedsSignature(classDecl.interfaces())) return true;
+        return false;
     }
 
     public void createClassBody(polyglot.ast.ClassBody classBody){
@@ -176,7 +194,7 @@ public class JL5ClassResolver extends AbstractClassResolver {
                 base().createConstructorDecl((ConstructorDecl)next);
             }
             else if (next instanceof ClassDecl){
-                JL5Util.addInnerClassTag(sootClass, JL5Util.getSootType(((ClassDecl)next).type()).toString(), sootClass.getName(), ((ClassDecl)next).name().toString(), JL5Util.getModifier(((ClassDecl)next).flags()));
+                JL5Util.addInnerClassTag(sootClass, JL5Util.getSootType(((ClassDecl)next).type()).toString(), sootClass.getName(), ((ClassDecl)next).name().toString(), getModifiers(((ClassDecl)next).flags()));
             }
             else if (next instanceof Initializer){
                 createInitializer((Initializer)next);
@@ -233,8 +251,84 @@ public class JL5ClassResolver extends AbstractClassResolver {
         if (!((JL5MethodDecl)method).classAnnotations().isEmpty()){
             sm.addTag(createRuntimeInvisibleAnnotationTag(((JL5MethodDecl)method).classAnnotations()));
         }
-        
+    
+        if (needsMethodSignature((JL5MethodDecl)method)){
+            StringBuffer sig = new StringBuffer();
+            sig.append(createParamTypesSig(((JL5MethodDecl)method).paramTypes()));
+            sig.append(createFormalsSig(method.formals()));
+            sig.append(((polyglot.ext.jl5.types.SignatureType)method.returnType().type()).signature());
+            sm.addTag(new SignatureTag(sig.toString()));
+        }
     }
+
+    private String createFormalsSig(List formals){
+        StringBuffer sig = new StringBuffer();
+        sig.append("(");
+        for (Iterator it = formals.iterator(); it.hasNext(); ){
+            sig.append(((polyglot.ext.jl5.types.SignatureType)((Formal)it.next()).type().type()).signature());
+        }
+        sig.append(")");
+        return sig.toString();
+    }
+    
+    private String createParamTypesSig(List paramTypes){
+        StringBuffer sig = new StringBuffer();
+        if (!paramTypes.isEmpty()){
+            sig.append("<");
+            for (Iterator it = paramTypes.iterator(); it.hasNext(); ){
+                polyglot.ext.jl5.types.IntersectionType next = (polyglot.ext.jl5.types.IntersectionType)((TypeNode)it.next()).type();
+                sig.append(next.name());
+                if (next.bounds().isEmpty()){
+                    sig.append(":"+((polyglot.ext.jl5.types.SignatureType)next.erasureType()).signature());
+                }
+                else {
+                    for (Iterator nt = next.bounds().iterator(); nt.hasNext(); ){
+                        sig.append(":"+((polyglot.ext.jl5.types.SignatureType)nt.next()).signature());
+                    }
+                }
+            }
+            sig.append(">");
+        }
+        return sig.toString();
+    }
+    
+    private boolean needsMethodSignature(JL5MethodDecl md){
+        if (!md.paramTypes().isEmpty()) return true;
+        if (md.returnType().type() instanceof polyglot.ext.jl5.types.IntersectionType || md.returnType().type() instanceof polyglot.ext.jl5.types.ParameterizedType) return true;
+        if (formalListNeedsSignature(md.formals())){
+            return true;
+        }
+        return false;
+    }
+
+    private boolean needsConstructorSignature(JL5ConstructorDecl cd){
+        if (!cd.paramTypes().isEmpty()) return true;
+        if (formalListNeedsSignature(cd.formals())){
+            return true;
+        }
+        return false; 
+    }
+
+    private boolean typeNodeListNeedsSignature(List l){
+        for (Iterator it = l.iterator(); it.hasNext(); ){
+            TypeNode tn = (TypeNode)it.next();
+            if (tn.type() instanceof polyglot.ext.jl5.types.IntersectionType || tn.type() instanceof polyglot.ext.jl5.types.ParameterizedType){
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    private boolean formalListNeedsSignature(List l){
+        for (Iterator it = l.iterator(); it.hasNext(); ){
+            Formal f = (Formal)it.next();
+            if (f.type().type() instanceof polyglot.ext.jl5.types.IntersectionType || f.type().type() instanceof polyglot.ext.jl5.types.ParameterizedType){
+                return true;
+            }
+        }
+        return false;
+    }
+    
 
     public void createConstructorDecl(ConstructorDecl constructor){
         String name = "<init>";
@@ -275,20 +369,40 @@ public class JL5ClassResolver extends AbstractClassResolver {
         if (!((JL5ConstructorDecl)constructor).classAnnotations().isEmpty()){
             sm.addTag(createRuntimeInvisibleAnnotationTag(((JL5ConstructorDecl)constructor).classAnnotations()));
         }
+        if (needsConstructorSignature((JL5ConstructorDecl)constructor)){
+            StringBuffer sig = new StringBuffer();
+            sig.append(createParamTypesSig(((JL5ConstructorDecl)constructor).paramTypes()));
+            sig.append(createFormalsSig(constructor.formals()));
+            sig.append("V");
+            sm.addTag(new SignatureTag(sig.toString()));
+        }
         
     }
 
     public void createFieldDecl(FieldDecl field){
         ext().createFieldDecl(field);
 
+        soot.SootField sootField = sootClass.getField(field.fieldInstance().name(), JL5Util.getSootType(field.fieldInstance().type()));
+        
         if (!((JL5FieldDecl)field).runtimeAnnotations().isEmpty()){
-            sootClass.getField(field.fieldInstance().name(), JL5Util.getSootType(field.fieldInstance().type())).addTag(createRuntimeVisibleAnnotationTag(((JL5FieldDecl)field).runtimeAnnotations()));
+            sootField.addTag(createRuntimeVisibleAnnotationTag(((JL5FieldDecl)field).runtimeAnnotations()));
         }
         if (!((JL5FieldDecl)field).classAnnotations().isEmpty()){
-            sootClass.getField(field.fieldInstance().name(), JL5Util.getSootType(field.fieldInstance().type())).addTag(createRuntimeInvisibleAnnotationTag(((JL5FieldDecl)field).classAnnotations()));
+            sootField.addTag(createRuntimeInvisibleAnnotationTag(((JL5FieldDecl)field).classAnnotations()));
+        }
+
+        if (field.type().type() instanceof polyglot.ext.jl5.types.IntersectionType){
+            sootField.addTag(new SignatureTag(((polyglot.ext.jl5.types.SignatureType)field.type().type()).signature()));
+        }
+        else if (field.type().type() instanceof polyglot.ext.jl5.types.ParameterizedType){
+            sootField.addTag(new SignatureTag(((polyglot.ext.jl5.types.SignatureType)field.type().type()).signature()));
         }
     }
 
+    public soot.Type getSootType(polyglot.types.Type polyglotType){
+        return JL5Util.getSootType(polyglotType);
+    }
+    
     public int getModifiers(polyglot.types.Flags flags){
         return JL5Util.getModifier(flags);
     }
@@ -308,6 +422,27 @@ public class JL5ClassResolver extends AbstractClassResolver {
 
     public JL5ClassResolver(soot.SootClass sootClass, List refs){
         this.sootClass = sootClass;
-        this.references = references;
+        this.references = refs;
     }
+    
+    // this is overridden to prevent Soot from trying to 
+    // load intersection types
+    public void findReferences(polyglot.ast.Node node) {
+        soot.javaToJimple.TypeListBuilder typeListBuilder = new soot.javaToJimple.TypeListBuilder();
+        
+        node.visit(typeListBuilder);
+
+        for( Iterator typeIt = typeListBuilder.getList().iterator(); typeIt.hasNext(); ) {
+
+            final polyglot.types.Type type = (polyglot.types.Type) typeIt.next();
+            if (type.isPrimitive()) continue;
+            if (type instanceof polyglot.ext.jl5.types.IntersectionType) continue;
+            if (!type.isClass()) continue;
+            polyglot.types.ClassType classType = (polyglot.types.ClassType)type;
+            soot.Type sootClassType = base().getSootType(classType);
+            System.out.println("adding type ref: "+sootClassType);
+            references.add(sootClassType);
+        }
+    }
+
 }

@@ -155,7 +155,7 @@ call.methodInstance().flags().isAbstract()){
     private soot.Local handleFieldSet(soot.javaToJimple.jj.ast.JjAccessField_c accessField, soot.Value right, soot.Local base){
         return handleCall(accessField.field(), accessField.setMeth(), right, base);
     }
-    protected soot.Value createExpr(polyglot.ast.Expr expr){
+    public soot.Value createExpr(polyglot.ast.Expr expr){
         if (expr instanceof soot.javaToJimple.jj.ast.JjAccessField_c){
             soot.javaToJimple.jj.ast.JjAccessField_c accessField = (soot.javaToJimple.jj.ast.JjAccessField_c)expr;
          

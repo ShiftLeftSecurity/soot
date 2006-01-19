@@ -157,4 +157,11 @@ public abstract class AbstractClassResolver {
     public int getModifiers(polyglot.types.Flags flags){
         return ext().getModifiers(flags);
     }
+
+    public soot.Type getSootType(polyglot.types.Type polyglotType){
+        return ext().getSootType(polyglotType);
+    }
+    public void findReferences(polyglot.ast.Node node) {
+        ext().findReferences(node);
+    }
 }

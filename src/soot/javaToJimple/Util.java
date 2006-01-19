@@ -484,7 +484,7 @@ public class Util {
 			sootType = soot.RefType.v(className);
 		}
 		else{
-			throw new RuntimeException("Unknown Type");
+			throw new RuntimeException("Unknown Type: "+type+" is a: "+type.getClass());
 		}
 		return sootType;
     }    
