@@ -39,7 +39,10 @@ public class JavaToJimple {
 	public polyglot.frontend.ExtensionInfo initExtInfo(String fileName, List sourceLocations){
 		
         Set source = new HashSet();
-        ExtensionInfo extInfo = new soot.javaToJimple.jj.ExtensionInfo() {
+        ExtensionInfo extInfo;
+        
+        if (soot.options.Options.v().source_level() == soot.options.Options.source_level_java_five){
+            extInfo = new polyglot.ext.jl5.ExtensionInfo() {
             public List passes(Job job) {
                 List passes = super.passes(job);
                 //beforePass(passes, Pass.EXIT_CHECK, new VisitorPass(polyglot.frontend.Pass.FOLD, job, new polyglot.visit.ConstantFolder(ts, nf)));
@@ -50,7 +53,24 @@ public class JavaToJimple {
                 return passes;
             }
             
-        };
+            };
+        }
+        else {
+            extInfo = new polyglot.ext.jl.ExtensionInfo() {
+            public List passes(Job job) {
+                List passes = super.passes(job);
+                //beforePass(passes, Pass.EXIT_CHECK, new VisitorPass(polyglot.frontend.Pass.FOLD, job, new polyglot.visit.ConstantFolder(ts, nf)));
+                beforePass(passes, Pass.EXIT_CHECK, new VisitorPass(CAST_INSERTION, job, new CastInsertionVisitor(job, ts, nf)));
+                beforePass(passes, Pass.EXIT_CHECK, new VisitorPass(STRICTFP_PROP, job, new StrictFPPropagator(false)));
+                //beforePass(passes, Pass.EXIT_CHECK, new VisitorPass(ANON_CONSTR_FINDER, job, new AnonConstructorFinder(job, ts, nf)));
+                afterPass(passes, Pass.PRE_OUTPUT_ALL, new SaveASTVisitor(SAVE_AST, job, this));
+                removePass(passes, Pass.OUTPUT);
+                return passes;
+            }
+            
+            };
+        }
+            
         polyglot.main.Options options = extInfo.getOptions();
 
         options.assertions = true;
@@ -88,12 +108,17 @@ public class JavaToJimple {
 
             SourceJob job = null;
 
-            if (compiler.sourceExtension() instanceof soot.javaToJimple.jj.ExtensionInfo){
+            /*if (compiler.sourceExtension() instanceof soot.javaToJimple.jj.ExtensionInfo){
                 soot.javaToJimple.jj.ExtensionInfo jjInfo = (soot.javaToJimple.jj.ExtensionInfo)compiler.sourceExtension();
                 if (jjInfo.sourceJobMap() != null){
                     job = (SourceJob)jjInfo.sourceJobMap().get(source);
                 }
+            }*/
+
+            if (soot.javaToJimple.InitialResolver.v().sourceJobMap() != null){
+                job = (SourceJob)soot.javaToJimple.InitialResolver.v().sourceJobMap().get(source);
             }
+            
             if (job == null){
 			    job = compiler.sourceExtension().addJob(source);
             }

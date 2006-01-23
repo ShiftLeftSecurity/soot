@@ -33,7 +33,14 @@ public class SaveASTVisitor extends polyglot.frontend.AbstractPass {
     }
 
     public boolean run(){
-        if (extInfo instanceof soot.javaToJimple.jj.ExtensionInfo){
+
+        if (soot.javaToJimple.InitialResolver.v().sourceJobMap() == null){
+            soot.javaToJimple.InitialResolver.v().sourceJobMap(new HashMap());
+        }
+        soot.javaToJimple.InitialResolver.v().sourceJobMap().put(job.source(), job);
+
+        return true;
+        /*if (extInfo instanceof soot.javaToJimple.jj.ExtensionInfo){
             soot.javaToJimple.jj.ExtensionInfo jjInfo = (soot.javaToJimple.jj.ExtensionInfo)extInfo; 
             if (jjInfo.sourceJobMap() == null){
                 jjInfo.sourceJobMap(new HashMap());
@@ -41,6 +48,6 @@ public class SaveASTVisitor extends polyglot.frontend.AbstractPass {
             jjInfo.sourceJobMap().put(job.source(), job);
             return true;
         }
-        return false;
+        return false;*/
     }
 }

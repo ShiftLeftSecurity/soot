@@ -37,7 +37,9 @@ public class InitialResolver {
   
     private HashMap sootNameToAST = null;
     private ArrayList hasOuterRefInInit; // list of sootclass types that need an outer class this param in for init
-   
+
+    private HashMap sourceJobMap;
+
     private HashMap classToSourceMap;
     private HashMap specialAnonMap;
     private HashMap privateFieldGetAccessMap;
@@ -56,6 +58,14 @@ public class InitialResolver {
     
     public AbstractJBBFactory getJBBFactory(){
         return jbbFactory;
+    }
+
+    public HashMap sourceJobMap(){
+        return sourceJobMap;
+    }
+
+    public void sourceJobMap(HashMap map) {
+        sourceJobMap = map;
     }
     
     /**
