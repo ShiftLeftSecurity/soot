@@ -978,7 +978,9 @@ public class JimpleBodyBuilder extends AbstractJimpleBodyBuilder {
                 rhs = getArrayInitLocal((polyglot.ast.ArrayInit)expr, localInst.type());
             }
             else {
+                System.out.println("create local decl: "+expr+" is a: "+expr.getClass());
                 rhs = base().createExpr(expr);
+                System.out.println("rhs is: "+rhs+" is a: "+rhs.getClass());
             }
             if (rhs instanceof soot.jimple.ConditionExpr) {
                 rhs = handleCondBinExpr((soot.jimple.ConditionExpr)rhs);
@@ -3794,9 +3796,9 @@ public class JimpleBodyBuilder extends AbstractJimpleBodyBuilder {
  
         
         // if its already the right type
-        /*if (castExpr.expr().type().equals(castExpr.type()) || (castExpr.type().isClass() && base().getSootType(castExpr.type()).toString().equals("java.lang.Object"))) {
+        if (castExpr.expr().type().equals(castExpr.type()) || (castExpr.type().isClass() && base().getSootType(castExpr.type()).toString().equals("java.lang.Object"))) {
             return base().createExpr(castExpr.expr());
-        }*/
+        }
 
         soot.Value val;
             val = base().createExpr(castExpr.expr());

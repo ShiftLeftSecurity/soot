@@ -17,23 +17,33 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package soot.javaToJimple.jj.ast;
+package soot.javaToJimple.jj5.ast;
 
 import polyglot.ast.*;
+import polyglot.visit.*;
 import polyglot.ext.jl.ast.*;
-import polyglot.types.Flags;
-import polyglot.types.Package;
-import polyglot.types.Type;
-import polyglot.types.Qualifier;
-import polyglot.util.*;
-import java.util.*;
-
 import polyglot.ext.jl5.ast.*;
+import polyglot.types.*;
+import polyglot.util.*;
 
-/**
- * NodeFactory for jj extension.
- */
-public interface JjNodeFactory extends NodeFactory {
-    // TODO: Declare any factory methods for new AST nodes.
-    public JjComma_c JjComma(Position pos, Expr first, Expr second);
+public class JjLocalAssign_c extends JL5LocalAssign_c {
+
+    public JjLocalAssign_c(Position pos, Local left, Operator op, Expr right){
+        super(pos, left, op, right);
+    }
+    
+    public Type childExpectedType(Expr child, AscriptionVisitor av){
+      if (op == SHL_ASSIGN || op == SHR_ASSIGN || op == USHR_ASSIGN) {
+            //System.out.println("local assign: child type: "+child.type()+" child: "+child);
+          return child.type();
+      }
+      
+      if (child == right) {
+          return left.type();
+      }
+
+      return child.type();
+        
+
+    }
 }

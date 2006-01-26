@@ -17,7 +17,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package soot.javaToJimple.jj;
+package soot.javaToJimple.jj5;
 
 import polyglot.lex.Lexer;
 //import soot.javaToJimple.jj.parse.Lexer_c;
@@ -40,18 +40,18 @@ import java.io.*;
 /**
  * Extension information for jj extension.
  */
-public class ExtensionInfo extends polyglot.ext.jl.ExtensionInfo {
+public class ExtensionInfo extends polyglot.ext.jl5.ExtensionInfo {
     static {
         // force Topics to load
         Topics t = new Topics();
     }
 
     public String defaultFileExtension() {
-        return "jj";
+        return "jj5";
     }
 
     public String compilerName() {
-        return "jjc";
+        return "jj5c";
     }
 
     /*public Parser parser(Reader reader, FileSource source, ErrorQueue eq) {

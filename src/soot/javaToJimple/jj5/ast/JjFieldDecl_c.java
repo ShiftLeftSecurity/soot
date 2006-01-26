@@ -17,23 +17,23 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package soot.javaToJimple.jj.ast;
+package soot.javaToJimple.jj5.ast;
 
 import polyglot.ast.*;
+import polyglot.visit.*;
 import polyglot.ext.jl.ast.*;
-import polyglot.types.Flags;
-import polyglot.types.Package;
-import polyglot.types.Type;
-import polyglot.types.Qualifier;
-import polyglot.util.*;
-import java.util.*;
-
 import polyglot.ext.jl5.ast.*;
+import polyglot.ext.jl5.types.*;
+import polyglot.types.*;
+import polyglot.util.*;
 
-/**
- * NodeFactory for jj extension.
- */
-public interface JjNodeFactory extends NodeFactory {
-    // TODO: Declare any factory methods for new AST nodes.
-    public JjComma_c JjComma(Position pos, Expr first, Expr second);
+public class JjFieldDecl_c extends JL5FieldDecl_c {
+
+    public JjFieldDecl_c(Position pos, FlagAnnotations flags, TypeNode type, String name, Expr init){
+        super(pos, flags, type, name, init);
+    }
+    
+    public Type childExpectedType(Expr child, AscriptionVisitor av){
+        return type().type();
+    }
 }

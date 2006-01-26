@@ -17,11 +17,12 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package soot.javaToJimple.jj.ast;
+package soot.javaToJimple.jj5.ast;
 
 import polyglot.ast.*;
 import polyglot.ext.jl.ast.*;
 import polyglot.ext.jl5.ast.*;
+import polyglot.ext.jl5.types.*;
 import polyglot.types.Flags;
 import polyglot.types.Package;
 import polyglot.types.Type;
@@ -32,7 +33,7 @@ import java.util.*;
 /**
  * NodeFactory for jj extension.
  */
-public class JjNodeFactory_c extends NodeFactory_c implements JjNodeFactory {
+public class JjNodeFactory_c extends JL5NodeFactory_c implements JjNodeFactory {
     // TODO:  Implement factory methods for new AST nodes.
     // TODO:  Override factory methods for overriden AST nodes.
     // TODO:  Override factory methods for AST nodes with new extension nodes.
@@ -83,7 +84,7 @@ public class JjNodeFactory_c extends NodeFactory_c implements JjNodeFactory {
         return n;
     }
     
-    public LocalDecl LocalDecl(Position pos, Flags flags, TypeNode type, String name, Expr init) {
+    public LocalDecl LocalDecl(Position pos, FlagAnnotations flags, TypeNode type, String name, Expr init) {
         LocalDecl n = new JjLocalDecl_c(pos, flags, type, name, init);
         n = (LocalDecl)n.ext(extFactory().extLocalAssign());
         n = (LocalDecl)n.del(delFactory().delLocalAssign());
@@ -97,7 +98,7 @@ public class JjNodeFactory_c extends NodeFactory_c implements JjNodeFactory {
         return n;
     }
     
-    public FieldDecl FieldDecl(Position pos, Flags flags, TypeNode type, String name, Expr init) {
+    public FieldDecl FieldDecl(Position pos, FlagAnnotations flags, TypeNode type, String name, Expr init) {
         FieldDecl n = new JjFieldDecl_c(pos, flags, type, name, init);
         n = (FieldDecl)n.ext(extFactory().extFieldAssign());
         n = (FieldDecl)n.del(delFactory().delFieldAssign());

@@ -42,7 +42,7 @@ public class JavaToJimple {
         ExtensionInfo extInfo;
         
         if (soot.options.Options.v().source_level() == soot.options.Options.source_level_java_five){
-            extInfo = new polyglot.ext.jl5.ExtensionInfo() {
+            extInfo = new soot.javaToJimple.jj5.ExtensionInfo() {
             public List passes(Job job) {
                 List passes = super.passes(job);
                 //beforePass(passes, Pass.EXIT_CHECK, new VisitorPass(polyglot.frontend.Pass.FOLD, job, new polyglot.visit.ConstantFolder(ts, nf)));
@@ -56,11 +56,11 @@ public class JavaToJimple {
             };
         }
         else {
-            extInfo = new polyglot.ext.jl.ExtensionInfo() {
+            extInfo = new soot.javaToJimple.jj.ExtensionInfo() {
             public List passes(Job job) {
                 List passes = super.passes(job);
                 //beforePass(passes, Pass.EXIT_CHECK, new VisitorPass(polyglot.frontend.Pass.FOLD, job, new polyglot.visit.ConstantFolder(ts, nf)));
-                beforePass(passes, Pass.EXIT_CHECK, new VisitorPass(CAST_INSERTION, job, new CastInsertionVisitor(job, ts, nf)));
+                beforePass(passes, Pass.PRE_OUTPUT_ALL, new VisitorPass(CAST_INSERTION, job, new CastInsertionVisitor(job, ts, nf)));
                 beforePass(passes, Pass.EXIT_CHECK, new VisitorPass(STRICTFP_PROP, job, new StrictFPPropagator(false)));
                 //beforePass(passes, Pass.EXIT_CHECK, new VisitorPass(ANON_CONSTR_FINDER, job, new AnonConstructorFinder(job, ts, nf)));
                 afterPass(passes, Pass.PRE_OUTPUT_ALL, new SaveASTVisitor(SAVE_AST, job, this));
