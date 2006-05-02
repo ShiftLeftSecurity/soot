@@ -12,10 +12,17 @@
     <target name="compile" depends="settings,sablecc,copypeephole,settings,singletons,options">
         <javac
             destdir="classes"
-            classpath="classes:${polyglot.jar}:${jasmin.jar}"
             debug="true"
             deprecation="on"
+        	source="1.2"
+        	target="1.2"
         >
+        	<classpath>
+        		<pathelement location="classes"/>
+        		<pathelement location="${polyglot.jar}"/>
+        		<pathelement location="${jl5.jar}"/>
+           		<pathelement location="${jasmin.jar}"/>
+        	</classpath>
             <src path="src"/>
             <src path="generated/singletons"/>
             <src path="generated/sablecc"/>
@@ -64,7 +71,7 @@
 
     <target name="javadoc">
         <javadoc
-            classpath="classes:${polyglot.jar}:${jasmin.jar}"
+            classpath="classes:${polyglot.jar}:${jl5.jar}:${jasmin.jar}"
             sourcepath="src:generated/singletons:generated/sablecc:generated/options"
             destdir="doc"
             maxmemory="400m"
@@ -117,7 +124,7 @@
             classname="soot.tools.BadFields"
             maxmemory="200m"
             fork="true"
-            classpath="classes:${polyglot.jar}:${jasmin.jar}"
+            classpath="classes:${polyglot.jar}:${jl5.jar}:${jasmin.jar}"
         >
             <arg value="-w"/>
             <arg value="-f"/>
@@ -133,7 +140,7 @@
         <javac
             srcdir="tests"
             destdir="testclasses"
-            classpath="classes:${polyglot.jar}:${jasmin.jar}"
+            classpath="classes:${polyglot.jar}:${jl5.jar}:${jasmin.jar}:${junit.jar}"
             debug="true"
             />
     </target>
@@ -144,6 +151,7 @@
                 <pathelement location="testclasses"/>
                 <pathelement location="classes"/>
                 <pathelement location="${polyglot.jar}"/>
+                <pathelement location="${jl5.jar}"/>
                 <pathelement location="${jasmin.jar}"/>
             </classpath>
 
@@ -180,6 +188,7 @@
             <zipfileset dir="${release.loc}/" includes="sootclasses-${soot.version}.jar" prefix="ca.mcgill.sable.soot"/>
             <zipfileset dir="eclipse/ca.mcgill.sable.soot/" includes="icons/*.png,icons/*.jpg,icons/*.gif" prefix="ca.mcgill.sable.soot"/>
             <zipfileset file="${polyglot.jar}" prefix="ca.mcgill.sable.soot"/>
+            <zipfileset file="${jl5.jar}" prefix="ca.mcgill.sable.soot"/>
             <zipfileset file="${jasmin.jar}" prefix="ca.mcgill.sable.soot"/>
         </jar>
         <tar destfile="${release.loc}/soot-eclipse-quickstart-${soot.version}.tar.gz" compression="gzip" longfile="gnu">
@@ -188,6 +197,7 @@
             <tarfileset dir="${release.loc}/" includes="sootclasses-${soot.version}.jar" prefix="ca.mcgill.sable.soot"/>
             <tarfileset dir="eclipse/ca.mcgill.sable.soot/" includes="icons/*.png,icons/*.jpg,icons/*.gif" prefix="ca.mcgill.sable.soot"/>
             <tarfileset file="${polyglot.jar}" prefix="ca.mcgill.sable.soot"/>
+            <tarfileset file="${jl5.jar}" prefix="ca.mcgill.sable.soot"/>
             <tarfileset file="${jasmin.jar}" prefix="ca.mcgill.sable.soot"/>
         </tar>
     </target>
