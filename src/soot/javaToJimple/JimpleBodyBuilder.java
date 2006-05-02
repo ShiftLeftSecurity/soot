@@ -992,7 +992,7 @@ public class JimpleBodyBuilder extends AbstractJimpleBodyBuilder {
             // this is a special case for position tags
             if ( localDecl.position() != null){
                 Util.addLnPosTags(stmt.getLeftOpBox(), localDecl.position().line(), localDecl.position().endLine(),  localDecl.position().endColumn()-name.length(), localDecl.position().endColumn());
-                if (expr != null && expr.position() != null){
+                if (expr != null){
                     Util.addLnPosTags(stmt, localDecl.position().line(), expr.position().endLine(), localDecl.position().column(), expr.position().endColumn());
                 }
                 else {
