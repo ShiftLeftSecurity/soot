@@ -384,11 +384,20 @@ public class ClassResolver extends AbstractClassResolver {
             method = new soot.SootMethod("<init>", params, soot.VoidType.v());
         }
         else {
-            Iterator aIt = aNew.arguments().iterator();
+            if (!aNew.arguments().isEmpty()){
+               
+                polyglot.types.ConstructorInstance ci = InitialResolver.v().getConstructorForAnon(aNew);
+                Iterator aIt = ci.formalTypes().iterator();
+                while (aIt.hasNext()){
+                    polyglot.types.Type pType = (polyglot.types.Type)aIt.next();
+                    params.add(Util.getSootType(pType));
+                }
+            } 
+            /*Iterator aIt = aNew.arguments().iterator();
             while (aIt.hasNext()){
                 polyglot.types.Type pType = ((polyglot.ast.Expr)aIt.next()).type();
                 params.add(base().getSootType(pType));
-            }
+            }*/
             method = new soot.SootMethod("<init>", params, soot.VoidType.v());
         }
         
