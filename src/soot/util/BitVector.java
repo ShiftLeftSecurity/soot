@@ -32,6 +32,14 @@ public class BitVector
     public BitVector() {
         this(64);
     }
+    
+    /**Copy constructor*/
+    //Added by Adam Richard.  More efficient than clone(), and easier to extend
+    public BitVector(BitVector other)
+    {
+        bits = new long[other.bits.length];
+        System.arraycopy( other.bits, 0, bits, 0, other.bits.length );
+    }
     public BitVector( int numBits ) {
         int lastIndex = indexOf( numBits-1 );
         bits = new long[lastIndex+1];
@@ -102,6 +110,7 @@ public class BitVector
         }
         return (int) ( (ret >> 32) ^ ret );
     }
+    /** Returns index of highest-numbered one bit. */
     public int length() {
         int i;
         for( i = bits.length-1; i >= 0; i-- ) {
@@ -142,6 +151,28 @@ public class BitVector
             bits[j] |= otherBits[j];
         }
     }
+    
+    /**Count the number of ones in the bitvector.
+     * @author Adam Richard
+     * This is Brian Kernighan's algorithm from:
+     * http://graphics.stanford.edu/~seander/bithacks.html
+     * and is efficient for sparse bit sets.
+     */
+	public int cardinality()
+	{
+		int c = 0;
+		for (int i = 0; i < bits.length; ++i)
+		{
+			long v = bits[i];
+			while (v != 0)
+			{
+				v &= v - 1;
+				++c;
+			}
+		}
+		return c;
+	}
+
     private void expand( int bit ) {
         int n = indexOf( bit )+1;
         if( n <= bits.length ) return;
@@ -168,6 +199,7 @@ public class BitVector
         bits[indexOf(bit)] |= mask(bit);
         return ret;
     }
+    /** Returns number of bits in the underlying array. */
     public int size() {
         return bits.length << 6;
     }
@@ -316,7 +348,7 @@ public class BitVector
         long[] retbits = ret.bits;
         long[] bits1 = set1.bits;
         long[] bits2 = set2.bits;
-        min <<= 6;
+        min >>= 6;
         for( int i = 0; i < min; i++ ) {
             retbits[i] = bits1[i] & bits2[i];
         }
@@ -335,8 +367,8 @@ public class BitVector
         long[] retbits = ret.bits;
         long[] bits1 = set1.bits;
         long[] bits2 = set2.bits;
-        min <<= 6;
-        max <<= 6;
+        min >>= 6;
+        max >>= 6;
         for( int i = 0; i < min; i++ ) {
             retbits[i] = bits1[i] | bits2[i];
         }

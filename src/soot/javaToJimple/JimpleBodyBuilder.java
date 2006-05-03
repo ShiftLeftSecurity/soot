@@ -546,7 +546,7 @@ public class JimpleBodyBuilder extends AbstractJimpleBodyBuilder {
 			base().createExpr(((polyglot.ast.Eval)stmt).expr());  
         }
         else if (stmt instanceof polyglot.ast.If) {
-           createIf((polyglot.ast.If)stmt);
+           createIf2((polyglot.ast.If)stmt);
         }
 		else if (stmt instanceof polyglot.ast.LocalDecl) {
 			createLocalDecl((polyglot.ast.LocalDecl)stmt);
@@ -555,13 +555,13 @@ public class JimpleBodyBuilder extends AbstractJimpleBodyBuilder {
 			createBlock((polyglot.ast.Block)stmt);
 		}
 		else if (stmt instanceof polyglot.ast.While) {
-		    createWhile((polyglot.ast.While)stmt);
+		    createWhile2((polyglot.ast.While)stmt);
 		}
 		else if (stmt instanceof polyglot.ast.Do) {
-			createDo((polyglot.ast.Do)stmt);
+			createDo2((polyglot.ast.Do)stmt);
 		}
 		else if (stmt instanceof polyglot.ast.For) {
-		    createForLoop((polyglot.ast.For)stmt);
+		    createForLoop2((polyglot.ast.For)stmt);
 		}
 		else if (stmt instanceof polyglot.ast.Switch) {
 			createSwitch((polyglot.ast.Switch)stmt);
@@ -614,7 +614,7 @@ public class JimpleBodyBuilder extends AbstractJimpleBodyBuilder {
      * If Stmts Creation - only add line-number tags to if (the other
      * stmts needing tags are created elsewhere
      */
-    private void createIf(polyglot.ast.If ifExpr){
+    /*private void createIf(polyglot.ast.If ifExpr){
 
         // create true/false noops to handle cond and/or
         trueNoop.push(soot.jimple.Jimple.v().newNopStmt());
@@ -676,12 +676,113 @@ public class JimpleBodyBuilder extends AbstractJimpleBodyBuilder {
         }
         
 
+    }*/
+    
+    /**
+     * If Stmts Creation - only add line-number tags to if (the other
+     * stmts needing tags are created elsewhere
+     */
+    private void createIf2(polyglot.ast.If ifExpr){
+            
+        soot.jimple.NopStmt endTgt = soot.jimple.Jimple.v().newNopStmt();
+        soot.jimple.NopStmt brchTgt = soot.jimple.Jimple.v().newNopStmt();
+
+        // handle cond 
+        polyglot.ast.Expr condition = ifExpr.cond();
+        createBranchingExpr(condition, brchTgt, false);
+
+        // add consequence
+		polyglot.ast.Stmt consequence = ifExpr.consequent();
+        createStmt(consequence);
+	
+        soot.jimple.Stmt goto1 = soot.jimple.Jimple.v().newGotoStmt(endTgt);
+        body.getUnits().add(goto1);
+      
+        
+		body.getUnits().add(brchTgt);
+        
+        // handle alternative
+        polyglot.ast.Stmt alternative = ifExpr.alternative();
+		if (alternative != null){
+			createStmt(alternative);
+        }
+		body.getUnits().add(endTgt);
+        
+
+    }
+
+    private void createBranchingExpr(polyglot.ast.Expr expr, soot.jimple.Stmt tgt, boolean boto){
+        if (expr instanceof polyglot.ast.Binary && ((polyglot.ast.Binary)expr).operator() == polyglot.ast.Binary.COND_AND){
+            polyglot.ast.Binary cond_and = (polyglot.ast.Binary)expr;
+            if (boto){
+                soot.jimple.Stmt t1 = soot.jimple.Jimple.v().newNopStmt();
+                createBranchingExpr(cond_and.left(), t1, false);
+                createBranchingExpr(cond_and.right(), tgt, true);
+                body.getUnits().add(t1);
+            }
+            else {
+                createBranchingExpr(cond_and.left(), tgt, false);
+                createBranchingExpr(cond_and.right(), tgt, false);
+            }
+        }
+        else if (expr instanceof polyglot.ast.Binary && ((polyglot.ast.Binary)expr).operator() == polyglot.ast.Binary.COND_OR){
+            polyglot.ast.Binary cond_or = (polyglot.ast.Binary)expr;
+            if (boto){
+                createBranchingExpr(cond_or.left(), tgt, true);
+                createBranchingExpr(cond_or.right(), tgt, true);
+            }
+            else {
+                soot.jimple.Stmt t1 = soot.jimple.Jimple.v().newNopStmt();
+                createBranchingExpr(cond_or.left(), t1, true);
+                createBranchingExpr(cond_or.right(), tgt, false);
+                body.getUnits().add(t1);
+            }
+            
+        }
+        else if (expr instanceof polyglot.ast.Unary && ((polyglot.ast.Unary)expr).operator() == polyglot.ast.Unary.NOT){
+            polyglot.ast.Unary not = (polyglot.ast.Unary)expr;
+            createBranchingExpr(not.expr(), tgt, !boto);
+        }
+        else {
+            soot.Value sootCond = base().createExpr(expr);
+
+            boolean needIf = needSootIf(sootCond);
+            if (!(sootCond instanceof soot.jimple.ConditionExpr)) {
+                if (!boto){
+                    sootCond = soot.jimple.Jimple.v().newEqExpr(sootCond, soot.jimple.IntConstant.v(0));
+                }
+                else {
+                    sootCond = soot.jimple.Jimple.v().newNeExpr(sootCond, soot.jimple.IntConstant.v(0));
+                }
+            }
+            
+            else {
+                sootCond = handleDFLCond((soot.jimple.ConditionExpr)sootCond);
+                if (!boto){
+                    sootCond = reverseCondition((soot.jimple.ConditionExpr)sootCond);
+                }
+            }
+                    
+            if (needIf) {
+		        soot.jimple.IfStmt ifStmt = soot.jimple.Jimple.v().newIfStmt(sootCond, tgt);
+		        body.getUnits().add(ifStmt);
+                // add line and pos tags
+                Util.addLnPosTags(ifStmt.getConditionBox(), expr.position());
+                Util.addLnPosTags(ifStmt, expr.position());
+            }
+            /*else {
+		        soot.jimple.GotoStmt gotoStmt = soot.jimple.Jimple.v().newGotoStmt(tgt);
+		        body.getUnits().add(gotoStmt);
+                // add line and pos tags
+                Util.addLnPosTags(gotoStmt, expr.position());
+            }*/
+        }
     }
     
     /**
      * While Stmts Creation
      */
-    private void createWhile(polyglot.ast.While whileStmt){
+    /*private void createWhile(polyglot.ast.While whileStmt){
 
         // create true/false noops to handle cond and/or
         trueNoop.push(soot.jimple.Jimple.v().newNopStmt());
@@ -721,62 +822,54 @@ public class JimpleBodyBuilder extends AbstractJimpleBodyBuilder {
             Util.addLnPosTags(ifStmt.getConditionBox(), condition.position());
             Util.addLnPosTags(ifStmt, condition.position());
         }
-        /*else {
-            soot.jimple.GotoStmt gotoIf = soot.jimple.Jimple.v().newGotoStmt(noop1);
-            body.getUnits().add(gotoIf);
-        }*/
-            
         
-        // handle body
-        
-        //soot.jimple.Stmt noop2 = soot.jimple.Jimple.v().newNopStmt();
-        //soot.jimple.Stmt goto1 = soot.jimple.Jimple.v().newGotoStmt(noop2);
-        //body.getUnits().add(goto1);
-        //body.getUnits().add(noop1);
         body.getUnits().add(tNoop);
         createStmt(whileStmt.body());
         soot.jimple.GotoStmt gotoLoop = soot.jimple.Jimple.v().newGotoStmt(noop2);
         body.getUnits().add(gotoLoop);
 
-        //body.getUnits().add(noop2);
-        
-        // handle cond
-        //body.getUnits().add((soot.jimple.Stmt)(condControlNoop.pop()));
-        
-        //polyglot.ast.Expr condition = whileStmt.cond();
-        //soot.Value sootCond = base().createExpr(condition);
-        //boolean needIf = needSootIf(sootCond);
-        //if (!(sootCond instanceof soot.jimple.ConditionExpr)) {
-        //    sootCond = soot.jimple.Jimple.v().newNeExpr(sootCond, soot.jimple.IntConstant.v(0));
-        //}
-        //else {
-        //    sootCond = reverseCondition((soot.jimple.ConditionExpr)sootCond);
-        //    sootCond = handleDFLCond((soot.jimple.ConditionExpr)sootCond);
-        //}
-
-        //if (needIf){
-        //    soot.jimple.IfStmt ifStmt = soot.jimple.Jimple.v().newIfStmt(sootCond, noop1);
-        
-        //    body.getUnits().add(ifStmt);
-        //    Util.addLnPosTags(ifStmt.getConditionBox(), condition.position());
-        //    Util.addLnPosTags(ifStmt, condition.position());
-        //}
-        //else {
-        //    soot.jimple.GotoStmt gotoIf = soot.jimple.Jimple.v().newGotoStmt(noop1);
-        //    body.getUnits().add(gotoIf);
-        //}
-        
-        
         body.getUnits().add((soot.jimple.Stmt)(endControlNoop.pop()));
         body.getUnits().add(noop1);
         body.getUnits().add(fNoop);
+        condControlNoop.pop();
+    }*/
+    
+    /**
+     * While Stmts Creation
+     */
+    private void createWhile2(polyglot.ast.While whileStmt){
+
+   
+        soot.jimple.Stmt brchTgt = soot.jimple.Jimple.v().newNopStmt();
+        soot.jimple.Stmt beginTgt = soot.jimple.Jimple.v().newNopStmt();
+
+        body.getUnits().add(beginTgt);
+        
+        // these are for break and continue
+        endControlNoop.push(soot.jimple.Jimple.v().newNopStmt());
+        condControlNoop.push(soot.jimple.Jimple.v().newNopStmt());
+        
+        // handle cond
+        soot.jimple.Stmt continueStmt = (soot.jimple.Stmt)condControlNoop.pop();
+        body.getUnits().add(continueStmt);
+        condControlNoop.push(continueStmt);
+        
+        polyglot.ast.Expr condition = whileStmt.cond();
+        createBranchingExpr(condition, brchTgt, false);
+        createStmt(whileStmt.body());
+        soot.jimple.GotoStmt gotoLoop = soot.jimple.Jimple.v().newGotoStmt(beginTgt);
+        body.getUnits().add(gotoLoop);
+
+        
+        body.getUnits().add((soot.jimple.Stmt)(endControlNoop.pop()));
+        body.getUnits().add(brchTgt);
         condControlNoop.pop();
     }
     
     /**
      * DoWhile Stmts Creation
      */
-    private void createDo(polyglot.ast.Do doStmt){
+    /*private void createDo(polyglot.ast.Do doStmt){
         
         // create true/false noops to handle cond and/or
         soot.jimple.Stmt tNoop = soot.jimple.Jimple.v().newNopStmt();
@@ -809,7 +902,7 @@ public class JimpleBodyBuilder extends AbstractJimpleBodyBuilder {
             body.getUnits().add((soot.jimple.Stmt)labelContinueMap.get(((LabelKey)labelStack.peek()).label()));
         }*/
         
-        trueNoop.push(tNoop);
+       /* trueNoop.push(tNoop);
         falseNoop.push(fNoop);
         
         polyglot.ast.Expr condition = doStmt.cond();
@@ -837,12 +930,45 @@ public class JimpleBodyBuilder extends AbstractJimpleBodyBuilder {
         body.getUnits().add((soot.jimple.Stmt)(endControlNoop.pop()));
         condControlNoop.pop();
         body.getUnits().add(falseNoop.pop());
+    }*/
+    
+    /**
+     * DoWhile Stmts Creation
+     */
+    private void createDo2(polyglot.ast.Do doStmt){
+        
+   
+        soot.jimple.Stmt noop1 = soot.jimple.Jimple.v().newNopStmt();
+        body.getUnits().add(noop1);
+        
+        // these are for break and continue
+        endControlNoop.push(soot.jimple.Jimple.v().newNopStmt());
+        condControlNoop.push(soot.jimple.Jimple.v().newNopStmt());
+        
+        // handle body
+        createStmt(doStmt.body());
+                
+        // handle cond
+        soot.jimple.Stmt continueStmt = (soot.jimple.Stmt)condControlNoop.pop();
+        body.getUnits().add(continueStmt);
+        condControlNoop.push(continueStmt);
+        
+        if (labelMap != null && labelMap.containsKey(doStmt)){
+            body.getUnits().add((soot.jimple.Stmt)labelMap.get(doStmt));
+        }
+        
+        polyglot.ast.Expr condition = doStmt.cond();
+       
+        createBranchingExpr(condition, noop1, true); 
+        
+        body.getUnits().add((soot.jimple.Stmt)(endControlNoop.pop()));
+        condControlNoop.pop();
     }
     
     /**
      * For Loop Stmts Creation
      */
-    private void createForLoop(polyglot.ast.For forStmt){
+    /*private void createForLoop(polyglot.ast.For forStmt){
         
         // create true/false noops to handle cond and/or
         soot.jimple.Stmt tNoop = soot.jimple.Jimple.v().newNopStmt();
@@ -929,7 +1055,7 @@ public class JimpleBodyBuilder extends AbstractJimpleBodyBuilder {
         }*/
         
         // handle iters
-        Iterator itersIt = forStmt.iters().iterator();
+       /* Iterator itersIt = forStmt.iters().iterator();
         while (itersIt.hasNext()){
             createStmt((polyglot.ast.Stmt)itersIt.next());
         }
@@ -970,9 +1096,55 @@ public class JimpleBodyBuilder extends AbstractJimpleBodyBuilder {
             body.getUnits().add(goto2);
            
         }*/
-        body.getUnits().add(noop1);
+       /* body.getUnits().add(noop1);
         body.getUnits().add((soot.jimple.Stmt)(endControlNoop.pop()));
         body.getUnits().add(fNoop);
+        
+    }*/
+    
+    /**
+     * For Loop Stmts Creation
+     */
+    private void createForLoop2(polyglot.ast.For forStmt){
+        
+        // these ()are for break and continue
+        endControlNoop.push(soot.jimple.Jimple.v().newNopStmt());
+        condControlNoop.push(soot.jimple.Jimple.v().newNopStmt());
+        
+        // handle for inits
+        Iterator initsIt = forStmt.inits().iterator();
+        while (initsIt.hasNext()){
+            createStmt((polyglot.ast.Stmt)initsIt.next());
+        }
+        soot.jimple.Stmt noop1 = soot.jimple.Jimple.v().newNopStmt();
+        soot.jimple.Stmt noop2 = soot.jimple.Jimple.v().newNopStmt();
+        
+        body.getUnits().add(noop2);
+        
+        // handle cond
+        
+        polyglot.ast.Expr condition = forStmt.cond();
+        if (condition != null) {
+            createBranchingExpr(condition, noop1, false);
+        }
+        createStmt(forStmt.body());
+        
+        // handle continue
+        body.getUnits().add((soot.jimple.Stmt)(condControlNoop.pop()));
+
+        if (labelMap != null && labelMap.containsKey(forStmt)){
+            body.getUnits().add((soot.jimple.Stmt)labelMap.get(forStmt));
+        }
+        
+        // handle iters
+        Iterator itersIt = forStmt.iters().iterator();
+        while (itersIt.hasNext()){
+            createStmt((polyglot.ast.Stmt)itersIt.next());
+        }
+        soot.jimple.Stmt goto1 = soot.jimple.Jimple.v().newGotoStmt(noop2);
+        body.getUnits().add(goto1);
+        body.getUnits().add(noop1);
+        body.getUnits().add((soot.jimple.Stmt)(endControlNoop.pop()));
         
     }
     
@@ -991,9 +1163,9 @@ public class JimpleBodyBuilder extends AbstractJimpleBodyBuilder {
                 rhs = getArrayInitLocal((polyglot.ast.ArrayInit)expr, localInst.type());
             }
             else {
-                System.out.println("create local decl: "+expr+" is a: "+expr.getClass());
+                //System.out.println("create local decl: "+expr+" is a: "+expr.getClass());
                 rhs = base().createExpr(expr);
-                System.out.println("rhs is: "+rhs+" is a: "+rhs.getClass());
+                //System.out.println("rhs is: "+rhs+" is a: "+rhs.getClass());
             }
             if (rhs instanceof soot.jimple.ConditionExpr) {
                 rhs = handleCondBinExpr((soot.jimple.ConditionExpr)rhs);
@@ -1209,6 +1381,30 @@ public class JimpleBodyBuilder extends AbstractJimpleBodyBuilder {
      * Branch Stmts Creation
      */
     private void createBranch(polyglot.ast.Branch branchStmt){
+        
+        //handle finally blocks before branch if inside try block
+        if (tryStack != null && !tryStack.isEmpty()){
+            polyglot.ast.Try currentTry = (polyglot.ast.Try)tryStack.pop();
+            if (currentTry.finallyBlock() != null){
+                createBlock(currentTry.finallyBlock());
+                tryStack.push(currentTry);
+            }
+            else {
+                tryStack.push(currentTry);
+            }
+        }
+       
+        //handle finally blocks before branch if inside catch block
+        if (catchStack != null && !catchStack.isEmpty()){
+            polyglot.ast.Try currentTry = (polyglot.ast.Try)catchStack.pop();
+            if (currentTry.finallyBlock() != null){
+                createBlock(currentTry.finallyBlock());
+                catchStack.push(currentTry);
+            }
+            else {
+                catchStack.push(currentTry);
+            }
+        }
         
         body.getUnits().add(soot.jimple.Jimple.v().newNopStmt());
         if (branchStmt.kind() == polyglot.ast.Branch.BREAK){
@@ -1982,8 +2178,18 @@ public class JimpleBodyBuilder extends AbstractJimpleBodyBuilder {
             paramTypes.add(conClass.getType());
             //paramTypes.add(base().getSootType(field.target().type()));
         }
-        paramTypes.add(param.getType());
-        soot.SootMethod meth = new soot.SootMethod(name, paramTypes, param.getType(), soot.Modifier.STATIC);
+        soot.Type retType; 
+        paramTypes.add(Util.getSootType(field.type()));
+        retType = Util.getSootType(field.type());
+        /*if (param.getType() instanceof soot.NullType){
+            paramTypes.add(soot.RefType.v("java.lang.Object"));
+            retType = soot.RefType.v("java.lang.Object");
+        }
+        else {
+            paramTypes.add(param.getType());
+            retType = param.getType();
+        }*/
+        soot.SootMethod meth = new soot.SootMethod(name, paramTypes, retType, soot.Modifier.STATIC);
         PrivateFieldSetMethodSource pfsms = new PrivateFieldSetMethodSource(
 		base().getSootType(field.type()),
 		field.name(),
@@ -3152,13 +3358,13 @@ public class JimpleBodyBuilder extends AbstractJimpleBodyBuilder {
             
         if (leftNeedIf){
             soot.jimple.IfStmt ifLeft;
-            if (!falseNoop.empty()){
+            /*if (!falseNoop.empty()){
                 soot.jimple.Stmt fNoop = (soot.jimple.Stmt)falseNoop.peek();
                 ifLeft = soot.jimple.Jimple.v().newIfStmt(lVal, fNoop);
             }
-            else {
+            else {*/
                 ifLeft = soot.jimple.Jimple.v().newIfStmt(lVal, noop1);
-            }
+            //}
             body.getUnits().add(ifLeft);
             Util.addLnPosTags(ifLeft.getConditionBox(), binary.left().position()); 
             Util.addLnPosTags(ifLeft, binary.left().position()); 
@@ -3176,22 +3382,22 @@ public class JimpleBodyBuilder extends AbstractJimpleBodyBuilder {
         }
         if (rightNeedIf){
             soot.jimple.IfStmt ifRight;
-            if (!falseNoop.empty()){
+            /*if (!falseNoop.empty()){
                 soot.jimple.Stmt fNoop = (soot.jimple.Stmt)falseNoop.peek();
                 ifRight = soot.jimple.Jimple.v().newIfStmt(rVal, fNoop);
             }
-            else {
+            else {*/
                 ifRight = soot.jimple.Jimple.v().newIfStmt(rVal, noop1);
-            }
+            //}
             body.getUnits().add(ifRight);
             Util.addLnPosTags(ifRight.getConditionBox(), binary.right().position());
             Util.addLnPosTags(ifRight, binary.right().position());
         }
 
         // return if cond will be used in if 
-        if (!falseNoop.empty()){
+        /*if (!falseNoop.empty()){
             return soot.jimple.IntConstant.v(1);
-        }
+        }*/
         
         soot.jimple.Stmt assign1 = soot.jimple.Jimple.v().newAssignStmt(retLocal, soot.jimple.IntConstant.v(1));
         body.getUnits().add(assign1);
@@ -3224,9 +3430,9 @@ public class JimpleBodyBuilder extends AbstractJimpleBodyBuilder {
          
         soot.jimple.Stmt noop1 = soot.jimple.Jimple.v().newNopStmt();
         soot.jimple.Stmt noop2 = soot.jimple.Jimple.v().newNopStmt();
-        inLeftOr++;
+        //inLeftOr++;
         soot.Value lVal = base().createExpr(binary.left());
-        inLeftOr--;
+        //inLeftOr--;
         
         boolean leftNeedIf = needSootIf(lVal);
         if (!(lVal instanceof soot.jimple.ConditionExpr)) {
@@ -3240,12 +3446,12 @@ public class JimpleBodyBuilder extends AbstractJimpleBodyBuilder {
         
         if (leftNeedIf){
             soot.jimple.IfStmt ifLeft;
-            if (!trueNoop.empty()){
+            /*if (!trueNoop.empty()){
                 ifLeft = soot.jimple.Jimple.v().newIfStmt(lVal, (soot.jimple.Stmt)trueNoop.peek());
             }
-            else {
+            else {*/
                 ifLeft = soot.jimple.Jimple.v().newIfStmt(lVal, noop1);
-            }
+            //}
             body.getUnits().add(ifLeft);
             Util.addLnPosTags(ifLeft, binary.left().position());    
             Util.addLnPosTags(ifLeft.getConditionBox(), binary.left().position());    
@@ -3266,7 +3472,7 @@ public class JimpleBodyBuilder extends AbstractJimpleBodyBuilder {
         if (rightNeedIf){
             
             soot.jimple.IfStmt ifRight;
-            if (!trueNoop.empty()){
+            /*if (!trueNoop.empty()){
                 if (inLeftOr == 0){
                     ifRight = soot.jimple.Jimple.v().newIfStmt(rVal, (soot.jimple.Stmt)falseNoop.peek());
                 }
@@ -3274,18 +3480,18 @@ public class JimpleBodyBuilder extends AbstractJimpleBodyBuilder {
                     ifRight = soot.jimple.Jimple.v().newIfStmt(rVal, (soot.jimple.Stmt)trueNoop.peek());
                 }
             }
-            else {
+            else {*/
                 ifRight = soot.jimple.Jimple.v().newIfStmt(rVal, noop2);
-            }
+            //}
             body.getUnits().add(ifRight);
             Util.addLnPosTags(ifRight, binary.right().position());    
             Util.addLnPosTags(ifRight.getConditionBox(), binary.right().position());    
         }
         
         // return if cond will be used in if 
-        if (!trueNoop.empty()){
+        /*if (!trueNoop.empty()){
             return soot.jimple.IntConstant.v(1);
-        }
+        }*/
         
         body.getUnits().add(noop1);
         
@@ -4711,36 +4917,15 @@ public class JimpleBodyBuilder extends AbstractJimpleBodyBuilder {
      */
     private soot.Local getConditionalLocal(polyglot.ast.Conditional condExpr){
         
-        // create true/false noops to handle cond and/or
-        trueNoop.push(soot.jimple.Jimple.v().newNopStmt());
-        falseNoop.push(soot.jimple.Jimple.v().newNopStmt());
-        
 
         // handle cond 
-        polyglot.ast.Expr condition = condExpr.cond();
-        soot.Value sootCond = base().createExpr(condition); 
-		boolean needIf = needSootIf(sootCond);
-        if (!(sootCond instanceof soot.jimple.ConditionExpr)) {
-            sootCond = soot.jimple.Jimple.v().newEqExpr(sootCond, soot.jimple.IntConstant.v(0));
-        }
-        else {
-            sootCond = reverseCondition((soot.jimple.ConditionExpr)sootCond);
-            sootCond = handleDFLCond((soot.jimple.ConditionExpr)sootCond);
-        }
-        
 		soot.jimple.Stmt noop1 = soot.jimple.Jimple.v().newNopStmt();
-		if (needIf){
-            soot.jimple.IfStmt ifStmt = soot.jimple.Jimple.v().newIfStmt(sootCond, noop1);
+        polyglot.ast.Expr condition = condExpr.cond();
+        createBranchingExpr(condition, noop1, false);
         
-		    body.getUnits().add(ifStmt);
-	        Util.addLnPosTags(ifStmt, condExpr.position());
-            Util.addLnPosTags(ifStmt.getConditionBox(), condition.position());
-        }
-       
         soot.Local retLocal = generateLocal(condExpr.type());
         
 		// handle consequence
-        body.getUnits().add(trueNoop.pop());
 		polyglot.ast.Expr consequence = condExpr.consequent();
         
         soot.Value conseqVal = base().createExpr(consequence);
@@ -4759,7 +4944,6 @@ public class JimpleBodyBuilder extends AbstractJimpleBodyBuilder {
         // handle alternative
         
         body.getUnits().add(noop1);
-		body.getUnits().add(falseNoop.pop());
         polyglot.ast.Expr alternative = condExpr.alternative();
 		if (alternative != null){
 			soot.Value altVal = base().createExpr(alternative);

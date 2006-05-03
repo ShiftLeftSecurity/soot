@@ -53,9 +53,12 @@ public class PAG implements PointsToAnalysis {
             case SparkOptions.set_impl_hybrid:
                 setFactory = HybridPointsToSet.getFactory();
                 break;
-            case SparkOptions.set_impl_shared:
-                setFactory = SharedPointsToSet.getFactory();
-                break;
+            case SparkOptions.set_impl_heintze:
+            	setFactory = SharedHybridSet.getFactory();
+            	break;
+            case SparkOptions.set_impl_sharedlist:
+            	setFactory = SharedListSet.getFactory();
+            	break;
             case SparkOptions.set_impl_array:
                 setFactory = SortedArraySet.getFactory();
                 break;
@@ -72,9 +75,12 @@ public class PAG implements PointsToAnalysis {
                     case SparkOptions.double_set_old_hybrid:
                         oldF = HybridPointsToSet.getFactory();
                         break;
-                    case SparkOptions.double_set_old_shared:
-                        oldF = SharedPointsToSet.getFactory();
-                        break;
+                    case SparkOptions.double_set_old_heintze:
+                    	oldF = SharedHybridSet.getFactory();
+                    	break;
+                    case SparkOptions.double_set_old_sharedlist:
+                    	oldF = SharedListSet.getFactory();
+                    	break;
                     case SparkOptions.double_set_old_array:
                         oldF = SortedArraySet.getFactory();
                         break;
@@ -91,9 +97,12 @@ public class PAG implements PointsToAnalysis {
                     case SparkOptions.double_set_new_hybrid:
                         newF = HybridPointsToSet.getFactory();
                         break;
-                    case SparkOptions.double_set_new_shared:
-                        newF = SharedPointsToSet.getFactory();
-                        break;
+                    case SparkOptions.double_set_new_heintze:
+                    	newF = SharedHybridSet.getFactory();
+                    	break;
+                    case SparkOptions.double_set_new_sharedlist:
+                    	newF = SharedListSet.getFactory();
+                    	break;
                     case SparkOptions.double_set_new_array:
                         newF = SortedArraySet.getFactory();
                         break;
@@ -763,6 +772,13 @@ public class PAG implements PointsToAnalysis {
                 initThis = initThis.getReplacement();
 
                 addEdge( newObject, initThis );
+                if (s instanceof AssignStmt) {
+                    AssignStmt as = (AssignStmt)s;
+                    Node asLHS = srcmpag.nodeFactory().getNode(as.getLeftOp());
+                    asLHS = srcmpag.parameterize( asLHS, e.srcCtxt());
+                    asLHS = asLHS.getReplacement();
+                    addEdge( newObject, asLHS);
+                }
             } else {
                 throw new RuntimeException( "Unhandled edge "+e );
             }

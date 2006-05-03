@@ -27,10 +27,11 @@ public class CastInsertionVisitor extends polyglot.visit.AscriptionVisitor {
 
     public polyglot.ast.Expr ascribe(polyglot.ast.Expr e, polyglot.types.Type toType) {
 
-        System.out.println("expr: "+e);
-        System.out.println("expr: "+e.getClass());
-        System.out.println("to type: "+toType);
+        //System.out.println("expr: "+e);
+        //System.out.println("expr: "+e.getClass());
+        //System.out.println("to type: "+toType);
         polyglot.types.Type fromType = e.type();
+        //System.out.println("from type: "+fromType);
 
         System.out.println("from type: "+fromType);
    

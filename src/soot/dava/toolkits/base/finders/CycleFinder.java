@@ -1,5 +1,6 @@
 /* Soot - a J*va Optimization Framework
  * Copyright (C) 2003 Jerome Miecznikowski
+ * Copyright (C) 2006 Nomair A. Naeem
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,6 +18,11 @@
  * Boston, MA 02111-1307, USA.
  */
 
+/*
+ * CHANGE LOG:
+ * 26-January-2006: Fixed Bug in Dava. Could not detect empty infinte loops.
+ * 5-April -2006: Fixed bug in Fix_MultiEntryPoint read comment dated 5 th April 2005 
+ */
 package soot.dava.toolkits.base.finders;
 
 import soot.*;
@@ -56,9 +62,11 @@ public class CycleFinder implements FactFinder
                 
                 node_list.clear();
                 node_list.addAll( (List) cit.next());
-                
+                //node_list contains all the nodes belonging to this SCC
+
                 IterableSet entry_points = get_EntryPoint( node_list);
 
+		//if more than one entry points found
 		if (entry_points.size() > 1) {
 		    
 		    LinkedList asgEntryPoints = new LinkedList();
@@ -75,7 +83,7 @@ public class CycleFinder implements FactFinder
 		    throw new RetriggerAnalysisException();
 		}
 		
-
+		//gets to this code only if each SCC has one entry point?
 		AugmentedStmt entry_point = (AugmentedStmt) entry_points.getFirst();
 		AugmentedStmt 
 		    characterizing_stmt = find_CharacterizingStmt( entry_point, node_list, wasg),
@@ -180,8 +188,11 @@ public class CycleFinder implements FactFinder
 	}
     }
 
-    private IterableSet get_EntryPoint( IterableSet nodeList)
-    {
+    /*
+     * Nomair A. Naeem Entry point to a SCC ARE those stmts whose predecessor
+     * does not belong to the SCC
+     */
+    private IterableSet get_EntryPoint( IterableSet nodeList){
 	IterableSet entryPoints = new IterableSet();
 
 	Iterator it = nodeList.iterator();
@@ -203,20 +214,40 @@ public class CycleFinder implements FactFinder
     }
 
 
-    private List build_component_list( AugmentedStmtGraph asg)
-    {
+    private List build_component_list( AugmentedStmtGraph asg){
         List c_list = new LinkedList();
 
         StronglyConnectedComponents scc = new StronglyConnectedComponents( asg);
 
+	//makes sure that all scc's with only one statement in them are removed
+	/*
+	  26th Jan 2006 Nomair A. Naeem
+	  This could be potentially bad since self loops will also get removed
+	  Adding code to check for self loop (a stmt is a self loop if its pred and succ
+	  contain the stmt itself
+	*/
         Iterator scomit = scc.getComponents().iterator();
-        while (scomit.hasNext()) {
-            List wcomp = (List) scomit.next();
-            if (wcomp.size() > 1) 
-                c_list.add( wcomp);
-        }
-
-        return c_list;
+	while (scomit.hasNext()) {
+	    List wcomp = (List) scomit.next();
+	    if (wcomp.size() > 1) 
+		c_list.add( wcomp);
+	    else if (wcomp.size()==1){
+		//this is a scc of one augmented stmt
+		//We should add those which are self loops
+		AugmentedStmt as = (AugmentedStmt)wcomp.get(0);
+	  
+		if(as.cpreds.contains(as) && (as.csuccs.contains(as))){
+		    //"as" has a predecssor and successor which is as i.e. it is a self loop
+	  
+		    List currentComponent = null;
+		    currentComponent = new StationaryArrayList();
+		    currentComponent.add(as);
+		    //System.out.println("Special add of"+as);
+		    c_list.add(currentComponent);
+		}
+	    }
+	}
+	return c_list;
     }
 
     private AugmentedStmt find_CharacterizingStmt( AugmentedStmt entry_point, IterableSet sc_component, AugmentedStmtGraph asg) 
@@ -405,6 +436,20 @@ public class CycleFinder implements FactFinder
 	
 	Unit defaultTarget = (Unit) naturalEntryPoint.get_Stmt();
 	LinkedList targets = new LinkedList();
+	
+	/*
+	 * Nomair A Naeem, Micheal Batchelder
+	 * 5 th April 2005 
+	 * shouldnt send empty targets list to constructor of GTableSwitch since
+	 * then it just creates an empty array to hold the targets..
+	 * we intend to fill these in later using the setTarget method
+	 * 
+	 * hence the hack is to just send in null fully aware that they are going to be changed
+	 * to the target we want within the following while loop
+	 */
+	for(int i=0;i<entry_points.size();i++)
+		targets.add(null);
+	/* 5th April End code change */
 	
 	TableSwitchStmt tss = new GTableSwitchStmt( controlLocal, 0, entry_points.size() - 2, targets, defaultTarget);
 	AugmentedStmt dispatchStmt = new AugmentedStmt( tss);

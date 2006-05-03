@@ -36,9 +36,10 @@ public class Options extends OptionsBase {
 
     public static final int src_prec_c = 1;
     public static final int src_prec_class = 1;
-    public static final int src_prec_J = 2;
-    public static final int src_prec_jimple = 2;
-    public static final int src_prec_java = 3;
+    public static final int src_prec_only_class = 2;
+    public static final int src_prec_J = 3;
+    public static final int src_prec_jimple = 3;
+    public static final int src_prec_java = 4;
     public static final int source_level_pre_java_five = 1;
     public static final int source_level_java_five = 2;
     public static final int output_format_J = 1;
@@ -195,6 +196,11 @@ public class Options extends OptionsBase {
                 process_dir.add( value );
             }
   
+            else if( false 
+            || option.equals( "ast-metrics" )
+            )
+                ast_metrics = true;
+  
             else if( false
             || option.equals( "src-prec" )
             ) {
@@ -216,6 +222,17 @@ public class Options extends OptionsBase {
                         return false;
                     }
                     src_prec = src_prec_class;
+                }
+    
+                else if( false
+                || value.equals( "only-class" )
+                ) {
+                    if( src_prec != 0
+                    && src_prec != src_prec_only_class ) {
+                        G.v().out.println( "Multiple values given for option "+option );
+                        return false;
+                    }
+                    src_prec = src_prec_only_class;
                 }
     
                 else if( false
@@ -956,6 +973,10 @@ public class Options extends OptionsBase {
     }
     public void set_process_dir( List setting ) { process_dir = setting; }
     private List process_dir = null;
+    public boolean ast_metrics() { return ast_metrics; }
+    private boolean ast_metrics = false;
+    public void set_ast_metrics( boolean setting ) { ast_metrics = setting; }
+  
     public int src_prec() {
         if( src_prec == 0 ) return src_prec_class;
         return src_prec; 
@@ -1136,8 +1157,10 @@ public class Options extends OptionsBase {
       
 +padOpt(" -cp PATH -soot-class-path PATH -soot-classpath PATH", "Use PATH as the classpath for finding classes." )
 +padOpt(" -process-dir DIR", "Process all classes found in DIR" )
++padOpt(" -ast-metrics", "Compute AST Metrics if performing java to jimple" )
 +padOpt(" -src-prec FORMAT", "Sets source precedence to FORMAT files" )
 +padVal(" c class (default)", "Favour class files as Soot source" )
++padVal(" only-class", "Use only class files as Soot source" )
 +padVal(" J jimple", "Favour Jimple files as Soot source" )
 +padVal(" java", "Favour Java files as Soot source" )
 +padOpt(" -source-level ARG", "Determines level of processing for source inputs" )
@@ -1309,7 +1332,12 @@ public class Options extends OptionsBase {
         +padVal("tag.ln", "Line number aggregator")
         +padVal("tag.an", "Array bounds and null pointer check aggregator")
         +padVal("tag.dep", "Dependence aggregator")
-        +padVal("tag.fieldrw", "Field read/write aggregator");
+        +padVal("tag.fieldrw", "Field read/write aggregator")
+        +padOpt("db", "Dummy phase to store options for Dava")
+        +padVal("db.transformations", "The Dava back-end with all its transformations")
+        +padVal("db.renamer", "Apply heuristics based naming of local variables")
+        +padVal("db.deobfuscate", " Apply de-obfuscation analyses")
+        +padVal("db.force-recompile", " Try to get recompilable code.");
     }
 
     public String getPhaseHelp( String phaseName ) {
@@ -1556,9 +1584,11 @@ public class Options extends OptionsBase {
                 
                 +padVal( "array", "Sorted array representation" )
                 
-                +padVal( "double (default)", "Double set representation for incremental propagation" )
+                +padVal( "heintze", "Heintze's shared bit-vector and overflow list representation" )
                 
-                +padVal( "shared", "Shared bit-vector representation" )
+                +padVal( "sharedlist", "Shared list representation" )
+                
+                +padVal( "double (default)", "Double set representation for incremental propagation" )
                 
                 +padOpt( "double-set-old", "Select implementation of points-to set for old part of double set" )
                 +padVal( "hash", "Use Java HashSet" )
@@ -1569,7 +1599,9 @@ public class Options extends OptionsBase {
                 
                 +padVal( "array", "Sorted array representation" )
                 
-                +padVal( "shared", "Shared bit-vector representation" )
+                +padVal( "heintze", "Heintze's shared bit-vector and overflow list representation" )
+                
+                +padVal( "sharedlist", "Shared list representation" )
                 
                 +padOpt( "double-set-new", "Select implementation of points-to set for new part of double set" )
                 +padVal( "hash", "Use Java HashSet" )
@@ -1580,7 +1612,9 @@ public class Options extends OptionsBase {
                 
                 +padVal( "array", "Sorted array representation" )
                 
-                +padVal( "shared", "Shared bit-vector representation" )
+                +padVal( "heintze", "Heintze's shared bit-vector and overflow list representation" )
+                
+                +padVal( "sharedlist", "Shared list representation" )
                 
                 +padOpt( "dump-html (false)", "Dump pointer assignment graph to HTML for debugging" )
                 +padOpt( "dump-pag (false)", "Dump pointer assignment graph for other solvers" )
@@ -1633,7 +1667,9 @@ public class Options extends OptionsBase {
                 +padVal( "numtrace", "Number-tracing queue implementation" )
                 
                 +padOpt( "backend", "Select BDD backend" )
-                +padVal( "buddy (default)", "BuDDy backend" )
+                +padVal( "auto (default)", "Select backend based on bdd option" )
+                
+                +padVal( "buddy", "BuDDy backend" )
                 
                 +padVal( "cudd", "CUDD backend" )
                 
@@ -2185,6 +2221,37 @@ public class Options extends OptionsBase {
                 +"\n\nRecognized options (with default values):\n"
                 +padOpt( "enabled (false)", "" );
     
+        if( phaseName.equals( "db" ) )
+            return "Phase "+phaseName+":\n"+
+                "\nThe decompile (Dava) option is set using the -f dava options in \nSoot. Options provided by Dava are added to this dummy phase so \nas not to clutter the soot general arguments. -p db (option \nname):(value) will be used to set all required values for Dava. \n"
+                +"\n\nRecognized options (with default values):\n"
+                +padOpt( "enabled (true)", "" )
+                +padOpt( "source_is_javac (true)", "" );
+    
+        if( phaseName.equals( "db.transformations" ) )
+            return "Phase "+phaseName+":\n"+
+                "\n					The transformations implemented using AST Traversal and \nstructural flow analses on Dava's AST 					"
+                +"\n\nRecognized options (with default values):\n"
+                +padOpt( "enabled (true)", "" );
+    
+        if( phaseName.equals( "db.renamer" ) )
+            return "Phase "+phaseName+":\n"+
+                "\nIf set, the renaming analyses implemented in Dava are applied to \neach method body being decompiled. The analyses use heuristics \nto choose potentially better names for local variables. (As of \nFebruary 14th 2006, work is still under progress on these \nanalyses (dava.toolkits.base.renamer). 					"
+                +"\n\nRecognized options (with default values):\n"
+                +padOpt( "enabled (false)", "" );
+    
+        if( phaseName.equals( "db.deobfuscate" ) )
+            return "Phase "+phaseName+":\n"+
+                "\nCertain analyses make sense only when the bytecode is obfuscated \ncode. There are plans to implement such analyses and apply them \non methods only if this flag is set. Dead Code elimination \nwhich includes removing code guarded by some condition which is \nalways false or always true is one such analysis. Another \nsuggested analysis is giving default names to classes and \nfields. Onfuscators love to use weird names for fields and \nclasses and even a simple re-naming of these could be a good \nhelp to the user. Another more advanced analysis would be to \ncheck for redundant constant fields added by obfuscators and \nthen remove uses of these constant fields from the code."
+                +"\n\nRecognized options (with default values):\n"
+                +padOpt( "enabled (true)", "" );
+    
+        if( phaseName.equals( "db.force-recompile" ) )
+            return "Phase "+phaseName+":\n"+
+                "\nWhile decompiling we have to be clear what our aim is: do we \nwant to convert bytecode to Java syntax and stay as close to the \nactual execution of bytecode or do we want recompilably Java \nsource representing the bytecode. This distinction is important \nbecause some restrictions present in Java source are absent from \nthe bytecode. Examples of this include that fact that in Java a \ncall to a constructor or super needs to be the first statement \nin a constructors body. This restriction is absent from the \nbytecode. Similarly final fields HAVE to be initialized once and \nonly once in either the static initializer (static fields) or \nall the constructors (non-static fields). Additionally the \nfields should be initialized on all possible execution paths. \nThese restrictions are again absent from the bytecode. In doing \na one-one conversion of bytecode to Java source then no attempt \nshould be made to fix any of these and similar problems in the \nJava source. However, if the aim is to get recompilable code \nthen these and similar issues need to be fixed. Setting the \nforce-recompilability flag will ensure that the decompiler tries \nits best to produce recompilable Java source."
+                +"\n\nRecognized options (with default values):\n"
+                +padOpt( "enabled (true)", "" );
+    
 
         return "Unrecognized phase: "+phaseName;
     }
@@ -2716,6 +2783,27 @@ public class Options extends OptionsBase {
             return ""
                 +"enabled ";
     
+        if( phaseName.equals( "db" ) )
+            return ""
+                +"enabled "
+                +"source_is_javac ";
+    
+        if( phaseName.equals( "db.transformations" ) )
+            return ""
+                +"enabled ";
+    
+        if( phaseName.equals( "db.renamer" ) )
+            return ""
+                +"enabled ";
+    
+        if( phaseName.equals( "db.deobfuscate" ) )
+            return ""
+                +"enabled ";
+    
+        if( phaseName.equals( "db.force-recompile" ) )
+            return ""
+                +"enabled ";
+    
         // The default set of options is just enabled.
         return "enabled";
     }
@@ -2905,7 +2993,7 @@ public class Options extends OptionsBase {
               +"order:32 "
               +"profile:false "
               +"q:auto "
-              +"backend:buddy "
+              +"backend:auto "
               +"ignore-types:false "
               +"pre-jimplify:false "
               +"context:insens "
@@ -3246,6 +3334,27 @@ public class Options extends OptionsBase {
             return ""
               +"enabled:false ";
     
+        if( phaseName.equals( "db" ) )
+            return ""
+              +"enabled:true "
+              +"source_is_javac:true ";
+    
+        if( phaseName.equals( "db.transformations" ) )
+            return ""
+              +"enabled:true ";
+    
+        if( phaseName.equals( "db.renamer" ) )
+            return ""
+              +"enabled:false ";
+    
+        if( phaseName.equals( "db.deobfuscate" ) )
+            return ""
+              +"enabled:true ";
+    
+        if( phaseName.equals( "db.force-recompile" ) )
+            return ""
+              +"enabled:true ";
+    
         // The default default value is enabled.
         return "enabled";
     }
@@ -3348,6 +3457,11 @@ public class Options extends OptionsBase {
         if( phaseName.equals( "tag.an" ) ) return;
         if( phaseName.equals( "tag.dep" ) ) return;
         if( phaseName.equals( "tag.fieldrw" ) ) return;
+        if( phaseName.equals( "db" ) ) return;
+        if( phaseName.equals( "db.transformations" ) ) return;
+        if( phaseName.equals( "db.renamer" ) ) return;
+        if( phaseName.equals( "db.deobfuscate" ) ) return;
+        if( phaseName.equals( "db.force-recompile" ) ) return;
         G.v().out.println( "Warning: Phase "+phaseName+" is not a standard Soot phase listed in XML files." );
     }
 
@@ -3545,6 +3659,16 @@ public class Options extends OptionsBase {
             G.v().out.println( "Warning: Options exist for non-existent phase tag.dep" );
         if( !PackManager.v().hasPhase( "tag.fieldrw" ) )
             G.v().out.println( "Warning: Options exist for non-existent phase tag.fieldrw" );
+        if( !PackManager.v().hasPhase( "db" ) )
+            G.v().out.println( "Warning: Options exist for non-existent phase db" );
+        if( !PackManager.v().hasPhase( "db.transformations" ) )
+            G.v().out.println( "Warning: Options exist for non-existent phase db.transformations" );
+        if( !PackManager.v().hasPhase( "db.renamer" ) )
+            G.v().out.println( "Warning: Options exist for non-existent phase db.renamer" );
+        if( !PackManager.v().hasPhase( "db.deobfuscate" ) )
+            G.v().out.println( "Warning: Options exist for non-existent phase db.deobfuscate" );
+        if( !PackManager.v().hasPhase( "db.force-recompile" ) )
+            G.v().out.println( "Warning: Options exist for non-existent phase db.force-recompile" );
     }
   
 }

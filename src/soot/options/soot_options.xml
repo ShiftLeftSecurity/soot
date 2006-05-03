@@ -284,6 +284,14 @@ instance, then Soot assumes <tt>MyClass</tt> is in package
 <tt>subA.subB</tt>.</p>
 </long_desc>
 		</listopt>
+		<boolopt>
+			<name>Compute AST Metrics</name>
+			<alias>ast-metrics</alias>
+			<short_desc>Compute AST Metrics if performing java to jimple</short_desc>
+			<long_desc>
+			If this flag is set and soot converts java to jimple then AST metrics will be computed.
+	</long_desc>
+		</boolopt>
 		<multiopt>
 			<name>Input Source Precedence</name>
 			<alias>src-prec</alias>
@@ -304,6 +312,16 @@ the Soot classpath.  Fall back to <tt>.jimple</tt> files
 only when unable to find a <tt>.class</tt> file.
 </long_desc>
 				<default/>
+			</value>
+			<value>
+				<name>Only Class File</name>
+				<alias>only-class</alias>
+				<short_desc>Use only class files as Soot source</short_desc>
+				<long_desc>
+Try to resolve classes first from <tt>.class</tt> files found in
+the Soot classpath.  Do not try any other types of files even when
+unable to find a <tt>.class</tt> file.
+</long_desc>
 			</value>
 			<value>
 				<name>Jimple File</name>
@@ -1773,6 +1791,23 @@ an algorithm based on the merge step from merge sort.
 </long_desc>
 							</value>
 							<value>
+								<name>Heintze</name>
+								<alias>heintze</alias>
+								<short_desc>Heintze's shared bit-vector and overflow list representation</short_desc>
+								<long_desc>Heintze's representation has elements represented by a bit-vector + a small
+									"overflow" list of some maximum number of elements.  The bit-vectors can be shared
+									by multiple points-to sets, while the overflow lists are not.
+								</long_desc>
+							</value>
+							<value>
+								<name>Shared List</name>
+								<alias>sharedlist</alias>
+								<short_desc>Shared list representation</short_desc>
+								<long_desc>Shared List stores its elements in a linked list, and might share
+									its tail with other similar points-to sets.
+								</long_desc>
+							</value>
+							<value>
 								<name>Double</name>
 								<alias>double</alias>
 								<default/>
@@ -1785,13 +1820,6 @@ old pointed-to objects that have been propagated and need not be
 reconsidered. This allows the propagation algorithms to be incremental,
 often speeding them up significantly.
 </long_desc>
-							</value>
-							<value>
-								<name>Shared bit-vector</name>
-								<alias>shared</alias>
-                                                                <short_desc>Shared bit-vector representation</short_desc>
-                                                                <long_desc>This is a bit-vector representation, in which duplicate bit-vectors are found and stored only once to save memory.</long_desc>
-
 							</value>
                                                         <short_desc>Select points-to set implementation</short_desc>
 							<long_desc>
@@ -1841,11 +1869,21 @@ an algorithm based on the merge step from merge sort.
 </long_desc>
 							</value>
 							<value>
-								<name>Shared bit-vector</name>
-								<alias>shared</alias>
-                                                                <short_desc>Shared bit-vector representation</short_desc>
-                                                                <long_desc>This is a bit-vector representation, in which duplicate bit-vectors are found and stored only once to save memory.</long_desc>
-
+								<name>Heintze</name>
+								<alias>heintze</alias>
+								<short_desc>Heintze's shared bit-vector and overflow list representation</short_desc>
+								<long_desc>Heintze's representation has elements represented by a bit-vector + a small
+									"overflow" list of some maximum number of elements.  The bit-vectors can be shared
+									by multiple points-to sets, while the overflow lists are not.
+								</long_desc>
+							</value>
+							<value>
+								<name>Shared List</name>
+								<alias>sharedlist</alias>
+								<short_desc>Shared list representation</short_desc>
+								<long_desc>Shared List stores its elements in a linked list, and might share
+									its tail with other similar points-to sets.
+								</long_desc>
 							</value>
                                                         <short_desc>Select implementation of points-to set for old part of double set</short_desc>
 							<long_desc>
@@ -1897,14 +1935,24 @@ binary search, and set union and intersection are computed using
 an algorithm based on the merge step from merge sort.
 </long_desc>
 							</value>
-							<value>
-								<name>Shared bit-vector</name>
-								<alias>shared</alias>
-                                                                <short_desc>Shared bit-vector representation</short_desc>
-                                                                <long_desc>This is a bit-vector representation, in which duplicate bit-vectors are found and stored only once to save memory.</long_desc>
-
+   							<value>
+								<name>Heintze</name>
+								<alias>heintze</alias>
+								<short_desc>Heintze's shared bit-vector and overflow list representation</short_desc>
+								<long_desc>Heintze's representation has elements represented by a bit-vector + a small
+									"overflow" list of some maximum number of elements.  The bit-vectors can be shared
+									by multiple points-to sets, while the overflow lists are not.
+								</long_desc>
 							</value>
-                                                        <short_desc>Select implementation of points-to set for new part of double set</short_desc>
+							<value>
+								<name>Shared List</name>
+								<alias>sharedlist</alias>
+								<short_desc>Shared list representation</short_desc>
+								<long_desc>Shared List stores its elements in a linked list, and might share
+									its tail with other similar points-to sets.
+								</long_desc>
+							</value>
+                                                     <short_desc>Select implementation of points-to set for new part of double set</short_desc>
 							<long_desc>
 Select an implementation for sets of new objects in the double
 points-to set implementation.
@@ -2235,9 +2283,19 @@ Select the implementation of worklists to be used in Paddle.
 							<name>Backend</name>
 							<alias>backend</alias>
 							<value>
+								<name>Select Automatically</name>
+								<alias>auto</alias>
+								<default/>
+<short_desc>Select backend based on bdd option</short_desc>
+<long_desc>
+When the bdd option is true, the BuDDy backend will be used.
+When the bdd option is false, the backend will be set to none, to avoid
+loading any BDD backend.
+</long_desc>
+							</value>
+							<value>
 								<name>BuDDy</name>
 								<alias>buddy</alias>
-								<default/>
 <short_desc>BuDDy backend</short_desc>
 <long_desc>
 Use BuDDy implementation of BDDs.
@@ -4779,6 +4837,136 @@ tags produced by the Field Read/Write Tagger, phase
 					</boolopt>
 				</sub_phase>
 			</phase>
+
+
+
+
+
+
+
+
+
+
+                       <phase>
+	                      <name>Dava Body Creation</name>
+	                      <alias>db</alias>
+          	              <short_desc>Dummy phase to store options for Dava</short_desc>
+
+				<long_desc>
+The decompile (Dava) option is set using the -f dava options in Soot.
+Options provided by Dava are added to this dummy phase so as not to clutter the soot general arguments.
+-p db (option name):(value) will be used to set all required values for Dava. 
+                                </long_desc>
+				<boolopt>
+					<name>Enabled</name>
+
+					<alias>enabled</alias>
+                                        <default>true</default>
+					<short_desc/>
+					<long_desc/>
+				</boolopt>
+				
+				
+				<boolopt>
+					<name>Source</name>
+
+					<alias>source_is_javac</alias>
+                    <default>true</default>
+					<short_desc/>
+					<long_desc>
+					check out soot.dava.toolkits.base.misc.ThrowFinder
+					In short we want to ensure that if there are throw exception info in the class file dava uses this info.					
+					</long_desc>
+				</boolopt>
+				
+				
+				<sub_phase>
+					<name>Transformations</name>
+					<alias>db.transformations</alias>
+					<short_desc>The Dava back-end with all its transformations</short_desc>
+					<long_desc>
+					The transformations implemented using AST Traversal and structural flow analses on Dava's AST
+					</long_desc>
+
+
+				<boolopt>
+					<name>Enabled</name>
+					<alias>enabled</alias>
+
+					<default>true</default>
+				</boolopt>
+                               </sub_phase>
+
+				<sub_phase>
+					<name>Renamer</name>
+					<alias>db.renamer</alias>
+					<short_desc>Apply heuristics based naming of local variables</short_desc>
+					<long_desc>If set, the renaming analyses implemented in Dava are applied to each method body being decompiled. The analyses use heuristics to choose potentially better names for local variables. (As of February 14th 2006, work is still under progress on these analyses (dava.toolkits.base.renamer).
+					</long_desc>
+
+
+				<boolopt>
+					<name>Enabled</name>
+					<alias>enabled</alias>
+
+					<default>false</default>
+				</boolopt>
+                </sub_phase>
+
+
+
+				<sub_phase>
+					<name>De-obfuscate</name>
+					<alias>db.deobfuscate</alias>
+					<short_desc> Apply de-obfuscation analyses</short_desc>
+					<long_desc>Certain analyses make sense only when the bytecode is obfuscated code. 
+There are plans to implement such analyses and apply them on methods only if this flag is set. 
+Dead Code elimination which includes removing code guarded by some condition which is always false or always true is one such
+analysis. Another suggested analysis is giving default names to classes and fields. Onfuscators love to use weird names
+for fields and classes and even a simple re-naming of these could be a good help to the user. 
+Another more advanced analysis would be to check for redundant constant fields added by obfuscators and then remove uses 
+of these constant fields from the code.</long_desc>
+
+				<boolopt>
+					<name>Enabled</name>
+					<alias>enabled</alias>
+
+					<default>true</default>
+				</boolopt>
+
+                               </sub_phase>
+
+
+<sub_phase>
+
+					<name>Force Recompilability</name>
+					<alias>db.force-recompile</alias>
+
+					<short_desc> Try to get recompilable code.</short_desc>
+					<long_desc>While decompiling we have to be clear what our aim is: do we want to convert bytecode
+to Java syntax and stay as close to the actual execution of bytecode or do we want recompilably Java source representing
+the bytecode. This distinction is important because some restrictions present in Java source are absent from the bytecode.
+Examples of this include that fact that in Java a call to a constructor or super needs to be the first statement in
+a constructors body. This restriction is absent from the bytecode. Similarly final fields HAVE to be initialized
+once and only once in either the static initializer (static fields) or all the constructors (non-static fields). Additionally
+the fields should be initialized on all possible execution paths. These restrictions are again absent from the bytecode.
+In doing a one-one conversion of bytecode to Java source then no attempt should be made to fix any of these and similar problems
+in the Java source. However, if the aim is to get recompilable code then these and similar issues need to be fixed. 
+Setting the force-recompilability flag will ensure that the decompiler tries its best to produce recompilable Java source.</long_desc>
+				<boolopt>
+					<name>Enabled</name>
+					<alias>enabled</alias>
+
+					<default>true</default>
+				</boolopt>
+
+                               </sub_phase>
+
+			</phase>
+
+
+
+
 		</phaseopt>
 		<macroopt>
 			<name>Optimize</name>
@@ -4892,7 +5080,7 @@ to the surrounding program.
 When constructing an <code>ExceptionalUnitGraph</code> or
 <code>ExceptionalBlockGraph</code>, include edges to an exception
 handler only from the predecessors of an instruction which may
-throw an exceptions to the handler, and not from the excepting
+throw an exception to the handler, and not from the excepting
 instruction itself, unless the excepting instruction has
 potential side effects.
 </p>

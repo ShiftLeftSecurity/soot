@@ -177,11 +177,16 @@ public class AntTask extends MatchingTask {
             return process_dir.createPath();
         }
   
+        public void setast_metrics(boolean arg) {
+            if(arg) addArg("-ast-metrics");
+        }
+  
         public void setsrc_prec(String arg) {
             if(false
     
                 || arg.equals( "c" )
                 || arg.equals( "class" )
+                || arg.equals( "only-class" )
                 || arg.equals( "J" )
                 || arg.equals( "jimple" )
                 || arg.equals( "java" )
@@ -2733,6 +2738,87 @@ public class AntTask extends MatchingTask {
           public void setenabled(boolean arg) {
             addArg("-p");
             addArg("tag.fieldrw");
+            addArg("enabled:"+(arg?"true":"false"));
+          }
+      
+        }
+    
+        public Object createp_db() {
+            Object ret = new PhaseOptdb();
+            phaseopts.add(ret);
+            return ret;
+        }
+        public class PhaseOptdb {
+      
+          public void setenabled(boolean arg) {
+            addArg("-p");
+            addArg("db");
+            addArg("enabled:"+(arg?"true":"false"));
+          }
+      
+          public void setsource_is_javac(boolean arg) {
+            addArg("-p");
+            addArg("db");
+            addArg("source_is_javac:"+(arg?"true":"false"));
+          }
+      
+        }
+    
+        public Object createp_db_transformations() {
+            Object ret = new PhaseOptdb_transformations();
+            phaseopts.add(ret);
+            return ret;
+        }
+        public class PhaseOptdb_transformations {
+      
+          public void setenabled(boolean arg) {
+            addArg("-p");
+            addArg("db.transformations");
+            addArg("enabled:"+(arg?"true":"false"));
+          }
+      
+        }
+    
+        public Object createp_db_renamer() {
+            Object ret = new PhaseOptdb_renamer();
+            phaseopts.add(ret);
+            return ret;
+        }
+        public class PhaseOptdb_renamer {
+      
+          public void setenabled(boolean arg) {
+            addArg("-p");
+            addArg("db.renamer");
+            addArg("enabled:"+(arg?"true":"false"));
+          }
+      
+        }
+    
+        public Object createp_db_deobfuscate() {
+            Object ret = new PhaseOptdb_deobfuscate();
+            phaseopts.add(ret);
+            return ret;
+        }
+        public class PhaseOptdb_deobfuscate {
+      
+          public void setenabled(boolean arg) {
+            addArg("-p");
+            addArg("db.deobfuscate");
+            addArg("enabled:"+(arg?"true":"false"));
+          }
+      
+        }
+    
+        public Object createp_db_force_recompile() {
+            Object ret = new PhaseOptdb_force_recompile();
+            phaseopts.add(ret);
+            return ret;
+        }
+        public class PhaseOptdb_force_recompile {
+      
+          public void setenabled(boolean arg) {
+            addArg("-p");
+            addArg("db.force-recompile");
             addArg("enabled:"+(arg?"true":"false"));
           }
       

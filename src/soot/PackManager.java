@@ -48,7 +48,7 @@ import soot.jimple.toolkits.annotation.defs.*;
 import soot.jimple.toolkits.annotation.liveness.*;
 import soot.jimple.toolkits.annotation.logic.*;
 import soot.jimple.toolkits.annotation.purity.*; // [AM]
-import soot.javaToJimple.toolkits.*; 
+//import soot.javaToJimple.toolkits.*; 
 import soot.jimple.toolkits.annotation.*;
 import soot.jimple.toolkits.pointer.*;
 import soot.jimple.toolkits.callgraph.*;
@@ -60,13 +60,16 @@ import soot.jimple.paddle.PaddleHook;
 import soot.jimple.toolkits.callgraph.CHATransformer;
 import soot.jimple.spark.fieldrw.*;
 import soot.dava.*;
+import soot.dava.toolkits.base.AST.interProcedural.InterProceduralAnalyses;
+import soot.dava.toolkits.base.AST.transformations.RemoveEmptyBodyDefaultConstructor;
+import soot.dava.toolkits.base.AST.transformations.VoidReturnRemover;
 import soot.dava.toolkits.base.misc.*;
 import soot.xml.*;
-import soot.toolkits.graph.*;
 import soot.toolkits.graph.interaction.*;
 
 /** Manages the Packs containing the various phases and their options. */
 public class PackManager {
+	public static boolean DEBUG=false;
     public PackManager( Singletons.Global g ) { PhaseOptions.v().setPackManager(this); init(); }
 
     public boolean onlyStandardPacks() { return onlyStandardPacks; }
@@ -247,6 +250,23 @@ public class PackManager {
             p.add(new Transform("tag.fieldrw", FieldTagAggregator.v()));
         }
 
+        // Dummy Dava Phase
+        /*
+         * Nomair A. Naeem 13th Feb 2006
+         * Added so that Dava Options can be added as phase options rather
+         * than main soot options since they only make sense when decompiling
+         * The db phase options are added in soot_options.xml
+         */
+        addPack(p = new BodyPack("db"));
+        {
+        	p.add(new Transform("db.transformations", null));
+        	p.add(new Transform("db.renamer", null));
+        	p.add(new Transform("db.deobfuscate", null));
+        	p.add(new Transform("db.force-recompile", null));
+        }
+
+       
+        
         onlyStandardPacks = true;
     }
 
@@ -314,6 +334,7 @@ public class PackManager {
                 G.v().out.println("Running in interactive mode.");
             }
         }
+        
         runBodyPacks();
         handleInnerClasses();
     }
@@ -365,7 +386,32 @@ public class PackManager {
     /* preprocess classes for DAVA */
     private void preProcessDAVA() {
         if (Options.v().output_format() == Options.output_format_dava) {
-            ThrowFinder.v().find();
+
+            Map options = PhaseOptions.v().getPhaseOptions("db");
+            boolean isSourceJavac = PhaseOptions.getBoolean(options, "source_is_javac"); 
+        	if(!isSourceJavac){
+        		/*
+        		 * It turns out that the exception attributes of a method i.e. those exceptions that
+        		 * a method can throw are only checked by the Java compiler and not the JVM
+        		 * 
+        		 * Javac does place this information into the attributes but other compilers dont
+        		 * hence if the source is not javac then we have to do this fancy analysis
+        		 * to find all the potential exceptions that might get thrown
+        		 * 
+        		 * BY DEFAULT the option javac of db is set to true so we assume that the source is javac
+        		 * 
+        		 * See ThrowFinder for more details
+        		 */
+        		if(DEBUG)
+        			System.out.println("Source is not Javac hence invoking ThrowFinder");
+        			
+        		ThrowFinder.v().find();
+        	}
+        	else{
+        		if(DEBUG)
+        			System.out.println("Source is javac hence we dont need to invoke ThrowFinder");
+        	}
+
             PackageNamer.v().fixNames();
 
             G.v().out.println();
@@ -426,14 +472,119 @@ public class PackManager {
     private void postProcessDAVA() {
         G.v().out.println();
 
-        Iterator classIt = Scene.v().getApplicationClasses().iterator();
+        Chain appClasses = Scene.v().getApplicationClasses();
+
+        Map options = PhaseOptions.v().getPhaseOptions("db.transformations");
+        boolean transformations = PhaseOptions.getBoolean(options, "enabled");
+        /*
+         * apply analyses etc 
+         */
+        Iterator classIt = appClasses.iterator();
         while (classIt.hasNext()) {
             SootClass s = (SootClass) classIt.next();
+            String fileName = SourceLocator.v().getFileNameFor(s, Options.v().output_format());
+            
+            /*
+             * Nomair A. Naeem 5-Jun-2005
+             * Added to remove the *final* bug in Dava (often seen in AspectJ programs)
+             */ 
+            DavaStaticBlockCleaner.v().staticBlockInlining(s);
 
+            //remove returns from void methods
+    		VoidReturnRemover.cleanClass(s);
+    		
+            //remove the default constructor if this is the only one present
+			RemoveEmptyBodyDefaultConstructor.checkAndRemoveDefault(s);
+
+
+	    
+    		/*
+    		 * Nomair A. Naeem 1st March 2006
+    		 * Check if we want to apply transformations
+    		 * one reason we might not want to do this is when gathering old metrics data!!
+    		 */
+
+            	//debug("analyzeAST","Advanced Analyses ALL DISABLED");
+            	
+            	G.v().out.println("Analyzing " + fileName + "... ");	 
+    	            
+            	/*
+            	 * Nomair A. Naeem 29th Jan 2006
+            	 * Added hook into going through each decompiled method again
+            	 * Need it for all the implemented AST analyses
+            	 */
+            	Iterator methodIt = s.methodIterator();
+            	while (methodIt.hasNext()) {
+            		
+            		SootMethod m = (SootMethod) methodIt.next();
+            		//System.out.println("SootMethod:"+m.getName().toString());
+            		
+            		/*
+            		 * 3rd April 2006
+            		 * Fixing RuntimeException caused when you
+            		 * retrieve an active body when one is not present
+            		 * 
+            		 */
+            		if(m.hasActiveBody()){
+            			DavaBody body = (DavaBody)m.getActiveBody();
+                		//System.out.println("body"+body.toString());
+                        if(transformations){
+                        	body.analyzeAST();
+                        } //if tansformations are enabled
+                        else{
+                        	body.applyBugFixes();
+                        }
+            		}
+            		else
+            			continue;
+            	}
+            
+        } //going through all classes
+    		
+
+        
+        
+        /*
+         * Nomair A. Naeem March 6th, 2006
+         * 
+         * SHOULD BE INVOKED ONLY ONCE!!!
+         * If interprocedural analyses are turned off they are checked within this
+         * method.
+         * 
+         * HAVE TO invoke this analysis since this invokes the renamer!!
+         */
+        if(transformations){
+        	InterProceduralAnalyses.applyInterProceduralAnalyses();
+        }
+    	        	
+
+        
+        outputDava();
+    }
+            
+    private void outputDava(){    
+        Chain appClasses = Scene.v().getApplicationClasses();
+
+     
+         /*
+          * Generate decompiled code
+          */   
+    	String pathForBuild=null;
+    	ArrayList decompiledClasses = new ArrayList();
+        Iterator classIt = appClasses.iterator();
+        while (classIt.hasNext()) {
+            SootClass s = (SootClass) classIt.next();
+            
             OutputStream streamOut = null;
             PrintWriter writerOut = null;
             String fileName = SourceLocator.v().getFileNameFor(s, Options.v().output_format());
-            if( Options.v().gzip() ) fileName = fileName+".gz";
+            decompiledClasses.add(fileName.substring(fileName.lastIndexOf('/')+1));
+            if(pathForBuild == null){
+            	pathForBuild =fileName.substring(0,fileName.lastIndexOf('/')+1);
+            	//System.out.println(pathForBuild);
+            }
+            if( Options.v().gzip() ) 
+            	fileName = fileName+".gz";
 
             try {
                 if( jarFile != null ) {
@@ -451,14 +602,10 @@ public class PackManager {
                 throw new CompilationDeathException("Cannot output file " + fileName);
             }
 
+           	
 
-	    /*
-	     * Nomair A. Naeem 5-Jun-2005
-	     * Added to remove the *final* bug in Dava (often seen in AspectJ programs)
-	     */
-	    DavaStaticBlockCleaner.v().staticBlockInlining(s);
-	    
             G.v().out.print("Generating " + fileName + "... ");
+            
             G.v().out.flush();
 
             DavaPrinter.v().printTo(s, writerOut);
@@ -474,14 +621,43 @@ public class PackManager {
                     throw new CompilationDeathException("Cannot close output file " + fileName);
                 }
             }
-        }
+        } //going through all classes
         G.v().out.println();
+
+        
+        /*
+         * Create the build.xml for Dava
+         */
+        {
+        	//path for build is probably ending in sootoutput/dava/src
+        	//definetly remove the src
+        	if(pathForBuild.endsWith("src/"))
+        		pathForBuild=pathForBuild.substring(0,pathForBuild.length()-4);
+        	
+        	String fileName = pathForBuild +"build.xml";
+        
+           	try{
+        		OutputStream streamOut = new FileOutputStream(fileName);
+        		PrintWriter writerOut = new PrintWriter(new OutputStreamWriter(streamOut));
+        		DavaBuildFile.generate(writerOut,decompiledClasses);
+        		writerOut.flush();
+        		streamOut.close();
+        	} catch (IOException e) {
+        		throw new CompilationDeathException("Cannot output file " + fileName);
+        	}
+        }
+
+        
+        
     }
 
     private void runBodyPacks(SootClass c) {
         final int format = Options.v().output_format();
         if (format == Options.output_format_dava) {
             G.v().out.print("Decompiling ");
+
+	     //January 13th, 2006  SootMethodAddedByDava is set to false for SuperFirstStmtHandler
+	    G.v().SootMethodAddedByDava=false;
         } else {
             G.v().out.print("Transforming ");
         }
@@ -530,7 +706,12 @@ public class PackManager {
         Iterator methodIt = c.methodIterator();
         while (methodIt.hasNext()) {
             SootMethod m = (SootMethod) methodIt.next();
-
+            
+            if(DEBUG){
+            	if(m.getExceptions().size()!=0)
+            		System.out.println("PackManager printing out jimple body exceptions for method "+m.toString()+" " + m.getExceptions().toString());
+            }
+            
             if (!m.isConcrete()) continue;
 
             if (produceShimple || wholeShimple) {
@@ -578,8 +759,7 @@ public class PackManager {
                 m.setActiveBody(Grimp.v().newBody(m.getActiveBody(), "gb"));
                 PackManager.v().getPack("gop").apply(m.getActiveBody());
             } else if (produceBaf) {
-                m.setActiveBody(Baf.v().newBody
-                                ((JimpleBody) m.getActiveBody()));
+                m.setActiveBody(Baf.v().newBody((JimpleBody) m.getActiveBody()));
                 PackManager.v().getPack("bop").apply(m.getActiveBody());
                 PackManager.v().getPack("tag").apply(m.getActiveBody());
             }
@@ -594,12 +774,30 @@ public class PackManager {
             methodIt = c.methodIterator();
             while (methodIt.hasNext()) {
                 SootMethod m = (SootMethod) methodIt.next();
-
-                if (!m.isConcrete()) continue;
-
+                if (!m.isConcrete()) 
+                	continue;
+                //all the work done in decompilation is done in DavaBody which is invoked from within newBody
                 m.setActiveBody(Dava.v().newBody(m.getActiveBody()));
             }
-        }
+
+            /*
+             * January 13th, 2006
+             * SuperFirstStmtHandler might have set SootMethodAddedByDava if it needs to create a new
+             * method. 
+             */
+            //could use G to add new method...................
+            if(G.v().SootMethodAddedByDava){
+            	//System.out.println("PACKMANAGER SAYS:----------------Have to add the new method(s)");
+            	ArrayList sootMethodsAdded = G.v().SootMethodsAdded;
+            	Iterator it = sootMethodsAdded.iterator();	
+            	while(it.hasNext()){
+            		c.addMethod((SootMethod)it.next());
+            	}
+            	G.v().SootMethodsAdded = new ArrayList();
+            	G.v().SootMethodAddedByDava=false;
+            }
+
+        }//end if produceDava
     }
 
     private void writeClass(SootClass c) {
@@ -722,6 +920,12 @@ public class PackManager {
             Iterator methodIt = cl.methodIterator();
             while (methodIt.hasNext()) {
                 SootMethod m = (SootMethod) methodIt.next();
+                if(DEBUG && cl.isApplicationClass()){                	
+                	if(m.getExceptions().size()!=0)
+                		System.out.println("PackManager printing out from within retrieveAllBodies exceptions for method "+m.toString()+" " + m.getExceptions().toString());
+                	else
+                		System.out.println("in retrieveAllBodies......Currently Method "+ m.toString() +" has no exceptions ");
+                }
 
                 if( m.isConcrete() ) {
                     m.retrieveActiveBody();
