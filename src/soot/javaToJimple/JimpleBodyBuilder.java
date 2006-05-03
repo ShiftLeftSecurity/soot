@@ -46,7 +46,9 @@ public class JimpleBodyBuilder extends AbstractJimpleBodyBuilder {
     
     HashMap labelBreakMap; // for break label --> nop to jump to
     HashMap labelContinueMap; // for continue label --> nop to jump to
-    String lastLabel;
+    //Stack labelStack;
+    //String lastLabel;
+    HashMap labelMap;
     HashMap localsMap = new HashMap();    // localInst --> soot local 
 
     HashMap getThisMap = new HashMap(); // type --> local to ret
@@ -799,9 +801,13 @@ public class JimpleBodyBuilder extends AbstractJimpleBodyBuilder {
         condControlNoop.push(continueStmt);
         
         // handle label continue
-        if ((labelContinueMap != null) && (labelContinueMap.containsKey(lastLabel))){
-            body.getUnits().add((soot.jimple.Stmt)labelContinueMap.get(lastLabel));
+        //if ((labelContinueMap != null) && (labelContinueMap.containsKey(lastLabel))){
+        if (labelMap != null && labelMap.containsKey(doStmt)){
+            body.getUnits().add((soot.jimple.Stmt)labelMap.get(doStmt));
         }
+        /*if ((labelContinueMap != null) && (labelStack != null) && (!labelStack.isEmpty()) && (labelContinueMap.containsKey(((LabelKey)labelStack.peek()).label()))){
+            body.getUnits().add((soot.jimple.Stmt)labelContinueMap.get(((LabelKey)labelStack.peek()).label()));
+        }*/
         
         trueNoop.push(tNoop);
         falseNoop.push(fNoop);
@@ -909,11 +915,18 @@ public class JimpleBodyBuilder extends AbstractJimpleBodyBuilder {
         body.getUnits().add((soot.jimple.Stmt)(condControlNoop.pop()));
 
         // handle label continue
-        if ((labelContinueMap != null) && (labelContinueMap.containsKey(lastLabel))){
-            if (!body.getUnits().contains((soot.jimple.Stmt)labelContinueMap.get(lastLabel))){
-                body.getUnits().add((soot.jimple.Stmt)labelContinueMap.get(lastLabel));
-            }
+        //if ((labelContinueMap != null) && (labelContinueMap.containsKey(lastLabel))){
+        if (labelMap != null && labelMap.containsKey(forStmt)){
+            body.getUnits().add((soot.jimple.Stmt)labelMap.get(forStmt));
         }
+        
+        /*if ((labelContinueMap != null) && (labelStack != null) && (!labelStack.isEmpty()) && (labelContinueMap.containsKey(((LabelKey)labelStack.peek()).label()))){
+            body.getUnits().add((soot.jimple.Stmt)labelContinueMap.get(((LabelKey)labelStack.peek()).label()));
+            //System.out.println("lastLabel: "+lastLabel);
+            //if (!body.getUnits().contains((soot.jimple.Stmt)labelContinueMap.get(lastLabel))){
+              //  body.getUnits().add((soot.jimple.Stmt)labelContinueMap.get(lastLabel));
+            //}
+        }*/
         
         // handle iters
         Iterator itersIt = forStmt.iters().iterator();
@@ -1235,14 +1248,25 @@ public class JimpleBodyBuilder extends AbstractJimpleBodyBuilder {
      */
     private void createLabeled(polyglot.ast.Labeled labeledStmt){
         String label = labeledStmt.label();
-        lastLabel = label;
-
+        //lastLabel = label;
         polyglot.ast.Stmt stmt = labeledStmt.statement();
 
         soot.jimple.Stmt noop = soot.jimple.Jimple.v().newNopStmt();
         if (!(stmt instanceof polyglot.ast.For) && !(stmt instanceof polyglot.ast.Do)){
             body.getUnits().add(noop);
         }
+        /*else {
+            if (labelStack == null){
+                labelStack = new Stack();
+            }
+            labelStack.push(new LabelKey(label, noop));
+        }*/
+
+        if (labelMap == null){
+            labelMap = new HashMap();
+        }
+
+        labelMap.put(stmt, noop);
         
 
         if (labelBreakMap == null) {
@@ -1258,6 +1282,10 @@ public class JimpleBodyBuilder extends AbstractJimpleBodyBuilder {
         labelBreakMap.put(label, noop2);
         
         createStmt(stmt);
+
+        /*if (labelStack != null && !labelStack.isEmpty() && (stmt instanceof polyglot.ast.For || stmt instanceof polyglot.ast.Do)){
+            labelStack.pop();
+        }*/
         
         body.getUnits().add(noop2);
         
@@ -1266,6 +1294,22 @@ public class JimpleBodyBuilder extends AbstractJimpleBodyBuilder {
         // there is something to look up for breaks and continues 
         // with labels
     }
+
+    /*class LabelKey{
+
+        public LabelKey(String label, soot.jimple.Stmt noop){
+            this.label = label;
+            this.noop = noop;
+        }
+        private String label;
+        public String label(){
+            return label;
+        }
+        private soot.jimple.Stmt noop;
+        public soot.jimple.Stmt noop(){
+            return noop;
+        }
+    }*/
     
     /**
      * Assert Stmt Creation
