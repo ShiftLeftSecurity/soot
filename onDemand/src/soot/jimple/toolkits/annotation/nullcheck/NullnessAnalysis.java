@@ -119,17 +119,18 @@ public class NullnessAnalysis  extends ForwardBranchedFlowAnalysis
 		}
 		
 		//if we have an array ref, set the info for this ref to TOP,
-		//cause we need to be conservative here
+		//cause we need to be conservative here;
+		//also set the array object to non-null
 		if(s.containsArrayRef()) {
 			ArrayRef arrayRef = s.getArrayRef();
 			handleArrayRef(arrayRef,out);
 		}
-		//same for field refs, but also set the receiver object to non-null, if there is one
+		//same for field refs, but sets the receiver object to non-null, if there is one
 		if(s.containsFieldRef()) {
 			FieldRef fieldRef = s.getFieldRef();
 			handleFieldRef(fieldRef, out);
 		}
-		//same for invoke expr., also set the receiver object to non-null, if there is one
+		//same for invoke expr., also sets the receiver object to non-null, if there is one
 		if(s.containsInvokeExpr()) {
 			InvokeExpr invokeExpr = s.getInvokeExpr();
 			handleInvokeExpr(invokeExpr, out);
