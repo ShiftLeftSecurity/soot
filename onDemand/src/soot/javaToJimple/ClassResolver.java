@@ -862,11 +862,7 @@ public class ClassResolver {
             sootField.addTag(new soot.tagkit.LongConstantValueTag(((Long)field.fieldInstance().constantValue()).longValue()));
         }
         else if (field.fieldInstance().constantValue() instanceof Double){
-            //System.out.println("const val: "+field.fieldInstance().constantValue());
             sootField.addTag(new soot.tagkit.DoubleConstantValueTag((long)((Double)field.fieldInstance().constantValue()).doubleValue()));
-            //System.out.println(((Double)field.fieldInstance().constantValue()).doubleValue());
-            soot.tagkit.DoubleConstantValueTag tag = (soot.tagkit.DoubleConstantValueTag)sootField.getTag("DoubleConstantValueTag");
-            //System.out.println("tag: "+tag);
         }
         else if (field.fieldInstance().constantValue() instanceof Float){
             sootField.addTag(new soot.tagkit.FloatConstantValueTag(((Float)field.fieldInstance().constantValue()).floatValue()));
