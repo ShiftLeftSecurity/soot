@@ -67,7 +67,7 @@ public class ShadowSwitch {
 	}
 
 	public static void enableShadowGroup(int groupNumber) {
-    	System.out.println("enabled shadow group #"+groupNumber);
+    	System.err.println("enabled shadow group #"+groupNumber);
 		for (int i = 0; i < groupTable[groupNumber].length; i++) {
 			boolean toEnable = groupTable[groupNumber][i];
 			enabled[i] = enabled[i] | toEnable;

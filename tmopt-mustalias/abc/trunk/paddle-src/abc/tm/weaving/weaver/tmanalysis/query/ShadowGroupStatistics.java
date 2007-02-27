@@ -84,24 +84,35 @@ public class ShadowGroupStatistics {
 	public void computeAndDumpStatistics() {
 		shadowGroupDump();
 		//computeClusters();
-    	perShadowStatistics();    	
+    	probeStatistics();    	
 	}
 	
 	/**
 	 * 
 	 */
-	private void perShadowStatistics() {
-		Set allConsistentShadowGroups = FlowInsensitiveAnalysis.v().getAllConsistentShadowGroups();
+	private void probeStatistics() {
+		Set probes = Probe.generateAllSoundProbes();
 		
 		System.err.println("---------------------------------------------");
-		System.err.println("'Shadows to groups' statistics");
+		System.err.println("Probe statistics");
 		System.err.println();
+		
+    	for (Iterator iterator = probes.iterator(); iterator.hasNext();) {
+			Probe probe = (Probe) iterator.next();			
+			System.err.println("\n\nProbe number "+probe.getNumber()+":\n");
+
+			List shadowIDs = new ArrayList(Shadow.uniqueShadowIDsOf(probe.getShadows()));
+			Collections.sort(shadowIDs);
+			for (Iterator shadowIDIter = shadowIDs.iterator(); shadowIDIter.hasNext();) {
+				System.err.println("    "+shadowIDIter.next());
+			}
+    	}
 		
 		//get all shadows
 		Set allShadows = new HashSet();		
-		for (Iterator groupIter = allConsistentShadowGroups.iterator(); groupIter.hasNext();) {
-			ShadowGroup group = (ShadowGroup) groupIter.next();
-			allShadows.addAll(group.getAllShadows());
+		for (Iterator groupIter = probes.iterator(); groupIter.hasNext();) {
+			Probe probe = (Probe) groupIter.next();
+			allShadows.addAll(probe.getShadows());
 		}
 		
 		//for each shadow
@@ -114,18 +125,19 @@ public class ShadowGroupStatistics {
 			
 			Set setsInducedByGroupsWithThisShadows = new HashSet();
 			
-			for (Iterator groupIter = allConsistentShadowGroups.iterator(); groupIter.hasNext();) {
-				ShadowGroup group = (ShadowGroup) groupIter.next();
+			for (Iterator groupIter = probes.iterator(); groupIter.hasNext();) {
+				Probe probe = (Probe) groupIter.next();
 			
-				if(group.getAllShadows().contains(shadow)) {
+				Set shadows = probe.getShadows();
+				if(shadows.contains(shadow)) {
 					groupsWithThisShadow++;
-					averageSizeOfGroupsWithThisShadows += group.getAllShadows().size();
+					averageSizeOfGroupsWithThisShadows += shadows.size();
 					
-					if(group.getAllShadows().size()>maximalSizeOfGroupsWithThisShadows) {
-						maximalSizeOfGroupsWithThisShadows = group.getAllShadows().size();
+					if(shadows.size()>maximalSizeOfGroupsWithThisShadows) {
+						maximalSizeOfGroupsWithThisShadows = shadows.size();
 					}
 					
-					setsInducedByGroupsWithThisShadows.add(group.getAllShadows());
+					setsInducedByGroupsWithThisShadows.add(shadows);
 				}
 			}			
 			averageSizeOfGroupsWithThisShadows /= (double)groupsWithThisShadow;
@@ -218,18 +230,12 @@ public class ShadowGroupStatistics {
 	protected void shadowGroupDump() {
     	Set allConsistentShadowGroups = FlowInsensitiveAnalysis.v().getAllConsistentShadowGroups();
     	
-    	Set allShadowSets = new HashSet();    	
-    	for (Iterator groupIter = allConsistentShadowGroups.iterator(); groupIter.hasNext();) {
-			ShadowGroup group = (ShadowGroup) groupIter.next();
-			allShadowSets.add(group.getAllShadows());
-		}
-
     	System.err.println("=====================================================================");
     	System.err.println("================               SHADOW GROUPS               ==========");
     	System.err.println("=====================================================================");
 		System.err.println("There are "+allConsistentShadowGroups.size()+" complete and consistent shadow groups");
     	System.err.println("containing "+ShadowRegistry.v().enabledShadows().size() +" shadows.\n");
-		System.err.println("Those groups form "+allShadowSets.size()+" different complete and consistent shadow sets.");
+		System.err.println("Those groups form "+Probe.generateAllSoundProbes().size()+" different probes.");
     	
     	for (Iterator iterator = allConsistentShadowGroups.iterator(); iterator.hasNext();) {
 			ShadowGroup group = (ShadowGroup) iterator.next();			

@@ -30,8 +30,8 @@ import soot.jimple.StaticFieldRef;
 import soot.jimple.VirtualInvokeExpr;
 import abc.main.Debug;
 import abc.main.Main;
+import abc.tm.weaving.weaver.tmanalysis.query.Probe;
 import abc.tm.weaving.weaver.tmanalysis.query.Shadow;
-import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroup;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowRegistry;
 import abc.tm.weaving.weaver.tmanalysis.stages.FlowInsensitiveAnalysis;
 import abc.weaving.aspectinfo.MethodCategory;
@@ -120,10 +120,9 @@ public class DynamicInstrumenter {
 		units.addLast(Jimple.v().newIdentityStmt(thisLocal,
 				Jimple.v().newThisRef(switchClass.getType())));
 
-		// retrieve the set of enabled shadows and the set of all shadow groups
+		// retrieve the set of enabled shadows and the set of all (sound) probes
 		Set enabledShadows = ShadowRegistry.v().enabledShadows();
-		Set shadowGroups = FlowInsensitiveAnalysis.v()
-				.getAllConsistentShadowGroups();
+		Set probes = Probe.generateAllSoundProbes();
 
 		// create a new array "grouptable". This is an array of arrays of
 		// boolean, i.e. a 2D array.
@@ -133,7 +132,7 @@ public class DynamicInstrumenter {
 		body.getLocals().add(array);
 		NewArrayExpr newArrayExpr = Jimple.v().newNewArrayExpr(
 				ArrayType.v(BooleanType.v(), 1),
-				IntConstant.v(shadowGroups.size()));
+				IntConstant.v(probes.size()));
 		SootFieldRef fieldRef = Scene.v().makeFieldRef(
 				Scene.v().getSootClass(
 						DynamicInstrumenter.SHADOW_SWITCH_CLASS_NAME),
@@ -172,14 +171,14 @@ public class DynamicInstrumenter {
 
 		// initialize the array "groupTable"
 		// for all shadow groups
-		for (Iterator groupIter = shadowGroups.iterator(); groupIter.hasNext();) {
-			ShadowGroup group = (ShadowGroup) groupIter.next();
+		for (Iterator groupIter = probes.iterator(); groupIter.hasNext();) {
+			Probe probe = (Probe) groupIter.next();
 
 			// create a method that initializes the array for this single group,
 			// i.e. one dimension of the array;
 			// this is done, because otherwise this method could easily grow too
 			// large (>65535 bytes)
-			SootMethod methodForGroup = createMethodForGroup(group,
+			SootMethod methodForGroup = createMethodForGroup(probe,
 					switchClass, enabledShadows);
 
 			// create a call to this method
@@ -241,13 +240,13 @@ public class DynamicInstrumenter {
 
 	/**
 	 * Generates a method which initializes a one dimension of the group array.
-	 * @param group the group to initialize
+	 * @param probe the probe to initialize
 	 * @param switchClass the class to which the method is attached
 	 * @param enabledShadows the set of all enabled shadows
 	 */
-	private SootMethod createMethodForGroup(ShadowGroup group,
+	private SootMethod createMethodForGroup(Probe probe,
 			SootClass switchClass, Set enabledShadows) {
-		SootMethod method = new SootMethod("initGroup$" + group.getNumber(),
+		SootMethod method = new SootMethod("initGroup$" + probe.getNumber(),
 				Collections.EMPTY_LIST, VoidType.v(), Modifier.PRIVATE);
 		switchClass.addMethod(method);
 		Body body = Jimple.v().newBody(method);
@@ -255,8 +254,8 @@ public class DynamicInstrumenter {
 		PatchingChain units = body.getUnits();
 
 		// get the IDs of all shadows in the group and the unique group number
-		Set shadowsOfGroup = Shadow.uniqueShadowIDsOf(group.getAllShadows());
-		int groupNumber = group.getNumber();
+		Set shadowsOfGroup = Shadow.uniqueShadowIDsOf(probe.getShadows());
+		int groupNumber = probe.getNumber();
 
 		//boolean[][] groupTable = ShadowSwitch.groupTable 
 		Local array = Jimple.v().newLocal("groupTable",
