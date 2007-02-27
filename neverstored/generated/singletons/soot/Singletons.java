@@ -868,4 +868,10 @@ public class Singletons {
         return instance_soot_jimple_toolkits_transaction_TransactionTransformer;
     }
 
+    private plam.NeverStoredAnnotator instance_plam_NeverStoredAnnotator;
+    public plam.NeverStoredAnnotator plam_NeverStoredAnnotator() {
+        if( instance_plam_NeverStoredAnnotator == null ) instance_plam_NeverStoredAnnotator = new plam.NeverStoredAnnotator( g );
+        return instance_plam_NeverStoredAnnotator;
+    }
+
 }
