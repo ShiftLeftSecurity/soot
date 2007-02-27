@@ -1,0 +1,147 @@
+Index: /home/user/ebodde/workspaces/abc/soot/src/soot/jimple/toolkits/pointer/Intersection.java
+===================================================================
+--- /home/user/ebodde/workspaces/abc/soot/src/soot/jimple/toolkits/pointer/Intersection.java	(revision 2507)
++++ /home/user/ebodde/workspaces/abc/soot/src/soot/jimple/toolkits/pointer/Intersection.java	(working copy)
+@@ -1,11 +1,11 @@
+ package soot.jimple.toolkits.pointer;
+-import java.util.*;
++import java.util.Collections;
++import java.util.HashSet;
++import java.util.Set;
+ 
+-import soot.*;
++import soot.PointsToSet;
+ import soot.jimple.paddle.EmptyPointsToSet;
+ import soot.jimple.paddle.PointsToSetReadOnly;
+-import soot.jimple.toolkits.pointer.FullObjectSet;
+-import soot.jimple.toolkits.pointer.Union;
+ 
+ /**
+  * Implements an intersection of two points-to sets without altering them.
+@@ -116,11 +116,21 @@
+ 			} else if(p1.equals(p2)) {
+ 				return p1;
+ 			} else {
+-				//else create a new Intersection
+-				return new Intersection(p1,p2);
++				if(p1 instanceof PaddlePointsToSetCompatibilityWrapper && p2 instanceof PaddlePointsToSetCompatibilityWrapper) {
++					PaddlePointsToSetCompatibilityWrapper pa1 = (PaddlePointsToSetCompatibilityWrapper) p1;
++					PaddlePointsToSetCompatibilityWrapper pa2 = (PaddlePointsToSetCompatibilityWrapper) p2;
++					return PaddlePointsToSetCompatibilityWrapper.intersect(pa1,pa2);
++				} else {
++					//else create a new Intersection
++					return new Intersection(p1,p2);
++				}
+ 			}
+ 		}
+ 	}
++	
++	
++	
++	
+ 
+ 	/**
+ 	 * {@inheritDoc}
+@@ -170,6 +180,13 @@
+ 		return Math.max(left, right)+1;		
+ 	}
+ 	
++	
++	/**
++	 * {@inheritDoc}
++	 */
++	public String toString() {
++		return " ( " + s1.toString() + " && " + s2.toString() + " ) ";
++	}
+ 
+ }
+ 
+Index: /home/user/ebodde/workspaces/abc/soot/src/soot/jimple/toolkits/pointer/PaddlePointsToSetCompatibilityWrapper.java
+===================================================================
+--- /home/user/ebodde/workspaces/abc/soot/src/soot/jimple/toolkits/pointer/PaddlePointsToSetCompatibilityWrapper.java	(revision 2507)
++++ /home/user/ebodde/workspaces/abc/soot/src/soot/jimple/toolkits/pointer/PaddlePointsToSetCompatibilityWrapper.java	(working copy)
+@@ -21,6 +21,11 @@
+ import java.util.Set;
+ 
+ import soot.PointsToSet;
++import soot.Type;
++import soot.jimple.paddle.ContextAllocNode;
++import soot.jimple.paddle.DoublePointsToSet;
++import soot.jimple.paddle.HybridPointsToSet;
++import soot.jimple.paddle.P2SetVisitor;
+ import soot.jimple.paddle.PointsToSetInternal;
+ import soot.jimple.paddle.PointsToSetReadOnly;
+ import soot.jimple.toolkits.pointer.Union;
+@@ -109,6 +114,11 @@
+ 		//have to get around the tyranny of reference losing equality
+ 		if(obj instanceof PaddlePointsToSetCompatibilityWrapper) {
+ 			PaddlePointsToSetCompatibilityWrapper wrapper = (PaddlePointsToSetCompatibilityWrapper) obj;
++			
++			if(paddlePts.toString().equals(wrapper.paddlePts.toString()) && !paddlePts.equals(wrapper.paddlePts)) {
++				System.err.println("ERROR");
++			}
++			
+ 			return paddlePts.equals(wrapper.paddlePts);
+ 		}
+ 		
+@@ -128,4 +138,60 @@
+ 	public String toString() {
+ 		return paddlePts.toString();
+ 	}
++
++	/**
++	 * @param pa1
++	 * @param pa2
++	 * @return
++	 */
++	public static PointsToSet intersect(PaddlePointsToSetCompatibilityWrapper pa1, PaddlePointsToSetCompatibilityWrapper pa2) {
++		if(pa1.paddlePts instanceof DoublePointsToSet && pa2.paddlePts instanceof DoublePointsToSet) {
++			DoublePointsToSet d1 = (DoublePointsToSet) pa1.paddlePts;
++			DoublePointsToSet d2 = (DoublePointsToSet) pa2.paddlePts;
++			return new PaddlePointsToSetCompatibilityWrapper(intersect(d1,d2));
++		} else {
++			return new Intersection(pa1,pa2);
++		}
++	}
++
++	/**
++	 * @param d1
++	 * @param d2
++	 * @return
++	 */
++	private static PointsToSetInternal intersect(DoublePointsToSet d1, DoublePointsToSet d2) {
++		PointsToSetInternal newSet = intersect(d1.getNewSet(),d2.getNewSet());
++		PointsToSetInternal oldSet = intersect(d1.getOldSet(),d2.getOldSet());
++		return new OpenDoublePointsToSet(null,newSet,oldSet);
++	}
++
++	/**
++	 * @param newSet
++	 * @param newSet2
++	 * @return
++	 */
++	private static PointsToSetInternal intersect(PointsToSetReadOnly newSet, final PointsToSetReadOnly newSet2) {
++		final PointsToSetInternal res = new HybridPointsToSet(null);
++		newSet.forall(new P2SetVisitor() {
++
++			public void visit(ContextAllocNode n) {
++				if(newSet2.contains(n)) {
++					res.add(n);
++				}
++			}
++			
++		});
++		return res;
++	}
++
++	protected static class OpenDoublePointsToSet extends DoublePointsToSet {
++
++		public OpenDoublePointsToSet(Type type, PointsToSetInternal newSet, PointsToSetInternal oldSet) {
++			super(type);
++			this.newSet = newSet;
++			this.oldSet = oldSet;
++		}
++		
++	}
++
+ }

@@ -1,0 +1,43 @@
+- main loop
+
+  - process command line
+  - load necessary classes
+
+  - AST metrics
+  -> initialize pack manager
+  - run packs
+  - write output
+
+- run packs
+  
+  - add line numbers to methods
+  - run whole program packs
+  - retrieve all bodies
+  - [jcbo/coffi metrics]
+  - preprocess dava
+  - init interactive mode
+  - run body packs
+  - handle inner classes
+
+- run whole program packs
+
+  - cg pack
+  - wjtp
+  - wjop
+  - wjap
+  - paddle shutdown - uses reflection
+
+- pack application
+
+  - check if enabled
+  - [dump before]
+  - internal apply
+  - [dump after]
+
+- body packs
+  - xml production
+  - application to each body
+  
+- body transformer
+  - check if enabled
+  - transform

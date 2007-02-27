@@ -1,0 +1,32 @@
+Dear Soot Users,
+
+We are pleased to announce that Soot version 2.2.3 is now available at:
+http://www.sable.mcgill.ca/soot/
+
+This release contains:
+
+1. Dava:
+    - Handling invocation of parent constructor and other constructors within
+    a constructor
+    - DeInlining final static fields.
+    - Ensuring initialization of all final fields
+    - Using copy propagation to remove un-necessary copy stmts
+    
+2. many bug fixes and improvements for Dava
+
+3. many bug fixes and improvements for Java To Jimple 
+
+As of version 2.2.0 the Soot bugzilla is avaiable at:
+http://svn.sable.mcgill.ca/bugzilla/. We encourage you to add any Soot
+bugs there.
+
+Also, as of version 2.2.0 the Soot wiki is available at:
+http://svn.sable.mcgill.ca/wiki/index.php/SootProject. The Soot team
+will be using this site for discussing upcoming work, so if you would
+like to know what's going on look there.
+
+Regards,
+
+Jennifer Lhotak 
+Sable Research Group, McGill University
+                                                                                                               

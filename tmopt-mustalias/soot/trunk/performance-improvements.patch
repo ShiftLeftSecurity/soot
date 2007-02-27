@@ -1,0 +1,141 @@
+Index: /home/user/ebodde/workspaces/abc/soot/src/soot/jimple/toolkits/pointer/MemoryEfficientRasUnion.java
+===================================================================
+--- /home/user/ebodde/workspaces/abc/soot/src/soot/jimple/toolkits/pointer/MemoryEfficientRasUnion.java	(revision 2456)
++++ /home/user/ebodde/workspaces/abc/soot/src/soot/jimple/toolkits/pointer/MemoryEfficientRasUnion.java	(working copy)
+@@ -45,10 +45,9 @@
+ 	return false;
+     }
+     public boolean addAll( PointsToSet s ) {
+-	boolean ret = false;
+ 	if( subsets == null ) subsets = new HashSet();
+-	if( s instanceof Union ) {
+-	    MemoryEfficientRasUnion meru = (MemoryEfficientRasUnion) s;
++	if( s instanceof MemoryEfficientRasUnion ) {
++		MemoryEfficientRasUnion meru = (MemoryEfficientRasUnion) s;
+ 	    if( meru.subsets == null || subsets.containsAll( meru.subsets ) ) {
+ 		return false;
+ 	    }
+@@ -54,7 +53,6 @@
+ 	    }
+ 	    return subsets.addAll( meru.subsets );
+ 	} else {
+-	    PointsToSet r = (PointsToSet) s;
+ 	    return subsets.add( s );
+ 	}
+     }
+Index: /home/user/ebodde/workspaces/abc/soot/src/soot/toolkits/graph/UnitGraph.java
+===================================================================
+--- /home/user/ebodde/workspaces/abc/soot/src/soot/toolkits/graph/UnitGraph.java	(revision 2456)
++++ /home/user/ebodde/workspaces/abc/soot/src/soot/toolkits/graph/UnitGraph.java	(working copy)
+@@ -399,10 +399,9 @@
+ 
+     public List getSuccsOf(Object u)
+     {
+-        if(!unitToSuccs.containsKey(u)) 
+-	    throw new NoSuchElementException("Invalid unit " + u);
+-
+-        return (List) unitToSuccs.get(u);
++		List l = (List) unitToSuccs.get(u);
++        if (l == null) throw new RuntimeException("Invalid unit " + u);
++        return l;
+     }
+ 
+     public int size()
+Index: /home/user/ebodde/workspaces/abc/soot/src/soot/toolkits/scalar/SmartLocalDefs.java
+===================================================================
+--- /home/user/ebodde/workspaces/abc/soot/src/soot/toolkits/scalar/SmartLocalDefs.java	(revision 2456)
++++ /home/user/ebodde/workspaces/abc/soot/src/soot/toolkits/scalar/SmartLocalDefs.java	(working copy)
+@@ -102,8 +102,9 @@
+     }
+     private Local localDef(Unit u) {
+         List defBoxes = u.getDefBoxes();
+-        if( defBoxes.size() == 0 ) return null;
+-        if( defBoxes.size() != 1 ) throw new RuntimeException();
++		int size = defBoxes.size();
++        if( size == 0 ) return null;
++        if( size != 1 ) throw new RuntimeException();
+         ValueBox vb = (ValueBox) defBoxes.get(0);
+         Value v = vb.getValue();
+         if( !(v instanceof Local) ) return null;
+@@ -135,6 +136,7 @@
+             outSet.addAll(inSet1);
+             outSet.addAll(inSet2);
+         }
++		
+         protected void flowThrough(Object inValue, Object unit, Object outValue) {
+             Unit u = (Unit) unit;
+             HashSet in = (HashSet) inValue;
+@@ -141,16 +143,38 @@
+             HashSet out = (HashSet) outValue;
+             out.clear();
+             Set mask = (Set) unitToMask.get(u);
+-            for( Iterator inUIt = in.iterator(); inUIt.hasNext(); ) {
+-                final Unit inU = (Unit) inUIt.next();
+-                if( mask.contains(localDef(inU)) ) out.add(inU);
+-            }
+             Local l = localDef(u);
+-            if( l != null ) {
+-                out.removeAll(defsOf(l));
+-                if(mask.contains(localDef(u))) out.add(u);
+-            }
++			HashSet allDefUnits = null;
++			if (l == null)
++			{//add all units contained in mask
++	            for( Iterator inUIt = in.iterator(); inUIt.hasNext(); ) {
++	                final Unit inU = (Unit) inUIt.next();
++	                if( mask.contains(localDef(inU)) )
++					{
++						out.add(inU);
++					}
++	            }
++			}
++			else
++			{//check unit whether contained in allDefUnits before add into out set.
++				allDefUnits = defsOf(l);
++				
++	            for( Iterator inUIt = in.iterator(); inUIt.hasNext(); ) {
++	                final Unit inU = (Unit) inUIt.next();
++    	            if( mask.contains(localDef(inU)) )
++					{//only add unit not contained in allDefUnits
++						if ( allDefUnits.contains(inU)){
++							out.remove(inU);
++						} else {
++							out.add(inU);
++						}
++					}
++    	        }
++   	            out.removeAll(allDefUnits);
++   	            if(mask.contains(l)) out.add(u);
++			}
+         }
++
+     
+         protected void copy(Object source, Object dest) {
+             HashSet sourceSet = (HashSet) source;
+@@ -155,9 +179,23 @@
+         protected void copy(Object source, Object dest) {
+             HashSet sourceSet = (HashSet) source;
+             HashSet destSet   = (HashSet) dest;
+-                
+-            destSet.clear();
+-            destSet.addAll(sourceSet);
++              
++			//retain all the elements contained by sourceSet
++			if (destSet.size() > 0)
++				destSet.retainAll(sourceSet);
++			
++			//add the elements not contained by destSet
++			if (sourceSet.size() > 0)
++			{
++				for( Iterator its = sourceSet.iterator(); its.hasNext(); ) {
++					Object o = its.next();
++					if (!destSet.contains(o))
++					{//need add this element.
++						destSet.add(o);
++					}
++				}
++			}
++
+         }
+ 
+         protected Object newInitialFlow() {
