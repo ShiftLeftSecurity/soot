@@ -1,0 +1,547 @@
+<?xml version="1.0"?>
+
+<project default="default" name="abc">
+
+    <target name="default"
+            depends="abc-jar,runtime-jar,testing-jar" />
+
+    <target name="settings">
+        <property file="ant.settings"/>
+        <fail
+            message="Please copy ant.settings.template to ant.settings, and set the variables in it."
+            unless="polyglot.loc"
+        />
+    </target>
+
+    <target name="jars" 
+            depends="abc-jar,paddle-jar,runtime-jar,testing-jar,complete-jar,abc-for-ajc-ant-jar"/>
+
+    <target name="copy-jars" depends="settings,libdir">
+        <copy file="${polyglot.loc}" tofile="lib/polyglot.jar" />
+        <copy file="${polyglot.cupclasses.loc}" tofile="lib/java_cup.jar" />
+        <copy file="${soot.loc}" tofile="lib/sootclasses.jar" />
+        <copy file="${jasmin.loc}" tofile="lib/jasminclasses.jar" />
+    </target>
+
+    <target name="abc-for-ajc-ant-jar" depends="settings,libdir">
+       <jar destfile="lib/abc-for-ajc-ant.jar">
+           <fileset dir="dist/abc-for-ajc-ant"/>
+       </jar>
+    </target>
+
+    <target name="libdir">
+       <mkdir dir="lib"/>
+    </target>
+
+    <target name="abc-jar" depends="settings,abc,libdir">
+        <jar destfile="lib/abc.jar">
+            <fileset dir="classes"/>
+        </jar>
+    </target>
+    
+    <target name="runtime-jar" depends="settings,runtime,libdir">
+        <jar destfile="lib/abc-runtime.jar">
+            <fileset dir="runtime-classes"/>
+        </jar>
+    </target>
+    
+    <target name="paddle-jar" depends="settings,paddle,libdir">
+        <jar destfile="lib/abc-paddle.jar">
+            <fileset dir="paddle-classes"/>
+        </jar>
+    </target>
+    
+    <target name="paddle" depends="settings,abc">
+        <mkdir dir="paddle-classes"/>
+        <javac
+            destdir="paddle-classes"
+            debug="true"
+            deprecation="true"
+        	source="1.5"
+        >
+            <src path="paddle-src"/>
+            <src path="cspto-src"/>
+            <classpath>
+              <pathelement location="${soot.loc}"/>
+              <pathelement location="${paddle.loc}"/>
+              <pathelement location="${polyglot.loc}"/>
+               <pathelement location="${commonscoll.jar}"/>
+              <pathelement location="classes"/>
+            </classpath>
+        </javac>
+    </target>
+
+    <target name="runtime" depends="settings">
+        <mkdir dir="runtime-classes"/>
+        <javac
+            destdir="runtime-classes"
+            debug="true"
+            deprecation="true"
+            target="1.4"
+            source="1.4"
+        >
+            <src path="runtime-src"/>
+            <classpath>
+            </classpath>
+        </javac>
+    </target>
+
+    <target name="testing-jar" depends="settings,testing,libdir">
+        <jar destfile="lib/abc-testing.jar">
+            <fileset dir="testing-classes"/>
+            <zipfileset src="ajc-harness/lib/abc-testing-ajc-part.jar"/>
+            <zipfileset src="${xact.loc}"/>
+        </jar>
+    </target>
+    
+    <target name="testing" depends="settings,abc">
+        <mkdir dir="testing-classes"/>
+        <javac
+            destdir="testing-classes"
+            debug="true"
+            deprecation="true"
+            target="1.4"
+            source="1.4"
+        >
+            <src path="testing-src"/>
+            <classpath>
+              <pathelement location="${polyglot.loc}"/>
+              <pathelement location="classes"/>
+              <pathelement location="${polyglot.cupclasses.loc}"/>
+              <pathelement location="${soot.loc}"/>
+              <pathelement location="${jasmin.loc}"/>
+              <pathelement location="${xact.loc}"/>
+              <pathelement location="ajc-harness/lib/abc-testing-ajc-part.jar"/>
+            </classpath>
+        </javac>
+    </target>
+
+   <target name="complete-jar" depends="abc-jar,paddle-jar,libdir,runtime">
+        <jar destfile="lib/abc-complete.jar">
+            <fileset dir="classes"/>
+            <fileset dir="runtime-classes"/>
+            <fileset dir="paddle-classes"/>
+            <zipfileset src="${polyglot.loc}"/>
+            <zipfileset src="${polyglot.cupclasses.loc}"/>
+            <zipfileset src="${soot.loc}"/>
+            <zipfileset src="${jasmin.loc}"/>
+            <zipfileset src="${paddle.loc}"/>
+            <zipfileset src="${jedd.runtime.jar}"/>
+            <zipfileset src="${javabdd.jar}"/>
+            <zipfileset src="${commonscoll.jar}"/>
+            <manifest>
+               <attribute name="Main-Class" value="abc.main.Main" />
+            </manifest>
+        </jar>
+   </target>
+
+    <target name="abc" depends="settings,flex-translator,cup-translator,options-code">
+        <mkdir dir="classes"/>
+        <javac
+            destdir="classes"
+            debug="true"
+            deprecation="true"
+            target="1.4"
+            source="1.4"
+        >
+            <src path="src"/>
+            <src path="generated"/>
+            <classpath>
+                <pathelement location="classes"/>
+                <pathelement location="${polyglot.loc}"/>
+                <pathelement location="${polyglot.cupclasses.loc}"/>
+                <pathelement location="${soot.loc}"/>
+                <pathelement location="${jasmin.loc}"/>
+            </classpath>
+        </javac>
+    </target>
+
+    <target name="flex-translator" depends="settings,jflex-dep" unless="jflex-up-to-date">
+        <mkdir dir="generated/abc/aspectj/parse"/>
+        <mkdir dir="generated/abc/eaj/parse"/>
+        <mkdir dir="generated/abc/tm/parse"/>
+    	<mkdir dir="generated/abc/om/parse"/>
+	
+        <java classname="JFlex.Main"
+            fork="true"
+            dir="."
+            failonerror="true"
+        >
+            <classpath>
+                <pathelement location="${jflex.loc}"/>
+            </classpath>
+            <arg line="-d generated/abc/aspectj/parse src/abc/aspectj/parse/aspectj.flex"/>
+        </java>
+    	
+        <java classname="JFlex.Main"
+            fork="true"
+            dir="."
+            failonerror="true"
+        >
+            <classpath>
+                <pathelement location="${jflex.loc}"/>
+            </classpath>
+            <arg line="-d generated/abc/om/parse src/abc/om/parse/omaspectj.flex"/>
+        </java>
+    </target>
+
+    <target name="jflex-dep" depends="settings">
+        <dependset>
+            <srcfileset dir="src/abc/aspectj/parse" includes="aspectj.flex"/>
+            <targetfileset dir="generated/abc/aspectj/parse"
+                includes="Lexer_c.java"/>
+        </dependset>
+        <condition property="jflex-up-to-date">
+            <and>
+                <available file="generated/abc/aspectj/parse/Lexer_c.java"/>
+                <available file="generated/abc/om/parse/Lexer_c.java"/>
+            </and>
+        </condition>
+    </target>
+
+    <target name="cup-translator" depends="settings,flex-translator,cup-dep,ppg-translator" unless="cup-up-to-date">
+        <mkdir dir="generated/abc/aspectj/parse"/>
+        <mkdir dir="generated/abc/eaj/parse"/>
+        <mkdir dir="generated/abc/tm/parse"/>
+    	<!--NEIL: added for om?-->
+    	<mkdir dir="generated/abc/om/parse"/>
+        <java classname="java_cup.Main"
+            fork="true"
+            dir="generated/abc/aspectj/parse"
+            failonerror="true"
+        >
+            <classpath>
+                <pathelement location="${polyglot.loc}"/>
+                <pathelement location="${polyglot.cupclasses.loc}"/>
+            </classpath>
+            <arg line="aspectj_ppg.cup"/>
+        </java>
+        <java classname="java_cup.Main"
+            fork="true"
+            dir="generated/abc/eaj/parse"
+            failonerror="true"
+        >
+            <classpath>
+                <pathelement location="${polyglot.loc}"/>
+                <pathelement location="${polyglot.cupclasses.loc}"/>
+            </classpath>
+            <arg line="eaj_ppg.cup"/>
+        </java>
+    	<!--NEIL: Added for abc om?-->
+        <java classname="java_cup.Main"
+            fork="true"
+            dir="generated/abc/om/parse"
+            failonerror="true"
+        >
+            <classpath>
+                <pathelement location="${polyglot.loc}"/>
+                <pathelement location="${polyglot.cupclasses.loc}"/>
+            </classpath>
+            <arg line="om_ppg.cup"/>
+        </java>
+        
+        <java classname="java_cup.Main"
+            fork="true"
+            dir="generated/abc/tm/parse"
+            failonerror="true"
+        >
+            <classpath>
+                <pathelement location="${polyglot.loc}"/>
+                <pathelement location="${polyglot.cupclasses.loc}"/>
+            </classpath>
+            <arg line="tm_ppg.cup"/>
+        </java>
+    </target>
+
+    <target name="cup-dep" depends="ppg-translator,settings">
+        <dependset>
+            <srcfileset dir="generated/abc/aspectj/parse" includes="aspectj_ppg.cup"/>
+            <targetfileset dir="generated/abc/aspectj/parse"
+                includes="Grm.java,sym.java"/>
+        </dependset>
+        <dependset>
+            <srcfileset dir="generated/abc/eaj/parse" includes="eaj_ppg.cup"/>
+            <targetfileset dir="generated/abc/eaj/parse"
+                includes="Grm.java,sym.java"/>
+        </dependset>
+    	<!--NEIL: Added for om?-->
+        <dependset>
+            <srcfileset dir="generated/abc/om/parse" includes="om_ppg.cup"/>
+            <targetfileset dir="generated/abc/om/parse"
+                includes="Grm.java,sym.java"/>
+        </dependset>
+        
+        <dependset>
+            <srcfileset dir="generated/abc/tm/parse" includes="tm_ppg.cup"/>
+            <targetfileset dir="generated/abc/tm/parse"
+                includes="Grm.java,sym.java"/>
+        </dependset>
+        <condition property="cup-up-to-date">
+            <and>
+                <available file="generated/abc/aspectj/parse/Grm.java"/>
+                <available file="generated/abc/aspectj/parse/sym.java"/>
+                <available file="generated/abc/eaj/parse/Grm.java"/>
+                <available file="generated/abc/eaj/parse/sym.java"/>
+                <available file="generated/abc/tm/parse/Grm.java"/>
+                <available file="generated/abc/tm/parse/sym.java"/>
+            	<!--NEIL: Added for om?-->
+                <available file="generated/abc/om/parse/Grm.java"/>
+                <available file="generated/abc/om/parse/sym.java"/>
+ 
+            </and>
+        </condition>
+    </target>
+
+    <target name="ppg-translator" depends="settings,ppg-dep,flex-translator" unless="ppg-up-to-date">
+        <mkdir dir="generated/abc/aspectj/parse"/>
+        <mkdir dir="generated/abc/eaj/parse"/>
+        <mkdir dir="generated/abc/tm/parse"/>
+    	<!--NEIL: Added for om?-->
+    	<mkdir dir="generated/abc/om/parse"/>
+        <java classname="ppg.PPG"
+            fork="true"
+            dir="src/abc/aspectj/parse"
+            failonerror="true"
+            output="generated/abc/aspectj/parse/aspectj_ppg.cup"
+        >
+            <classpath>
+                <pathelement location="${polyglot.loc}"/>
+                <pathelement location="${polyglot.cupclasses.loc}"/>
+            </classpath>
+            <arg line="aspectj.ppg"/>
+        </java>
+        <java classname="ppg.PPG"
+            fork="true"
+            dir="src/abc/eaj/parse"
+            failonerror="true"
+            output="generated/abc/eaj/parse/eaj_ppg.cup"
+        >
+            <classpath>
+                <pathelement location="${polyglot.loc}"/>
+                <pathelement location="${polyglot.cupclasses.loc}"/>
+            </classpath>
+            <arg line="eaj.ppg"/>
+        </java>
+    	<!--NEIL: Added for om?-->
+        <java classname="ppg.PPG"
+            fork="true"
+            dir="src/abc/om/parse"
+            failonerror="true"
+            output="generated/abc/om/parse/om_ppg.cup"
+        >
+            <classpath>
+                <pathelement location="${polyglot.loc}"/>
+                <pathelement location="${polyglot.cupclasses.loc}"/>
+            </classpath>
+            <arg line="om.ppg"/>
+        </java>
+        
+        <java classname="ppg.PPG"
+            fork="true"
+            dir="src/abc/tm/parse"
+            failonerror="true"
+            output="generated/abc/tm/parse/tm_ppg.cup"
+        >
+            <classpath>
+                <pathelement location="${polyglot.loc}"/>
+                <pathelement location="${polyglot.cupclasses.loc}"/>
+            </classpath>
+            <arg line="tm.ppg"/>
+        </java>
+    </target>
+    <target name="ppg-dep" depends="settings">
+        <dependset>
+            <srcfileset dir="src/abc/aspectj/parse" includes="aspectj.ppg"/>
+            <targetfileset dir="generated/abc/aspectj/parse"
+                includes="aspectj_ppg.cup"/>
+        </dependset>
+        <dependset>
+            <srcfileset dir="src/abc/eaj/parse" includes="eaj.ppg"/>
+            <targetfileset dir="generated/abc/eaj/parse"
+                includes="eaj_ppg.cup"/>
+        </dependset>
+
+    	<!--NEIL: added for om. Note: Shouldn't the include be omX.ppg? -->
+        <dependset>
+            <srcfileset dir="src/abc/om/parse" includes="om.ppg"/>
+            <targetfileset dir="generated/abc/om/parse"
+                includes="om_ppg.cup"/>
+        </dependset>
+        
+        <dependset>
+            <srcfileset dir="src/abc/tm/parse" includes="tm.ppg"/>
+            <targetfileset dir="generated/abc/tm/parse"
+                includes="tm_ppg.cup"/>
+        </dependset>
+        <condition property="ppg-up-to-date">
+            <and> 
+                <available file="generated/abc/aspectj/parse/aspectj_ppg.cup"/>
+                <available file="generated/abc/eaj/parse/eaj_ppg.cup"/>
+                <available file="generated/abc/tm/parse/tm_ppg.cup"/>
+            	<!--NEIL: Added for om-->
+                <available file="generated/abc/om/parse/om_ppg.cup"/>
+            </and>
+        </condition>
+    </target>
+
+    <target name="javadoc">
+        <javadoc
+                 destdir="javadoc"
+		 link="http://musketeer.comlab.ox.ac.uk/javadoc/soot-dev/;http://java.sun.com/j2se/1.4.2/docs/api/"
+                 maxmemory="200m"
+                 windowtitle="ABC compiler"
+                 verbose="true"
+        >
+          <fileset dir="src" includes="**/*.java" />
+        </javadoc>
+    </target>
+
+    <target name="runtime-javadoc">
+        <javadoc
+                 destdir="runtime-javadoc"
+		 link="http://musketeer.comlab.ox.ac.uk/javadoc/soot-dev/;http://java.sun.com/j2se/1.4.2/docs/api/"
+                 maxmemory="200m"
+                 windowtitle="ABC compiler"
+                 verbose="true"
+        >
+          <fileset dir="runtime-src" includes="**/*.java" />
+        </javadoc>
+    </target>
+
+    <target name="clean" depends="settings">
+        <delete quiet="true" includeEmptyDirs="yes">
+            <fileset dir="runtime-classes" includes="**" />
+            <fileset dir="classes" includes="**" />
+            <fileset dir="testing-classes" includes="**" />
+            <fileset dir="paddle-classes" includes="**" />
+            <fileset dir="lib" includes="**/*.jar" />
+            <fileset dir="ajc-harness/classes" includes="**" />
+            <fileset dir="ajc-harness/lib" includes="abc-tests.jar" />
+            <fileset dir="doc/options" includes="*.dvi,*.pdf,*.aux,*.ps,*.tex,*.toc,*.log" />
+        </delete> 
+    </target>
+
+    <target name="clobber" depends="veryclean"/>
+
+    <target name="veryclean" depends="settings,clean">
+        <delete quiet="true">
+            <fileset dir="generated" includes="**/*" />
+        </delete>
+    </target>
+
+    <target name="options-doc">
+        <xslt
+            style="doc/options/usage.xsl"
+            in="src/abc/main/options/options.xml"
+            out="doc/options/usage.tex"
+        />
+        <exec executable="latex" dir="doc/options">
+            <arg value="usage.tex"/>
+        </exec>
+        <exec executable="latex" dir="doc/options">
+            <arg value="usage.tex"/>
+        </exec>
+        <exec executable="dvips" dir="doc/options">
+            <arg value="usage.dvi"/>
+            <arg value="-o"/>
+            <arg value="usage.ps"/>
+        </exec>
+        <exec executable="dvips" dir="doc/options">
+            <arg value="usage.dvi"/>
+            <arg value="-Ppdf"/>
+            <arg value="-o"/>
+            <arg value="usage-forpdf.ps"/>
+        </exec>
+        <exec executable="ps2pdf" dir="doc/options">
+            <arg value="usage-forpdf.ps"/>
+            <arg value="usage.pdf"/>
+        </exec>
+    </target>
+
+    <target name="options-code">
+        <xslt
+            style="src/abc/main/options/help-screen.xsl"
+            in="src/abc/main/options/options.xml"
+            out="generated/abc/main/options/Usage.java"
+        />
+        <xslt
+            style="src/abc/main/options/parser.xsl"
+            in="src/abc/main/options/options.xml"
+            out="generated/abc/main/options/OptionsParser.java"
+        />
+    </target>
+
+    <target name="aspectj5-parser" depends="settings">
+        <mkdir dir="generated/abc/aspectj5/parse"/>
+        <java classname="JFlex.Main"
+            fork="true"
+            dir="."
+            failonerror="true"
+        >
+            <classpath>
+                <pathelement location="${jflex.loc}"/>
+            </classpath>
+            <arg line="-d generated/abc/aspectj5/parse src/abc/aspectj5/parse/aspectj5.flex"/>
+        </java>
+        <java classname="ppg.PPG"
+            fork="true"
+            dir="src/abc/aspectj5/parse"
+            failonerror="true"
+            output="generated/abc/aspectj5/parse/aspectj5_ppg.cup"
+        >
+            <classpath>
+                <pathelement location="${polyglot.loc}"/>
+                <pathelement location="${polyglot.cupclasses.loc}"/>
+            </classpath>
+            <arg line="aspectj5.ppg"/>
+        </java>
+        <java classname="java_cup.Main"
+            fork="true"
+            dir="generated/abc/aspectj5/parse"
+            failonerror="true"
+        >
+            <classpath>
+                <pathelement location="${polyglot.loc}"/>
+                <pathelement location="${polyglot.cupclasses.loc}"/>
+            </classpath>
+            <arg line="aspectj5_ppg.cup"/>
+        </java>
+    </target>
+	<target name="aspectj5-parser-exp" depends="settings">
+	        <mkdir dir="generated/abc/aspectj5/parse"/>
+	        <java classname="JFlex.Main"
+	            fork="true"
+	            dir="."
+	            failonerror="true"
+	        >
+	            <classpath>
+	                <pathelement location="${jflex.loc}"/>
+	            </classpath>
+	            <arg line="-d generated/abc/aspectj5/parse src/abc/aspectj5/parse/aspectj5.flex"/>
+	        </java>
+	        <java classname="ppg.PPG"
+	            fork="true"
+	            dir="src/abc/aspectj5/parse"
+	            failonerror="true"
+	            output="generated/abc/aspectj5/parse/aspectj5exp_ppg.cup"
+	        >
+	            <classpath>
+	                <pathelement location="${polyglot.loc}"/>
+	                <pathelement location="${polyglot.cupclasses.loc}"/>
+	            </classpath>
+	            <arg line="aspectj5exp.ppg"/>
+	        </java>
+	        <java classname="java_cup.Main"
+	            fork="true"
+	            dir="generated/abc/aspectj5/parse"
+	            failonerror="true"
+	        >
+	            <classpath>
+	                <pathelement location="${polyglot.loc}"/>
+	                <pathelement location="${polyglot.cupclasses.loc}"/>
+	            </classpath>
+	            <arg line="aspectj5exp_ppg.cup"/>
+	        </java>
+	    </target>
+	
+</project>

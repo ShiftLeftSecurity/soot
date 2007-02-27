@@ -1,0 +1,3 @@
+module NonExistentModule {
+    open NoSuchModule;
+}

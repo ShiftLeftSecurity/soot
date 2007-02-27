@@ -1,0 +1,3 @@
+module NonExistentAspect {
+    friend NoSuchAspect;
+}

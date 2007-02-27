@@ -1,0 +1,369 @@
+/* abc - The AspectBench Compiler
+ * Copyright (C) 2004 Chris Allan
+ * Copyright (C) 2005 Julian Tibble
+ *
+ * This compiler is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this compiler, in the file LESSER-GPL;
+ * if not, write to the Free Software Foundation, Inc.,
+ * 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
+
+include "../../eaj/parse/eaj.ppg"
+
+package abc.tm.parse;
+
+import polyglot.util.*;
+import abc.tm.ast.*;
+
+import java.util.LinkedList;
+
+parser Grm extends abc.aspectj.parse.Grm
+{:
+    public final TMNodeFactory nf;
+
+    public Grm(Lexer l, TypeSystem t, NodeFactory n, ErrorQueue q) {
+        super(l, t, n, q);
+        nf = (TMNodeFactory) n;
+    }
+:};
+
+
+// ------- new tokens ------------------------------
+
+terminal Token PERTHREAD;
+terminal Token TRACEMATCH;
+terminal Token SYM;
+terminal Token FREQUENT;
+
+// ------- new non-terminals -----------------------
+
+// tracematch non-terminals
+non terminal List tracematch;
+non terminal TMModsAndType tracematch_modifiers_and_type;
+
+// symbol non-terminals
+non terminal List symbol_declaration_list;
+non terminal SymbolDecl symbol_declaration;
+non terminal SymbolKind symbol_kind;
+non terminal List name_list;
+
+// frequent-declaration non-terminals
+non terminal List frequent_symbols_declaration_opt;
+non terminal List symbol_list;
+
+// regular expression non-terminals
+non terminal Regex regex_or;
+non terminal Regex regex_and;
+non terminal Regex regex_count;
+non terminal Regex regex_simple;
+
+
+start with goal;
+
+
+extend aspect_body_declaration ::=
+    tracematch:a
+    {:
+        RESULT = a;
+    :}
+;
+
+
+tracematch ::=
+    tracematch_modifiers_and_type:m TRACEMATCH:t
+    LPAREN formal_parameter_list_opt:p RPAREN throws_opt:e
+    LBRACE
+        symbol_declaration_list:s
+        frequent_symbols_declaration_opt:f
+        regex_or:r
+        method_body:b
+    RBRACE:y
+    {:
+        Grm.parserTrace("tracematch definition");
+        String name = UniqueID.newID("tracematch");
+        TMDecl tcd =
+            parser.nf.TMDecl(parser.pos(t,y), parser.pos(b),
+                                m, name, p, e, s, f, r, b);
+
+        List ds = new TypedList(new LinkedList(),ClassMember.class,false);
+        ds.add(tcd);
+        RESULT = ds;
+    :}
+;
+
+
+tracematch_modifiers_and_type ::=
+    modifiers_opt:m
+    {:
+        TypeNode voidn =
+            parser.nf.CanonicalTypeNode(Position.COMPILER_GENERATED,
+                                            parser.ts.Void());
+        AdviceSpec before = parser.nf.Before(Position.COMPILER_GENERATED,
+                                             new LinkedList(), voidn);
+        AdviceSpec after = parser.nf.After(Position.COMPILER_GENERATED,
+                                           new LinkedList(), voidn);
+
+        RESULT = parser.nf.TMModsAndType(m, false, before, after,
+                                         false, voidn);
+    :}
+|
+    modifiers_opt:m type:t
+    {:
+        AdviceSpec around = parser.nf.Around(Position.COMPILER_GENERATED,
+                                             t, new LinkedList());
+
+        RESULT = parser.nf.TMModsAndType(m, false, around, null, true, t);
+    :}
+|
+    modifiers_opt:m VOID:t
+    {:
+        TypeNode voidn =
+            parser.nf.CanonicalTypeNode(parser.pos(t), parser.ts.Void());
+        AdviceSpec around = parser.nf.Around(Position.COMPILER_GENERATED,
+                                             voidn, new LinkedList());
+
+        RESULT = parser.nf.TMModsAndType(m, false, around, null, true, voidn);
+    :}
+|
+    modifiers_opt:m1 PERTHREAD:x modifiers_opt:m2
+    {:
+        TypeNode voidn =
+            parser.nf.CanonicalTypeNode(parser.pos(x), parser.ts.Void());
+        AdviceSpec before = parser.nf.Before(Position.COMPILER_GENERATED,
+                                             new LinkedList(),
+                                             voidn);
+        AdviceSpec after = parser.nf.After(Position.COMPILER_GENERATED,
+                                           new LinkedList(),
+                                           voidn);
+        RESULT = parser.nf.TMModsAndType(m1.set(m2), true, before,
+                                         after, false, voidn);
+    :}
+|
+    modifiers_opt:m1 PERTHREAD modifiers_opt:m2 type:t
+    {:
+        AdviceSpec around = parser.nf.Around(Position.COMPILER_GENERATED,
+                                             t, new LinkedList());
+
+        RESULT = parser.nf.TMModsAndType(m1.set(m2), true, around,
+                                         null, true, t);
+    :}
+|
+    modifiers_opt:m1 PERTHREAD modifiers_opt:m2 VOID:t
+    {:
+        TypeNode voidn =
+            parser.nf.CanonicalTypeNode(parser.pos(t), parser.ts.Void());
+        AdviceSpec around = parser.nf.Around(Position.COMPILER_GENERATED,
+                                             voidn, new LinkedList());
+
+
+        RESULT = parser.nf.TMModsAndType(m1.set(m2), true, around,
+                                         null, true, voidn);
+    :}
+;
+
+
+symbol_declaration_list ::=
+    symbol_declaration:a
+    {:
+        Grm.parserTrace("symbol declaration list");
+
+        RESULT = new TypedList(new LinkedList(), SymbolDecl.class, false);
+        RESULT.add(a);
+    :}
+|
+    symbol_declaration_list:a symbol_declaration:b
+    {:
+        Grm.parserTrace("symbol declaration list");
+
+        RESULT = a;
+        RESULT.add(b);
+    :}
+;
+ 
+
+symbol_declaration ::=
+    SYM:x IDENTIFIER:b symbol_kind:c COLON pointcut_expr:d SEMICOLON:y
+    {:
+        RESULT = parser.nf.SymbolDecl(parser.pos(x,y),
+                                        b.getIdentifier(), c, d);
+    :}
+;
+
+
+symbol_kind ::=
+    BEFORE:x
+    {:
+        RESULT = parser.nf.BeforeSymbol(parser.pos(x));
+    :}
+|
+    AFTER:x
+    {:
+        RESULT = parser.nf.AfterSymbol(parser.pos(x));
+    :}
+|
+    AFTER:x PC_RETURNING:y
+    {:
+        RESULT = parser.nf.AfterReturningSymbol(parser.pos(x,y));
+    :}
+|
+    AFTER:x PC_RETURNING LPAREN IDENTIFIER:a RPAREN:y
+    {:
+        Local var = parser.nf.Local(parser.pos(a), a.getIdentifier());
+        RESULT = parser.nf.AfterReturningSymbol(parser.pos(x,y), var);
+    :}
+|
+    AFTER:x PC_THROWING:y
+    {:
+        RESULT = parser.nf.AfterThrowingSymbol(parser.pos(x,y));
+    :}
+|
+    AFTER:x PC_THROWING LPAREN IDENTIFIER:a RPAREN:y
+    {:
+        Local var = parser.nf.Local(parser.pos(a), a.getIdentifier());
+        RESULT = parser.nf.AfterThrowingSymbol(parser.pos(x,y), var);
+    :}
+|
+    AROUND:x
+    {:
+        RESULT = parser.nf.AroundSymbol(parser.pos(x), new LinkedList());
+    :}
+|
+    AROUND:x LPAREN name_list:a RPAREN:y
+    {:
+        RESULT = parser.nf.AroundSymbol(parser.pos(x,y), a);
+    :}
+;
+
+
+name_list ::=
+    IDENTIFIER:a
+    {:
+        Local id = parser.nf.Local(parser.pos(a), a.getIdentifier());
+        RESULT = new LinkedList();
+        RESULT.add(id);
+    :}
+|
+    name_list:a COMMA IDENTIFIER:b
+    {:
+        Local id = parser.nf.Local(parser.pos(b), b.getIdentifier());
+        a.add(id);
+        RESULT = a;
+    :}
+;
+
+
+frequent_symbols_declaration_opt ::=
+    /* empty */
+    {:
+        RESULT = null;
+    :}
+|
+    FREQUENT:x symbol_list:a SEMICOLON:y
+    {:
+        RESULT = a;
+    :}
+; 
+
+
+symbol_list ::=
+    IDENTIFIER:a
+    {:
+        RESULT = new LinkedList();
+        RESULT.add(a.getIdentifier());
+    :}
+|
+    symbol_list:a COMMA IDENTIFIER:b
+    {:
+        a.add(b.getIdentifier());
+        RESULT = a;
+    :}
+;
+
+
+regex_or ::=
+    regex_and:a
+    {:
+        RESULT = a;
+    :}
+|
+    regex_and:a OR regex_or:b
+    {:
+        RESULT = parser.nf.RegexAlternation(parser.pos(a,b), a, b);
+    :}
+;
+
+
+regex_and ::= 
+    regex_count:a
+    {:
+        RESULT = a;
+    :}
+|   
+    regex_count:a regex_and:b
+    {:
+        RESULT = parser.nf.RegexConjunction(parser.pos(a,b), a, b);
+    :}
+;
+ 
+
+regex_count ::=
+    regex_simple:a
+    {:
+        RESULT = a;
+    :}
+|
+    regex_simple:a MULT:y
+    {:
+        RESULT = parser.nf.RegexStar(parser.pos(a,y), a);
+    :}
+|
+    regex_simple:a PLUS:y
+    {:
+        RESULT = parser.nf.RegexPlus(parser.pos(a,y), a);
+    :}
+|
+    regex_simple:a LBRACK INTEGER_LITERAL:n RBRACK:y
+    {:
+        int repeats = n.getValue().intValue(); // non-negative
+        if (repeats == 0)
+            parser.report_error("Number of repeats must be positive.",
+                                    parser.pos(n));
+        RESULT = parser.nf.RegexCount(parser.pos(a,y), a, repeats, repeats);
+    :}
+|
+    regex_simple:a LBRACK INTEGER_LITERAL:m COMMA INTEGER_LITERAL:n RBRACK:y
+    {:
+        int min = m.getValue().intValue(); // non-negative
+        int max = n.getValue().intValue(); // non-negative
+        if (max == 0)
+            parser.report_error("Maximum must be positive.",
+                                    parser.pos(n));
+        if (min > max)
+            parser.report_error("Minimum cannot be greater than maximum.",
+                                    parser.pos(m,n));
+        RESULT = parser.nf.RegexCount(parser.pos(a,y), a, min, max);
+    :}
+;
+
+
+regex_simple ::=
+    IDENTIFIER:a
+    {:
+        RESULT = parser.nf.RegexSymbol(parser.pos(a), a.getIdentifier());
+    :}
+|
+    LPAREN regex_or:a RPAREN
+    {:
+        RESULT = a;
+    :}
+;
