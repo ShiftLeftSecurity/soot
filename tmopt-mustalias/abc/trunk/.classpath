@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry excluding="abc/main/AntTask.java" kind="src" path="src"/>
+	<classpathentry excluding="abc/tm/weaving/weaver/tmanalysis/ds/HistoryMergingDisjunctSet.java|abc/tm/weaving/weaver/tmanalysis/bench/Bench.java|abc/tm/weaving/weaver/tmanalysis/TMShadowOptimizer.java|abc/tm/weaving/weaver/tmanalysis/partitioning/EdgePartitioner.java|abc/tm/weaving/weaver/tmanalysis/mustalias/SingleObjectAnalysisInfo.java|abc/tm/weaving/weaver/tmanalysis/TraditionalTMMayFlowAnalysis.java|abc/tm/weaving/weaver/tmanalysis/WorklistBasedTMFlowAnalysis.java|abc/tm/weaving/weaver/tmanalysis/stages/FlowSensitiveAnalysis.java|abc/tm/weaving/weaver/tmanalysis/mustalias/MustAliasMain.java|abc/tm/weaving/weaver/tmanalysis/mustalias/MustAliasTagger.java" kind="src" path="paddle-src"/>
+	<classpathentry kind="src" path="runtime-src"/>
+	<classpathentry kind="src" path="testing-src"/>
+	<classpathentry kind="src" path="cspto-src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/sun-jdk1.5.0_08"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/soot"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/paddle"/>
+	<classpathentry kind="lib" path="/soot/lib/sootclasses-2.2.1.jar" sourcepath="/soot/src"/>
+	<classpathentry kind="lib" path="lib/abc.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/abcJars"/>
+	<classpathentry kind="lib" path="/home/user/ebodde/workspaces/abc/abc/ajc-harness/lib/abc-testing-ajc-part.jar"/>
+	<classpathentry kind="lib" path="/paddle/lib/paddle-custom.jar"/>
+	<classpathentry kind="lib" path="/abcJars/commons-collections-3.1.jar"/>
+	<classpathentry kind="output" path="classes"/>
+</classpath>
