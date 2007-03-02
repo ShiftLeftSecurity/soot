@@ -123,7 +123,7 @@ public class ShadowGroupStatistics {
 			double averageSizeOfGroupsWithThisShadows = 0;
 			int maximalSizeOfGroupsWithThisShadows = 0;
 			
-			Set setsInducedByGroupsWithThisShadows = new HashSet();
+			Set setsInducedByProbesWithThisShadows = new HashSet();
 			
 			for (Iterator groupIter = probes.iterator(); groupIter.hasNext();) {
 				Probe probe = (Probe) groupIter.next();
@@ -137,23 +137,22 @@ public class ShadowGroupStatistics {
 						maximalSizeOfGroupsWithThisShadows = shadows.size();
 					}
 					
-					setsInducedByGroupsWithThisShadows.add(shadows);
+					setsInducedByProbesWithThisShadows.add(shadows);
 				}
 			}			
 			averageSizeOfGroupsWithThisShadows /= (double)groupsWithThisShadow;
 			
 			System.err.println("shadow "+shadow.getUniqueShadowId());
-			System.err.println("  contained in groups:     "+groupsWithThisShadow);
-			System.err.println("  average group size:      "+averageSizeOfGroupsWithThisShadows);
-			System.err.println("  maximal group size:      "+maximalSizeOfGroupsWithThisShadows);
-			System.err.println("  configurations induced:  "+setsInducedByGroupsWithThisShadows.size());
+			System.err.println("  contained in probes:     "+groupsWithThisShadow);
+			System.err.println("  average probes size:      "+averageSizeOfGroupsWithThisShadows);
+			System.err.println("  maximal probes size:      "+maximalSizeOfGroupsWithThisShadows);
 			System.err.println();
 			System.err.println("coupling:");
 			for (Iterator shadowIter2 = allShadows.iterator(); shadowIter2.hasNext();) {
 				Shadow shadow2 = (Shadow) shadowIter2.next();
 
 				int commonSets = 0;
-				for (Iterator thisShadowsGroupsShadows = setsInducedByGroupsWithThisShadows.iterator(); thisShadowsGroupsShadows.hasNext();) {
+				for (Iterator thisShadowsGroupsShadows = setsInducedByProbesWithThisShadows.iterator(); thisShadowsGroupsShadows.hasNext();) {
 					Set shadows = (Set) thisShadowsGroupsShadows.next();
 					assert shadows.contains(shadow);
 					
@@ -161,7 +160,7 @@ public class ShadowGroupStatistics {
 						commonSets++;
 					}
 				}
-				double coupling = commonSets/ (double)setsInducedByGroupsWithThisShadows.size();
+				double coupling = commonSets/ (double)setsInducedByProbesWithThisShadows.size();
 
 				System.err.println("coupling["+shadow.getUniqueShadowId()+","+shadow2.getUniqueShadowId()+"] = "+coupling+" (common probes: "+commonSets+")");
 			}	
@@ -179,7 +178,7 @@ public class ShadowGroupStatistics {
 	private void computeClusters() {
 		//initialize clusters
 		clusters = new LinkedHashSet();
-    	Set allConsistentShadowGroups = FlowInsensitiveAnalysis.v().getAllConsistentShadowGroups();
+    	Set allConsistentShadowGroups = ShadowGroupRegistry.v().getAllShadowGroups();
     	for (Iterator iterator = allConsistentShadowGroups.iterator(); iterator.hasNext();) {
 			ShadowGroup group = (ShadowGroup) iterator.next();			
 			clusters.add(new Cluster(group));
@@ -228,7 +227,7 @@ public class ShadowGroupStatistics {
 	}
 
 	protected void shadowGroupDump() {
-    	Set allConsistentShadowGroups = FlowInsensitiveAnalysis.v().getAllConsistentShadowGroups();
+    	Set allConsistentShadowGroups = ShadowGroupRegistry.v().getAllShadowGroups();
     	
     	System.err.println("=====================================================================");
     	System.err.println("================               SHADOW GROUPS               ==========");

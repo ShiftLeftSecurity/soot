@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import abc.main.Debug;
 import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.matching.TMStateMachine;
 import abc.tm.weaving.weaver.tmanalysis.DominatorEdgeLabels;
@@ -22,7 +21,7 @@ import abc.tm.weaving.weaver.tmanalysis.query.ConsistentShadowGroupFinder;
 import abc.tm.weaving.weaver.tmanalysis.query.ReachableShadowFinder;
 import abc.tm.weaving.weaver.tmanalysis.query.Shadow;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroup;
-import abc.tm.weaving.weaver.tmanalysis.query.ShadowRegistry;
+import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroupRegistry;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowsPerTMSplitter;
 import abc.tm.weaving.weaver.tmanalysis.query.TraceMatchByName;
 
@@ -36,9 +35,7 @@ public class FlowInsensitiveAnalysis extends AbstractAnalysisStage {
 	protected Timer domEdgesTimer = new Timer("dominating-edges");
 
 	protected Timer groupShadowsTimer = new Timer("group-shadows");
-	
-	protected Set allConsistentShadowGroups;
-	
+		
 	/**
 	 * {@inheritDoc}
 	 */
@@ -63,7 +60,7 @@ public class FlowInsensitiveAnalysis extends AbstractAnalysisStage {
         //split all remaining shadows by tracematch
         Map tmNameToShadows = ShadowsPerTMSplitter.v().splitShadows(reachableShadows);
         
-        allConsistentShadowGroups = new LinkedHashSet();
+        Set allConsistentShadowGroups = new LinkedHashSet();
         
         //for each "tracematch-name to shadows" mapping 
         for (Iterator entryIter = tmNameToShadows.entrySet().iterator(); entryIter.hasNext();) {
@@ -98,6 +95,8 @@ public class FlowInsensitiveAnalysis extends AbstractAnalysisStage {
 			disableShadows(shadowsToDisable);			
 		}
         
+        ShadowGroupRegistry.v().registerShadowGroups(allConsistentShadowGroups);
+        
         logToStatistics("cum-dominating-edges-time", domEdgesTimer);
         logToStatistics("cum-group-shadows-time", groupShadowsTimer);
         
@@ -116,15 +115,15 @@ public class FlowInsensitiveAnalysis extends AbstractAnalysisStage {
 		disableAll(shadowIDsToDisable);
 	}
 	
-	/**
-	 * @return the allConsistentShadowGroups
-	 */
-	public Set getAllConsistentShadowGroups() {
-		if(allConsistentShadowGroups==null) {
-			throw new IllegalStateException("Stage not yet run!");
-		}
-		return allConsistentShadowGroups;
-	}
+//	/**
+//	 * @return the allConsistentShadowGroups
+//	 */
+//	public Set getAllConsistentShadowGroups() {
+//		if(allConsistentShadowGroups==null) {
+//			throw new IllegalStateException("Stage not yet run!");
+//		}
+//		return allConsistentShadowGroups;
+//	}
 	
 	//singleton pattern
 

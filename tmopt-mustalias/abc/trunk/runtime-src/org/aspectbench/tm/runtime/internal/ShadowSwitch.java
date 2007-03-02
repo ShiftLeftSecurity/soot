@@ -37,6 +37,11 @@ public class ShadowSwitch {
 	}
 
 	private static void parse(String argString) {
+		if(argString.length()==0) {
+			return;
+		}
+		
+		
 		String[] split = argString.split(":");
 		String format = split[0];
 		String arg = split[1];		

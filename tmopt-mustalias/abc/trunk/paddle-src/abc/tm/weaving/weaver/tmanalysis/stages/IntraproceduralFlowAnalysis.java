@@ -13,6 +13,7 @@ import java.util.Set;
 import soot.SootMethod;
 import abc.tm.weaving.weaver.tmanalysis.query.Shadow;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroup;
+import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroupRegistry;
 
 /**
  * IntraproceduralFlowAnalysis
@@ -26,7 +27,7 @@ public class IntraproceduralFlowAnalysis extends AbstractAnalysisStage {
 	 */
 	protected void doAnalysis() {
 		
-		Set shadowGroups = FlowInsensitiveAnalysis.v().getAllConsistentShadowGroups();
+		Set shadowGroups = ShadowGroupRegistry.v().getAllShadowGroups();
 		
 		Set singleMethodShadowGroups = new HashSet();
 		

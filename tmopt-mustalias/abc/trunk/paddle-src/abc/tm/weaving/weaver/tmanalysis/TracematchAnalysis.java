@@ -35,6 +35,7 @@ import abc.tm.weaving.weaver.tmanalysis.dynamicinstr.DynamicInstrumenter;
 import abc.tm.weaving.weaver.tmanalysis.query.ReachableShadowFinder;
 import abc.tm.weaving.weaver.tmanalysis.query.Shadow;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroup;
+import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroupRegistry;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroupStatistics;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowRegistry;
 import abc.tm.weaving.weaver.tmanalysis.query.StateMachineFolder;
@@ -355,6 +356,7 @@ public class TracematchAnalysis extends AbstractReweavingAnalysis {
 		QuickCheck.reset();
 		UnwovenShadowTagRemover.reset();
 		StateMachineFoldingCache.reset();
+		ShadowGroupRegistry.reset();
 	}
 
 

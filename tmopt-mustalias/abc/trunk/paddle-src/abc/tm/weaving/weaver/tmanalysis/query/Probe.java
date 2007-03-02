@@ -53,7 +53,7 @@ public class Probe {
 		
 		Set shadowSets = new HashSet();
 		
-		Set allConsistentShadowGroups = FlowInsensitiveAnalysis.v().getAllConsistentShadowGroups();
+		Set allConsistentShadowGroups = ShadowGroupRegistry.v().getAllShadowGroups();
 		for (Iterator groupIter = allConsistentShadowGroups.iterator(); groupIter
 				.hasNext();) {
 			ShadowGroup sg = (ShadowGroup) groupIter.next();
