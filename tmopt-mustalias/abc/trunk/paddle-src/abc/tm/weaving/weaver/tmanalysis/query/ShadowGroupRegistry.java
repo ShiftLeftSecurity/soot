@@ -47,34 +47,69 @@ public class ShadowGroupRegistry {
 	
 	/**
 	 * Prunes all shadow groups which have a label-shadow equal to one one of the shadows in deadShadows.
-	 * Also disables all shadows in deadShadows in the {@link ShadowRegistry}.
+	 * Disables all shadows in deadShadows.
+	 * Then disables all (other) shadows which are not member of a shadow group any more.
 	 * @param deadShadows a set of shadows which is known to be dead, i.e. unnecessary
-	 * @return <code>true</code> if any shadow group was actually removed
+	 * @return <code>true</code> if a shadow could actually be disabled
 	 * @see ShadowGroup#getLabelShadows()
-	 * @seee {@link ShadowRegistry#disableShadow(String)}
+	 * @see {@link ShadowRegistry#disableShadow(String)}
 	 */
 	public boolean pruneShadowsAndIncompleteDependentGroups(Collection deadShadows) {
-		boolean removedSomething = true;
+		boolean removedAGroup = true;
+		Set allShadowsInAllShadowGroups = new HashSet();
+		
+		//prune all groups which have a dead shadow as a label-shadow
+		for (Iterator groupIter = shadowGroups.iterator(); groupIter.hasNext();) {
+			ShadowGroup group = (ShadowGroup) groupIter.next();
+
+			//collect all shadows
+			allShadowsInAllShadowGroups.addAll(group.getAllShadows());
+			
+			Set labelShadows = group.getLabelShadows();
 			for (Iterator shadowIter = deadShadows.iterator(); shadowIter.hasNext();) {
 				Shadow deadShadow = (Shadow) shadowIter.next();
-				for (Iterator groupIter = shadowGroups.iterator(); groupIter.hasNext();) {
-					ShadowGroup group = (ShadowGroup) groupIter.next();
-					Set labelShadows = group.getLabelShadows();
-					if(labelShadows.contains(deadShadow)) {
-						if(Debug.v().tmShadowGroupDump) {
-							System.err.println("Removed shadow group #"+group.getNumber()+
-									" because it contains label-shadow "+deadShadow.getUniqueShadowId()+
-									", which is dead.");
-						}
-						groupIter.remove();
-						removedSomething = true;					
+				if(labelShadows.contains(deadShadow)) {
+					if(Debug.v().tmShadowGroupDump) {
+						System.err.println("Removed shadow group #"+group.getNumber()+
+								" because it contains label-shadow "+deadShadow.getUniqueShadowId()+
+								", which is dead.");
 					}
+					groupIter.remove();
+					removedAGroup = true;
+					break;
 				}
-				
-				//actually disable shadow
-				ShadowRegistry.v().disableShadow(deadShadow.getUniqueShadowId());
 			}
-		return removedSomething;
+		}
+		
+		//disable all dead shadows
+		for (Iterator deadShadowIter = deadShadows.iterator(); deadShadowIter.hasNext();) {
+			Shadow shadow = (Shadow) deadShadowIter.next();
+			ShadowRegistry.v().disableShadow(shadow.getUniqueShadowId());
+		}		
+		
+		if(removedAGroup) {
+			//collect all shadows which are still active, i.e. still contained in a remaining shadow group
+			Set allShadowsStillActive = new HashSet();
+			for (Iterator groupIter = shadowGroups.iterator(); groupIter.hasNext();) {
+				ShadowGroup group = (ShadowGroup) groupIter.next();
+				allShadowsStillActive.addAll(group.getAllShadows());
+			}
+			
+			//we can disable all shadows which were in a shadow group before but now are not any more
+			Set shadowsToDisable = new HashSet(allShadowsInAllShadowGroups);
+			shadowsToDisable.removeAll(allShadowsStillActive);			
+			for (Iterator shadowIter = shadowsToDisable.iterator(); shadowIter.hasNext();) {
+				Shadow shadow = (Shadow) shadowIter.next();
+				ShadowRegistry.v().disableShadow(shadow.getUniqueShadowId());
+				if(Debug.v().tmShadowGroupDump) {
+					System.err.println("Removed shadow "+shadow.getUniqueShadowId()+
+							" because it is no longer part of any active shadow group.");
+				}
+			}			
+			return !shadowsToDisable.isEmpty();
+		} else {
+			return false;
+		}
 	}
 
 	//singleton pattern
