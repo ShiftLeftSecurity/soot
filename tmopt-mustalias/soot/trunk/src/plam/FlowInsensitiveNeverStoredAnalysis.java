@@ -26,7 +26,6 @@ import soot.toolkits.graph.*;
 import soot.toolkits.scalar.*;
 import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.jimple.toolkits.callgraph.Targets;
-import soot.jimple.toolkits.callgraph.TransitiveTargets;
 
 /** Given a SootClass c and a Local l, determines whether or not l is
  * ever stored in c such that l is accessible from the outside.
@@ -41,7 +40,9 @@ import soot.jimple.toolkits.callgraph.TransitiveTargets;
  *
  * Check: 1) no returns of objects aliased to outerThis;
  *        2) no transitive stores of aliases of outerThis to non-private
- *              fields.
+ *              fields;
+ *        3) all reads of this$0 have base object 'this'---approximate that
+ *           by checking that all reads of private fields have base 'this'.
  *
  * Threads should be okay, because they're in separate classes and
  * hence cannot read the private field.
@@ -81,14 +82,44 @@ public class FlowInsensitiveNeverStoredAnalysis {
     /* analyzingClass: if true, conservatively bail on calls to non-concrete methods. */
     static private boolean possiblyExposes(SootMethod m, Local l, boolean analyzingClass, 
                                            LinkedList visited, HashMap cachedResults) {
-        System.out.println("query on "+m);
+//         System.out.println("query on "+m);
 
         visited.add(m);
         PointsToAnalysis pa = Scene.v().getPointsToAnalysis();
         CallGraph cg = Scene.v().getCallGraph();
         PointsToSet lp = pa.reachingObjects(l);
+        Local thisLocal = null;
 
         Iterator unitsIt = m.retrieveActiveBody().getUnits().iterator();
+
+        while (unitsIt.hasNext()) {
+            Stmt u = (Stmt) unitsIt.next();
+            if (u instanceof AssignStmt) {
+                Value lhs = ((AssignStmt)u).getLeftOp(),
+                    rhs = ((AssignStmt)u).getRightOp();
+                if (rhs instanceof ThisRef) {
+                    if (thisLocal == null) {
+                        thisLocal = (Local)lhs;
+                    }
+                    else
+                        return bail(m, visited, "multiple ThisRef assignment", cachedResults);
+                }
+            }
+        }
+
+        unitsIt = m.retrieveActiveBody().getUnits().iterator();
+        while (unitsIt.hasNext()) {
+            Stmt u = (Stmt) unitsIt.next();
+            if (u instanceof AssignStmt) {
+                Value lhs = ((AssignStmt)u).getLeftOp(),
+                    rhs = ((AssignStmt)u).getRightOp();
+
+                if (lhs.equals(thisLocal) && !(rhs instanceof ThisRef))
+                    return bail(m, visited, "ThisRef mutation", cachedResults);
+            }
+        }
+
+        unitsIt = m.retrieveActiveBody().getUnits().iterator();
         while (unitsIt.hasNext()) {
             Stmt u = (Stmt) unitsIt.next();
             if (u instanceof ReturnStmt) {
@@ -123,11 +154,18 @@ public class FlowInsensitiveNeverStoredAnalysis {
                             return bail(m, visited, "field write of "+rhs+" to field "+lhs+" and analyzingClass off", cachedResults);
                     }
                 }
+
+                if (rhs instanceof InstanceFieldRef) {
+                    SootField f = ((FieldRef)rhs).getField();
+                    if (((SootField)f).isPrivate() &&
+                        !((InstanceFieldRef)rhs).getBase().equals(thisLocal))
+                        return bail(m, visited, "read of private field on non-this", cachedResults);
+                }
             }
             if (u.containsInvokeExpr()) {
                 // Transitively check on callees, don't recurse.
                 SootMethod initialMethod = (SootMethod)visited.getFirst();
-                Iterator targIt = new TransitiveTargets(cg).iterator(u);
+                Iterator targIt = new Targets(cg.edgesOutOf(u));
                 while (targIt.hasNext()) {
                     SootMethod targ = (SootMethod)targIt.next();
                     boolean leavingInitialClass = targ.getDeclaringClass()
