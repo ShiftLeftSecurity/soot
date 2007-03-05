@@ -18,11 +18,13 @@
  */
 package abc.tm.weaving.aspectinfo;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import polyglot.util.ErrorInfo;
 import polyglot.util.Position;
@@ -47,7 +49,9 @@ import abc.weaving.residues.NeverMatch;
 public class TMOptTraceMatch extends TraceMatch
 {
 	
-    /**
+    private final Map adviceNameToTymbolName;
+
+	/**
      * @see TraceMatch#TraceMatch(String, List, List, StateMachine, boolean, Map, List, Map, String, String, String, Aspect, Position)
      */
     public TMOptTraceMatch(String name, List formals, List new_advice_body_formals,
@@ -72,6 +76,12 @@ public class TMOptTraceMatch extends TraceMatch
     			container, 
     			pos
     	);
+    	//store reverse mapping
+    	adviceNameToTymbolName = new HashMap();
+		for (Iterator iterator = sym_to_advice_name.entrySet().iterator(); iterator.hasNext();) {
+			Entry entry = (Entry) iterator.next();
+			adviceNameToTymbolName.put(entry.getValue(), entry.getKey());
+		}
     }
     
 	/**
@@ -163,4 +173,7 @@ public class TMOptTraceMatch extends TraceMatch
 		}
 	}
 	
+	public String symbolNameForSymbolAdvice(SootMethod symbolAdviceMethod) {
+		return (String) adviceNameToTymbolName.get(symbolAdviceMethod.getName());
+	}
 }

@@ -267,6 +267,9 @@ public class AbcExtension extends abc.eaj.AbcExtension
             } catch( Exception e ) {
                 throw new InternalCompilerError("Couldn't load interprocedural analysis plugin 'abc.tm.weaving.weaver.tmanalysis.TracematchAnalysis'.",e);
             }
+            
+            //we need instruction tags so that we can identify shadow IDs after weaving
+            OptionsParser.v().set_tag_instructions(true);
         }
     }
 

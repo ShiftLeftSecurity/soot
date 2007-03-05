@@ -47,6 +47,7 @@ import abc.tm.weaving.weaver.tmanalysis.stages.FlowInsensitiveAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.stages.IntraproceduralFlowAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.stages.PerMethodStateMachines;
 import abc.tm.weaving.weaver.tmanalysis.stages.QuickCheck;
+import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger;
 import abc.tm.weaving.weaver.tmanalysis.stages.UnwovenShadowTagRemover;
 import abc.weaving.weaver.AbstractReweavingAnalysis;
 
@@ -144,6 +145,8 @@ public class TracematchAnalysis extends AbstractReweavingAnalysis {
 	protected void doAnalyze() {
 		//see what was selected as last stage
 		String laststage = OptionsParser.v().laststage();
+		
+		new TMShadowTagger().apply();
 		
     	//remove the tags of all shadows that were marked but never actually woven
     	//(this can happen due to the the fact that pointcuts are always strictly evaluated,
