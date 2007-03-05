@@ -16,7 +16,6 @@ import java.util.Map.Entry;
 
 import soot.PointsToSet;
 import soot.jimple.toolkits.pointer.FullObjectSet;
-
 import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.weaver.tmanalysis.ds.Intersection;
 import abc.tm.weaving.weaver.tmanalysis.ds.ThreadContext;

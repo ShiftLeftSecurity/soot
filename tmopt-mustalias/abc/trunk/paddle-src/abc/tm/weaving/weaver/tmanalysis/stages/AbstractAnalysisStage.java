@@ -12,7 +12,6 @@ import java.util.Iterator;
 import java.util.Set;
 
 import abc.tm.weaving.aspectinfo.TMGlobalAspectInfo;
-import abc.tm.weaving.weaver.tmanalysis.MatchingTMSymbolTag;
 import abc.tm.weaving.weaver.tmanalysis.Statistics;
 import abc.tm.weaving.weaver.tmanalysis.Timer;
 import abc.tm.weaving.weaver.tmanalysis.query.Naming;

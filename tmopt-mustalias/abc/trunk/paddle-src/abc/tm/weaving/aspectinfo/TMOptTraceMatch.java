@@ -26,20 +26,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import polyglot.util.ErrorInfo;
 import polyglot.util.Position;
 import soot.SootMethod;
 import abc.main.Debug;
 import abc.tm.weaving.matching.SMEdge;
 import abc.tm.weaving.matching.StateMachine;
 import abc.tm.weaving.matching.TMStateMachine;
-import abc.tm.weaving.weaver.tmanalysis.util.AdviceApplicationVisitor;
-import abc.tm.weaving.weaver.tmanalysis.util.AdviceApplicationVisitor.AdviceApplicationHandler;
 import abc.weaving.aspectinfo.AdviceDecl;
 import abc.weaving.aspectinfo.Aspect;
 import abc.weaving.aspectinfo.GlobalAspectInfo;
-import abc.weaving.matching.AdviceApplication;
-import abc.weaving.residues.NeverMatch;
 
 /** 
  * TODO

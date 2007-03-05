@@ -19,8 +19,6 @@
 
 package abc.tm.weaving.weaver.tmanalysis.ds;
 
-import static abc.tm.weaving.weaver.tmanalysis.ds.Disjunct.FALSE;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,7 +27,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import soot.Local;
 import soot.PointsToSet;
 import soot.jimple.Stmt;
 import abc.tm.weaving.matching.SMNode;
@@ -82,7 +79,7 @@ public class Disjunct implements Cloneable {
 		/**
 		 * Returns the empty set.
 		 */
-		public Set addNegativeBindingsForSymbol(Collection allVariables, Map bindings, String shadowId, TMFlowAnalysis analysis) {
+		public Set addNegativeBindingsForSymbol(Collection allVariables, Map bindings, String shadowId, TMFlowAnalysis analysis, Stmt stmt)  {
 			//return no disjuncts, because there is nothing to remove
 			return Collections.EMPTY_SET;
 		}

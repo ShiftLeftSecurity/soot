@@ -4,7 +4,6 @@ import java.util.Set;
 
 import soot.Local;
 import soot.jimple.Stmt;
-
 import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.weaver.tmanalysis.query.Naming;
 

@@ -27,7 +27,6 @@ import java.util.Set;
 import soot.Local;
 import soot.SootMethod;
 import soot.jimple.Stmt;
-import soot.toolkits.graph.ExceptionalUnitGraph;
 import soot.toolkits.graph.UnitGraph;
 import soot.toolkits.scalar.ForwardFlowAnalysis;
 import abc.tm.weaving.aspectinfo.TraceMatch;

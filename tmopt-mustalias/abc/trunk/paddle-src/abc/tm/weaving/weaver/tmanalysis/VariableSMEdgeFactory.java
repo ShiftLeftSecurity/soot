@@ -18,28 +18,16 @@
  */
 package abc.tm.weaving.weaver.tmanalysis;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 
-import soot.Local;
 import soot.PointsToSet;
-import soot.PrimType;
-import soot.Scene;
-import soot.SootMethod;
-import soot.jimple.toolkits.pointer.FullObjectSet;
 import abc.tm.weaving.matching.SMEdge;
 import abc.tm.weaving.matching.SMEdgeFactory;
 import abc.tm.weaving.matching.SMNode;
 import abc.tm.weaving.matching.State;
 import abc.tm.weaving.weaver.tmanalysis.ShadowSMEdgeFactory.SMShadowEdge;
-import abc.tm.weaving.weaver.tmanalysis.ds.PaddlePointsToSetCompatibilityWrapper;
 import abc.tm.weaving.weaver.tmanalysis.query.Shadow;
-import abc.weaving.aspectinfo.Var;
-import abc.weaving.residues.WeavingVar;
 
 /**
  * This factory creates edges which can hold variable bindings. 

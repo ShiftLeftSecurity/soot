@@ -23,18 +23,15 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
 import soot.jimple.Stmt;
-
 import abc.tm.weaving.matching.SMEdge;
 import abc.tm.weaving.matching.SMNode;
 import abc.tm.weaving.matching.TMStateMachine;
-import abc.tm.weaving.weaver.tmanalysis.SMThreadSpawnEdge;
 import abc.tm.weaving.weaver.tmanalysis.TMFlowAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.VariableSMEdgeFactory.SMVariableEdge;
 import abc.tm.weaving.weaver.tmanalysis.query.Naming;

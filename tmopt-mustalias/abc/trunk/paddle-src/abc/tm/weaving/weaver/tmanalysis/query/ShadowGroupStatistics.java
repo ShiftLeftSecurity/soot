@@ -11,12 +11,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import abc.tm.weaving.weaver.tmanalysis.stages.FlowInsensitiveAnalysis;
 
 /**
  * ShadowGroupStatistics
@@ -171,60 +168,60 @@ public class ShadowGroupStatistics {
 
 		System.err.println("---------------------------------------------");
 	}
-
-	/**
-	 * 
-	 */
-	private void computeClusters() {
-		//initialize clusters
-		clusters = new LinkedHashSet();
-    	Set allConsistentShadowGroups = ShadowGroupRegistry.v().getAllShadowGroups();
-    	for (Iterator iterator = allConsistentShadowGroups.iterator(); iterator.hasNext();) {
-			ShadowGroup group = (ShadowGroup) iterator.next();			
-			clusters.add(new Cluster(group));
-    	}
-    	
-    	//cluster together
-    	boolean goodEnough = false;
-    	do {
-    		
-    		//find the two clusters with the smallest distance
-    		double smallestDistance = Double.POSITIVE_INFINITY;    		
-    		Cluster smallestDistanceCluster1 = null;
-    		Cluster smallestDistanceCluster2 = null;
-    		
-    		for (Iterator clusterIter = clusters.iterator(); clusterIter.hasNext();) {
-				Cluster c1 = (Cluster) clusterIter.next();
-
-				for (Iterator clusterIter2 = clusters.iterator(); clusterIter2.hasNext();) {
-					Cluster c2 = (Cluster) clusterIter2.next();
-					
-					if(c2==c1) break;	//shortcut; only need to traverse halfway, because the distance is symmetric
-					if(smallestDistance==0) break;
-					
-					double distance = c1.distance(c2);
-					if(distance<smallestDistance) {
-						smallestDistance = distance;
-						smallestDistanceCluster1 = c1;
-						smallestDistanceCluster2 = c2;
-					}					
-				}				
-			}
-    		
-    		//merge clusters
-    		Cluster join = new Cluster(smallestDistanceCluster1, smallestDistanceCluster2);
-    		clusters.remove(smallestDistanceCluster1);
-    		clusters.remove(smallestDistanceCluster2);
-    		clusters.add(join);
-    		
-    		System.out.println(smallestDistance);
-    		
-    		goodEnough = clusters.size()==1;
-    		
-    	} while(!goodEnough);
-    	
-    	clusters = null;
-	}
+//
+//	/**
+//	 * 
+//	 */
+//	private void computeClusters() {
+//		//initialize clusters
+//		clusters = new LinkedHashSet();
+//    	Set allConsistentShadowGroups = ShadowGroupRegistry.v().getAllShadowGroups();
+//    	for (Iterator iterator = allConsistentShadowGroups.iterator(); iterator.hasNext();) {
+//			ShadowGroup group = (ShadowGroup) iterator.next();			
+//			clusters.add(new Cluster(group));
+//    	}
+//    	
+//    	//cluster together
+//    	boolean goodEnough = false;
+//    	do {
+//    		
+//    		//find the two clusters with the smallest distance
+//    		double smallestDistance = Double.POSITIVE_INFINITY;    		
+//    		Cluster smallestDistanceCluster1 = null;
+//    		Cluster smallestDistanceCluster2 = null;
+//    		
+//    		for (Iterator clusterIter = clusters.iterator(); clusterIter.hasNext();) {
+//				Cluster c1 = (Cluster) clusterIter.next();
+//
+//				for (Iterator clusterIter2 = clusters.iterator(); clusterIter2.hasNext();) {
+//					Cluster c2 = (Cluster) clusterIter2.next();
+//					
+//					if(c2==c1) break;	//shortcut; only need to traverse halfway, because the distance is symmetric
+//					if(smallestDistance==0) break;
+//					
+//					double distance = c1.distance(c2);
+//					if(distance<smallestDistance) {
+//						smallestDistance = distance;
+//						smallestDistanceCluster1 = c1;
+//						smallestDistanceCluster2 = c2;
+//					}					
+//				}				
+//			}
+//    		
+//    		//merge clusters
+//    		Cluster join = new Cluster(smallestDistanceCluster1, smallestDistanceCluster2);
+//    		clusters.remove(smallestDistanceCluster1);
+//    		clusters.remove(smallestDistanceCluster2);
+//    		clusters.add(join);
+//    		
+//    		System.out.println(smallestDistance);
+//    		
+//    		goodEnough = clusters.size()==1;
+//    		
+//    	} while(!goodEnough);
+//    	
+//    	clusters = null;
+//	}
 
 	protected void shadowGroupDump() {
     	Set allConsistentShadowGroups = ShadowGroupRegistry.v().getAllShadowGroups();

@@ -28,7 +28,7 @@ import abc.tm.weaving.weaver.tmanalysis.callgraph.SomewhatAbstractedCallGraph;
 import abc.tm.weaving.weaver.tmanalysis.query.Naming;
 import abc.tm.weaving.weaver.tmanalysis.query.ReachableShadowFinder;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowRegistry;
-import abc.tm.weaving.weaver.tmanalysis.query.TaggedHosts;
+import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowMatchTag;
 import abc.weaving.weaver.Weaver;
 
 /**
@@ -143,16 +143,12 @@ public class CallGraphAbstraction extends AbstractAnalysisStage {
 	    	
 	    	SootMethod method = curr.method();
 
-	    	if(TaggedHosts.v().hasTag(method)) {
-	    		return true;
-	    	}
-	    	
 	        if(method.hasActiveBody()) {
 	            Body body = method.getActiveBody();
 	            
 	            for (Iterator iter = body.getUnits().iterator(); iter.hasNext();) {
 	                Unit u = (Unit) iter.next();
-	                if(TaggedHosts.v().hasTag(u)) {
+	                if(u.hasTag(SymbolShadowMatchTag.NAME)) {
 	                    return true;
 	                }
 	            }

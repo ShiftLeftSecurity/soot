@@ -126,9 +126,6 @@ public class ShadowRegistry {
 		boolean added = disabledShadows.add(uniqueShadowId);
 		assert added;
 		
-		//remove it from all tags in the program		
-		TaggedHosts.v().removeShadowFromTags(uniqueShadowId);
-		
 		if(Debug.v().tmShadowDump) {
 			System.err.println("disabled shadow: "+uniqueShadowId);
 		}

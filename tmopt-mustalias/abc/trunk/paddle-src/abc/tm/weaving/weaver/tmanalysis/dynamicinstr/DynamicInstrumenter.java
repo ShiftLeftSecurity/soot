@@ -33,7 +33,6 @@ import abc.main.Main;
 import abc.tm.weaving.weaver.tmanalysis.query.Probe;
 import abc.tm.weaving.weaver.tmanalysis.query.Shadow;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowRegistry;
-import abc.tm.weaving.weaver.tmanalysis.stages.FlowInsensitiveAnalysis;
 import abc.weaving.aspectinfo.MethodCategory;
 import abc.weaving.residues.Residue;
 import abc.weaving.weaver.Unweaver;

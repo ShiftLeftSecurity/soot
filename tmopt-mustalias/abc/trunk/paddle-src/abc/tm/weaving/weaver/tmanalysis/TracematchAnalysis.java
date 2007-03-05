@@ -18,11 +18,8 @@
  */
 package abc.tm.weaving.weaver.tmanalysis;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import abc.main.AbcTimer;
 import abc.main.Debug;
@@ -33,22 +30,15 @@ import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.matching.TMStateMachine;
 import abc.tm.weaving.weaver.tmanalysis.dynamicinstr.DynamicInstrumenter;
 import abc.tm.weaving.weaver.tmanalysis.query.ReachableShadowFinder;
-import abc.tm.weaving.weaver.tmanalysis.query.Shadow;
-import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroup;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroupRegistry;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroupStatistics;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowRegistry;
-import abc.tm.weaving.weaver.tmanalysis.query.StateMachineFolder;
-import abc.tm.weaving.weaver.tmanalysis.query.TaggedHosts;
 import abc.tm.weaving.weaver.tmanalysis.query.TraceMatchByName;
 import abc.tm.weaving.weaver.tmanalysis.query.WeavableMethods;
 import abc.tm.weaving.weaver.tmanalysis.stages.CallGraphAbstraction;
 import abc.tm.weaving.weaver.tmanalysis.stages.FlowInsensitiveAnalysis;
-import abc.tm.weaving.weaver.tmanalysis.stages.IntraproceduralFlowAnalysis;
-import abc.tm.weaving.weaver.tmanalysis.stages.PerMethodStateMachines;
 import abc.tm.weaving.weaver.tmanalysis.stages.QuickCheck;
 import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger;
-import abc.tm.weaving.weaver.tmanalysis.stages.UnwovenShadowTagRemover;
 import abc.weaving.weaver.AbstractReweavingAnalysis;
 
 /**
@@ -148,12 +138,6 @@ public class TracematchAnalysis extends AbstractReweavingAnalysis {
 		
 		new TMShadowTagger().apply();
 		
-    	//remove the tags of all shadows that were marked but never actually woven
-    	//(this can happen due to the the fact that pointcuts are always strictly evaluated,
-    	//i.e. in the case of "within(ABC) && call(* *(..))", the call pointcut would be evaluated at
-    	//*every* call shadow
-    	UnwovenShadowTagRemover.v().apply();
-    	
 		AbcTimer.mark("TMAnalysis (prelude)");
 
     	//this performs a quick test that can always be applied:
@@ -348,17 +332,12 @@ public class TracematchAnalysis extends AbstractReweavingAnalysis {
 	public static void reset() {
 		ReachableShadowFinder.reset();
 		ShadowRegistry.reset();
-		StateMachineFolder.reset();
-		TaggedHosts.reset();
 		TraceMatchByName.reset();
 		WeavableMethods.reset();
 		CallGraphAbstraction.reset();
 		FlowInsensitiveAnalysis.reset();
 		//FlowSensitiveAnalysis.reset();
-		PerMethodStateMachines.reset();
 		QuickCheck.reset();
-		UnwovenShadowTagRemover.reset();
-		StateMachineFoldingCache.reset();
 		ShadowGroupRegistry.reset();
 	}
 

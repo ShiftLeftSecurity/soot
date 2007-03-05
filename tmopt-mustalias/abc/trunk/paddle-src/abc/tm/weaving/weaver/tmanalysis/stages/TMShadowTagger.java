@@ -9,6 +9,7 @@ package abc.tm.weaving.weaver.tmanalysis.stages;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -63,6 +64,15 @@ public class TMShadowTagger extends BodyTransformer implements Stage {
 				return symbolShadowMatch;
 			}
 		}
+		
+		public Set<SymbolShadowMatch> getAllMatches() {
+			Set<SymbolShadowMatch> res = new HashSet<SymbolShadowMatch>();
+			for (Set<SymbolShadowMatch> matches : tmToMatches.values()) {
+				res.addAll(matches);
+			}
+			return res;
+		}
+		
 		
 	}
 	

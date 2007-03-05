@@ -18,7 +18,7 @@ import soot.Body;
 import soot.SootMethod;
 import soot.Unit;
 import soot.jimple.toolkits.callgraph.CallGraph;
-import soot.tagkit.Host;
+import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowMatchTag;
 
 /**
  * Finds all reachable shadows in a callgraph. It uses result caching, i.e. assumes that the call graph does not change over time.
@@ -76,23 +76,20 @@ public class ReachableShadowFinder {
 	 * @param method any reachable method
 	 */
 	protected void findShadowsIn(SootMethod method) {
-		addShadowIfPresent(method);
 		Body b = method.getActiveBody();
-
 		for (Iterator unitIter = b.getUnits().iterator(); unitIter.hasNext();) {
 			Unit u = (Unit) unitIter.next();
-			addShadowIfPresent(u);
+			addShadowIfPresent(u,method);
 		}
 	}
 
 
 	/**
 	 * if h has a shadows attached, those are added to {@link #reachableShadows}
-	 * @param a host
 	 */
-	protected void addShadowIfPresent(Host h) {
-		if(TaggedHosts.v().hasTag(h)) {
-			reachableShadows.addAll(TaggedHosts.v().getShadowsOf(h));
+	protected void addShadowIfPresent(Unit h, SootMethod container) {
+		if(h.hasTag(SymbolShadowMatchTag.NAME)) {
+			reachableShadows.addAll(Shadow.allShadowsForHost(h, container));
 		}
 	}
 

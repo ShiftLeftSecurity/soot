@@ -18,7 +18,6 @@ import soot.Local;
 import soot.SootMethod;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
-import soot.tagkit.Tag;
 import soot.toolkits.graph.DirectedGraph;
 import soot.toolkits.scalar.ForwardFlowAnalysis;
 import abc.main.Main;

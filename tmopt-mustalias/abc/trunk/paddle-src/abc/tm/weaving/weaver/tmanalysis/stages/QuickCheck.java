@@ -16,7 +16,6 @@ import abc.main.AbcTimer;
 import abc.tm.weaving.aspectinfo.TMGlobalAspectInfo;
 import abc.tm.weaving.aspectinfo.TMOptTraceMatch;
 import abc.tm.weaving.aspectinfo.TraceMatch;
-import abc.tm.weaving.weaver.tmanalysis.MatchingTMSymbolTag;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowRegistry;
 
 /**

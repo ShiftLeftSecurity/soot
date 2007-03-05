@@ -12,8 +12,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import abc.tm.weaving.weaver.tmanalysis.stages.FlowInsensitiveAnalysis;
-
 /**
  * Probe
  *
