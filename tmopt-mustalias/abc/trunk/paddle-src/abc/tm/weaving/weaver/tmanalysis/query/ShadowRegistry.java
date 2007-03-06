@@ -75,7 +75,7 @@ public class ShadowRegistry {
 							//get the tracematch for that advice application
 							String traceMatchID = decl.getTraceMatchID();
 
-							String qualifiedShadowId = Naming.uniqueShadowID(traceMatchID, decl.getSymbolId(),aa.shadowmatch.shadowId);
+							String qualifiedShadowId = Naming.uniqueShadowID(traceMatchID, decl.getSymbolId(),aa.shadowmatch.shadowId).intern();
 							Object old = allShadowsToAdviceApplications.put(qualifiedShadowId, aa);
 							assert old==null; //IDs should be unique
 							

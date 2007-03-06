@@ -20,6 +20,7 @@ package abc.tm.weaving.weaver.tmanalysis;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import abc.main.AbcTimer;
 import abc.main.Debug;
@@ -29,7 +30,9 @@ import abc.tm.weaving.aspectinfo.TMGlobalAspectInfo;
 import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.matching.TMStateMachine;
 import abc.tm.weaving.weaver.tmanalysis.dynamicinstr.DynamicInstrumenter;
+import abc.tm.weaving.weaver.tmanalysis.query.InitialShadowFinder;
 import abc.tm.weaving.weaver.tmanalysis.query.ReachableShadowFinder;
+import abc.tm.weaving.weaver.tmanalysis.query.Shadow;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroupRegistry;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroupStatistics;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowRegistry;
@@ -136,11 +139,12 @@ public class TracematchAnalysis extends AbstractReweavingAnalysis {
 		//see what was selected as last stage
 		String laststage = OptionsParser.v().laststage();
 		
-		new TMShadowTagger().apply();
-		
 		AbcTimer.mark("TMAnalysis (prelude)");
 
-    	//this performs a quick test that can always be applied:
+		//add tags to all statements matches by a shadow
+		TMShadowTagger.v().apply();
+
+		//this performs a quick test that can always be applied:
     	//we see if actually all of the per-symbol advice matched at some point;
     	//if one of them did not match, we remove all edges that
     	//hold this symbol; also, if then the final state becomes unreachable,
@@ -162,6 +166,9 @@ public class TracematchAnalysis extends AbstractReweavingAnalysis {
     	}
 
     	FlowInsensitiveAnalysis.v().apply();
+    	
+    	Set<Shadow> initialShadows = InitialShadowFinder.v().findInitialShadows();
+    	System.out.println(initialShadows);
     	
 //        if(Debug.v().tmShadowGroupDump) {
 //        	shadowGroupDump();
@@ -336,9 +343,10 @@ public class TracematchAnalysis extends AbstractReweavingAnalysis {
 		WeavableMethods.reset();
 		CallGraphAbstraction.reset();
 		FlowInsensitiveAnalysis.reset();
-		//FlowSensitiveAnalysis.reset();
 		QuickCheck.reset();
 		ShadowGroupRegistry.reset();
+		InitialShadowFinder.reset();
+		TMShadowTagger.reset();
 	}
 
 

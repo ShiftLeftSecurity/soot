@@ -83,7 +83,6 @@ public class TMShadowTagger extends BodyTransformer implements Stage {
 		for (Stmt call : symbolFinder.getSomeAdviceMethodCalls()) {
 			Map<TraceMatch,Set<SymbolShadowMatch>> matches = symbolFinder.getSymbolsAtSomeAdviceMethodCall(call);
 			call.addTag(new SymbolShadowMatchTag(matches));
-			System.out.println(matches);
 		}
 	}
 	
@@ -109,6 +108,26 @@ public class TMShadowTagger extends BodyTransformer implements Stage {
 				}				
 			}
 		}
+	}
+	
+	//singleton pattern
+	
+	protected static TMShadowTagger instance;
+
+	private TMShadowTagger() {}
+	
+	public static TMShadowTagger v() {
+		if(instance==null) {
+			instance = new TMShadowTagger();
+		}
+		return instance;		
+	}
+	
+	/**
+	 * Frees the singleton object. 
+	 */
+	public static void reset() {
+		instance = null;
 	}
 
 }
