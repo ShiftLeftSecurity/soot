@@ -16,6 +16,7 @@ import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.matching.SMEdge;
 import abc.tm.weaving.matching.SMNode;
 import abc.tm.weaving.matching.TMStateMachine;
+import abc.tm.weaving.weaver.tmanalysis.query.ShadowRegistry;
 import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowMatchTag;
 import abc.tm.weaving.weaver.tmanalysis.util.SymbolFinder.SymbolShadowMatch;
 
@@ -35,24 +36,38 @@ public class TransitionUtils {
 	 * @return
 	 */
 	public static Set<SMNode> getSuccessorStatesFor(SMNode currentState, TraceMatch tm, Stmt stmt) {
+		//if the current statement is not tagged, we don't switch states
 		if(!stmt.hasTag(SymbolShadowMatchTag.NAME)) {
 			return Collections.singleton(currentState);
 		}
 		
-		Set<SMNode> res = new HashSet<SMNode>();
-		
+		Set<SMNode> res = new HashSet<SMNode>();		
 		SymbolShadowMatchTag tag = (SymbolShadowMatchTag) stmt.getTag(SymbolShadowMatchTag.NAME);
+		
+		boolean atLeastOneShadowActive = false;
+		//for all shadow matches registered in the tag
 		for (SymbolShadowMatch match : tag.getMatchesForTracematch(tm)) {
-			String symbolName = match.getSymbolName();
-			for (Iterator edgeIter = currentState.getOutEdgeIterator(); edgeIter.hasNext();) {
-				SMEdge edge = (SMEdge) edgeIter.next();
-				if(edge.getLabel().equals(symbolName)) {
-					res.add(edge.getTarget());
+			//if the shadow is still enabled
+			if(ShadowRegistry.v().enabledShadows().contains(match.getUniqueShadowId())) {
+				
+				//add all states which we can reach directly via this symbol
+				String symbolName = match.getSymbolName();
+				for (Iterator edgeIter = currentState.getOutEdgeIterator(); edgeIter.hasNext();) {
+					SMEdge edge = (SMEdge) edgeIter.next();
+					if(edge.getLabel().equals(symbolName)) {
+						res.add(edge.getTarget());
+					}
 				}
+				
+				atLeastOneShadowActive = true;
 			}
 		}
-		
-		return res;
+
+		//if we actually made a transition, return the result, otherwise treat as a no-op
+		if(atLeastOneShadowActive)
+			return res;
+		else
+			return Collections.singleton(currentState);
 	}
 
 }

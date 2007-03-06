@@ -58,7 +58,7 @@ public class SymbolFinder extends ForwardFlowAnalysis {
 			this.symbolName = symbolName;
 			this.tmVarToAdviceLocal = tmVarToAdviceLocal;
 			this.owner = owner;
-			this.uniqueShadowId = Naming.uniqueShadowID(owner.getName(),symbolName,shadowId);
+			this.uniqueShadowId = Naming.uniqueShadowID(owner.getName(),symbolName,shadowId).intern();
 		}
 
 		/**
