@@ -6,19 +6,33 @@
  */
 package abc.tm.weaving.weaver.tmanalysis.util;
 
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import soot.Body;
+import soot.BodyTransformer;
+import soot.SootClass;
+import soot.SootMethod;
+import soot.Unit;
 import soot.jimple.Stmt;
+import soot.jimple.toolkits.callgraph.CallGraph;
+import abc.main.Main;
+import abc.tm.weaving.aspectinfo.TMGlobalAspectInfo;
 import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.matching.SMEdge;
 import abc.tm.weaving.matching.SMNode;
 import abc.tm.weaving.matching.TMStateMachine;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowRegistry;
+import abc.tm.weaving.weaver.tmanalysis.stages.CallGraphAbstraction;
 import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowMatchTag;
 import abc.tm.weaving.weaver.tmanalysis.util.SymbolFinder.SymbolShadowMatch;
+import abc.weaving.aspectinfo.AbcClass;
 
 /**
  * TransitionUtils
@@ -69,5 +83,41 @@ public class TransitionUtils {
 		else
 			return Collections.singleton(currentState);
 	}
-
+	
+	/**
+	 * Returns <code>true</code> if the given unit might transitively call another shadow.
+	 * This requires the {@link CallGraphAbstraction} to have run already.
+	 * @param unit any unit
+	 * @return <code>true</code> if there is an outgoing edge for this node in the abstracted call graph
+	 * @see CallGraphAbstraction#apply()
+	 */
+	public static boolean mayTransitivelyCallOtherShadow(Unit unit) {
+		CallGraph abstractedCallGraph = CallGraphAbstraction.v().abstractedCallGraph();
+		return abstractedCallGraph.edgesOutOf(unit).hasNext();
+	}
+	
+//	public static void testcase() {
+//		TMGlobalAspectInfo gai = (TMGlobalAspectInfo) Main.v().getAbcExtension().getGlobalAspectInfo();
+//		
+//		for (AbcClass abcClass : (Set<AbcClass>)gai.getWeavableClasses()) {
+//			SootClass sootClass = abcClass.getSootClass();
+//			for (final SootMethod method : (List<SootMethod>)sootClass.getMethods()) {
+//				if(method.hasActiveBody()) {
+//					new BodyTransformer() {
+//
+//						protected void internalTransform(Body b,
+//								String phaseName, Map options) {
+//							for (Stmt s : (Collection<Stmt>)b.getUnits()) {
+//								System.out.println(mayTransitivelyCallOtherShadow(s));
+//							}
+//							
+//						}
+//						
+//					}.transform(method.getActiveBody());
+//				}				
+//			}
+//		}
+//		
+//	}
+	
 }

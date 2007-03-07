@@ -62,7 +62,7 @@ public class CallGraphAbstraction extends AbstractAnalysisStage {
 	/**
 	 * {@inheritDoc}
 	 */
-	public void doAnalysis() {
+	protected void doAnalysis() {
         //set a main class from the options if none is set yet
         Scene.v().setMainClassFromOptions();
         
