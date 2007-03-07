@@ -42,7 +42,6 @@ import abc.tm.weaving.weaver.tmanalysis.stages.CallGraphAbstraction;
 import abc.tm.weaving.weaver.tmanalysis.stages.FlowInsensitiveAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.stages.QuickCheck;
 import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger;
-import abc.tm.weaving.weaver.tmanalysis.util.TransitionUtils;
 import abc.weaving.weaver.AbstractReweavingAnalysis;
 
 /**
@@ -167,9 +166,11 @@ public class TracematchAnalysis extends AbstractReweavingAnalysis {
     	}
 
     	FlowInsensitiveAnalysis.v().apply();
+    	//prune edges from the abstracted callgraph which become superflous due to shadows
+    	//removed by the flow-insensitive analysis
+    	CallGraphAbstraction.v().rebuildAbstractedCallGraph();
     	
     	Set<Shadow> initialShadows = InitialShadowFinder.v().findInitialShadows();
-    	System.out.println(initialShadows);
     	
 //        if(Debug.v().tmShadowGroupDump) {
 //        	shadowGroupDump();

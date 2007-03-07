@@ -25,6 +25,7 @@ import abc.tm.weaving.aspectinfo.TMGlobalAspectInfo;
 import abc.tm.weaving.aspectinfo.TMOptTraceMatch;
 import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.weaver.tmanalysis.query.Naming;
+import abc.tm.weaving.weaver.tmanalysis.query.ShadowRegistry;
 import abc.weaving.tagkit.InstructionShadowTag;
 
 /**
@@ -80,6 +81,13 @@ public class SymbolFinder extends ForwardFlowAnalysis {
 		 */
 		public Map<String, Local> getTmVarToAdviceLocal() {
 			return tmVarToAdviceLocal;
+		}
+		
+		/**
+		 * @return <code>true</code> if this shadow is enabled in the {@link ShadowRegistry}
+		 */
+		public boolean isEnabled() {
+			return ShadowRegistry.v().isEnabled(getUniqueShadowId());
 		}
 		
 		/**

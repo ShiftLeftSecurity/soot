@@ -10,8 +10,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import edu.berkeley.pa.csdemand.DemandCSPointsTo;
-
 import soot.Body;
 import soot.MethodOrMethodContext;
 import soot.PackManager;
@@ -29,7 +27,9 @@ import abc.tm.weaving.weaver.tmanalysis.query.Naming;
 import abc.tm.weaving.weaver.tmanalysis.query.ReachableShadowFinder;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowRegistry;
 import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowMatchTag;
+import abc.tm.weaving.weaver.tmanalysis.util.SymbolFinder.SymbolShadowMatch;
 import abc.weaving.weaver.Weaver;
+import edu.berkeley.pa.csdemand.DemandCSPointsTo;
 
 /**
  * This stage does not actually perform any real analysis. It merely applies the <i>cg</i> phase, constructing a call graph
@@ -109,6 +109,15 @@ public class CallGraphAbstraction extends AbstractAnalysisStage {
 	}
 	
 	/**
+	 * Rebuilds the abstracted callgraph. This is desirable after additional shadows have been removed, because
+	 * then after re-abstraction edges to methods containing those removed shadows can be removed as well.
+	 */
+	public void rebuildAbstractedCallGraph() {
+		CallGraph callGraph = Scene.v().getCallGraph();
+        abstractedCallGraph = new SomewhatAbstractedCallGraph(callGraph, ONLY_METHODS_WITH_MATCHED_UNITS);
+	}
+	
+	/**
 	 * Returns the abstracted call graph. This graph holds no edges for methods which are not of interest to the analysis. 
 	 * @return the abstracted call graph
 	 */
@@ -148,8 +157,15 @@ public class CallGraphAbstraction extends AbstractAnalysisStage {
 	            
 	            for (Iterator iter = body.getUnits().iterator(); iter.hasNext();) {
 	                Unit u = (Unit) iter.next();
+	                //if we have a tag
 	                if(u.hasTag(SymbolShadowMatchTag.NAME)) {
-	                    return true;
+	                	SymbolShadowMatchTag tag = (SymbolShadowMatchTag) u.getTag(SymbolShadowMatchTag.NAME);
+						//if any shadows in the tag are still enabled 
+	                	for (SymbolShadowMatch match : tag.getAllMatches()) {
+							if(match.isEnabled()) {
+								return true;
+							}
+						}
 	                }
 	            }
 	        }

@@ -18,7 +18,6 @@ import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.matching.SMEdge;
 import abc.tm.weaving.matching.SMNode;
 import abc.tm.weaving.matching.TMStateMachine;
-import abc.tm.weaving.weaver.tmanalysis.query.ShadowRegistry;
 import abc.tm.weaving.weaver.tmanalysis.stages.CallGraphAbstraction;
 import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowMatchTag;
 import abc.tm.weaving.weaver.tmanalysis.util.SymbolFinder.SymbolShadowMatch;
@@ -51,7 +50,7 @@ public class TransitionUtils {
 		//for all shadow matches registered in the tag
 		for (SymbolShadowMatch match : tag.getMatchesForTracematch(tm)) {
 			//if the shadow is still enabled
-			if(ShadowRegistry.v().enabledShadows().contains(match.getUniqueShadowId())) {
+			if(match.isEnabled()) {
 				
 				//add all states which we can reach directly via this symbol
 				String symbolName = match.getSymbolName();

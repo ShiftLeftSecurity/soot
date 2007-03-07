@@ -276,6 +276,14 @@ public class ShadowRegistry {
 		}
 		return number.intValue();
 	}
+	
+	/**
+     * Returns <code>true</code> if the shadow with this unique id is still enabled.
+	 */
+	public boolean isEnabled(String uniqueShadowId) {
+		assert allShadowsToAdviceApplications.keySet().contains(uniqueShadowId);
+		return enabledShadows.contains(uniqueShadowId);
+	}
 
 	
 	//singleton pattern

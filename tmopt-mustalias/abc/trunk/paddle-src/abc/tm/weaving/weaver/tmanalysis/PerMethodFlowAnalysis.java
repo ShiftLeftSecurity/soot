@@ -149,7 +149,7 @@ public class PerMethodFlowAnalysis extends ForwardFlowAnalysis implements TMFlow
 		ConfigurationBox cout = (ConfigurationBox) out;
 		Configuration inConfig = cin.get();
 
-		Set shadows = Shadow.allShadowsForHostAndTM(s, container, tracematch);
+		Set shadows = Shadow.allActiveShadowsForHostAndTM(s, container, tracematch);
 
 		Configuration outConfig;
 		
