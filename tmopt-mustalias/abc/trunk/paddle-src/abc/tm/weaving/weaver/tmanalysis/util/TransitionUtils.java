@@ -6,24 +6,14 @@
  */
 package abc.tm.weaving.weaver.tmanalysis.util;
 
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-import soot.Body;
-import soot.BodyTransformer;
-import soot.SootClass;
-import soot.SootMethod;
 import soot.Unit;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.callgraph.CallGraph;
-import abc.main.Main;
-import abc.tm.weaving.aspectinfo.TMGlobalAspectInfo;
 import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.matching.SMEdge;
 import abc.tm.weaving.matching.SMNode;
@@ -32,7 +22,6 @@ import abc.tm.weaving.weaver.tmanalysis.query.ShadowRegistry;
 import abc.tm.weaving.weaver.tmanalysis.stages.CallGraphAbstraction;
 import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowMatchTag;
 import abc.tm.weaving.weaver.tmanalysis.util.SymbolFinder.SymbolShadowMatch;
-import abc.weaving.aspectinfo.AbcClass;
 
 /**
  * TransitionUtils
