@@ -50,8 +50,8 @@ public class NeverStoredAnnotator extends SceneTransformer {
             {
                 SootMethod m = (SootMethod)mIt.next();
 
-                // Abstract methods are harmless.
-                if (m.isAbstract())
+                // Abstract methods are harmless.  Natives aren't, but they're too hard; let's assume they're harmless.
+                if (m.isAbstract() || m.isNative())
                     continue;
 
                 Body b = m.retrieveActiveBody();
