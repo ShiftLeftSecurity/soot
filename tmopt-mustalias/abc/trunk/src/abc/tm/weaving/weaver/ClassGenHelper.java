@@ -2107,7 +2107,7 @@ public class ClassGenHelper {
             List switchValues = new LinkedList();
             List switchLabels = new LinkedList();
             List incomingNodes = new LinkedList();
-            Iterator stateIt = ((TMStateMachine)curTraceMatch.getStateMachine()).getStateIterator();
+            Iterator stateIt = curTraceMatch.getStateMachine().getStateIterator();
             while(stateIt.hasNext()) {
                 SMNode state = (SMNode)stateIt.next();
                 if(state.hasInEdgeWithLabel(symbol)) {
@@ -2174,7 +2174,7 @@ public class ClassGenHelper {
                 // (a) S doesn't bind X, or
                 // (b) S binds X weakly, but the current state binds it strongly.
                 // Thus, we keep, for each predecessor state S, a list of variables which need to be reassigned.
-                Iterator nodeIt = ((TMStateMachine)curTraceMatch.getStateMachine()).getStateIterator();
+                Iterator nodeIt = curTraceMatch.getStateMachine().getStateIterator();
                 List predecessorStates = new LinkedList();
                 Map varsForState = new HashMap();
                 switchLabels = new LinkedList();
@@ -2384,7 +2384,7 @@ public class ClassGenHelper {
             List jumpToLabels = new LinkedList(); // list of labels for the switch statement
             List jumpOnValues = new LinkedList(); // list of IntConstants for the switch statement
             
-            Iterator stateIt = ((TMStateMachine)curTraceMatch.getStateMachine()).getStateIterator();
+            Iterator stateIt = curTraceMatch.getStateMachine().getStateIterator();
             while(stateIt.hasNext()) {
                 SMNode curNode = (SMNode)stateIt.next();
                 // if all variables are bound and the state has a skip loop for this symbol -- we want to optimise it.
@@ -2692,7 +2692,7 @@ public class ClassGenHelper {
         List switchValues = new LinkedList();
         List switchLabels = new LinkedList();
         List affectedStates = new LinkedList();
-        Iterator stateIt = ((TMStateMachine)curTraceMatch.getStateMachine()).getStateIterator();
+        Iterator stateIt = curTraceMatch.getStateMachine().getStateIterator();
         while(stateIt.hasNext()) {
             SMNode state = (SMNode)stateIt.next();
             // States which have no collectableWeakRefs are always valid.
@@ -3874,8 +3874,7 @@ public class ClassGenHelper {
     protected Map addIndLookupSwitch(Local lookup_key, Stmt default_label,
                                      boolean names_matter)
     {
-        TMStateMachine sm = ((TMStateMachine) curTraceMatch.getStateMachine());
-        Iterator states = sm.getStateIterator();
+        Iterator states = curTraceMatch.getStateMachine().getStateIterator();
         Map case_to_label = new HashMap();
 
         List lookup_values = new LinkedList();
@@ -3925,7 +3924,7 @@ public class ClassGenHelper {
 	protected Map addStateLookupSwitch(Local key, Stmt labelDefault, boolean nonIndexingToDefault) {
 		List switchValues = new LinkedList(), switchLabels = new LinkedList();
 		Map stateToLabel = new HashMap();
-		for(Iterator stateIt = ((TMStateMachine)curTraceMatch.getStateMachine()).getStateIterator(); 
+		for(Iterator stateIt = curTraceMatch.getStateMachine().getStateIterator(); 
 						stateIt.hasNext(); ) {
 			SMNode state = (SMNode) stateIt.next();
 			

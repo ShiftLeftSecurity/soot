@@ -31,7 +31,7 @@ import java.util.Map.Entry;
 import soot.jimple.Stmt;
 import abc.tm.weaving.matching.SMEdge;
 import abc.tm.weaving.matching.SMNode;
-import abc.tm.weaving.matching.TMStateMachine;
+import abc.tm.weaving.matching.StateMachine;
 import abc.tm.weaving.weaver.tmanalysis.TMFlowAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.VariableSMEdgeFactory.SMVariableEdge;
 import abc.tm.weaving.weaver.tmanalysis.query.Naming;
@@ -122,7 +122,7 @@ public class Configuration implements Cloneable {
 		//the shadow id
 		final String shadowId = shadow.getUniqueShadowId();//edge.getQualifiedShadowId();
 		//all variables of the state machine
-		final TMStateMachine sm = (TMStateMachine) analysis.getTracematch().getStateMachine();
+		final StateMachine sm = analysis.getTracematch().getStateMachine();
 		final Collection allVariables =
 			Collections.unmodifiableCollection(analysis.getTracematch().getVariableOrder(symbolName));
 
@@ -228,7 +228,7 @@ public class Configuration implements Cloneable {
 //		 * if we now only iterated once, "a" would not reach the final state - we need to iterate at least twice  
 //		 */
 //		
-//		TMStateMachine sm = (TMStateMachine) analysis.getTracematch().getStateMachine();		
+//		StateMachine sm = analysis.getTracematch().getStateMachine();		
 //		for(int i=0;i<sm.size();i++) {
 //			copy = copy.processActiveThreads();
 //		}

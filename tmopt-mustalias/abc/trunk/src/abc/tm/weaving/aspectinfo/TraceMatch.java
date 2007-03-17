@@ -278,7 +278,7 @@ public class TraceMatch
 
 	public int[] getIndexingDepths()
 	{
-		TMStateMachine sm = (TMStateMachine) state_machine;
+		StateMachine sm = state_machine;
 		boolean[] depths = new boolean[sm.getNumberOfStates()];
 		Iterator states = sm.getStateIterator();
 
@@ -603,9 +603,8 @@ public class TraceMatch
 	 * @return whether the associated state machine contains an edge with that label
 	 */
 	protected boolean stateMachineHasAnyEdgeWithSymbol(String symbolName) {
-		TMStateMachine sm = (TMStateMachine) getStateMachine();
 		boolean foundSymbol = false;						
-		for (Iterator edgeIter = sm.getEdgeIterator(); edgeIter.hasNext();) {
+		for (Iterator edgeIter = getStateMachine().getEdgeIterator(); edgeIter.hasNext();) {
 			SMEdge edge = (SMEdge) edgeIter.next();
 			
 			if(edge.getLabel().equals(symbolName)) {

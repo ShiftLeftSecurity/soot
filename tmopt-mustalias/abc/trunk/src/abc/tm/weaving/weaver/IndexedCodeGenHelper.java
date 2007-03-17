@@ -272,7 +272,7 @@ public class IndexedCodeGenHelper extends CodeGenHelper
         // if this state is indexed, and the symbol that
         // triggered this method call binds all the indices,
         // then add them to the "queue" call
-        TMStateMachine sm = (TMStateMachine) tm.getStateMachine();
+        StateMachine sm = tm.getStateMachine();
         SMNode node = sm.getStateByNumber(state);
         List sym_binds = tm.getVariableOrder(symbol);
 
@@ -325,7 +325,7 @@ public class IndexedCodeGenHelper extends CodeGenHelper
         }
 
         SootClass container = tm.getLabelsClass();
-        TMStateMachine sm = (TMStateMachine) tm.getStateMachine();
+        StateMachine sm = tm.getStateMachine();
         Iterator states = sm.getStateIterator();
 
         SootMethod init =

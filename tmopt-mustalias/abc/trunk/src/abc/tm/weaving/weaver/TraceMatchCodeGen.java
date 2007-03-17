@@ -65,8 +65,7 @@ public class TraceMatchCodeGen {
     protected void fillInSymbolAdviceBody(String symbol, SootMethod method,
                                             TraceMatch tm, CodeGenHelper helper)
     {
-        TMStateMachine sm = (TMStateMachine) tm.getStateMachine();
-        Iterator to_states = sm.getStateIterator();
+        Iterator to_states = tm.getStateMachine().getStateIterator();
 
         while (to_states.hasNext()) {
             SMNode to = (SMNode) to_states.next();
@@ -102,8 +101,7 @@ public class TraceMatchCodeGen {
     protected void fillInSomeAdviceBody(SootMethod method, TraceMatch tm,
                                     CodeGenHelper helper)
     {
-        TMStateMachine sm = (TMStateMachine) tm.getStateMachine();
-        Iterator states = sm.getStateIterator();
+        Iterator states = tm.getStateMachine().getStateIterator();
 
         helper.genReturnIfNotUpdated(method);
 

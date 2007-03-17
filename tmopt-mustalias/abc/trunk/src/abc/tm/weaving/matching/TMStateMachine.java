@@ -1118,7 +1118,7 @@ public class TMStateMachine implements StateMachine {
 	 * Checks if the transition struture of this automaton is conistent,
 	 * i.e. the automaton contains all nodes all its edges point to
 	 * and no node refers to an edge that is not in its edge set.
-	 * Should be used garded by <code>assert</code> or a debug flag to
+	 * Should be used guarded by <code>assert</code> or a debug flag to
 	 * avoid unnecessary overheads at deployment time.
 	 * @return <code>true</code> if this automaton is consistent
 	 */

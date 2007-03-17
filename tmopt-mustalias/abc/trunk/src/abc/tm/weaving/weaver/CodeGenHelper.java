@@ -1223,8 +1223,7 @@ public class CodeGenHelper
         }
 
         SootClass container = tm.getLabelsClass();
-        TMStateMachine sm = (TMStateMachine) tm.getStateMachine();
-        Iterator states = sm.getStateIterator();
+        Iterator states = tm.getStateMachine().getStateIterator();
 
         SootMethod init =
             container.getMethodByName(SootMethod.constructorName);

@@ -94,7 +94,7 @@ public class ShadowRegistry {
 		disabledShadows = new HashSet();
 		shadowsToBeRetained = new HashSet();
 		
-		//instantly remove tracematches from the system, which have no matches at all
+		//instantly remove tracematches from the system which have no matches at all
 		removeTracematchesWithNoRemainingShadows();
 	}
 	
