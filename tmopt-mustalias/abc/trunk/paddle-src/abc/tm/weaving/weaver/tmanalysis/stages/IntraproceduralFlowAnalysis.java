@@ -25,6 +25,7 @@ import abc.tm.weaving.matching.SMEdge;
 import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.weaver.tmanalysis.ShadowSMEdgeFactory.SMShadowEdge;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.StatePropagatorFlowAnalysis;
+import abc.tm.weaving.weaver.tmanalysis.query.Naming;
 import abc.tm.weaving.weaver.tmanalysis.query.TraceMatchByName;
 import abc.tm.weaving.weaver.tmanalysis.query.Shadow;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroup;
@@ -55,17 +56,18 @@ public class IntraproceduralFlowAnalysis extends AbstractAnalysisStage {
 	protected void doAnalysis() {
         Set reachableShadows = ReachableShadowFinder.v().reachableShadows(CallGraphAbstraction.v().abstractedCallGraph());
         // split shadows by tracematch
-        Map<Shadow, Shadow> tmNameToShadows = ShadowsPerTMSplitter.v().splitShadows(reachableShadows);
+        Map<String, Set<Shadow>> tmNameToShadows = ShadowsPerTMSplitter.v().splitShadows(reachableShadows);
 
-		Set shadowGroups = ShadowGroupRegistry.v().getAllShadowGroups();
+//		Set shadowGroups = ShadowGroupRegistry.v().getAllShadowGroups();
 		Map<ShadowGroup, Shadow> initialShadowMap
 			= InitialShadowFinder.v().findInitialShadows();
-		Set<Shadow> initialShadows = new HashSet();
-		for (Entry<ShadowGroup, Shadow> e : initialShadowMap.entrySet()) 
-			initialShadows.add(e.getValue());
+		Set<Shadow> initialShadows = new HashSet(initialShadowMap.values());
+//		for (Entry<ShadowGroup, Shadow> e : initialShadowMap.entrySet()) 
+//			initialShadows.add(e.getValue());
 
-        for (Iterator keyIter = tmNameToShadows.keySet().iterator(); keyIter.hasNext();) {
-			String tmName = (String) keyIter.next();
+		//for each initial shadow
+        for (Shadow initialShadow: initialShadows) {
+        	String tmName = Naming.getTracematchName(initialShadow.getUniqueShadowId());
 			TraceMatch traceMatch = TraceMatchByName.v().get(tmName);
 
 			// Each ShadowSMEdge knows what Shadow it's carrying.
@@ -73,6 +75,7 @@ public class IntraproceduralFlowAnalysis extends AbstractAnalysisStage {
 			// Shadows change the current SMNode in the state...
 			Map<String, SMEdge> shadowIdsToSMEdges = new HashMap<String, SMEdge>();
 
+//FIXME there can be multiple edges with the same label			
 			Iterator<SMEdge> it = traceMatch.getStateMachine().getEdgeIterator();
 			while (it.hasNext()) {
 				SMEdge e = it.next();
@@ -80,16 +83,18 @@ public class IntraproceduralFlowAnalysis extends AbstractAnalysisStage {
 			}
 
 			// locate initial shadow for that tracematch.
-			Set<Shadow> thisTMsShadows = (Set<Shadow>) tmNameToShadows.get(tmName);
+			Set<Shadow> thisTMsShadows = tmNameToShadows.get(tmName);
 			for (Shadow s : thisTMsShadows) {
 				if (initialShadows.contains(s)) {
 					SootMethod m = s.getContainer();
+//FIXME here we want the unique (?) state after reading the initial symbol, I guess
 					SMEdge e = shadowIdsToSMEdges.get(s.getUniqueShadowId());
 					SMNode initialState = e.getTarget();
 
 					StatePropagatorFlowAnalysis.SmMaPair p = StatePropagatorFlowAnalysis.newSmMaPair(initialState, s.getBoundLocals());
 
 					// Now propagate p through the procedure.
+					//TODO is it safe enough to use a BriefUnitGraph or do we want an ExceptionalUnitGraph?
 					StatePropagatorFlowAnalysis a = new StatePropagatorFlowAnalysis(m, new BriefUnitGraph(m.retrieveActiveBody()), 
 																					s, p, shadowIdsToSMEdges);
 
