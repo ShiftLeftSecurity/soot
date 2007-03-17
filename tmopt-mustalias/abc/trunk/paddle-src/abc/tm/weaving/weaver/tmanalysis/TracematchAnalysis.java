@@ -30,7 +30,6 @@ import abc.tm.weaving.aspectinfo.TMGlobalAspectInfo;
 import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.matching.TMStateMachine;
 import abc.tm.weaving.weaver.tmanalysis.dynamicinstr.DynamicInstrumenter;
-import abc.tm.weaving.weaver.tmanalysis.query.InitialShadowFinder;
 import abc.tm.weaving.weaver.tmanalysis.query.ReachableShadowFinder;
 import abc.tm.weaving.weaver.tmanalysis.query.Shadow;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroupRegistry;
@@ -40,6 +39,7 @@ import abc.tm.weaving.weaver.tmanalysis.query.TraceMatchByName;
 import abc.tm.weaving.weaver.tmanalysis.query.WeavableMethods;
 import abc.tm.weaving.weaver.tmanalysis.stages.CallGraphAbstraction;
 import abc.tm.weaving.weaver.tmanalysis.stages.FlowInsensitiveAnalysis;
+import abc.tm.weaving.weaver.tmanalysis.stages.IntraproceduralFlowAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.stages.QuickCheck;
 import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger;
 import abc.weaving.weaver.AbstractReweavingAnalysis;
@@ -155,9 +155,6 @@ public class TracematchAnalysis extends AbstractReweavingAnalysis {
     		return;
     	}
 
-        //perform intraprocedural analyses
-        //intraproceduralAnalyses();
-        
         //build the abstracted call graph
         CallGraphAbstraction.v().apply();
         
@@ -170,13 +167,11 @@ public class TracematchAnalysis extends AbstractReweavingAnalysis {
     	//removed by the flow-insensitive analysis
     	CallGraphAbstraction.v().rebuildAbstractedCallGraph();
     	
-    	Set<Shadow> initialShadows = InitialShadowFinder.v().findInitialShadows();
-    	
 //        if(Debug.v().tmShadowGroupDump) {
 //        	shadowGroupDump();
 //        }
 
-    	//IntraproceduralFlowAnalysis.v().apply();
+    	IntraproceduralFlowAnalysis.v().apply();
     	
     	
     	if(!ShadowRegistry.v().enabledShadowsLeft() || laststage.equals("flowins")) {
@@ -347,7 +342,6 @@ public class TracematchAnalysis extends AbstractReweavingAnalysis {
 		FlowInsensitiveAnalysis.reset();
 		QuickCheck.reset();
 		ShadowGroupRegistry.reset();
-		InitialShadowFinder.reset();
 		TMShadowTagger.reset();
 	}
 

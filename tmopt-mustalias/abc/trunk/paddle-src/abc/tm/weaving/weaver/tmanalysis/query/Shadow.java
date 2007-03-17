@@ -10,6 +10,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
@@ -43,6 +45,8 @@ public class Shadow {
 	protected boolean hasEmptyMapping;
 
 	protected final SootMethod container;
+
+	protected List<Local> boundLocals;
 	
 //	/**
 //	 * @param variableMapping
@@ -63,6 +67,7 @@ public class Shadow {
 		this.hasEmptyMapping = false;
 		this.container = container;
 		this.uniqueShadowId = match.getUniqueShadowId();
+		this.boundLocals = null;
 		importVariableMapping(match.getTmVarToAdviceLocal(), container);
 	}
 
@@ -85,7 +90,7 @@ public class Shadow {
 		return result;
 	}
 	
-	public static Set allActiveShadowsForHost(Host h, SootMethod container) {
+	public static Set<Shadow> allActiveShadowsForHost(Host h, SootMethod container) {
 		if(h.hasTag(SymbolShadowMatchTag.NAME)) {
 			SymbolShadowMatchTag tag = (SymbolShadowMatchTag) h.getTag(SymbolShadowMatchTag.NAME);
 			return allActiveShadowsForTag(tag, container);
@@ -109,6 +114,7 @@ public class Shadow {
 	}
 	
 	public void importVariableMapping(Map<String,Local> mapping, SootMethod container)  {
+		assert boundLocals == null;
 		
 		varToPointsToSet = new HashMap();
 		varToSootLocal = new HashMap();
@@ -208,14 +214,27 @@ public class Shadow {
 	public Set getBoundVariables() {
 		return Collections.unmodifiableSet(new HashSet(varToPointsToSet.keySet()));
 	}
-	;
+
+	// TODO generalize for must-alias info, or factor it back out to callers or something.
+    public List<Local> getBoundLocals() {
+		if (this.boundLocals != null)
+			return this.boundLocals;
+
+		boundLocals = new LinkedList<Local>();
+		for (Object var : getBoundVariables()) {
+			boundLocals.add(getLocalForVarName((String)var));
+		}
+		boundLocals = Collections.unmodifiableList(boundLocals);
+		return boundLocals;
+	}
+	
 	public boolean hasVariableMapping() {
 		return varToPointsToSet!=null;
 	}
 
 	
 	/**
-	 * TODO comment
+	 * Returns the points-to set corresponding to shadow bound variable v.
 	 * @param v
 	 * @return
 	 */
