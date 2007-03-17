@@ -63,14 +63,13 @@ public class FlowInsensitiveAnalysis extends AbstractAnalysisStage {
         Set allConsistentShadowGroups = new LinkedHashSet();
         
         //for each "tracematch-name to shadows" mapping 
-        for (Iterator entryIter = tmNameToShadows.entrySet().iterator(); entryIter.hasNext();) {
-			Entry entry = (Entry) entryIter.next();
-			String tmName = (String) entry.getKey();
+        for (Iterator keyIter = tmNameToShadows.keySet().iterator(); keyIter.hasNext();) {
+			String tmName = (String) keyIter.next();
 			TraceMatch traceMatch = TraceMatchByName.v().get(tmName);
 			
 			//find the sets of labels that dominate final states along each path
 			domEdgesTimer.startOrResume();
-			DominatorEdgeLabels del = new DominatorEdgeLabels((TMStateMachine) traceMatch.getStateMachine());
+			DominatorEdgeLabels del = new DominatorEdgeLabels((TMStateMachine)traceMatch.getStateMachine());
 			Set pathInfos = del.getPathInfos();
 			domEdgesTimer.stop();
 			
