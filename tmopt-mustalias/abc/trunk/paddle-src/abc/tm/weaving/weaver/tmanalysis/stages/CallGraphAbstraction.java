@@ -74,15 +74,11 @@ public class CallGraphAbstraction extends AbstractAnalysisStage {
         cgTimer.stop();
 		logToStatistics("cg-phase-time", cgTimer);
 		
-		System.err.println("cg done");
-		
 		if(Debug.v().onDemand) {
 			PointsToAnalysis onDemandAnalysis = DemandCSPointsTo.makeDefault();
 			Scene.v().setPointsToAnalysis(onDemandAnalysis);
 		}
 
-		System.err.println("on demand analysis created");
-		
 		CallGraph callGraph = Scene.v().getCallGraph();
 
 		logToStatistics("cg-size-original", callGraph.size());
