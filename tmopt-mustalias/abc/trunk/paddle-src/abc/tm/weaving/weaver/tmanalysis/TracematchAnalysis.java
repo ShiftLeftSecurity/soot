@@ -20,7 +20,6 @@ package abc.tm.weaving.weaver.tmanalysis;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import abc.main.AbcTimer;
 import abc.main.Debug;
@@ -31,7 +30,6 @@ import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.matching.TMStateMachine;
 import abc.tm.weaving.weaver.tmanalysis.dynamicinstr.DynamicInstrumenter;
 import abc.tm.weaving.weaver.tmanalysis.query.ReachableShadowFinder;
-import abc.tm.weaving.weaver.tmanalysis.query.Shadow;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroupRegistry;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroupStatistics;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowRegistry;
@@ -39,7 +37,7 @@ import abc.tm.weaving.weaver.tmanalysis.query.TraceMatchByName;
 import abc.tm.weaving.weaver.tmanalysis.query.WeavableMethods;
 import abc.tm.weaving.weaver.tmanalysis.stages.CallGraphAbstraction;
 import abc.tm.weaving.weaver.tmanalysis.stages.FlowInsensitiveAnalysis;
-import abc.tm.weaving.weaver.tmanalysis.stages.IntraproceduralFlowAnalysis;
+import abc.tm.weaving.weaver.tmanalysis.stages.IntraproceduralAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.stages.QuickCheck;
 import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger;
 import abc.weaving.weaver.AbstractReweavingAnalysis;
@@ -171,7 +169,7 @@ public class TracematchAnalysis extends AbstractReweavingAnalysis {
 //        	shadowGroupDump();
 //        }
 
-    	IntraproceduralFlowAnalysis.v().apply();
+    	IntraproceduralAnalysis.v().apply();
     	
     	
     	if(!ShadowRegistry.v().enabledShadowsLeft() || laststage.equals("flowins")) {
