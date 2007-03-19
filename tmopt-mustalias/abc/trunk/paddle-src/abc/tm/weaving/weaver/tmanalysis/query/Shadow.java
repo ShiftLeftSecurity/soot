@@ -24,6 +24,8 @@ import soot.Scene;
 import soot.SootMethod;
 import soot.jimple.toolkits.pointer.FullObjectSet;
 import soot.tagkit.Host;
+import abc.main.Main;
+import abc.tm.weaving.aspectinfo.TMGlobalAspectInfo;
 import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.weaver.tmanalysis.ds.PaddlePointsToSetCompatibilityWrapper;
 import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowMatchTag;
@@ -323,6 +325,13 @@ public class Shadow {
 	 */
 	public SootMethod getContainer() {
 		return container;
+	}
+	
+	public TraceMatch getTraceMatch() {
+		//TODO optimize by storing reference at construction time
+		String tmName = Naming.getTracematchName(getUniqueShadowId());
+		TMGlobalAspectInfo gai = (TMGlobalAspectInfo) Main.v().getAbcExtension().getGlobalAspectInfo();
+		return gai.traceMatchByName(tmName);		
 	}
 	
 	
