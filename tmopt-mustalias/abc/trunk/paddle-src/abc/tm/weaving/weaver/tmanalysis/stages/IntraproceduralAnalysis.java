@@ -40,13 +40,16 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 		Map<ShadowGroup, Shadow> initialShadowMap
 			= InitialShadowFinder.v().findInitialShadows();
 		Set<Shadow> initialShadows = new HashSet(initialShadowMap.values());
-
+		
 		//for each initial shadow
         for (Shadow initialShadow: initialShadows) {
 
 			// Now propagate p through the procedure.
 			//TODO is it safe enough to use a BriefUnitGraph or do we want an ExceptionalUnitGraph?
-			StatePropagatorFlowAnalysis a = new StatePropagatorFlowAnalysis(new BriefUnitGraph(initialShadow.getContainer().retrieveActiveBody()),initialShadow);
+			StatePropagatorFlowAnalysis a = new StatePropagatorFlowAnalysis(
+					new BriefUnitGraph(initialShadow.getContainer().retrieveActiveBody()),
+					initialShadow,
+					CallGraphAbstraction.v().abstractedCallGraph());
 
 			System.err.println(initialShadow);
 			System.err.println(initialShadow.getContainer());
