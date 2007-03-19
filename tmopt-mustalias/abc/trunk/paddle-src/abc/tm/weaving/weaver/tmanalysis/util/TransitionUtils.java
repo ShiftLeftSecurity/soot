@@ -6,6 +6,7 @@
  */
 package abc.tm.weaving.weaver.tmanalysis.util;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -31,13 +32,16 @@ public class TransitionUtils {
 	
 	/**
 	 * For any state of a {@link TMStateMachine} of {@link TraceMatch} tm, returns the successor states
-	 * under the statement stmt. 
+	 * under the statement stmt. Note that <i>skip</i>-loops are treated the following way:
+	 * If we are in state <i>s</i> , read symbol <i>a</i> and <i>s</i> has a <i>skip</i>-loop labeled
+	 * <i>skip<a></i> then we return the set of all initial states ant <b>not</b> <i>s</i>.
 	 * @param currentState the current state of the tracematch automaton
 	 * @param tm the tracematch owning that state
 	 * @param stmt any statement; tagged with a tracematch shadow
+	 * @param initial states of <code>tm</code>
 	 * @return
 	 */
-	public static Set<SMNode> getSuccessorStatesFor(SMNode currentState, TraceMatch tm, Stmt stmt) {
+	public static Set<SMNode> getSuccessorStatesFor(SMNode currentState, TraceMatch tm, Stmt stmt, Collection<SMNode> initialStates) {
 		//if the current statement is not tagged, we don't switch states
 		if(!stmt.hasTag(SymbolShadowMatchTag.NAME)) {
 			return Collections.singleton(currentState);
@@ -56,8 +60,13 @@ public class TransitionUtils {
 				String symbolName = match.getSymbolName();
 				for (Iterator edgeIter = currentState.getOutEdgeIterator(); edgeIter.hasNext();) {
 					SMEdge edge = (SMEdge) edgeIter.next();
+					//if we have a skip edge, we get back to the initial configuration
 					if(edge.getLabel().equals(symbolName)) {
-						res.add(edge.getTarget());
+						if(edge.isSkipEdge()) {
+							res.addAll(initialStates);
+						} else {
+							res.add(edge.getTarget());
+						}
 					}
 				}
 				
