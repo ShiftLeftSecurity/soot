@@ -78,7 +78,8 @@ public class StatePropagatorFlowAnalysis extends ForwardFlowAnalysis {
 		//
 		this.traceMatch = initialShadow.getTraceMatch();
 		this.boundLocals = new HashSet<Local>();
-		
+		//for each bound advice local find the (hopefully unique?) local which is assigned to it
+		//TODO we might want to make this a little more stable and failsafe
 		for (Stmt s : (Collection<Stmt>)g.getBody().getUnits()) {
 			for (ValueBox defBox : (Collection<ValueBox>)s.getDefBoxes()) {
 				if(initialShadow.getBoundLocals().contains(defBox.getValue())) {
