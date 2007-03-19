@@ -29,6 +29,25 @@ import abc.tm.weaving.weaver.tmanalysis.util.TransitionUtils;
  * represents the fact that the automaton we're tracking may have multiple states
  * at that program point.
  *
+ * FIXME This implementation is still not 100% sound, at least for the following reasons:
+ * 
+ * 1.) Skip loops: We can only assume that a skip-loop takes us back to an initial state
+ *   if we know that it refers to the same object as the initial shadow. Right now we do not
+ *   check this. Assume the following example:
+ *   i = c.iterator();
+ *   i2 = c.iterator();
+ *   if(i.hasNext()) {
+ *     i.next();
+ *     if(i2.hasNext) {  //here we go back to the initial state which is wrong
+ *       i.next();
+ *     }
+ *   }
+ *     
+ *  2.) Initial configuration: We have to make sure that we enter the initial shadow in this
+ *    method with an initial configuration.
+ *    
+ *  3.) Thread safety: Right now, we do not take threads into account.
+ *
  * @author Eric Bodden
  * @author Patrick Lam
  */
