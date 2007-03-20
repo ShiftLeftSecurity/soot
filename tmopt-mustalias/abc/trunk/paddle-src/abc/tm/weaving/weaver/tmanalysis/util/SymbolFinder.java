@@ -51,13 +51,13 @@ public class SymbolFinder extends ForwardFlowAnalysis {
 		
 		private final String uniqueShadowId;
 		
-		private Map<String,Local> tmVarToAdviceLocal;
+		private Map<String,Local> tmFormalToAdviceLocal;
 
 		private SymbolShadowMatch(String symbolName,
 				Map<String, Local> tmVarToAdviceLocal, int shadowId, TraceMatch owner) {
 			super();
 			this.symbolName = symbolName;
-			this.tmVarToAdviceLocal = tmVarToAdviceLocal;
+			this.tmFormalToAdviceLocal = tmVarToAdviceLocal;
 			this.owner = owner;
 			this.uniqueShadowId = Naming.uniqueShadowID(owner.getName(),symbolName,shadowId).intern();
 		}
@@ -77,10 +77,10 @@ public class SymbolFinder extends ForwardFlowAnalysis {
 		}
 
 		/**
-		 * @return the tmVarToAdviceLocal
+		 * @return the tmFormalToAdviceLocal
 		 */
-		public Map<String, Local> getTmVarToAdviceLocal() {
-			return tmVarToAdviceLocal;
+		public Map<String, Local> getTmFormalToAdviceLocal() {
+			return tmFormalToAdviceLocal;
 		}
 		
 		/**
@@ -96,7 +96,7 @@ public class SymbolFinder extends ForwardFlowAnalysis {
 		public String toString() {
 			return "symbol:  " + symbolName + "\n" +
 				"tracematch: " + owner.getName()+ "\n" +
-				"variables:  " + tmVarToAdviceLocal + "\n" +
+				"variables:  " + tmFormalToAdviceLocal + "\n" +
 				"shadow:     " + uniqueShadowId;				
 		}
 

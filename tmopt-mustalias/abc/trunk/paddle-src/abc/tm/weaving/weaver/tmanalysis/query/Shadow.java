@@ -42,6 +42,8 @@ public class Shadow {
 
 	protected Map varToSootLocal;		
 
+	protected Map sootLocalToVar;		
+
 	protected String uniqueShadowId;
 
 	protected boolean hasEmptyMapping;
@@ -70,7 +72,7 @@ public class Shadow {
 		this.container = container;
 		this.uniqueShadowId = match.getUniqueShadowId();
 		this.boundLocals = null;
-		importVariableMapping(match.getTmVarToAdviceLocal(), container);
+		importVariableMapping(match.getTmFormalToAdviceLocal(), container);
 	}
 
 	public static Set allActiveShadowsForTag(SymbolShadowMatchTag tag, SootMethod container) {
@@ -86,7 +88,7 @@ public class Shadow {
 //			
 //			Map mapping = tag.getVariableMappingForSymbol(symbolId);
 //			String uniqueShadowId = tag.getMatchingUniqueShadowID(symbolId);
-//			
+//			)
 //			result.add(new Shadow(uniqueShadowId,mapping,container));
 //		}
 		return result;
@@ -120,6 +122,7 @@ public class Shadow {
 		
 		varToPointsToSet = new HashMap();
 		varToSootLocal = new HashMap();
+		sootLocalToVar = new HashMap();
 		
 		for (Entry<String,Local> entry : mapping.entrySet()) {
 
@@ -150,56 +153,12 @@ public class Shadow {
 			String varName = entry.getKey();
 			varToPointsToSet.put(varName,pts);
 			varToSootLocal.put(varName, l);
-			
+			assert !sootLocalToVar.containsKey(l);
+			sootLocalToVar.put(l, varName);
 		}
-		
-//		if(varToPointsToSet!=null) {
-//			throw new IllegalStateException("mapping already set");
-//		}
-//		varToPointsToSet = new HashMap();
-//		varToSootLocal = new HashMap();
-//		//for each WeavingVar, get its local l and for that l get and store
-//		//the points-to set
-//		for (Iterator iter = mapping.entrySet().iterator(); iter.hasNext();) {
-//			Entry entry = (Entry) iter.next();
-//			Collection weavingVars = (Collection) entry.getValue();
-//
-//			assert weavingVars.size()<=1;
-//
-//			if(weavingVars.size()>0) {
-//				WeavingVar wv = (WeavingVar) weavingVars.iterator().next();
-//				Local l = wv.get();
-//				
-//				PointsToSet pts;
-//				if(l.getType() instanceof PrimType) {
-//					//if the type of the variable is a primitive type, then we assume it could "point to anything", i.e. could have any value
-//					pts = FullObjectSet.v();
-//				} else {
-//					//if l is null this probably means that the WeavingVar was never woven
-//					assert l!=null;
-//					PointsToSet paddlePts = (PointsToSet) Scene.v().getPointsToAnalysis().reachingObjects(l);
-//					if(paddlePts.isEmpty()) {
-//						hasEmptyMapping = true;
-//						abc.main.Main.v().error_queue.enqueue(ErrorInfo.WARNING, "Empty points-to set for variable "+l+" in "+container);
-//						/*   POSSIBLE CAUSES FOR EMPTY VARIABLE MAPPINGS:
-//						 *   1.) a shadow is created for an invoke statement (or similar) of the form o.foo() where o has type NullType, i.e. is certainly null.
-//						 *   2.) if object-sensitivity is enabled:
-//						 *       if dynamic type checks for advice aplication can be ruled out statically; 
-//						 *        example: point cut is call(* Set.add(..)) && args(Collection)
-//						 *                 shadow is s.add("someString")
-//						 *                 in this case, paddle sees automatically that the instanceof check in the bytecode
-//						 *                 can never succeed; hence the statement is rendered unreachable and the points-to set becomes empty
-//						 */
-//					}							
-//					pts = new PaddlePointsToSetCompatibilityWrapper(paddlePts);
-//				}
-//				String varName = ((Var)entry.getKey()).getName();
-//				varToPointsToSet.put(varName,pts);
-//				varToSootLocal.put(varName, l);
-//			}
-//		}
+			
 	}
-	
+		
 	/**
 	 * @return the varToPointsToSet
 	 */
@@ -210,6 +169,10 @@ public class Shadow {
 	public Local getLocalForVarName(String varName) {
 		assert varToSootLocal.containsKey(varName);
 		return (Local) varToSootLocal.get(varName);
+	}
+	
+	public String getVarNameForLocal(Local l) {
+		return (String) sootLocalToVar.get(l);
 	}
 
 	

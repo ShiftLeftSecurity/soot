@@ -4,8 +4,11 @@
 package abc.tm.weaving.weaver.tmanalysis.mustalias;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import soot.Local;
@@ -38,7 +41,7 @@ import abc.tm.weaving.weaver.tmanalysis.util.TransitionUtils;
  *   i2 = c.iterator();
  *   if(i.hasNext()) {
  *     i.next();
- *     if(i2.hasNext) {  //here we go back to the initial state which is wrong
+ *     if(i2.hasNext()) {  //here we go back to the initial state which is wrong
  *       i.next();
  *     }
  *   }
@@ -60,9 +63,10 @@ public class StatePropagatorFlowAnalysis extends ForwardFlowAnalysis {
 	protected boolean initializedInitial;
 	private TraceMatch traceMatch;
 	private final BriefUnitGraph g;
-	private Collection<Local> boundLocals;
 	private boolean gaveUp;
 	private final CallGraph abstractedCallGraph;
+	private Map<String,Local> tmFormalToTmVar;
+	private Map<Local,Local> adviceActualToTmVar;
 
 	/**
 	 * @param g
@@ -76,6 +80,7 @@ public class StatePropagatorFlowAnalysis extends ForwardFlowAnalysis {
 		this.meth = g.getBody().getMethod();
 		this.initializedInitial = false;
 		this.gaveUp = false;
+		this.initialShadow = initialShadow;
 		//find initial tracematch state (initialValue)
 		this.initialStates = new HashSet<SMNode>();
 		StateMachine stateMachine = initialShadow.getTraceMatch().getStateMachine();
@@ -96,15 +101,20 @@ public class StatePropagatorFlowAnalysis extends ForwardFlowAnalysis {
 		assert initialStmt!=null;
 		//
 		this.traceMatch = initialShadow.getTraceMatch();
-		this.boundLocals = new HashSet<Local>();
+		this.adviceActualToTmVar = new HashMap<Local,Local>();
+		this.tmFormalToTmVar = new HashMap<String, Local>();
 		//for each bound advice local find the (hopefully unique?) local which is assigned to it
 		//TODO we might want to make this a little more stable and failsafe
 		for (Stmt s : (Collection<Stmt>)g.getBody().getUnits()) {
 			for (ValueBox defBox : (Collection<ValueBox>)s.getDefBoxes()) {
-				if(initialShadow.getBoundLocals().contains(defBox.getValue())) {
+				Value lValue = defBox.getValue();
+				if(initialShadow.getBoundLocals().contains(lValue)) {
 					AssignStmt assign = (AssignStmt) s;
-					if(assign.getRightOp() instanceof Local) {
-						this.boundLocals.add((Local)assign.getRightOp());
+					if(assign.getLeftOp() instanceof Local && assign.getRightOp() instanceof Local) {;
+						Local lv = (Local) assign.getLeftOp(), rv = (Local) assign.getRightOp();
+						this.adviceActualToTmVar.put(lv, rv);						
+						String tmFormal = initialShadow.getVarNameForLocal(lv);
+						tmFormalToTmVar.put(tmFormal, rv);
 					} else {
 						gaveUp = true;
 					}
@@ -168,7 +178,7 @@ public class StatePropagatorFlowAnalysis extends ForwardFlowAnalysis {
 			for (ValueBox box : (Collection<ValueBox>)s.getDefBoxes()) {
 				Value value = box.getValue();
 				// 1. does s redefine the local we're depending on;
-				if(boundLocals.contains(value)) {
+				if(adviceActualToTmVar.containsValue(value)) {
 					gaveUp = true;
 				}
 			}
@@ -176,7 +186,7 @@ public class StatePropagatorFlowAnalysis extends ForwardFlowAnalysis {
 		
 		out.clear();
 		for (SMNode state : in) {
-			Set<SMNode> successorStates = TransitionUtils.getSuccessorStatesFor(state,traceMatch,s,initialStates);
+			Set<SMNode> successorStates = TransitionUtils.getSuccessorStatesFor(state,traceMatch,s,initialStates,adviceActualToTmVar,tmFormalToTmVar);
 			for (SMNode succ : successorStates) {
 				if(succ.isFinalNode()) {
 					gaveUp = true;
