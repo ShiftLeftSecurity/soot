@@ -9,6 +9,7 @@ package abc.tm.weaving.weaver.tmanalysis.stages;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import soot.toolkits.graph.BriefUnitGraph;
 import abc.main.Main;
@@ -39,15 +40,17 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 	protected void doAnalysis() {
 		Map<ShadowGroup, Shadow> initialShadowMap
 			= InitialShadowFinder.v().findInitialShadows();
-		Set<Shadow> initialShadows = new HashSet(initialShadowMap.values());
 		
 		//for each initial shadow
-        for (Shadow initialShadow: initialShadows) {
+        for (Entry<ShadowGroup, Shadow> e : initialShadowMap.entrySet()) {
+            ShadowGroup initialShadowGroup = e.getKey();
+            Shadow initialShadow = e.getValue();
 
 			// Now propagate p through the procedure.
 			//TODO is it safe enough to use a BriefUnitGraph or do we want an ExceptionalUnitGraph?
 			StatePropagatorFlowAnalysis a = new StatePropagatorFlowAnalysis(
 					new BriefUnitGraph(initialShadow.getContainer().retrieveActiveBody()),
+                    initialShadowGroup, 
 					initialShadow,
 					CallGraphAbstraction.v().abstractedCallGraph());
 

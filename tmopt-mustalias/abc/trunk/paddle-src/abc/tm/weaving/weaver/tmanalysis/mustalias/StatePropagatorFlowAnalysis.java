@@ -24,6 +24,8 @@ import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.matching.SMNode;
 import abc.tm.weaving.matching.StateMachine;
 import abc.tm.weaving.weaver.tmanalysis.query.Shadow;
+import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroup;
+import abc.tm.weaving.weaver.tmanalysis.query.ShadowRegistry;
 import abc.tm.weaving.weaver.tmanalysis.util.TransitionUtils;
 
 /** StatePropagatorFlowAnalysis: Propagates sets of pairs (SMNode, List<Local>).
@@ -73,7 +75,7 @@ public class StatePropagatorFlowAnalysis extends ForwardFlowAnalysis {
 	 * @param initialShadow 
 	 * @param abstractedCallGraph 
 	 */
-	public StatePropagatorFlowAnalysis(BriefUnitGraph g, Shadow initialShadow, CallGraph abstractedCallGraph) {
+	public StatePropagatorFlowAnalysis(BriefUnitGraph g, ShadowGroup initialShadowGroup, Shadow initialShadow, CallGraph abstractedCallGraph) {
 		super(g);
 		this.g = g;
 		this.abstractedCallGraph = abstractedCallGraph;
@@ -105,21 +107,26 @@ public class StatePropagatorFlowAnalysis extends ForwardFlowAnalysis {
 		this.tmFormalToTmVar = new HashMap<String, Local>();
 		//for each bound advice local find the (hopefully unique?) local which is assigned to it
 		//TODO we might want to make this a little more stable and failsafe
-		for (Stmt s : (Collection<Stmt>)g.getBody().getUnits()) {
-			for (ValueBox defBox : (Collection<ValueBox>)s.getDefBoxes()) {
-				Value lValue = defBox.getValue();
-				if(initialShadow.getBoundLocals().contains(lValue)) {
-					AssignStmt assign = (AssignStmt) s;
-					if(assign.getLeftOp() instanceof Local && assign.getRightOp() instanceof Local) {;
-						Local lv = (Local) assign.getLeftOp(), rv = (Local) assign.getRightOp();
-						this.adviceActualToTmVar.put(lv, rv);						
-						String tmFormal = initialShadow.getVarNameForLocal(lv);
-						tmFormalToTmVar.put(tmFormal, rv);
-					} else {
-						gaveUp = true;
-					}
-				}
-			}
+
+        for (Shadow ss : (Collection<Shadow>)initialShadowGroup.getAllShadows()) {
+            if (ss.getTraceMatch() != this.traceMatch || !ss.getContainer().equals(initialShadow.getContainer()))
+                continue;
+            for (Stmt s : (Collection<Stmt>)g.getBody().getUnits()) {
+                for (ValueBox defBox : (Collection<ValueBox>)s.getDefBoxes()) {
+                    Value lValue = defBox.getValue();
+                    if(ss.getBoundLocals().contains(lValue)) {
+                        AssignStmt assign = (AssignStmt) s;
+                        if(assign.getLeftOp() instanceof Local && assign.getRightOp() instanceof Local) {
+                            Local lv = (Local) assign.getLeftOp(), rv = (Local) assign.getRightOp();
+                            this.adviceActualToTmVar.put(lv, rv);						
+                            String tmFormal = ss.getVarNameForLocal(lv);
+                            tmFormalToTmVar.put(tmFormal, rv);
+                        } else {
+                            gaveUp = true;
+                        }
+                    }
+                }
+            }
 		}
 		
 		doAnalysis();	
