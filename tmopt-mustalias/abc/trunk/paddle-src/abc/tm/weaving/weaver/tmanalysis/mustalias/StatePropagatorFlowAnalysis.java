@@ -25,33 +25,22 @@ import abc.tm.weaving.matching.SMNode;
 import abc.tm.weaving.matching.StateMachine;
 import abc.tm.weaving.weaver.tmanalysis.query.Shadow;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroup;
+import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroupRegistry;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowRegistry;
 import abc.tm.weaving.weaver.tmanalysis.util.TransitionUtils;
 
-/** StatePropagatorFlowAnalysis: Propagates sets of pairs (SMNode, List<Local>).
+/** StatePropagatorFlowAnalysis: Propagates sets of SMNodes.
  * 
- * When a statement has multiple pairs associated with it, this abstractly
+ * When a statement has multiple SMNodes associated with it, this abstractly
  * represents the fact that the automaton we're tracking may have multiple states
  * at that program point.
  *
  * FIXME This implementation is still not 100% sound, at least for the following reasons:
  * 
- * 1.) Skip loops: We can only assume that a skip-loop takes us back to an initial state
- *   if we know that it refers to the same object as the initial shadow. Right now we do not
- *   check this. Assume the following example:
- *   i = c.iterator();
- *   i2 = c.iterator();
- *   if(i.hasNext()) {
- *     i.next();
- *     if(i2.hasNext()) {  //here we go back to the initial state which is wrong
- *       i.next();
- *     }
- *   }
- *     
- *  2.) Initial configuration: We have to make sure that we enter the initial shadow in this
+ *  1.) Initial configuration: We have to make sure that we enter the initial shadow in this
  *    method with an initial configuration.
  *    
- *  3.) Thread safety: Right now, we do not take threads into account.
+ *  2.) Thread safety: Right now, we do not take threads into account.
  *
  * @author Eric Bodden
  * @author Patrick Lam
@@ -75,7 +64,7 @@ public class StatePropagatorFlowAnalysis extends ForwardFlowAnalysis {
 	 * @param initialShadow 
 	 * @param abstractedCallGraph 
 	 */
-	public StatePropagatorFlowAnalysis(BriefUnitGraph g, ShadowGroup initialShadowGroup, Shadow initialShadow, CallGraph abstractedCallGraph) {
+	public StatePropagatorFlowAnalysis(BriefUnitGraph g, Shadow initialShadow, CallGraph abstractedCallGraph) {
 		super(g);
 		this.g = g;
 		this.abstractedCallGraph = abstractedCallGraph;
@@ -108,26 +97,36 @@ public class StatePropagatorFlowAnalysis extends ForwardFlowAnalysis {
 		//for each bound advice local find the (hopefully unique?) local which is assigned to it
 		//TODO we might want to make this a little more stable and failsafe
 
-        for (Shadow ss : (Collection<Shadow>)initialShadowGroup.getAllShadows()) {
-            if (ss.getTraceMatch() != this.traceMatch || !ss.getContainer().equals(initialShadow.getContainer()))
-                continue;
-            for (Stmt s : (Collection<Stmt>)g.getBody().getUnits()) {
-                for (ValueBox defBox : (Collection<ValueBox>)s.getDefBoxes()) {
-                    Value lValue = defBox.getValue();
-                    if(ss.getBoundLocals().contains(lValue)) {
-                        AssignStmt assign = (AssignStmt) s;
-                        if(assign.getLeftOp() instanceof Local && assign.getRightOp() instanceof Local) {
-                            Local lv = (Local) assign.getLeftOp(), rv = (Local) assign.getRightOp();
-                            this.adviceActualToTmVar.put(lv, rv);						
-                            String tmFormal = ss.getVarNameForLocal(lv);
-                            tmFormalToTmVar.put(tmFormal, rv);
-                        } else {
-                            gaveUp = true;
+		Set<ShadowGroup> shadowGroups = ShadowGroupRegistry.v().getAllShadowGroups();
+		for (ShadowGroup group : shadowGroups) {
+			Set<Shadow> allShadows = group.getAllShadows();
+            if (!allShadows.contains(initialShadow)) continue;
+            System.err.println("found matching shadow group");
+            Set<String> seenAlready = new HashSet<String>();
+			for (Shadow ss : allShadows) {
+                if (ss.getTraceMatch() != this.traceMatch || !ss.getContainer().equals(initialShadow.getContainer()))
+                    continue;
+                if (seenAlready.contains(ss.getUniqueShadowId())) continue;
+                seenAlready.add(ss.getUniqueShadowId());
+                System.err.println("also contains shadow "+ss+" with id "+ss.getUniqueShadowId());
+                for (Stmt s : (Collection<Stmt>)g.getBody().getUnits()) {
+                    for (ValueBox defBox : (Collection<ValueBox>)s.getDefBoxes()) {
+                        Value lValue = defBox.getValue();
+                        if(ss.getBoundLocals().contains(lValue)) {
+                            AssignStmt assign = (AssignStmt) s;
+                            if(assign.getLeftOp() instanceof Local && assign.getRightOp() instanceof Local) {
+                                Local lv = (Local) assign.getLeftOp(), rv = (Local) assign.getRightOp();
+                                this.adviceActualToTmVar.put(lv, rv);						
+                                String tmFormal = ss.getVarNameForLocal(lv);
+                                tmFormalToTmVar.put(tmFormal, rv);
+                            } else {
+                                gaveUp = true;
+                            }
                         }
                     }
                 }
             }
-		}
+        }
 		
 		doAnalysis();	
 	}

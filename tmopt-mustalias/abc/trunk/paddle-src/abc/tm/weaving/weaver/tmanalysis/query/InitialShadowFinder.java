@@ -24,6 +24,7 @@ import abc.tm.weaving.aspectinfo.TMGlobalAspectInfo;
 import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.matching.SMEdge;
 import abc.tm.weaving.matching.SMNode;
+import abc.tm.weaving.matching.TMStateMachine;
 
 /**
  * InitialShadowFinder
@@ -33,14 +34,14 @@ import abc.tm.weaving.matching.SMNode;
 public class InitialShadowFinder {
 	
 	
-	public Map<ShadowGroup, Shadow> findInitialShadows() {
+	public Set<Shadow> findInitialShadows() {
 
 		TMGlobalAspectInfo globalAspectInfo = (TMGlobalAspectInfo) Main.v().getAbcExtension().getGlobalAspectInfo();
 		
 		//build a mapping from tracematch name to the initial labels of the tracematch state machine
 		Map<TraceMatch,Set<String>> tmNameToInitialSymbolNames = new HashMap<TraceMatch, Set<String>>();
 		for (TraceMatch tm : (Collection<TraceMatch>)globalAspectInfo.getTraceMatches()) {
-			for (Iterator stateIter = tm.getStateMachine().getStateIterator(); stateIter.hasNext();) {
+			for (Iterator stateIter = ((TMStateMachine)tm.getStateMachine()).getStateIterator(); stateIter.hasNext();) {
 				SMNode state = (SMNode) stateIter.next();
 				if(state.isInitialNode()) {
 					for (Iterator outEdgeIter = state.getOutEdgeIterator(); outEdgeIter.hasNext();) {
@@ -57,7 +58,7 @@ public class InitialShadowFinder {
 			}
 		}		
 		
-		Map<ShadowGroup, Shadow> result = new HashMap<ShadowGroup, Shadow>();
+		Set<Shadow> result = new HashSet<Shadow>();
 		Set<ShadowGroup> shadowGroups = ShadowGroupRegistry.v().getAllShadowGroups();
 		//for all shadow groups
 		for (ShadowGroup group : shadowGroups) {
@@ -67,7 +68,7 @@ public class InitialShadowFinder {
 				assert ShadowRegistry.v().enabledShadows().contains(shadow.getUniqueShadowId());
 				String symbolName = Naming.getSymbolShortName(shadow.getUniqueShadowId());
 				if(tmNameToInitialSymbolNames.get(group.getTraceMatch()).contains(symbolName)) {
-					result.put(group, shadow);
+					result.add(shadow);
 				}
 			}
 		}
@@ -80,10 +81,8 @@ public class InitialShadowFinder {
 		
 		Set<Stmt> result = new HashSet<Stmt>();
 		
-		Map<ShadowGroup, Shadow> m = findInitialShadows();
-		Set<ShadowGroup> sgs = m.keySet();
-		for (ShadowGroup sg : sgs) {
-		    Shadow shadow = m.get(sg);
+		Set<Shadow> findInitialShadows = findInitialShadows();
+		for (Shadow shadow : findInitialShadows) {
 			for (String var : (Collection<String>)shadow.getBoundVariables()) {
 				PointsToSet pts = shadow.getPointsToSet(var);
 				if(pts instanceof PointsToSetInternal) {

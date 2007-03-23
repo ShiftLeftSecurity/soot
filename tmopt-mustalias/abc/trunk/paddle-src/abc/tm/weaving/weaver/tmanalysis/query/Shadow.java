@@ -52,17 +52,6 @@ public class Shadow {
 
 	protected List<Local> boundLocals;
 	
-//	/**
-//	 * @param variableMapping
-//	 */
-//	public Shadow(String uniqueShadowId, Map variableMapping, SootMethod container) {
-//		this.container = container;
-//		assert uniqueShadowId!=null && variableMapping!=null && container!=null;
-//		this.uniqueShadowId = uniqueShadowId;
-////		this.hasEmptyMapping = false;
-//		importVariableMapping(variableMapping, container);
-//	}
-	
 	/**
 	 * @param match
 	 * @param container
