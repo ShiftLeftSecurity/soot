@@ -22,6 +22,7 @@ import soot.jimple.Stmt;
 import soot.tagkit.AttributeValueException;
 import soot.tagkit.Tag;
 import soot.toolkits.graph.BriefUnitGraph;
+import soot.toolkits.graph.ExceptionalUnitGraph;
 import abc.main.Main;
 import abc.tm.weaving.aspectinfo.TMGlobalAspectInfo;
 import abc.tm.weaving.aspectinfo.TraceMatch;
@@ -78,7 +79,7 @@ public class TMShadowTagger extends BodyTransformer implements Stage {
 	
 	protected void internalTransform(Body b, String phaseName, Map options) {
 
-		SymbolFinder symbolFinder = new SymbolFinder(new BriefUnitGraph(b));
+		SymbolFinder symbolFinder = new SymbolFinder(new ExceptionalUnitGraph(b));
 		
 		for (Stmt call : symbolFinder.getSomeAdviceMethodCalls()) {
 			Map<TraceMatch,Set<SymbolShadowMatch>> matches = symbolFinder.getSymbolsAtSomeAdviceMethodCall(call);
