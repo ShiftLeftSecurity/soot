@@ -182,10 +182,6 @@ public class SymbolFinder extends ForwardFlowAnalysis {
 				assert tag!=null;
 				int shadowId = tag.value();								
 				Set<SymbolShadowMatch> currSymbolSet = (Set<SymbolShadowMatch>) inMap.get(tm);
-				if(currSymbolSet==null) {
-					System.out.println();
-				}
-				
 				Set<SymbolShadowMatch> newSet = new HashSet<SymbolShadowMatch>(currSymbolSet);
 				newSet.add(new SymbolShadowMatch(symbolName,varMapping,shadowId,tm));
 				outMap.put(tm,newSet);
