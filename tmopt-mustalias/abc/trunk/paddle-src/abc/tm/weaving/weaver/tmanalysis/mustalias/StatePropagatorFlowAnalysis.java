@@ -18,7 +18,7 @@ import soot.ValueBox;
 import soot.jimple.AssignStmt;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.callgraph.CallGraph;
-import soot.toolkits.graph.BriefUnitGraph;
+import soot.toolkits.graph.UnitGraph;
 import soot.toolkits.scalar.ForwardFlowAnalysis;
 import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.matching.SMNode;
@@ -37,9 +37,6 @@ import abc.tm.weaving.weaver.tmanalysis.util.TransitionUtils;
  *
  * FIXME This implementation is still not 100% sound, at least for the following reasons:
  * 
- *  1.) Initial configuration: We have to make sure that we enter the initial shadow in this
- *    method with an initial configuration.
- *    
  *  2.) Thread safety: Right now, we do not take threads into account.
  *
  * @author Eric Bodden
@@ -52,29 +49,55 @@ public class StatePropagatorFlowAnalysis extends ForwardFlowAnalysis {
 	protected Stmt initialStmt;
 	protected StateMachine sm;
 	private TraceMatch traceMatch;
-	private final BriefUnitGraph g;
+	private final UnitGraph g;
+    /** True if we ever hit final state (or have to give up for some reason) */
 	private boolean gaveUp;
 	private final CallGraph abstractedCallGraph;
+
+    /* A tale of three maps. Two of the maps are here.
+     * Definitions: 
+     * 1) A tracematch formal is the name used within the
+     * body of the tracematch. 
+     * 2) A tracematch variable is the variable used by the 
+     * weaver for the argument to the tracematch at the caller.
+     * 3) An advice actual is the variable (local) used
+     * in the caller for tracematch formals.
+     *
+     * An example:
+     *   tracematch(Object a) { ... }
+     *   ...
+     *   x.foo() => becomes => tm$0 = x; tm$0.advice(); x.foo();
+     *
+     * a is the tracematch formal; x is the advice actual;
+     * and tm$0 is the tracematch variable.
+     *
+     * So the two maps we have here are f: tm formal -> tm var
+     * and g: advice actual -> tm var. The missing map is
+     * h: tm formal -> advice actual, which exists at the level of the 
+     * SymbolShadowMatch. We check that h \circ g = f.
+     */
 	private Map<String,Local> tmFormalToTmVar;
 	private Map<Local,Local> adviceActualToTmVar;
 
 	/**
 	 * Computes possible states of <code>tm</code> in the given procedure.
+     * (todo:) Checks that only one binding of tracematch formals occurs in this
+     * procedure and that the bound advice actuals are never written to.
 	 */
-	public StatePropagatorFlowAnalysis(TraceMatch tm, BriefUnitGraph g, CallGraph abstractedCallGraph) {
+	public StatePropagatorFlowAnalysis(TraceMatch tm, UnitGraph g, CallGraph abstractedCallGraph) {
 		super(g);
 		this.g = g;
 		this.abstractedCallGraph = abstractedCallGraph;
 		this.meth = g.getBody().getMethod();
-		this.gaveUp = false;
+		this.gaveUp = false; 
 
 		this.traceMatch = tm;
 		this.sm = tm.getStateMachine();
 		this.adviceActualToTmVar = new HashMap<Local,Local>();
 		this.tmFormalToTmVar = new HashMap<String, Local>();
-		//for each bound advice local find the (hopefully unique?) local which is assigned to it
-		//TODO we might want to make this a little more stable and failsafe
 
+        // Attempt to compute the maps adviceActualToTmVar and
+        // tmFormalToTmVar.
 		Set<ShadowGroup> shadowGroups = ShadowGroupRegistry.v().getAllShadowGroups();
 		for (ShadowGroup group : shadowGroups) {
 			Set<Shadow> allShadows = group.getAllShadows();
@@ -178,5 +201,4 @@ public class StatePropagatorFlowAnalysis extends ForwardFlowAnalysis {
 	private boolean mayHaveSideEffects(Stmt s) {
 		return abstractedCallGraph.edgesOutOf(s).hasNext();
 	}
-	
 }

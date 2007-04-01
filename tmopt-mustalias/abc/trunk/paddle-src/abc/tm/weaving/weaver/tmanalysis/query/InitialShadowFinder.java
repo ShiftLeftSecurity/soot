@@ -41,7 +41,7 @@ public class InitialShadowFinder {
 		//build a mapping from tracematch name to the initial labels of the tracematch state machine
 		Map<TraceMatch,Set<String>> tmNameToInitialSymbolNames = new HashMap<TraceMatch, Set<String>>();
 		for (TraceMatch tm : (Collection<TraceMatch>)globalAspectInfo.getTraceMatches()) {
-			for (Iterator stateIter = ((TMStateMachine)tm.getStateMachine()).getStateIterator(); stateIter.hasNext();) {
+			for (Iterator stateIter = tm.getStateMachine().getStateIterator(); stateIter.hasNext();) {
 				SMNode state = (SMNode) stateIter.next();
 				if(state.isInitialNode()) {
 					for (Iterator outEdgeIter = state.getOutEdgeIterator(); outEdgeIter.hasNext();) {

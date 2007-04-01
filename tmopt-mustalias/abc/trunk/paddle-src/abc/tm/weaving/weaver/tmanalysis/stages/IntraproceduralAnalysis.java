@@ -6,16 +6,20 @@
  */
 package abc.tm.weaving.weaver.tmanalysis.stages;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import soot.toolkits.graph.BriefUnitGraph;
+import soot.SootMethod;
+import soot.toolkits.graph.ExceptionalUnitGraph;
 import abc.main.Main;
+import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.aspectinfo.TMGlobalAspectInfo;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.StatePropagatorFlowAnalysis;
-import abc.tm.weaving.weaver.tmanalysis.query.InitialShadowFinder;
+import abc.tm.weaving.weaver.tmanalysis.query.ReachableShadowFinder;
+import abc.tm.weaving.weaver.tmanalysis.query.ShadowsPerTMSplitter;
 import abc.tm.weaving.weaver.tmanalysis.query.Shadow;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroup;
 
@@ -38,21 +42,31 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 	 * {@inheritDoc}
 	 */
 	protected void doAnalysis() {
-		Set<Shadow> initialShadowMap
-			= InitialShadowFinder.v().findInitialShadows();
-		
-		//for each initial shadow
-        for (Shadow initialShadow : initialShadowMap) {
-//             System.err.println("analyzing this shadow: ");
-// 			System.err.println(initialShadow);
+        for (TraceMatch tm : (Collection<TraceMatch>)gai.getTraceMatches()) {
 			// Now propagate p through the procedure.
-			//TODO is it safe enough to use a BriefUnitGraph or do we want an ExceptionalUnitGraph?
-			StatePropagatorFlowAnalysis a = new StatePropagatorFlowAnalysis(
-					new BriefUnitGraph(initialShadow.getContainer().retrieveActiveBody()),
-					initialShadow,
-					CallGraphAbstraction.v().abstractedCallGraph());
 
-// 			System.err.println(initialShadow.getContainer());
+            //split reachable shadows by tracematch
+            Set reachableShadows = ReachableShadowFinder.v().reachableShadows
+                (CallGraphAbstraction.v().abstractedCallGraph());
+            Map tmNameToShadows = ShadowsPerTMSplitter.v().splitShadows
+                (reachableShadows);
+			Set<Shadow> thisTMsShadows = (Set<Shadow>) tmNameToShadows.get(tm.getName());
+            Collection<SootMethod> thisTMsContainers = new HashSet();
+            for (Shadow s : thisTMsShadows) 
+                thisTMsContainers.add(s.getContainer());
+
+            for (SootMethod m : thisTMsContainers) {
+                System.err.println("analyzing method: "+m);
+                StatePropagatorFlowAnalysis a = 
+                    new StatePropagatorFlowAnalysis(tm,
+                                                    new ExceptionalUnitGraph(m.retrieveActiveBody()),
+                                                    CallGraphAbstraction.v().abstractedCallGraph());
+                // now read off the results: if we know single
+                // non-final state for each tail, then set the state
+                // to the known state.
+                // Also if we know that a given shadow can only hit a skip shadow,
+                // eliminate it.
+            }
 		}
 	}
 	
@@ -74,7 +88,6 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 	 */
 	public static void reset() {
 		instance = null;
-		InitialShadowFinder.reset();
 	}
 
 }
