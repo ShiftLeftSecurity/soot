@@ -1006,6 +1006,19 @@ public class TMStateMachine implements StateMachine {
         return edges.iterator();
     }
 
+	public Set<SMNode> getInitialStates() {
+		// In principle, we could memoize this.
+		Set<SMNode> initialStates = new HashSet();
+
+		for (Iterator iterator = getStateIterator(); iterator.hasNext();) {
+			SMNode state = (SMNode) iterator.next();
+			if(state.isInitialNode()) {
+				initialStates.add(state);
+			}
+		}
+		return initialStates;
+	}
+
     public SMNode getStateByNumber(int n) {
         Iterator i = getStateIterator();
         while (i.hasNext()) {

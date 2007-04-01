@@ -20,6 +20,7 @@
 package abc.tm.weaving.matching;
 
 import java.util.Iterator;
+import java.util.Set;
 
 /** 
  * High-level representation of the state machine of the regex for tracematches -- interface
@@ -48,4 +49,6 @@ public interface StateMachine {
     public Iterator getStateIterator();
     public Iterator getEdgeIterator();
     public SMNode getStateByNumber(int n);
+
+	public Set<SMNode> getInitialStates();
 }
