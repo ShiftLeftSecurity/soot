@@ -63,48 +63,6 @@ public class Shadow {
 		this.boundLocals = null;
 		importVariableMapping(match.getTmFormalToAdviceLocal(), container);
 	}
-
-	public static Set allActiveShadowsForTag(SymbolShadowMatchTag tag, SootMethod container) {
-		Set result = new HashSet();
-
-		for (SymbolShadowMatch match : tag.getAllMatches()) {
-			if(match.isEnabled()) {
-				result.add(new Shadow(match,container));
-			}
-		}
-//		for (Iterator symbolIdIter = tag.getMatchingSymbolIDs().iterator(); symbolIdIter.hasNext();) {
-//			String symbolId = (String) symbolIdIter.next();
-//			
-//			Map mapping = tag.getVariableMappingForSymbol(symbolId);
-//			String uniqueShadowId = tag.getMatchingUniqueShadowID(symbolId);
-//			)
-//			result.add(new Shadow(uniqueShadowId,mapping,container));
-//		}
-		return result;
-	}
-	
-	public static Set<Shadow> allActiveShadowsForHost(Host h, SootMethod container) {
-		if(h.hasTag(SymbolShadowMatchTag.NAME)) {
-			SymbolShadowMatchTag tag = (SymbolShadowMatchTag) h.getTag(SymbolShadowMatchTag.NAME);
-			return allActiveShadowsForTag(tag, container);
-		} else {
-			return Collections.EMPTY_SET; 
-		}
-	}
-
-	public static Set allActiveShadowsForHostAndTM(Host h, SootMethod container, TraceMatch tm) {
-		Set result = new HashSet();
-		Set allShadowsForHost = allActiveShadowsForHost(h, container);
-		for (Iterator shadowIter = allShadowsForHost.iterator(); shadowIter.hasNext();) {
-			Shadow shadow = (Shadow) shadowIter.next();
-			String shadowId = shadow.getUniqueShadowId();
-			String tracematchName = Naming.getTracematchName(shadowId);
-			if(tracematchName.equals(tm.getName())) {
-				result.add(shadow);
-			}
-		}
-		return result;
-	}
 	
 	public void importVariableMapping(Map<String,Local> mapping, SootMethod container)  {
 		assert boundLocals == null;

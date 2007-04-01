@@ -50,8 +50,7 @@ public class StatePropagatorFlowAnalysis extends ForwardFlowAnalysis {
 	protected SootMethod meth;
 	protected Shadow initialShadow;
 	protected Stmt initialStmt;
-	protected Set<SMNode> initialStates;
-	protected boolean initializedInitial;
+	protected StateMachine sm;
 	private TraceMatch traceMatch;
 	private final BriefUnitGraph g;
 	private boolean gaveUp;
@@ -60,38 +59,17 @@ public class StatePropagatorFlowAnalysis extends ForwardFlowAnalysis {
 	private Map<Local,Local> adviceActualToTmVar;
 
 	/**
-	 * @param g
-	 * @param initialShadow 
-	 * @param abstractedCallGraph 
+	 * Computes possible states of <code>tm</code> in the given procedure.
 	 */
-	public StatePropagatorFlowAnalysis(BriefUnitGraph g, Shadow initialShadow, CallGraph abstractedCallGraph) {
+	public StatePropagatorFlowAnalysis(TraceMatch tm, BriefUnitGraph g, CallGraph abstractedCallGraph) {
 		super(g);
 		this.g = g;
 		this.abstractedCallGraph = abstractedCallGraph;
 		this.meth = g.getBody().getMethod();
-		this.initializedInitial = false;
 		this.gaveUp = false;
-		this.initialShadow = initialShadow;
-		//find initial tracematch state (initialValue)
-		this.initialStates = new HashSet<SMNode>();
-		StateMachine stateMachine = initialShadow.getTraceMatch().getStateMachine();
-		for (Iterator iterator = stateMachine.getStateIterator(); iterator.hasNext();) {
-			SMNode state = (SMNode) iterator.next();
-			if(state.isInitialNode()) {
-				initialStates.add(state);
-			}
-		}
-		//find initial statement
-		for (Stmt s : (Collection<Stmt>)g.getBody().getUnits()) {
-			for (Shadow ss : Shadow.allActiveShadowsForHost(s, meth)) {
-				if (ss.equals(initialShadow)) {
-					initialStmt = s;
-				}
-			}
-		}
-		assert initialStmt!=null;
-		//
-		this.traceMatch = initialShadow.getTraceMatch();
+
+		this.traceMatch = tm;
+		this.sm = tm.getStateMachine();
 		this.adviceActualToTmVar = new HashMap<Local,Local>();
 		this.tmFormalToTmVar = new HashMap<String, Local>();
 		//for each bound advice local find the (hopefully unique?) local which is assigned to it
@@ -100,15 +78,12 @@ public class StatePropagatorFlowAnalysis extends ForwardFlowAnalysis {
 		Set<ShadowGroup> shadowGroups = ShadowGroupRegistry.v().getAllShadowGroups();
 		for (ShadowGroup group : shadowGroups) {
 			Set<Shadow> allShadows = group.getAllShadows();
-            if (!allShadows.contains(initialShadow)) continue;
-            System.err.println("found matching shadow group");
             Set<String> seenAlready = new HashSet<String>();
 			for (Shadow ss : allShadows) {
-                if (ss.getTraceMatch() != this.traceMatch || !ss.getContainer().equals(initialShadow.getContainer()))
+                if (ss.getTraceMatch() != this.traceMatch || !ss.getContainer().equals(meth))
                     continue;
                 if (seenAlready.contains(ss.getUniqueShadowId())) continue;
                 seenAlready.add(ss.getUniqueShadowId());
-                System.err.println("also contains shadow "+ss+" with id "+ss.getUniqueShadowId());
                 for (Stmt s : (Collection<Stmt>)g.getBody().getUnits()) {
                     for (ValueBox defBox : (Collection<ValueBox>)s.getDefBoxes()) {
                         Value lValue = defBox.getValue();
@@ -131,30 +106,6 @@ public class StatePropagatorFlowAnalysis extends ForwardFlowAnalysis {
 		doAnalysis();	
 	}
 
-	/**
-	 * We return true if <code>g</code> never causes the tracematch associated with <code>initialShadow</code>
-	 * to hit a final state and g always leaves the tracematch automaton always in its initial configuration on exit. 
-	 * @return
-	 */
-	public boolean isSafelyInvariant() {
-		if(gaveUp) {
-			return false;
-		}
-		
-		//check that for each tail unit we are in the initial state
-		for (Stmt tailUnit : (Collection<Stmt>)g.getTails()) {
-			Collection<SMNode> flowAfter = (Collection<SMNode>) getFlowAfter(tailUnit);
-			for (SMNode state : flowAfter) {
-				if(!state.isInitialNode()) {
-					return false;
-				}
-			}
-		}
-		//we know that if we ever hit a final state the former check is going to return false,
-		//so we are done with checking here
-		return true;
-	}
-	
 	protected void flowThrough(Object inVal, Object stmt, Object outVal) {
 		if(gaveUp) {
 			return;
@@ -169,16 +120,9 @@ public class StatePropagatorFlowAnalysis extends ForwardFlowAnalysis {
 			return;
 		}
 
-		//initialize when seeing the initial shadow
-		if(s == initialStmt && !initializedInitial) {
-			unitToBeforeFlow.put(s, initialStates);
-			inVal = initialStates;
-			initializedInitial = true;
-		}
-
 		Collection<SMNode> in = (Collection<SMNode>) inVal, out = (Collection<SMNode>) outVal;
 
-		//if in is empty we have not seen the initial shadow yet and do not (yet) care about
+		//if in is empty we have not seen any shadows yet and do not (yet) care about
 		//definitions
 		if(!in.isEmpty()) {
 			for (ValueBox box : (Collection<ValueBox>)s.getDefBoxes()) {
@@ -191,16 +135,15 @@ public class StatePropagatorFlowAnalysis extends ForwardFlowAnalysis {
 		}
 		
 		out.clear();
-		for (SMNode state : in) {
-			Set<SMNode> successorStates = TransitionUtils.getSuccessorStatesFor(state,traceMatch,s,initialStates,adviceActualToTmVar,tmFormalToTmVar);
-			for (SMNode succ : successorStates) {
-				if(succ.isFinalNode()) {
-					gaveUp = true;
-					return;
-				}
+		Collection<SMNode> successorStates = TransitionUtils.getSuccessorStatesFor
+			(in, traceMatch, s, adviceActualToTmVar, tmFormalToTmVar);
+		for (SMNode succ : successorStates) {
+			if(succ.isFinalNode()) {
+				gaveUp = true;
+				return;
 			}
-			out.addAll(successorStates);			
 		}
+		out.addAll(successorStates);			
 	}
 
 	protected Object newInitialFlow() {
@@ -232,7 +175,7 @@ public class StatePropagatorFlowAnalysis extends ForwardFlowAnalysis {
 	 * This information is computed using the abstractedCallGraph.
 	 * @param s any statement
 	 */
-	protected boolean mayHaveSideEffects(Stmt s) {
+	private boolean mayHaveSideEffects(Stmt s) {
 		return abstractedCallGraph.edgesOutOf(s).hasNext();
 	}
 	

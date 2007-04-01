@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.Map.Entry;
 
 import soot.SootMethod;
+import soot.tagkit.Host;
 import abc.main.Debug;
 import abc.main.Main;
 import abc.tm.weaving.aspectinfo.TMGlobalAspectInfo;
@@ -27,6 +28,8 @@ import abc.weaving.matching.AdviceApplication;
 import abc.weaving.residues.AndResidue;
 import abc.weaving.residues.NeverMatch;
 import abc.weaving.residues.Residue;
+import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowMatchTag;
+import abc.tm.weaving.weaver.tmanalysis.util.SymbolFinder.SymbolShadowMatch;
 
 /**
  * ShadowRegistry
@@ -285,6 +288,39 @@ public class ShadowRegistry {
 		return enabledShadows.contains(uniqueShadowId);
 	}
 
+	public Set allActiveShadowsForTag(SymbolShadowMatchTag tag, SootMethod container) {
+		Set result = new HashSet();
+
+		for (SymbolShadowMatch match : tag.getAllMatches()) {
+			if(match.isEnabled()) {
+				result.add(new Shadow(match,container));
+			}
+		}
+		return result;
+	}
+	
+	public Set<Shadow> allActiveShadowsForHost(Host h, SootMethod container) {
+		if(h.hasTag(SymbolShadowMatchTag.NAME)) {
+			SymbolShadowMatchTag tag = (SymbolShadowMatchTag) h.getTag(SymbolShadowMatchTag.NAME);
+			return allActiveShadowsForTag(tag, container);
+		} else {
+			return Collections.EMPTY_SET; 
+		}
+	}
+
+	public Set allActiveShadowsForHostAndTM(Host h, SootMethod container, TraceMatch tm) {
+		Set result = new HashSet();
+		Set allShadowsForHost = allActiveShadowsForHost(h, container);
+		for (Iterator shadowIter = allShadowsForHost.iterator(); shadowIter.hasNext();) {
+			Shadow shadow = (Shadow) shadowIter.next();
+			String shadowId = shadow.getUniqueShadowId();
+			String tracematchName = Naming.getTracematchName(shadowId);
+			if(tracematchName.equals(tm.getName())) {
+				result.add(shadow);
+			}
+		}
+		return result;
+	}
 	
 	//singleton pattern
 	

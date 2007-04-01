@@ -79,21 +79,6 @@ public class TracematchAnalysis extends AbstractReweavingAnalysis {
      * Epsilon transitions and unreachable states are removed immediately whenever appropriate.
      */
     public boolean analyze() {
-//    	PackManager.v().getPack("cg").apply();
-//    	CallGraph callGraph = Scene.v().getCallGraph();
-//    	
-//    	Set reachable = WeavableMethods.v().getReachable(callGraph);
-//    	for (Iterator methodIter = reachable.iterator(); methodIter.hasNext();) {
-//			SootMethod m = (SootMethod) methodIter.next();
-//			System.err.println(m);
-//			for (Iterator localIter = m.getActiveBody().getLocals().iterator(); localIter.hasNext();) {
-//				Local l= (Local) localIter.next();
-//				String s = (Scene.v().getPointsToAnalysis().reachingObjects(l).isEmpty() ? "empty ": "full  ") + l.toString();
-//				System.err.println(s);
-//			}
-//			
-//		}
-//    	System.exit(0);
     	gai = (TMGlobalAspectInfo) Main.v().getAbcExtension().getGlobalAspectInfo();
 
 		//nothing to do?

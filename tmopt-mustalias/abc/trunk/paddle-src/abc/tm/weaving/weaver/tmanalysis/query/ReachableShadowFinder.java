@@ -88,7 +88,7 @@ public class ReachableShadowFinder {
 	 * if h has a shadows attached, those are added to {@link #reachableShadows}
 	 */
 	protected void addShadowIfPresent(Unit h, SootMethod container) {
-		reachableShadows.addAll(Shadow.allActiveShadowsForHost(h, container));
+		reachableShadows.addAll(ShadowRegistry.v().allActiveShadowsForHost(h, container));
 	}
 
 	//singleton pattern

@@ -35,6 +35,7 @@ import abc.tm.weaving.weaver.tmanalysis.ds.Configuration;
 import abc.tm.weaving.weaver.tmanalysis.ds.ConfigurationBox;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.LocalMustAliasAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.query.Shadow;
+import abc.tm.weaving.weaver.tmanalysis.query.ShadowRegistry;
 
 /**
  */
@@ -149,7 +150,7 @@ public class PerMethodFlowAnalysis extends ForwardFlowAnalysis implements TMFlow
 		ConfigurationBox cout = (ConfigurationBox) out;
 		Configuration inConfig = cin.get();
 
-		Set shadows = Shadow.allActiveShadowsForHostAndTM(s, container, tracematch);
+		Set shadows = ShadowRegistry.v().allActiveShadowsForHostAndTM(s, container, tracematch);
 
 		Configuration outConfig;
 		
