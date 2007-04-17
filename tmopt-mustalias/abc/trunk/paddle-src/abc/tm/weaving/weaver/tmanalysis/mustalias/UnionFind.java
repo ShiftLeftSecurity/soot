@@ -81,4 +81,14 @@ public class UnionFind
         for( int i = 0; i < preds.length; i++ ) other.preds[i] = preds[i];
         for( int i = 0; i < rank.length; i++ ) other.rank[i] = rank[i];
     }
+
+    public boolean equals( Object o ) {
+        UnionFind other = (UnionFind)o;
+        if( objectNumberMap != other.objectNumberMap )
+            throw new RuntimeException( "Different objectNumberMaps" );
+
+        for( int i = 0; i < preds.length; i++ ) if (other.preds[i] != preds[i]) return false;
+        for( int i = 0; i < rank.length; i++ ) if (other.rank[i] != rank[i]) return false;
+        return true;
+    }
 }
