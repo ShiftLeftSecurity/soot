@@ -20,6 +20,17 @@ public class UnionFind
         rank = new int[objectNumberMap.size()];
     }
 
+    /** Opposite of clear: mutates this object so that everything is in the same class. */
+    public void mergeAll() {
+        if (objectNumberMap.keySet().size() == 0)
+            return;
+
+        Object first = objectNumberMap.keySet().iterator().next();
+
+        for( Iterator oIt = objectNumberMap.keySet().iterator(); oIt.hasNext(); ) 
+            merge (first, oIt.next());
+    }
+
     public int lookup( Object o ) {
         Integer i = (Integer) objectNumberMap.get(o);
         if( i == null ) throw new RuntimeException( "Object "+o+" not in objectNumberMap = "+objectNumberMap );

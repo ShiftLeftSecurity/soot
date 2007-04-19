@@ -106,7 +106,9 @@ outer:
         
     protected Object newInitialFlow()
     {
-        return new UnionFind(objectMap);
+        UnionFind u = new UnionFind(objectMap);
+        u.mergeAll();
+        return u;
     }
 
 	/**
