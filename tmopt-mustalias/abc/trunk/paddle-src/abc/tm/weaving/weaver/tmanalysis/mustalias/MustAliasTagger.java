@@ -38,6 +38,7 @@ public class MustAliasTagger extends BodyTransformer
             if(b.getMethod().getSignature().indexOf("main")>-1) {
             
 	            System.err.println();
+	            System.err.println(s);
 	            for (Iterator localIter = b.getLocals().iterator(); localIter.hasNext();) {
 					Local l = (Local) localIter.next();
 					for (Iterator localIter2 = b.getLocals().iterator(); localIter2

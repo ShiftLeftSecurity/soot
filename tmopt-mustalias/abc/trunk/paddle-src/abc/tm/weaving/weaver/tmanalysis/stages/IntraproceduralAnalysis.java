@@ -8,11 +8,14 @@ package abc.tm.weaving.weaver.tmanalysis.stages;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import soot.toolkits.graph.UnitGraph;
 import soot.SootMethod;
+import soot.Unit;
 import soot.toolkits.graph.ExceptionalUnitGraph;
 import abc.main.Main;
 import abc.tm.weaving.aspectinfo.TraceMatch;
@@ -22,6 +25,7 @@ import abc.tm.weaving.weaver.tmanalysis.query.ReachableShadowFinder;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowsPerTMSplitter;
 import abc.tm.weaving.weaver.tmanalysis.query.Shadow;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroup;
+import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowMatchTag;
 
 /**
  * IntraproceduralAnalysis: This analysis is the core of the analysis
@@ -57,15 +61,27 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 
             for (SootMethod m : thisTMsContainers) {
                 System.err.println("analyzing method: "+m);
+                UnitGraph g = new ExceptionalUnitGraph(m.retrieveActiveBody());
                 StatePropagatorFlowAnalysis a = 
                     new StatePropagatorFlowAnalysis(tm,
-                                                    new ExceptionalUnitGraph(m.retrieveActiveBody()),
+                                                    g,
                                                     CallGraphAbstraction.v().abstractedCallGraph());
+
+                for (Unit u : (Collection<Unit>)g.getBody().getUnits()) {
+                    if (!u.hasTag(SymbolShadowMatchTag.NAME))
+                        continue;
+
+                    System.out.println("after stmt "+u+" have "+a.getFlowAfter(u));
+                }
+
+                for (Unit u : (Collection<Unit>)g.getTails()) {
+                    System.out.println(" for tail "+u+" got "+a.getFlowAfter(u));
+                }
                 // now read off the results: if we know single
                 // non-final state for each tail, then set the state
                 // to the known state.
                 // Also if we know that a given shadow can only hit a skip shadow,
-                // eliminate it.
+                // we can eliminate it.
             }
 		}
 	}

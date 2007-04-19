@@ -18,8 +18,10 @@ import soot.ValueBox;
 import soot.jimple.AssignStmt;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.callgraph.CallGraph;
+import soot.toolkits.graph.ExceptionalUnitGraph;
 import soot.toolkits.graph.UnitGraph;
 import soot.toolkits.scalar.ForwardFlowAnalysis;
+import soot.jimple.toolkits.callgraph.Edge;
 import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.matching.SMNode;
 import abc.tm.weaving.matching.StateMachine;
@@ -27,6 +29,7 @@ import abc.tm.weaving.weaver.tmanalysis.query.Shadow;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroup;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroupRegistry;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowRegistry;
+import abc.tm.weaving.weaver.tmanalysis.stages.CallGraphAbstraction;
 import abc.tm.weaving.weaver.tmanalysis.util.TransitionUtils;
 
 /** StatePropagatorFlowAnalysis: Propagates sets of SMNodes.
@@ -53,31 +56,12 @@ public class StatePropagatorFlowAnalysis extends ForwardFlowAnalysis {
     /** True if we ever hit final state (or have to give up for some reason) */
 	private boolean gaveUp;
 	private final CallGraph abstractedCallGraph;
+    private LocalMustAliasAnalysis lma;
 
-    /* A tale of three maps. Two of the maps are here.
-     * Definitions: 
-     * 1) A tracematch formal is the name used within the
-     * body of the tracematch. 
-     * 2) A tracematch variable is the variable used by the 
-     * weaver for the argument to the tracematch at the caller.
-     * 3) An advice actual is the variable (local) used
-     * in the caller for tracematch formals.
-     *
-     * An example:
-     *   tracematch(Object a) { ... }
-     *   ...
-     *   x.foo() => becomes => tm$0 = x; tm$0.advice(); x.foo();
-     *
-     * a is the tracematch formal; x is the advice actual;
-     * and tm$0 is the tracematch variable.
-     *
-     * So the two maps we have here are f: tm formal -> tm var
-     * and g: advice actual -> tm var. The missing map is
-     * h: tm formal -> advice actual, which exists at the level of the 
-     * SymbolShadowMatch. We check that h \circ g = f.
-     */
-	private Map<String,Local> tmFormalToTmVar;
-	private Map<Local,Local> adviceActualToTmVar;
+    /* Pick out a shadow associated with the given tracematch and in the appropriate method.
+     * Use it to determine the bindings that we're tracking. */
+    /* In principle, we ought to try all possible principalShadows. */
+    private Shadow principalShadow;
 
 	/**
 	 * Computes possible states of <code>tm</code> in the given procedure.
@@ -93,11 +77,8 @@ public class StatePropagatorFlowAnalysis extends ForwardFlowAnalysis {
 
 		this.traceMatch = tm;
 		this.sm = tm.getStateMachine();
-		this.adviceActualToTmVar = new HashMap<Local,Local>();
-		this.tmFormalToTmVar = new HashMap<String, Local>();
+		this.lma = new LocalMustAliasAnalysis(g);
 
-        // Attempt to compute the maps adviceActualToTmVar and
-        // tmFormalToTmVar.
 		Set<ShadowGroup> shadowGroups = ShadowGroupRegistry.v().getAllShadowGroups();
 		for (ShadowGroup group : shadowGroups) {
 			Set<Shadow> allShadows = group.getAllShadows();
@@ -107,66 +88,51 @@ public class StatePropagatorFlowAnalysis extends ForwardFlowAnalysis {
                     continue;
                 if (seenAlready.contains(ss.getUniqueShadowId())) continue;
                 seenAlready.add(ss.getUniqueShadowId());
-                for (Stmt s : (Collection<Stmt>)g.getBody().getUnits()) {
-                    for (ValueBox defBox : (Collection<ValueBox>)s.getDefBoxes()) {
-                        Value lValue = defBox.getValue();
-                        if(ss.getBoundLocals().contains(lValue)) {
-                            AssignStmt assign = (AssignStmt) s;
-                            if(assign.getLeftOp() instanceof Local && assign.getRightOp() instanceof Local) {
-                                Local lv = (Local) assign.getLeftOp(), rv = (Local) assign.getRightOp();
-                                this.adviceActualToTmVar.put(lv, rv);						
-                                String tmFormal = ss.getVarNameForLocal(lv);
-                                tmFormalToTmVar.put(tmFormal, rv);
-                            } else {
-                                gaveUp = true;
-                            }
-                        }
-                    }
-                }
+
+                // Pick the first shadow we see...
+                principalShadow = ss;
+                break;
             }
         }
 		
-		doAnalysis();	
-	}
+		doAnalysis();
+    }
 
 	protected void flowThrough(Object inVal, Object stmt, Object outVal) {
 		if(gaveUp) {
 			return;
 		}
 		
+		Collection<SMNode> in = (Collection<SMNode>) inVal, out = (Collection<SMNode>) outVal;
 		Stmt s = (Stmt) stmt;
 		
-		//if this statement may have sideeffects on the automaton configuration,
-		//currently we just give up
-		if(mayHaveSideEffects(s)) {
-			gaveUp = true;
-			return;
-		}
-
-		Collection<SMNode> in = (Collection<SMNode>) inVal, out = (Collection<SMNode>) outVal;
-
-		//if in is empty we have not seen any shadows yet and do not (yet) care about
-		//definitions
+		// This check verifies that stmt s does not redefine the
+		// variables which we're tracking.  However, if
+		// <code>in</code> is empty, we have not seen any shadows yet
+		// and hence do not (yet) care about definitions
 		if(!in.isEmpty()) {
 			for (ValueBox box : (Collection<ValueBox>)s.getDefBoxes()) {
 				Value value = box.getValue();
 				// 1. does s redefine the local we're depending on;
-				if(adviceActualToTmVar.containsValue(value)) {
-					gaveUp = true;
+                for (Local l : principalShadow.getBoundLocals()) {
+                    if(l == value) {
+                        gaveUp = true;
+                        return;
+                    }
 				}
 			}
 		}
 		
 		out.clear();
 		Collection<SMNode> successorStates = TransitionUtils.getSuccessorStatesFor
-			(in, traceMatch, s, adviceActualToTmVar, tmFormalToTmVar);
+			(in, traceMatch, principalShadow, s, lma);
 		for (SMNode succ : successorStates) {
 			if(succ.isFinalNode()) {
 				gaveUp = true;
 				return;
 			}
 		}
-		out.addAll(successorStates);			
+		out.addAll(successorStates);
 	}
 
 	protected Object newInitialFlow() {
