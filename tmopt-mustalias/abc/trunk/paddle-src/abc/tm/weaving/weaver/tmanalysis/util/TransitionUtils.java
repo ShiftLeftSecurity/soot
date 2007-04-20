@@ -58,37 +58,38 @@ public class TransitionUtils {
 		boolean atLeastOneShadowActive = false;
 		for (SymbolShadowMatch match : tag.getMatchesForTracematch(tm)) {
 			if(match.isEnabled()) {
-				//check composition of tmFormalToAdviceLocal and adviceActualToTmVar
-				//against tmFormalToTmVar
 				boolean sameVariableMapping = true;
+
+				String symbolName = match.getSymbolName();
+                System.out.println("symbol name "+symbolName);
+
                 Map<String, Local> m = match.getTmFormalToAdviceLocal();
                 for (Entry<String,Local> tmFormalAndAdviceActual : m.entrySet()) {
 					String tmFormal = tmFormalAndAdviceActual.getKey();
 					Local adviceActual = tmFormalAndAdviceActual.getValue();
                     Local supposedAdviceActual = ps.getLocalForVarName(tmFormal);
+                    System.out.println("tmFormal "+tmFormal+" aa "+adviceActual+" supposedAdviceActual "+supposedAdviceActual);
 					if(!lma.mustAlias(adviceActual, supposedAdviceActual, stmt)) {
 						sameVariableMapping = false;
 						break;
 					}
 				}
 				
-				//add all states which we can reach directly via this symbol
-				String symbolName = match.getSymbolName();
-                System.out.println("symbol name "+symbolName);
-
+				//add all states which we can reach directly via symbolName
 				Iterator<SMNode> it = currentStates.iterator();
 				if (currentStates.isEmpty())
 					it = tm.getStateMachine().getStateIterator();
 
 				for (; it.hasNext(); ) {
 					SMNode cs = it.next();
+                    System.out.println("from node "+cs);
 					for (Iterator edgeIter = cs.getOutEdgeIterator(); edgeIter.hasNext();) {
 						SMEdge edge = (SMEdge) edgeIter.next();
 						//if we have a skip edge, we get back to the initial configuration
 						if(edge.getLabel().equals(symbolName)) {
                             System.out.println("found edge; skip "+edge.isSkipEdge()+" target "+edge.getLabel()+" with sameVariableMapping "+sameVariableMapping);
 							if(edge.isSkipEdge() && sameVariableMapping) {
-                                System.out.println("initial states: "+tm.getStateMachine().getInitialStates());
+                                System.out.println("target-initial states: "+tm.getStateMachine().getInitialStates());
 								//TODO if sameVariableMapping is false, we could add edge only if it gets us closer to the final state
 								res.addAll(tm.getStateMachine().getInitialStates());
 							} else {
