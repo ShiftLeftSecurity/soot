@@ -32,6 +32,9 @@ import abc.main.Debug;
 import abc.tm.weaving.matching.SMEdge;
 import abc.tm.weaving.matching.StateMachine;
 import abc.tm.weaving.matching.TMStateMachine;
+import abc.tm.weaving.weaver.CodeGenHelper;
+import abc.tm.weaving.weaver.DynamicSwitchIndexedCodeGenHelper;
+import abc.tm.weaving.weaver.IndexedCodeGenHelper;
 import abc.weaving.aspectinfo.AdviceDecl;
 import abc.weaving.aspectinfo.Aspect;
 import abc.weaving.aspectinfo.GlobalAspectInfo;
@@ -71,6 +74,14 @@ public class TMOptTraceMatch extends TraceMatch
     			container, 
     			pos
     	);
+    	//switch godegen helper
+    	if(Debug.v().dynaInstr) {
+            if (abc.main.Debug.v().useIndexing)
+                this.helper = new DynamicSwitchIndexedCodeGenHelper(this);
+            else
+                throw new RuntimeException("Dynamic instrumentation currently not supported without indexing.");
+    	}
+    	
     	//store reverse mapping
     	adviceNameToTymbolName = new HashMap();
 		for (Iterator iterator = sym_to_advice_name.entrySet().iterator(); iterator.hasNext();) {

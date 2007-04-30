@@ -154,7 +154,7 @@ public class TracematchAnalysis extends AbstractReweavingAnalysis {
 //        	shadowGroupDump();
 //        }
 
-    	IntraproceduralAnalysis.v().apply();
+    	//IntraproceduralAnalysis.v().apply();
     	
     	
     	if(!ShadowRegistry.v().enabledShadowsLeft() || laststage.equals("flowins")) {

@@ -32,8 +32,11 @@ public class ShadowSwitch {
 			System.exit(1);
 		}				
 		
+		System.out.println(groupTable.length + " shadow groups present");
+		
 		String argString = System.getProperty("SHADOWGROUPS","");
 		parse(argString);
+		LabelShadowSwitchPrompt.start();
 	}
 
 	private static void parse(String argString) {

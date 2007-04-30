@@ -209,6 +209,6 @@ public class Debug {
 	public boolean tmTimerTrace = false;			    //trace timers for tracemat optimization
 	public boolean csv = false; 				//output statistics in CSV format
 	public boolean onDemand = true;			//use demand-driven points-to analysis by Manu Sridharan
-	public boolean dynaInstr = false;				//use dynamically configurable residues for remaining shadows
+	public boolean dynaInstr = true;				//use dynamically configurable residues for remaining shadows
 	
 }
