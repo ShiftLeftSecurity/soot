@@ -2,6 +2,8 @@ package org.aspectbench.tm.runtime.internal;
 
 import java.util.StringTokenizer;
 
+import org.aspectbench.tm.runtime.internal.labelshadows.LabelShadowSwitchFactory;
+
 /**
  * ShadowSwitch
  *
@@ -36,25 +38,38 @@ public class ShadowSwitch {
 		
 		String argString = System.getProperty("SHADOWGROUPS","");
 		parse(argString);
-		LabelShadowSwitchPrompt.start();
+		LabelShadowSwitchFactory.start();
 	}
 
 	private static void parse(String argString) {
-		if(argString.length()==0) {
-			return;
-		}
-		
-		
-		String[] split = argString.split(":");
-		String format = split[0];
-		String arg = split[1];		
-		if(format.equals("enum")) {
-			byNumber(arg);
-		} else if(format.equals("upto")) {
-			upToNumber(arg);
+		if(argString.length()>0) {
+			if(argString.equals("all")) {
+				all();
+				return;
+			}
+			
+			String[] split = argString.split(":");
+			String format = split[0];
+			String arg = split[1];		
+			if(format.equals("enum")) {
+				byNumber(arg);
+			} else if(format.equals("upto")) {
+				upToNumber(arg);
+			} else {
+				System.err.println("No shadow groups enabled.");
+			}
+		} else {
+			System.err.println("No shadow groups enabled.");
 		}
 	}
 	
+	private static void all() {
+		for(int i=0;i<groupTable.length;i++) {
+			enableShadowGroup(i);
+		}
+		System.err.println("Enabled all shadow groups.");
+	}
+
 	private static void upToNumber(String arg) {
 		int bound = Integer.parseInt(arg);
 		if(bound<0) {
@@ -63,6 +78,7 @@ public class ShadowSwitch {
 		for(int i=0;i<bound;i++) {
 			enableShadowGroup(i);
 		}
+		System.err.println("Enabled all shadow groups up to #"+bound);
 	}
 
 	private static void byNumber(String enumeration) {
@@ -72,10 +88,10 @@ public class ShadowSwitch {
 	    	int groupId = Integer.parseInt(token);
 	    	enableShadowGroup(groupId);
 	    }
+		System.err.println("Enabled shadow groups: "+enumeration);
 	}
 
 	public static void enableShadowGroup(int groupNumber) {
-    	System.err.println("enabled shadow group #"+groupNumber);
 		for (int i = 0; i < groupTable[groupNumber].length; i++) {
 			boolean toEnable = groupTable[groupNumber][i];
 			enabled[i] = enabled[i] | toEnable;

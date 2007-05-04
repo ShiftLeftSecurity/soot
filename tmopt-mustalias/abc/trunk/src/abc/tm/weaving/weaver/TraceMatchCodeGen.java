@@ -20,7 +20,6 @@
 
 package abc.tm.weaving.weaver;
 
-import java.util.Collection;
 import java.util.Iterator;
 
 import soot.SootMethod;
@@ -94,7 +93,7 @@ public class TraceMatchCodeGen {
             if (to.hasSkipLoop(symbol)
                     && !to.hasEdgeTo(to, symbol)
                     && !abc.main.Debug.v().noNegativeBindings)
-                helper.genSkipLabelUpdate(to.getNumber(), symbol, method);
+                helper.genSkipLabelUpdate(to, symbol, method);
         }
     }
 

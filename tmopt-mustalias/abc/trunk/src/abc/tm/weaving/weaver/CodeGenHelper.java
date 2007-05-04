@@ -1354,7 +1354,7 @@ public class CodeGenHelper
      * Generate code to update a label with the constraint for
      * a skip transition.
      */
-    public void genSkipLabelUpdate(int to, String symbol, SootMethod method)
+    public void genSkipLabelUpdate(SMNode to, String symbol, SootMethod method)
     {
         Body body = method.getActiveBody();
 
@@ -1365,13 +1365,14 @@ public class CodeGenHelper
 
         setUpdated(units, label_base, IntConstant.v(1));
 
-        Value to_state = getInt(to);
-        Local lab = getLabel(body, units, label_base, to, SKIP_LABEL);
+        int toNumber = to.getNumber();
+		Value to_state = getInt(toNumber);
+        Local lab = getLabel(body, units, label_base, toNumber, SKIP_LABEL);
         Local result =
             callBindingsMethod(body, units, symbol, lab, method,
                                 to_state, to_state, false);
 
-        assignToLabel(body, units, label_base, to, SKIP_LABEL, result);
+        assignToLabel(body, units, label_base, toNumber, SKIP_LABEL, result);
 
         insertBeforeReturn(units, body.getUnits());
     }
