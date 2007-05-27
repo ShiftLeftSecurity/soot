@@ -35,7 +35,7 @@ public class FlowInsensitiveAnalysis extends AbstractAnalysisStage {
 	protected Timer domEdgesTimer = new Timer("dominating-edges");
 
 	protected Timer groupShadowsTimer = new Timer("group-shadows");
-		
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -98,7 +98,6 @@ public class FlowInsensitiveAnalysis extends AbstractAnalysisStage {
         
         logToStatistics("cum-dominating-edges-time", domEdgesTimer);
         logToStatistics("cum-group-shadows-time", groupShadowsTimer);
-        
 	}
 	
 	/**
@@ -113,16 +112,6 @@ public class FlowInsensitiveAnalysis extends AbstractAnalysisStage {
 		}
 		disableAll(shadowIDsToDisable);
 	}
-	
-//	/**
-//	 * @return the allConsistentShadowGroups
-//	 */
-//	public Set getAllConsistentShadowGroups() {
-//		if(allConsistentShadowGroups==null) {
-//			throw new IllegalStateException("Stage not yet run!");
-//		}
-//		return allConsistentShadowGroups;
-//	}
 	
 	//singleton pattern
 

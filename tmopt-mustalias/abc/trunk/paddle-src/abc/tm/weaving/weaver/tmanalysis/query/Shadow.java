@@ -32,7 +32,11 @@ import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowMatchT
 import abc.tm.weaving.weaver.tmanalysis.util.SymbolFinder.SymbolShadowMatch;
 
 /**
- * Shadow
+ * A Shadow represents a static point in the program where the state
+ * machine may make a transition. Each Shadow belongs to a container
+ * method and has a uniqueShadowId. Shadows also have a points-to
+ * set for each tracematch variable, and track one local belonging 
+ * to each points-to set specifically.
  *
  * @author Eric Bodden
  */
@@ -46,10 +50,12 @@ public class Shadow {
 
 	protected String uniqueShadowId;
 
+    /* An error flag for the shadow... */
 	protected boolean hasEmptyMapping;
 
 	protected final SootMethod container;
-
+    
+    /* Derived state; we don't really need it. */
 	protected List<Local> boundLocals;
 	
 	/**

@@ -133,7 +133,10 @@ public class TracematchAnalysis extends AbstractReweavingAnalysis {
     	//hold this symbol; also, if then the final state becomes unreachable,
     	//we remove the tracematch entirely
     	QuickCheck.v().apply();
-    	
+
+		// XXX
+     	IntraproceduralAnalysis.v().apply();
+    	    	
     	if(!ShadowRegistry.v().enabledShadowsLeft() || laststage.equals("quick")) {
     		return;
     	}
@@ -154,9 +157,8 @@ public class TracematchAnalysis extends AbstractReweavingAnalysis {
 //        	shadowGroupDump();
 //        }
 
-    	//IntraproceduralAnalysis.v().apply();
-    	
-    	
+//      	IntraproceduralAnalysis.v().apply();
+
     	if(!ShadowRegistry.v().enabledShadowsLeft() || laststage.equals("flowins")) {
     		return;
     	}

@@ -15,6 +15,7 @@ import java.util.Set;
 
 import soot.Unit;
 import soot.Local;
+import soot.Value;
 import soot.SootMethod;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.callgraph.CallGraph;
@@ -23,30 +24,52 @@ import abc.tm.weaving.matching.SMEdge;
 import abc.tm.weaving.matching.SMNode;
 import abc.tm.weaving.matching.TMStateMachine;
 import abc.tm.weaving.weaver.tmanalysis.query.Shadow;
+import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroup;
+import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroupRegistry;
 import abc.tm.weaving.weaver.tmanalysis.stages.CallGraphAbstraction;
 import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowMatchTag;
 import abc.tm.weaving.weaver.tmanalysis.util.SymbolFinder.SymbolShadowMatch;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.LocalMustAliasAnalysis;
+import abc.tm.weaving.weaver.tmanalysis.mustalias.LocalNotMayAliasAnalysis;
 
 public class TransitionUtils {
 	
 	/**
 	 * For any state of a {@link TMStateMachine} of {@link TraceMatch}
 	 * tm, returns the successor states under the statement stmt
-	 * (itself; this method does not handle any callees of stmt). Note
-	 * that <i>skip</i>-loops are treated the following way: If we are
-	 * in state <i>s</i> , read symbol <i>a</i> and <i>s</i> has a
-	 * <i>skip</i>-loop labeled <i>skip<a></i> then we return the set
-	 * of all initial states ant <b>not</b> <i>s</i>.
+	 * (itself; this method does not handle any callees of stmt).
+     *
+     * The rules: 
+     *
+     *  1) The initial state is always a successor state. (due to
+     *     suffix property);
+     * 2) If we have a nonskip edge matching the given symbol, add its
+     *     target as successor;
+     * 3) If we have a skip edge matching the given symbol, remove the
+     *     current state as successor.
+     *
 	 * @param currentStates possible current states of the tracematch automaton; empty set indicates all states possible
 	 * @param tm the tracematch owning that state
 	 * @param stmt any statement; tagged with a tracematch shadow
+     * @param psm links shadow actuals to their defining stmts
 	 * @param adviceActualToTmVar 
 	 * @param tmFormalToTmVar 
 	 * @param initial states of <code>tm</code>
 	 * @return a collection of possible successor states given known set of current states
 	 */
-	public static Collection<SMNode> getSuccessorStatesFor(Collection<SMNode> currentStates, TraceMatch tm, Shadow ps, Stmt stmt, LocalMustAliasAnalysis lma) {
+	public static Collection<SMNode> getSuccessorStatesFor(Collection<SMNode> currentStates, TraceMatch tm, Shadow ps, 
+                                                           Map<Value,Stmt> psm, Stmt stmt, LocalMustAliasAnalysis lma,
+                                                           LocalNotMayAliasAnalysis lnma) {
+
+//         Set<Shadow> shadowsIntersectingPs = new HashSet();
+
+//         Set allShadowGroups = ShadowGroupRegistry.v().getAllShadowGroups();
+//         for (ShadowGroup ss : (Set<ShadowGroup>)allShadowGroups) {
+//             if (ss.getAllShadows().contains(ps)) {
+//                 shadowsIntersectingPs.addAll(ss.getAllShadows());
+//             }
+//         }
+
 		//if the current statement is not tagged, we don't switch states
 		if(!stmt.hasTag(SymbolShadowMatchTag.NAME)) {
 			return currentStates;
@@ -58,50 +81,81 @@ public class TransitionUtils {
 		boolean atLeastOneShadowActive = false;
 		for (SymbolShadowMatch match : tag.getMatchesForTracematch(tm)) {
 			if(match.isEnabled()) {
-				boolean sameVariableMapping = true;
+                // Check to see if match belongs to the same shadow group (may-alias check)
+//                 String shadowId = match.getUniqueShadowId();
+//                 boolean found = false;
+//                 for (Shadow s : shadowsIntersectingPs) {
+//                     if (s.getUniqueShadowId().equals(shadowId))
+//                         found = true;
+//                 }
+//                 if (!found)
+//                     continue;
+
+				boolean sameVariableMapping = true, notMaySameVariableMapping = false;
 
 				String symbolName = match.getSymbolName();
-                System.out.println("symbol name "+symbolName);
+                System.out.println("doing shadow ID "+match.getUniqueShadowId());
 
+                /* Figure out if we have the exact same bindings as the
+                 * tracematch we're tracking.
+                 * If so, then we can carry out rule 3. */
                 Map<String, Local> m = match.getTmFormalToAdviceLocal();
                 for (Entry<String,Local> tmFormalAndAdviceActual : m.entrySet()) {
 					String tmFormal = tmFormalAndAdviceActual.getKey();
 					Local adviceActual = tmFormalAndAdviceActual.getValue();
                     Local supposedAdviceActual = ps.getLocalForVarName(tmFormal);
-                    System.out.println("tmFormal "+tmFormal+" aa "+adviceActual+" supposedAdviceActual "+supposedAdviceActual);
-					if(!lma.mustAlias(adviceActual, supposedAdviceActual, stmt)) {
-						sameVariableMapping = false;
-						break;
-					}
+                    System.out.println("tmFormal "+tmFormal+" aa "+adviceActual+" supposedAdviceActual "+supposedAdviceActual+" psm "+psm);
+                    System.out.println();
+                    if (psm.get(supposedAdviceActual) != null) {
+                        Stmt saaDef = psm.get(supposedAdviceActual);
+                        if(!lma.mustAlias(adviceActual, stmt, supposedAdviceActual, saaDef))
+                            sameVariableMapping = false;
+                        if (lnma.notMayAlias(adviceActual, stmt, supposedAdviceActual, saaDef))
+                            notMaySameVariableMapping = true;
+                    }
 				}
 				
-				//add all states which we can reach directly via symbolName
+                res.addAll(tm.getStateMachine().getInitialStates());
+
 				Iterator<SMNode> it = currentStates.iterator();
 				if (currentStates.isEmpty())
 					it = tm.getStateMachine().getStateIterator();
 
 				for (; it.hasNext(); ) {
 					SMNode cs = it.next();
+
+                    // Final states are always sinks, don't treat them
+                    // as sources here.
+                    if (cs.isFinalNode())
+                        continue;
+
                     System.out.println("from node "+cs);
+
+                    // Rule 1: always add initial
+                    boolean mustAddCurrent = true;
+
 					for (Iterator edgeIter = cs.getOutEdgeIterator(); edgeIter.hasNext();) {
 						SMEdge edge = (SMEdge) edgeIter.next();
-						//if we have a skip edge, we get back to the initial configuration
+
 						if(edge.getLabel().equals(symbolName)) {
-                            System.out.println("found edge; skip "+edge.isSkipEdge()+" target "+edge.getLabel()+" with sameVariableMapping "+sameVariableMapping);
-							if(edge.isSkipEdge() && sameVariableMapping) {
-                                System.out.println("target-initial states: "+tm.getStateMachine().getInitialStates());
-								//TODO if sameVariableMapping is false, we could add edge only if it gets us closer to the final state
-								res.addAll(tm.getStateMachine().getInitialStates());
-							} else {
-                                System.out.println("target: "+edge.getTarget());
-								res.add(edge.getTarget());
-							}
+                            System.out.println("found edge; skip "+edge.isSkipEdge()+" label "+edge.getLabel()+" with svm "+sameVariableMapping+" and msvm "+notMaySameVariableMapping);
+                            // Rule 3: if skip & same vars, don't add current
+							if(edge.isSkipEdge()) {
+                                if (sameVariableMapping) 
+                                    mustAddCurrent = false;
+                            }
+                            else {
+                                // Rule 2: non-skip => add target
+                                // (unless not-may)
+                                if (!notMaySameVariableMapping) {
+                                    System.out.println("Adding transition");
+                                    res.add(edge.getTarget());
+                                }
+                            }
 						}
 					}
-				}
-				//weak update; also remain in the current state
-				if(!sameVariableMapping) {
-					res.addAll(currentStates);
+                    if (mustAddCurrent)
+                        res.add(cs);
 				}
 				
 				atLeastOneShadowActive = true;

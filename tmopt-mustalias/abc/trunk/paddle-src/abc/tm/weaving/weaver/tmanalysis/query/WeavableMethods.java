@@ -99,7 +99,7 @@ public class WeavableMethods {
 		//check for weavable ones
         while(reader.hasNext()) {
             SootMethod method = (SootMethod) reader.next();
-            
+
             if(weavableMethods.contains(method)) {
             	reachableWeavableMethods.add(method);
             }

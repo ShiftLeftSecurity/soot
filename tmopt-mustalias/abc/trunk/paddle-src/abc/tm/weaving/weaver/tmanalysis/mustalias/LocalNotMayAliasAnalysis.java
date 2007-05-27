@@ -20,13 +20,13 @@ import soot.toolkits.graph.UnitGraph;
 import soot.toolkits.scalar.ForwardFlowAnalysis;
 
 
-public class LocalMustAliasAnalysis extends ForwardFlowAnalysis
+public class LocalNotMayAliasAnalysis extends ForwardFlowAnalysis
 {
     private Map objectMap = new HashMap();
 	private static final Object UNKNOWN = new Object();
 	private List<Local> locals;
 
-    public LocalMustAliasAnalysis(UnitGraph g)
+    public LocalNotMayAliasAnalysis(UnitGraph g)
     {
         super(g);
         locals = new LinkedList<Local>(); locals.addAll(g.getBody().getLocals());
@@ -52,7 +52,7 @@ public class LocalMustAliasAnalysis extends ForwardFlowAnalysis
             if (l1.contains(UNKNOWN) || l2.contains(UNKNOWN)) {
                 out.add(UNKNOWN);
             } else {
-                out.addAll(l1); out.retainAll(l2);
+                out.addAll(l1); out.addAll(l2);
             }
         }
     }
@@ -127,14 +127,15 @@ public class LocalMustAliasAnalysis extends ForwardFlowAnalysis
 	 * @return true if values of l1 (at s1) and l2 (at s2) are known
 	 * to have different creation sites
 	 */
-	public boolean mustAlias(Local l1, Stmt s1, Local l2, Stmt s2) {
+	public boolean notMayAlias(Local l1, Stmt s1, Local l2, Stmt s2) {
 		Set l1n = (Set) ((HashMap)getFlowBefore(s1)).get(l1);
 		Set l2n = (Set) ((HashMap)getFlowBefore(s2)).get(l2);
 
         if (l1n.contains(UNKNOWN) || l2n.contains(UNKNOWN))
             return false;
 
-		return l1n.containsAll(l2n) && l2n.containsAll(l1n);
+        Set n = new HashSet(); n.addAll(l1n); n.retainAll(l2n);
+		return n.isEmpty();
 	}
         
 }

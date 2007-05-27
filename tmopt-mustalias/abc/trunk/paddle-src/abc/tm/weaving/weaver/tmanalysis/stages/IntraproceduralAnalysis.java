@@ -17,6 +17,9 @@ import soot.toolkits.graph.UnitGraph;
 import soot.SootMethod;
 import soot.Unit;
 import soot.toolkits.graph.ExceptionalUnitGraph;
+import soot.jimple.toolkits.callgraph.CallGraph;
+import soot.jimple.toolkits.callgraph.CallGraphBuilder;
+import soot.jimple.toolkits.pointer.DumbPointerAnalysis;
 import abc.main.Main;
 import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.aspectinfo.TMGlobalAspectInfo;
@@ -29,7 +32,7 @@ import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowMatchT
 
 /**
  * IntraproceduralAnalysis: This analysis is the core of the analysis
- * described in the OOPSLA paper.  In particular, for each shadow group SG:
+ * described in the POPL paper.  In particular, for each shadow group SG:
  *
  *  a) For each initial shadow, give must-names to the binding objects.
  *  b) Propagate state information when we hit additional shadows.
@@ -47,31 +50,36 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 	 */
 	protected void doAnalysis() {
         for (TraceMatch tm : (Collection<TraceMatch>)gai.getTraceMatches()) {
-			// Now propagate p through the procedure.
-
             //split reachable shadows by tracematch
-            Set reachableShadows = ReachableShadowFinder.v().reachableShadows
-                (CallGraphAbstraction.v().abstractedCallGraph());
+			CallGraph cg = CallGraphAbstraction.v().abstractedCallGraph();
+			if (cg == null) {
+				CallGraphBuilder cgb = new CallGraphBuilder(DumbPointerAnalysis.v());
+				soot.Scene.v().setPointsToAnalysis(DumbPointerAnalysis.v());
+				cg = cgb.getCallGraph();
+				cgb.build();
+			}
+
+            Set reachableShadows = ReachableShadowFinder.v().reachableShadows(cg);
             Map tmNameToShadows = ShadowsPerTMSplitter.v().splitShadows
                 (reachableShadows);
 			Set<Shadow> thisTMsShadows = (Set<Shadow>) tmNameToShadows.get(tm.getName());
-            Collection<SootMethod> thisTMsContainers = new HashSet();
-            for (Shadow s : thisTMsShadows) 
-                thisTMsContainers.add(s.getContainer());
+            for (Shadow s : thisTMsShadows) {
+                SootMethod m = s.getContainer();
 
-            for (SootMethod m : thisTMsContainers) {
                 System.err.println("analyzing method: "+m);
+                System.err.println(" and shadow "+s.getUniqueShadowId());
+
                 UnitGraph g = new ExceptionalUnitGraph(m.retrieveActiveBody());
                 StatePropagatorFlowAnalysis a = 
-                    new StatePropagatorFlowAnalysis(tm,
-                                                    g,
-                                                    CallGraphAbstraction.v().abstractedCallGraph());
+                    new StatePropagatorFlowAnalysis(tm, s, g, cg);
 
                 for (Unit u : (Collection<Unit>)g.getBody().getUnits()) {
                     if (!u.hasTag(SymbolShadowMatchTag.NAME))
                         continue;
 
-                    System.out.println("after stmt "+u+" have "+a.getFlowAfter(u));
+                    System.out.println("new unit");
+                    for (abc.tm.weaving.weaver.tmanalysis.util.SymbolFinder.SymbolShadowMatch match : ((SymbolShadowMatchTag)u.getTag(SymbolShadowMatchTag.NAME)).getMatchesForTracematch(tm)) 
+                        System.out.println("after tag "+match.getUniqueShadowId()+" have "+a.getFlowAfter(u));
                 }
 
                 for (Unit u : (Collection<Unit>)g.getTails()) {

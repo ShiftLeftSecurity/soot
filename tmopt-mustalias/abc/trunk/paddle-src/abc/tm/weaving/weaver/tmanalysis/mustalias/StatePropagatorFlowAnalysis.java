@@ -27,6 +27,7 @@ import abc.tm.weaving.matching.SMNode;
 import abc.tm.weaving.matching.StateMachine;
 import abc.tm.weaving.weaver.tmanalysis.query.Shadow;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroup;
+import abc.tm.weaving.weaver.tmanalysis.query.ReachableShadowFinder;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroupRegistry;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowRegistry;
 import abc.tm.weaving.weaver.tmanalysis.stages.CallGraphAbstraction;
@@ -48,8 +49,6 @@ import abc.tm.weaving.weaver.tmanalysis.util.TransitionUtils;
 public class StatePropagatorFlowAnalysis extends ForwardFlowAnalysis {
 	
 	protected SootMethod meth;
-	protected Shadow initialShadow;
-	protected Stmt initialStmt;
 	protected StateMachine sm;
 	private TraceMatch traceMatch;
 	private final UnitGraph g;
@@ -57,18 +56,20 @@ public class StatePropagatorFlowAnalysis extends ForwardFlowAnalysis {
 	private boolean gaveUp;
 	private final CallGraph abstractedCallGraph;
     private LocalMustAliasAnalysis lma;
+    private LocalNotMayAliasAnalysis lnma;
+    private PathsReachingFlowAnalysis prf;
 
     /* Pick out a shadow associated with the given tracematch and in the appropriate method.
      * Use it to determine the bindings that we're tracking. */
     /* In principle, we ought to try all possible principalShadows. */
     private Shadow principalShadow;
+    private Collection<Stmt> principalShadowDefs;
+    private HashMap<Value, Stmt> principalShadowDefMap;
 
 	/**
-	 * Computes possible states of <code>tm</code> in the given procedure.
-     * (todo:) Checks that only one binding of tracematch formals occurs in this
-     * procedure and that the bound advice actuals are never written to.
+	 * Computes possible states of <code>tm</code> in the given procedure, based on the bindings for shadow <code>s</code>.
 	 */
-	public StatePropagatorFlowAnalysis(TraceMatch tm, UnitGraph g, CallGraph abstractedCallGraph) {
+	public StatePropagatorFlowAnalysis(TraceMatch tm, Shadow s, UnitGraph g, CallGraph abstractedCallGraph) {
 		super(g);
 		this.g = g;
 		this.abstractedCallGraph = abstractedCallGraph;
@@ -77,23 +78,65 @@ public class StatePropagatorFlowAnalysis extends ForwardFlowAnalysis {
 
 		this.traceMatch = tm;
 		this.sm = tm.getStateMachine();
+        this.principalShadow = s;
 		this.lma = new LocalMustAliasAnalysis(g);
+        this.lnma = new LocalNotMayAliasAnalysis(g);
+        this.prf = new PathsReachingFlowAnalysis(g);
 
-		Set<ShadowGroup> shadowGroups = ShadowGroupRegistry.v().getAllShadowGroups();
-		for (ShadowGroup group : shadowGroups) {
-			Set<Shadow> allShadows = group.getAllShadows();
-            Set<String> seenAlready = new HashSet<String>();
-			for (Shadow ss : allShadows) {
-                if (ss.getTraceMatch() != this.traceMatch || !ss.getContainer().equals(meth))
-                    continue;
-                if (seenAlready.contains(ss.getUniqueShadowId())) continue;
-                seenAlready.add(ss.getUniqueShadowId());
+        // dump the woven body...
+//           java.io.PrintWriter pw = new java.io.PrintWriter(System.out);
+//           soot.Printer.v().printTo(g.getBody(), pw);
+//           pw.close();
 
-                // Pick the first shadow we see...
+			// for after-flow-ins analysis
+        // 	Set<ShadowGroup> shadowGroups = ShadowGroupRegistry.v().getAllShadowGroups();
+        // 	for (ShadowGroup group : shadowGroups) {
+        //	Set<Shadow> allShadows = group.getAllShadows();
+
+			// for quick-state-prop
+ 		Set<Shadow> allShadows = ReachableShadowFinder.v().reachableShadows(abstractedCallGraph);
+
+        /*
+        int maxBindingCount = -1;
+        for (Shadow ss : allShadows) {
+            if (ss.getTraceMatch() != this.traceMatch || !ss.getContainer().equals(meth))
+                continue;
+            
+            if (ss.getBoundLocals().size() > maxBindingCount) {
                 principalShadow = ss;
-                break;
+                maxBindingCount = ss.getBoundLocals().size();
+        */
+        principalShadowDefs = new java.util.LinkedList();
+        principalShadowDefMap = new java.util.HashMap();
+
+        Collection seenBoundLocals = new java.util.LinkedList();
+                
+        for (Stmt u : (Collection<Stmt>)g.getBody().getUnits()) {
+            for (soot.ValueBox vb : (Collection<soot.ValueBox>)u.getDefBoxes()) {
+                soot.Value v = vb.getValue();
+                if (principalShadow.getBoundLocals().contains(v)) {
+                    if (prf.getFlowAfter(u) == PathsReachingFlowAnalysis.MANY) {
+                        gaveUp = true;
+                    }
+                    if (seenBoundLocals.contains(v)) {
+                        gaveUp = true;
+                    }
+                    seenBoundLocals.add(v);
+                    principalShadowDefMap.put(v, (Stmt)(g.getSuccsOf(u).get(0)));
+                    principalShadowDefs.add(u);
+                }
             }
         }
+
+        /*
+            }
+        }
+        */
+
+        // quick-state-prop
+        // 		}
+
+        System.out.println("principalShadow's bound variables: "+principalShadow.getBoundLocals());
 		
 		doAnalysis();
     }
@@ -105,29 +148,13 @@ public class StatePropagatorFlowAnalysis extends ForwardFlowAnalysis {
 		
 		Collection<SMNode> in = (Collection<SMNode>) inVal, out = (Collection<SMNode>) outVal;
 		Stmt s = (Stmt) stmt;
-		
-		// This check verifies that stmt s does not redefine the
-		// variables which we're tracking.  However, if
-		// <code>in</code> is empty, we have not seen any shadows yet
-		// and hence do not (yet) care about definitions
-		if(!in.isEmpty()) {
-			for (ValueBox box : (Collection<ValueBox>)s.getDefBoxes()) {
-				Value value = box.getValue();
-				// 1. does s redefine the local we're depending on;
-                for (Local l : principalShadow.getBoundLocals()) {
-                    if(l == value) {
-                        gaveUp = true;
-                        return;
-                    }
-				}
-			}
-		}
-		
+
 		out.clear();
 		Collection<SMNode> successorStates = TransitionUtils.getSuccessorStatesFor
-			(in, traceMatch, principalShadow, s, lma);
+			(in, traceMatch, principalShadow, principalShadowDefMap, s, lma, lnma);
 		for (SMNode succ : successorStates) {
 			if(succ.isFinalNode()) {
+                System.out.println("gave up: final");
 				gaveUp = true;
 				return;
 			}
@@ -156,6 +183,14 @@ public class StatePropagatorFlowAnalysis extends ForwardFlowAnalysis {
 		out.clear();
 		out.addAll(in1);
 		out.addAll(in2);
+
+        if (!in1.equals(in2)) {
+            // actually we should do something at flowThrough
+            // when we have a set of output nodes or something.
+            // Except when we have an initial flow. Then it's fine.
+//             System.out.println("unequal merges");
+            //            gaveUp = true;
+        }
 	}
 
 	/**
