@@ -11,7 +11,6 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 
 import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.matching.TMStateMachine;
@@ -27,6 +26,15 @@ import abc.tm.weaving.weaver.tmanalysis.query.TraceMatchByName;
 
 /**
  * This stage applies a flow-insensitive analysis to all shadows still remaining at this stage.
+ * 
+ * FIXME:
+ * 
+ * "edges which are part of a strongly connected component do not
+ * necessarily have to be visited to reach a final state."
+ * This is not true in general. For example:
+ * A ---> B ---> C ---> D
+ *        <---
+ * B and C are a SCC, but you need to go from B to C to get from A to D.
  *
  * @author Eric Bodden
  */
