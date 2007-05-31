@@ -117,12 +117,12 @@ public class TransitionUtils {
 				
                 res.addAll(tm.getStateMachine().getInitialStates());
 
-				Iterator<SMNode> it = currentStates.iterator();
+				Iterator it = currentStates.iterator();
 				if (currentStates.isEmpty())
 					it = tm.getStateMachine().getStateIterator();
 
 				for (; it.hasNext(); ) {
-					SMNode cs = it.next();
+					SMNode cs = (SMNode) it.next();
 
                     // Final states are always sinks, don't treat them
                     // as sources here.
