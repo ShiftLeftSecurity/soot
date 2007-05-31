@@ -114,43 +114,31 @@ public class SMEdge implements Cloneable {
     		this.target.addIncomingEdge(this);
     }
     
-    /** 
-	 * If {@link #equalsDespiteState} is true, the hash code is based on the label.
-	 * If it is false, the code is also based on the source and target state.
-	 */
 	public int hashCode() {
 		final int PRIME = 31;
 		int result = 1;
-		if(!equalsDespiteState) {
-			result = PRIME * result + ((source == null) ? 0 : source.hashCode());
-			result = PRIME * result + ((target == null) ? 0 : target.hashCode());
-		}
+		result = PRIME * result + ((source == null) ? 0 : source.hashCode());
+		result = PRIME * result + ((target == null) ? 0 : target.hashCode());
 		result = PRIME * result + ((label == null) ? 0 : label.hashCode());
 		return result;
 	}
 
-	/** 
-	 * If {@link #equalsDespiteState} is true, equality is based on the label.
-	 * If it is false, equality is also based on the source and target state.
-	 */
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
 		if (getClass() != obj.getClass())
 			return false;
 		final SMEdge other = (SMEdge) obj;
-		if(!equalsDespiteState) {
-			if (source == null) {
-				if (other.source != null)
-					return false;
-			} else if (!source.equals(other.source))
+		if (source == null) {
+			if (other.source != null)
 				return false;
-			if (target == null) {
-				if (other.target != null)
-					return false;
-			} else if (!target.equals(other.target))
+		} else if (!source.equals(other.source))
+			return false;
+		if (target == null) {
+			if (other.target != null)
 				return false;
-		}
+		} else if (!target.equals(other.target))
+			return false;
 		if (label == null) {
 			if (other.label != null)
 				return false;
