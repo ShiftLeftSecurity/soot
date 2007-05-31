@@ -25,10 +25,10 @@ import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.aspectinfo.TMGlobalAspectInfo;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.StatePropagatorFlowAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.query.ReachableShadowFinder;
-import abc.tm.weaving.weaver.tmanalysis.query.ShadowsPerTMSplitter;
 import abc.tm.weaving.weaver.tmanalysis.query.Shadow;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroup;
 import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowMatchTag;
+import abc.tm.weaving.weaver.tmanalysis.util.ShadowsPerTMSplitter;
 
 /**
  * IntraproceduralAnalysis: This analysis is the core of the analysis
@@ -52,16 +52,9 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
         for (TraceMatch tm : (Collection<TraceMatch>)gai.getTraceMatches()) {
             //split reachable shadows by tracematch
 			CallGraph cg = CallGraphAbstraction.v().abstractedCallGraph();
-			if (cg == null) {
-				CallGraphBuilder cgb = new CallGraphBuilder(DumbPointerAnalysis.v());
-				soot.Scene.v().setPointsToAnalysis(DumbPointerAnalysis.v());
-				cg = cgb.getCallGraph();
-				cgb.build();
-			}
 
             Set reachableShadows = ReachableShadowFinder.v().reachableShadows(cg);
-            Map tmNameToShadows = ShadowsPerTMSplitter.v().splitShadows
-                (reachableShadows);
+            Map tmNameToShadows = ShadowsPerTMSplitter.splitShadows(reachableShadows);
 			Set<Shadow> thisTMsShadows = (Set<Shadow>) tmNameToShadows.get(tm.getName());
             for (Shadow s : thisTMsShadows) {
                 SootMethod m = s.getContainer();

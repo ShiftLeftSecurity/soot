@@ -1,4 +1,4 @@
-package abc.tm.weaving.weaver;
+package abc.tm.weaving.weaver.tmanalysis.dynamicinstr;
 
 import java.util.Collections;
 
@@ -29,6 +29,7 @@ import soot.jimple.NullConstant;
 import soot.util.Chain;
 import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.matching.SMNode;
+import abc.tm.weaving.weaver.IndexedCodeGenHelper;
 
 /**
  * Version of {@link IndexedCodeGenHelper} which allows for dynamic switching of non-skip shadows.
@@ -137,39 +138,45 @@ public class DynamicSwitchIndexedCodeGenHelper extends IndexedCodeGenHelper {
         //Set/Map $temp = c.<disjunctsFieldName>
 
         //field name and type of disjuncts set/map depends on whether or not the state uses indexing
-        boolean stateUsesIndexing = state.indices != null && !state.indices.isEmpty();        
-        String disjunctsFieldName = stateUsesIndexing ? "indexedDisjuncts" : "disjuncts";
-        Type disjunctsFieldType = stateUsesIndexing ? RefType.v("java.util.Map") : set.getType();
         
-        SootFieldRef disjunctsFieldRef = Scene.v().makeFieldRef(constraint, disjunctsFieldName, disjunctsFieldType, false);
-        InstanceFieldRef rhs = Jimple.v().newInstanceFieldRef(constraintLocal, disjunctsFieldRef);
-        Local disjunctsLocal = localGen.generateLocal(disjunctsFieldType);
-        newUnits.add(Jimple.v().newAssignStmt(disjunctsLocal, rhs));
         
-        //if($temp==null) goto jumpTarget
-        EqExpr nullCheck = Jimple.v().newEqExpr(disjunctsLocal, NullConstant.v());
-        newUnits.add(Jimple.v().newIfStmt(nullCheck, jumpTarget));
+        //FIXME does not compile any more
+        //boolean stateUsesIndexing = state.indices != null && !state.indices.isEmpty();
         
-        //boolean $isEmpty = $temp.isEmpty();
-        SootClass disjunctsFieldClass = stateUsesIndexing ? Scene.v().getSootClass("java.util.Map") : Scene.v().getSootClass("java.util.Set");
-        Local isEmptyLocal = localGen.generateLocal(BooleanType.v());
-        SootMethodRef isEmptyMethodRef = Scene.v().makeMethodRef(disjunctsFieldClass, "isEmpty", Collections.EMPTY_LIST, BooleanType.v(), false);
-        InvokeExpr isEmptyInvokeExpr = Jimple.v().newInterfaceInvokeExpr(disjunctsLocal, isEmptyMethodRef);
-        newUnits.add(Jimple.v().newAssignStmt(isEmptyLocal, isEmptyInvokeExpr));
+        throw new RuntimeException("FIXME!");
         
-        //if($isEmpty) goto jumpTarget
-        EqExpr emptyCheck = Jimple.v().newEqExpr(isEmptyLocal, IntConstant.v(1));
-        newUnits.add(Jimple.v().newIfStmt(emptyCheck, jumpTarget));
-
-        //generate code we would generate otherwise
-        Chain units = body.getUnits();
-        insertBeforeReturn(newUnits, units);
-        super.genSkipLabelUpdate(state, symbol, method);
-        
-        //insert jump target
-        newUnits = newChain();
-        newUnits.add(jumpTarget);        
-        insertBeforeReturn(newUnits, units);        
+//        String disjunctsFieldName = stateUsesIndexing ? "indexedDisjuncts" : "disjuncts";
+//        Type disjunctsFieldType = stateUsesIndexing ? RefType.v("java.util.Map") : set.getType();
+//        
+//        SootFieldRef disjunctsFieldRef = Scene.v().makeFieldRef(constraint, disjunctsFieldName, disjunctsFieldType, false);
+//        InstanceFieldRef rhs = Jimple.v().newInstanceFieldRef(constraintLocal, disjunctsFieldRef);
+//        Local disjunctsLocal = localGen.generateLocal(disjunctsFieldType);
+//        newUnits.add(Jimple.v().newAssignStmt(disjunctsLocal, rhs));
+//        
+//        //if($temp==null) goto jumpTarget
+//        EqExpr nullCheck = Jimple.v().newEqExpr(disjunctsLocal, NullConstant.v());
+//        newUnits.add(Jimple.v().newIfStmt(nullCheck, jumpTarget));
+//        
+//        //boolean $isEmpty = $temp.isEmpty();
+//        SootClass disjunctsFieldClass = stateUsesIndexing ? Scene.v().getSootClass("java.util.Map") : Scene.v().getSootClass("java.util.Set");
+//        Local isEmptyLocal = localGen.generateLocal(BooleanType.v());
+//        SootMethodRef isEmptyMethodRef = Scene.v().makeMethodRef(disjunctsFieldClass, "isEmpty", Collections.EMPTY_LIST, BooleanType.v(), false);
+//        InvokeExpr isEmptyInvokeExpr = Jimple.v().newInterfaceInvokeExpr(disjunctsLocal, isEmptyMethodRef);
+//        newUnits.add(Jimple.v().newAssignStmt(isEmptyLocal, isEmptyInvokeExpr));
+//        
+//        //if($isEmpty) goto jumpTarget
+//        EqExpr emptyCheck = Jimple.v().newEqExpr(isEmptyLocal, IntConstant.v(1));
+//        newUnits.add(Jimple.v().newIfStmt(emptyCheck, jumpTarget));
+//
+//        //generate code we would generate otherwise
+//        Chain units = body.getUnits();
+//        insertBeforeReturn(newUnits, units);
+//        super.genSkipLabelUpdate(state, symbol, method);
+//        
+//        //insert jump target
+//        newUnits = newChain();
+//        newUnits.add(jumpTarget);        
+//        insertBeforeReturn(newUnits, units);        
     }
     
     

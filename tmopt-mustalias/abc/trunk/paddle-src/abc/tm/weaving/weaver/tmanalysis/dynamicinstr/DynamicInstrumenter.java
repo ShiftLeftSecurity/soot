@@ -7,7 +7,9 @@
 package abc.tm.weaving.weaver.tmanalysis.dynamicinstr;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import soot.ArrayType;
@@ -30,10 +32,11 @@ import soot.jimple.StaticFieldRef;
 import soot.jimple.VirtualInvokeExpr;
 import abc.main.Debug;
 import abc.main.Main;
-import abc.tm.weaving.weaver.tmanalysis.query.Probe;
 import abc.tm.weaving.weaver.tmanalysis.query.Shadow;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowRegistry;
 import abc.weaving.aspectinfo.MethodCategory;
+import abc.weaving.matching.AdviceApplication;
+import abc.weaving.residues.AndResidue;
 import abc.weaving.residues.Residue;
 import abc.weaving.weaver.Unweaver;
 
@@ -51,6 +54,9 @@ import abc.weaving.weaver.Unweaver;
  */
 public class DynamicInstrumenter {
 
+	/** maps a shadow ID to a unique number for that id */
+	protected Map shadowIdToNumber = new HashMap();
+	
 	/** Name of the shadow switch class in the abc runtime. */
 	// do not change this name, unless you change it in AbcExtension, too
 	public static final String SHADOW_SWITCH_CLASS_NAME = "org.aspectbench.tm.runtime.internal.ShadowSwitch";
@@ -73,8 +79,19 @@ public class DynamicInstrumenter {
 	 */
 	public void createClassesAndSetDynamicResidues() {
 		createShadowSwitchInitializerClass();
-
-		ShadowRegistry.v().setDynamicResidues();
+		
+		// Conjoin the residues of all enabled shadows with a {@link DynamicInstrumentationResidue}.
+		for (Iterator enabledIter = ShadowRegistry.v().enabledShadows().iterator(); enabledIter.hasNext();) {
+			String uniqueShadowId = (String) enabledIter.next();
+			AdviceApplication aa = (AdviceApplication) ShadowRegistry.v().getAdviceApplicationForShadow(uniqueShadowId);
+			Residue originalResidue = aa.getResidue();
+			aa.setResidue(
+					AndResidue.construct(					
+							new DynamicInstrumentationResidue(numberOf(uniqueShadowId)),
+							originalResidue
+					)
+			);			
+		}
 	}
 
 	/**
@@ -290,7 +307,7 @@ public class DynamicInstrumenter {
 
 			// get the unique shadow number (starts at 0, so it can be used to
 			// index the array)
-			int shadowNumber = ShadowRegistry.v().numberOf(shadowId);
+			int shadowNumber = numberOf(shadowId);
 			// if the shadow in the current group?
 			boolean isInGroup = shadowsOfGroup.contains(shadowId);
 
@@ -319,6 +336,22 @@ public class DynamicInstrumenter {
 		return method;
 	}
 
+	
+	/**
+	 * Returns a unique int number for the given shadow id.
+	 * The numbers start with 0 and then increase by 1.
+	 * @param uniqueShadowId
+	 * @return
+	 */
+	protected int numberOf(String uniqueShadowId) {
+		Integer number = (Integer) shadowIdToNumber.get(uniqueShadowId);
+		if(number==null) {
+			number = new Integer(shadowIdToNumber.size());
+			shadowIdToNumber.put(uniqueShadowId, number);
+		}
+		return number.intValue();
+	}
+	
 	//singleton pattern
 	
 	protected static DynamicInstrumenter instance;
