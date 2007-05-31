@@ -44,7 +44,7 @@ public class MustAliasTagger extends BodyTransformer
 					for (Iterator localIter2 = b.getLocals().iterator(); localIter2
 							.hasNext();) {
 						Local l2 = (Local) localIter2.next();
-						System.err.println("mustalias("+l+","+l2+") = "+a.mustAlias(l,l2,s));
+						System.err.println("mustalias("+l+","+l2+") = "+a.mustAlias(l,s,l2,s));
 					}
 					
 				}

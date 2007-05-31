@@ -269,8 +269,8 @@ public class PerMethodFlowAnalysis extends ForwardFlowAnalysis implements TMFlow
 		return new ConfigurationBox();
 	}
 	
-	public boolean mustAlias(Local l1, Local l2, Stmt s) {
-		return mustAlias.mustAlias(l1,l2, s);
+	public boolean mustAlias(Local l1, Stmt s1, Local l2, Stmt s2) {
+		return mustAlias.mustAlias(l1, s1, l2, s2);
 	}
 
 //	/**

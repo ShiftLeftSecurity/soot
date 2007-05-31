@@ -115,7 +115,8 @@ public class StatePropagatorFlowAnalysis extends ForwardFlowAnalysis {
             for (soot.ValueBox vb : (Collection<soot.ValueBox>)u.getDefBoxes()) {
                 soot.Value v = vb.getValue();
                 if (principalShadow.getBoundLocals().contains(v)) {
-                    if (prf.getFlowAfter(u) == PathsReachingFlowAnalysis.MANY) {
+                    if (((PathsReachingFlowAnalysis.Box)prf.getFlowAfter(u)).getValue() == PathsReachingFlowAnalysis.MANY) {
+                        System.out.println("gave up: many defs");
                         gaveUp = true;
                     }
                     if (seenBoundLocals.contains(v)) {

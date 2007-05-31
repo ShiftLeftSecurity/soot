@@ -14,26 +14,41 @@ import soot.Value;
 import soot.ValueBox;
 import soot.RefLikeType;
 import soot.jimple.NewExpr;
+import soot.jimple.InvokeExpr;
+import soot.jimple.ParameterRef;
+import soot.jimple.ThisRef;
 import soot.jimple.DefinitionStmt;
 import soot.jimple.Stmt;
 import soot.toolkits.graph.UnitGraph;
 import soot.toolkits.scalar.ForwardFlowAnalysis;
 
-
+/** LocalMustAliasAnalysis attempts to determine if two local
+ * variables (at two potentially different program points) must point
+ * to the same object.
+ *
+ * The underlying abstraction is that of definition expressions.
+ * When a local variable is assigned to, the analysis tracks the source
+ * of the value (a NewExpr, InvokeExpr, or ParameterRef). If two
+ * variables have the same source, then they are equal.
+ *
+ * This is like constant propagation on abstract objects. */
 public class LocalMustAliasAnalysis extends ForwardFlowAnalysis
 {
     private Map objectMap = new HashMap();
-	private static final Object UNKNOWN = new Object();
-	private List<Local> locals;
+    private static final Object UNKNOWN = new Object();
+    private List<Local> locals;
+
+    private PathsReachingFlowAnalysis prf;
 
     public LocalMustAliasAnalysis(UnitGraph g)
     {
         super(g);
-        locals = new LinkedList<Local>(); locals.addAll(g.getBody().getLocals());
+        this.prf = new PathsReachingFlowAnalysis(g);
+        this.locals = new LinkedList<Local>(); 
 
-		for (Local l : (Collection<Local>) g.getBody().getLocals()) {
-			if (l.getType() instanceof RefLikeType)
-				locals.add(l);
+        for (Local l : (Collection<Local>) g.getBody().getLocals()) {
+            if (l.getType() instanceof RefLikeType)
+                this.locals.add(l);
         }
 
         doAnalysis();
@@ -46,14 +61,11 @@ public class LocalMustAliasAnalysis extends ForwardFlowAnalysis
         HashMap outMap = (HashMap) o;
 
         for (Local l : locals) {
-            Set l1 = (Set)inMap1.get(l), l2 = (Set)inMap2.get(l);
-            Set out = (Set)outMap.get(l);
-            out.clear();
-            if (l1.contains(UNKNOWN) || l2.contains(UNKNOWN)) {
-                out.add(UNKNOWN);
-            } else {
-                out.addAll(l1); out.retainAll(l2);
-            }
+            Object i1 = inMap1.get(l), i2 = inMap2.get(l);
+            if (i1 == i2) 
+                outMap.put(l, i1);
+            else
+                outMap.put(l, UNKNOWN);
         }
     }
     
@@ -81,15 +93,22 @@ public class LocalMustAliasAnalysis extends ForwardFlowAnalysis
             DefinitionStmt ds = (DefinitionStmt) s;
             Value lhs = ds.getLeftOp();
             Value rhs = ds.getRightOp();
-            if (lhs instanceof Local) {
-                HashSet lv = new HashSet();
-                out.put(lhs, lv);
-                if (rhs instanceof NewExpr) {
-                    lv.add(rhs);
-                } else if (rhs instanceof Local) {
-                    lv.addAll((HashSet)in.get(rhs));
-                } else lv.add(UNKNOWN);
-            }
+
+            if (((PathsReachingFlowAnalysis.Box)prf.getFlowAfter(s)).getValue() == PathsReachingFlowAnalysis.ONE) {
+                if (lhs instanceof Local && lhs.getType() instanceof RefLikeType) {
+                    if (rhs instanceof NewExpr ||
+                        rhs instanceof InvokeExpr || 
+                        rhs instanceof ParameterRef || 
+                        rhs instanceof ThisRef) {
+                        // use the newexpr, invokeexpr, parameterref,
+                        // or thisref as an ID; this should be OK for
+                        // must-alias analysis.
+                        out.put(lhs, rhs);
+                    } else if (rhs instanceof Local) {
+                        out.put(lhs, in.get(rhs));
+                    } else out.put(lhs, UNKNOWN);
+                }
+            } else out.put(lhs, UNKNOWN);
         }
     }
 
@@ -98,43 +117,44 @@ public class LocalMustAliasAnalysis extends ForwardFlowAnalysis
         HashMap sourceMap = (HashMap) source;
         HashMap destMap   = (HashMap) dest;
             
-		for (Local l : (Collection<Local>) locals) {
-			destMap.put (l, sourceMap.get(l));
-		}
+        for (Local l : (Collection<Local>) locals) {
+            destMap.put (l, sourceMap.get(l));
+        }
     }
 
+    /** Initial conservative value: objects have unknown definition. */
     protected Object entryInitialFlow()
     {
         HashMap m = new HashMap();
-		for (Local l : (Collection<Local>) locals) {
-			HashSet s = new HashSet(); s.add(UNKNOWN);
-			m.put(l, s);
-		}
+        for (Local l : (Collection<Local>) locals) {
+            HashSet s = new HashSet(); s.add(UNKNOWN);
+            m.put(l, s);
+        }
         return m;
     }
-        
+
+    /** Initial aggressive value: objects have no definitions. */
     protected Object newInitialFlow()
     {
         HashMap m = new HashMap();
-		for (Local l : (Collection<Local>) locals) {
-			HashSet s = new HashSet(); 
-			m.put(l, s);
-		}
+        for (Local l : (Collection<Local>) locals) {
+            HashSet s = new HashSet(); 
+            m.put(l, s);
+        }
         return m;
     }
 
-	/**
-	 * @return true if values of l1 (at s1) and l2 (at s2) are known
-	 * to have different creation sites
-	 */
-	public boolean mustAlias(Local l1, Stmt s1, Local l2, Stmt s2) {
-		Set l1n = (Set) ((HashMap)getFlowBefore(s1)).get(l1);
-		Set l2n = (Set) ((HashMap)getFlowBefore(s2)).get(l2);
+    /**
+     * @return true if values of l1 (at s1) and l2 (at s2) have the
+     * exact same object IDs
+     */
+    public boolean mustAlias(Local l1, Stmt s1, Local l2, Stmt s2) {
+        Object l1n = ((HashMap)getFlowBefore(s1)).get(l1);
+        Object l2n = ((HashMap)getFlowBefore(s2)).get(l2);
 
-        if (l1n.contains(UNKNOWN) || l2n.contains(UNKNOWN))
+        if (l1n == UNKNOWN || l2n == UNKNOWN)
             return false;
 
-		return l1n.containsAll(l2n) && l2n.containsAll(l1n);
-	}
-        
+        return l1n == l2n;
+    }
 }

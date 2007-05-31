@@ -39,6 +39,6 @@ public interface TMFlowAnalysis {
 	 */
 	public Set getActiveShadows();
 
-	public boolean mustAlias(Local l1, Local l2, Stmt s);
+	public boolean mustAlias(Local l1, Stmt s1, Local l2, Stmt s2);
 
 }

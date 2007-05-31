@@ -19,21 +19,28 @@ import soot.jimple.Stmt;
 import soot.toolkits.graph.UnitGraph;
 import soot.toolkits.scalar.ForwardFlowAnalysis;
 
-
+/** LocalNotMayAliasAnalysis attempts to determine if two local
+ * variables (at two potentially different program points) definitely
+ * point to different objects.
+ *
+ * The underlying abstraction is that of definition expressions.  When
+ * a local variable gets assigned a new object (unlike LocalMust, only
+ * NewExprs), the analysis tracks the source of the value. If two
+ * variables have different sources, then they are different. */
 public class LocalNotMayAliasAnalysis extends ForwardFlowAnalysis
 {
     private Map objectMap = new HashMap();
-	private static final Object UNKNOWN = new Object();
-	private List<Local> locals;
+    private static final Object UNKNOWN = new Object();
+    private List<Local> locals;
 
     public LocalNotMayAliasAnalysis(UnitGraph g)
     {
         super(g);
         locals = new LinkedList<Local>(); locals.addAll(g.getBody().getLocals());
 
-		for (Local l : (Collection<Local>) g.getBody().getLocals()) {
-			if (l.getType() instanceof RefLikeType)
-				locals.add(l);
+        for (Local l : (Collection<Local>) g.getBody().getLocals()) {
+            if (l.getType() instanceof RefLikeType)
+                locals.add(l);
         }
 
         doAnalysis();
@@ -98,44 +105,44 @@ public class LocalNotMayAliasAnalysis extends ForwardFlowAnalysis
         HashMap sourceMap = (HashMap) source;
         HashMap destMap   = (HashMap) dest;
             
-		for (Local l : (Collection<Local>) locals) {
-			destMap.put (l, sourceMap.get(l));
-		}
+        for (Local l : (Collection<Local>) locals) {
+            destMap.put (l, sourceMap.get(l));
+        }
     }
 
     protected Object entryInitialFlow()
     {
         HashMap m = new HashMap();
-		for (Local l : (Collection<Local>) locals) {
-			HashSet s = new HashSet(); s.add(UNKNOWN);
-			m.put(l, s);
-		}
+        for (Local l : (Collection<Local>) locals) {
+            HashSet s = new HashSet(); s.add(UNKNOWN);
+            m.put(l, s);
+        }
         return m;
     }
         
     protected Object newInitialFlow()
     {
         HashMap m = new HashMap();
-		for (Local l : (Collection<Local>) locals) {
-			HashSet s = new HashSet(); 
-			m.put(l, s);
-		}
+        for (Local l : (Collection<Local>) locals) {
+            HashSet s = new HashSet(); 
+            m.put(l, s);
+        }
         return m;
     }
 
-	/**
-	 * @return true if values of l1 (at s1) and l2 (at s2) are known
-	 * to have different creation sites
-	 */
-	public boolean notMayAlias(Local l1, Stmt s1, Local l2, Stmt s2) {
-		Set l1n = (Set) ((HashMap)getFlowBefore(s1)).get(l1);
-		Set l2n = (Set) ((HashMap)getFlowBefore(s2)).get(l2);
+    /**
+     * @return true if values of l1 (at s1) and l2 (at s2) are known
+     * to have different creation sites
+     */
+    public boolean notMayAlias(Local l1, Stmt s1, Local l2, Stmt s2) {
+        Set l1n = (Set) ((HashMap)getFlowBefore(s1)).get(l1);
+        Set l2n = (Set) ((HashMap)getFlowBefore(s2)).get(l2);
 
         if (l1n.contains(UNKNOWN) || l2n.contains(UNKNOWN))
             return false;
 
         Set n = new HashSet(); n.addAll(l1n); n.retainAll(l2n);
-		return n.isEmpty();
-	}
+        return n.isEmpty();
+    }
         
 }
