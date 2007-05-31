@@ -1,5 +1,7 @@
 /* abc - The AspectBench Compiler
  * Copyright (C) 2005 Pavel Avgustinov
+ * Copyright (C) 2007 Eric Bodden
+ * Copyright (C) 2007 Patrick Lam
  *
  * This compiler is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,6 +29,8 @@ import java.util.Set;
  * for creating the state machine
  *
  *  @author Pavel Avgustinov
+ *  @author Eric Bodden
+ *  @author Patrick Lam
  */
 
 public interface StateMachine {
@@ -46,8 +50,8 @@ public interface StateMachine {
     public SMEdge newTransition(State from, State to, String s);
 
     public int getNumberOfStates();
-    public Iterator getStateIterator();
-    public Iterator getEdgeIterator();
+    public Iterator<State> getStateIterator();
+    public Iterator<SMEdge> getEdgeIterator();
     public SMNode getStateByNumber(int n);
 
 	public Set<SMNode> getInitialStates();
