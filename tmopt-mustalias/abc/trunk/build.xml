@@ -134,7 +134,7 @@ The most important tasks are:
 	<target name="abc" depends="settings">
 		<mkdir dir="classes" />
 		<javac destdir="classes" debug="true" source="${java.source}">
-			<src path="paddle-src" />
+			<src path="src" />
 			<src path="${abc.dir}/src" />
 			<src path="${abc.dir}/generated" />
 			<classpath>
