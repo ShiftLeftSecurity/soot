@@ -26,3 +26,12 @@ javabdd.jar=../abcJars/javabdd-1.0b2.jar
 
 ## Location of commons collections classes
 commonscoll.jar=../abcJars/commons-collections-3.2.jar
+
+## location of abc
+abc.dir=../abc
+
+## (package) name of your extension: abc.${ext.name}
+ext.name=tm
+
+## Java Source version
+java.source=1.5
