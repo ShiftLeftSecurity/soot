@@ -1,3 +1,0 @@
-module Module {
-    class A;
-}
