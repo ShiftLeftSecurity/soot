@@ -31,16 +31,10 @@ import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowMatchT
 import abc.tm.weaving.weaver.tmanalysis.util.ShadowsPerTMSplitter;
 
 /**
- * IntraproceduralAnalysis: This analysis is the core of the analysis
- * described in the POPL paper.  In particular, for each shadow group SG:
+ * IntraproceduralAnalysis: This analysis propagates tracematch
+ * automaton states through the method.
  *
- *  a) For each initial shadow, give must-names to the binding objects.
- *  b) Propagate state information when we hit additional shadows.
- *  c) If we can show that a method is safely invariant with respect to SG,
- *       remove all of that method's shadows.
- *  c') Dead objects.
- *
- * @author Eric Bodden
+ * @author Patrick Lam
  */
 public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 	protected static TMGlobalAspectInfo gai = (TMGlobalAspectInfo) Main.v().getAbcExtension().getGlobalAspectInfo();
@@ -52,6 +46,16 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
         for (TraceMatch tm : (Collection<TraceMatch>)gai.getTraceMatches()) {
             //split reachable shadows by tracematch
 			CallGraph cg = CallGraphAbstraction.v().abstractedCallGraph();
+
+            if (cg == null) {
+                CallGraphBuilder cgb = new CallGraphBuilder(DumbPointerAnalysis.v());
+                soot.Scene.v().setPointsToAnalysis(DumbPointerAnalysis.v());
+                cg = cgb.getCallGraph();
+                cgb.build();
+
+                //tag shadows in Jimple 
+                TMShadowTagger.v().apply();
+            }
 
             Set reachableShadows = ReachableShadowFinder.v().reachableShadows(cg);
             Map tmNameToShadows = ShadowsPerTMSplitter.splitShadows(reachableShadows);
