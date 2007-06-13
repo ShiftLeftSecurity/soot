@@ -3,32 +3,19 @@
 
 package abc.tm.weaving.weaver.tmanalysis.mustalias;
 
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
-import soot.Local;
-import soot.SootMethod;
-import soot.Value;
-import soot.ValueBox;
-import soot.jimple.AssignStmt;
-import soot.jimple.Stmt;
-import soot.jimple.toolkits.callgraph.CallGraph;
-import soot.toolkits.graph.ExceptionalUnitGraph;
 import soot.toolkits.graph.UnitGraph;
 import soot.toolkits.scalar.ForwardFlowAnalysis;
-import soot.jimple.toolkits.callgraph.Edge;
 
 public class PathsReachingFlowAnalysis extends ForwardFlowAnalysis {
     public static final Object NONE = new Object();
     public static final Object ONE = new Object();
     public static final Object MANY = new Object();
 
-    class Box { 
+    HashSet visited = new HashSet();
+    
+    public class Box { 
         Object o;
 
         public Box(Object o) {
@@ -60,8 +47,13 @@ public class PathsReachingFlowAnalysis extends ForwardFlowAnalysis {
     }
 
 	protected void flowThrough(Object inVal, Object stmt, Object outVal) {
-		Box in = (Box) inVal, out = (Box) outVal;
-        copy (in, out);
+		Box out = (Box) outVal;
+		if (visited.contains(stmt)) {
+			out.setValue(MANY);
+		} else {
+			out.setValue(ONE);
+			visited.add(stmt);
+		}
 	}
 
 	protected Object newInitialFlow() {
@@ -69,7 +61,7 @@ public class PathsReachingFlowAnalysis extends ForwardFlowAnalysis {
 	}
 
 	protected Object entryInitialFlow() {
-		return new Box(ONE);
+		return new Box(NONE);
 	}
 
 	protected void copy(Object src, Object dest) {
@@ -80,16 +72,13 @@ public class PathsReachingFlowAnalysis extends ForwardFlowAnalysis {
 	protected void merge(Object i1, Object i2, Object o) {
         //   N O M
         // N N O M
-        // O O M M 
+        // O O O M 
         // M M M M
 		Box in1 = (Box) i1, in2 = (Box) i2, out = (Box) o;
-        if (i1 == MANY || i2 == MANY) {
+        if (in1.getValue() == MANY || in2.getValue() == MANY) {
             out.setValue(MANY);
         }
-        else if (i1 == ONE && i2 == ONE) {
-            out.setValue(MANY);
-        }
-        else if (i1 == NONE && i2 == NONE) {
+        else if (in1.getValue() == NONE && in2.getValue() == NONE) {
             out.setValue(NONE);
         }
         else 

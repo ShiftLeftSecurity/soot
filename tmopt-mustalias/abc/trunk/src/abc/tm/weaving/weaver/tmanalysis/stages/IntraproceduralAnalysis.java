@@ -7,28 +7,39 @@
 package abc.tm.weaving.weaver.tmanalysis.stages;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 
-import soot.toolkits.graph.UnitGraph;
+import soot.Body;
+import soot.Local;
 import soot.SootMethod;
-import soot.Unit;
-import soot.toolkits.graph.ExceptionalUnitGraph;
+import soot.Value;
+import soot.jimple.AssignStmt;
+import soot.jimple.Stmt;
 import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.jimple.toolkits.callgraph.CallGraphBuilder;
 import soot.jimple.toolkits.pointer.DumbPointerAnalysis;
+import soot.jimple.toolkits.thread.IThreadLocalObjectsAnalysis;
+import soot.jimple.toolkits.thread.ThreadLocalObjectsAnalysis;
+import soot.jimple.toolkits.thread.mhp.UnsynchronizedMhpAnalysis;
+import soot.toolkits.graph.ExceptionalUnitGraph;
+import soot.toolkits.graph.UnitGraph;
 import abc.main.Main;
-import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.aspectinfo.TMGlobalAspectInfo;
-import abc.tm.weaving.weaver.tmanalysis.mustalias.StatePropagatorFlowAnalysis;
+import abc.tm.weaving.aspectinfo.TraceMatch;
+import abc.tm.weaving.weaver.tmanalysis.ds.MustMayNotAliasDisjunct;
+import abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis;
+import abc.tm.weaving.weaver.tmanalysis.mustalias.LocalMustAliasAnalysis;
+import abc.tm.weaving.weaver.tmanalysis.mustalias.LocalNotMayAliasAnalysis;
+import abc.tm.weaving.weaver.tmanalysis.mustalias.PathsReachingFlowAnalysis;
+import abc.tm.weaving.weaver.tmanalysis.mustalias.TMFlowAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.query.ReachableShadowFinder;
 import abc.tm.weaving.weaver.tmanalysis.query.Shadow;
-import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroup;
-import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowMatchTag;
+import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowTag;
 import abc.tm.weaving.weaver.tmanalysis.util.ShadowsPerTMSplitter;
+import abc.tm.weaving.weaver.tmanalysis.util.SymbolShadow;
 
 /**
  * IntraproceduralAnalysis: This analysis propagates tracematch
@@ -37,61 +48,121 @@ import abc.tm.weaving.weaver.tmanalysis.util.ShadowsPerTMSplitter;
  * @author Patrick Lam
  */
 public class IntraproceduralAnalysis extends AbstractAnalysisStage {
+	
+	protected final static boolean MAKE_SAFE = false;
+	
 	protected static TMGlobalAspectInfo gai = (TMGlobalAspectInfo) Main.v().getAbcExtension().getGlobalAspectInfo();
 
 	/**
 	 * {@inheritDoc}
 	 */
 	protected void doAnalysis() {
+		TMShadowTagger.v().apply();
+		CallGraph cg; 
+		IThreadLocalObjectsAnalysis tloa;
+		if(MAKE_SAFE) {
+			CallGraphAbstraction.v().apply();
+			cg = CallGraphAbstraction.v().abstractedCallGraph();
+			tloa = new ThreadLocalObjectsAnalysis(new UnsynchronizedMhpAnalysis());
+		} else {
+			CallGraphBuilder cgb = new CallGraphBuilder(DumbPointerAnalysis.v());
+			soot.Scene.v().setPointsToAnalysis(DumbPointerAnalysis.v());
+			cg = cgb.getCallGraph();
+			cgb.build();
+			tloa = new IThreadLocalObjectsAnalysis() {
+				public boolean isObjectThreadLocal(Value localOrRef,SootMethod sm) {
+					//assume that any variable is thread-local;
+					//THIS IS UNSAFE!
+					return true;
+				}
+			};
+		}
+		
+		Set reachableShadows = ReachableShadowFinder.v().reachableShadows(cg);
+		Map tmNameToShadows = ShadowsPerTMSplitter.splitShadows(reachableShadows);
+				
         for (TraceMatch tm : (Collection<TraceMatch>)gai.getTraceMatches()) {
-            //split reachable shadows by tracematch
-			CallGraph cg = CallGraphAbstraction.v().abstractedCallGraph();
-
-            if (cg == null) {
-                CallGraphBuilder cgb = new CallGraphBuilder(DumbPointerAnalysis.v());
-                soot.Scene.v().setPointsToAnalysis(DumbPointerAnalysis.v());
-                cg = cgb.getCallGraph();
-                cgb.build();
-
-                //tag shadows in Jimple 
-                TMShadowTagger.v().apply();
-            }
-
-            Set reachableShadows = ReachableShadowFinder.v().reachableShadows(cg);
-            Map tmNameToShadows = ShadowsPerTMSplitter.splitShadows(reachableShadows);
-			Set<Shadow> thisTMsShadows = (Set<Shadow>) tmNameToShadows.get(tm.getName());
+        	Set<SootMethod> methodsWithShadows = new HashSet<SootMethod>();
+        	Set<Shadow> thisTMsShadows = (Set<Shadow>) tmNameToShadows.get(tm.getName());
             for (Shadow s : thisTMsShadows) {
                 SootMethod m = s.getContainer();
-
-                System.err.println("analyzing method: "+m);
-                System.err.println(" and shadow "+s.getUniqueShadowId());
-
-                UnitGraph g = new ExceptionalUnitGraph(m.retrieveActiveBody());
-                StatePropagatorFlowAnalysis a = 
-                    new StatePropagatorFlowAnalysis(tm, s, g, cg);
-
-                for (Unit u : (Collection<Unit>)g.getBody().getUnits()) {
-                    if (!u.hasTag(SymbolShadowMatchTag.NAME))
-                        continue;
-
-                    System.out.println("new unit");
-                    for (abc.tm.weaving.weaver.tmanalysis.util.SymbolFinder.SymbolShadowMatch match : ((SymbolShadowMatchTag)u.getTag(SymbolShadowMatchTag.NAME)).getMatchesForTracematch(tm)) 
-                        System.out.println("after tag "+match.getUniqueShadowId()+" have "+a.getFlowAfter(u));
-                }
-
-                for (Unit u : (Collection<Unit>)g.getTails()) {
-                    System.out.println(" for tail "+u+" got "+a.getFlowAfter(u));
-                }
-                // now read off the results: if we know single
-                // non-final state for each tail, then set the state
-                // to the known state.
-                // Also if we know that a given shadow can only hit a skip shadow,
-                // we can eliminate it.
+                methodsWithShadows.add(m);
             }
-		}
+
+            for (SootMethod m : methodsWithShadows) {
+                UnitGraph g = new ExceptionalUnitGraph(m.retrieveActiveBody());
+                
+                Map<Local,Stmt> tmLocalsToDefStatements = findTmLocalDefinitions(g,tm);
+                System.err.println("Analyzing: "+m);
+    			TMFlowAnalysis flowAnalysis = new IntraProceduralTMFlowAnalysis(
+                		tm,
+                		g,
+                		new MustMayNotAliasDisjunct(
+                				new LocalMustAliasAnalysis(g),
+                				new LocalNotMayAliasAnalysis(g),
+                				tmLocalsToDefStatements
+                		)
+                );
+    			
+    			System.err.println(flowAnalysis.getActiveShadows());
+			}
+        }
 	}
 	
 	//singleton pattern
+
+	/**
+	 * @param b
+	 * @param tm 
+	 * @return
+	 */
+	private Map<Local, Stmt> findTmLocalDefinitions(UnitGraph g, TraceMatch tm) {
+		
+		PathsReachingFlowAnalysis pathsReachingFlowAnalysis = new PathsReachingFlowAnalysis(g);
+		Body b = g.getBody();
+		
+		Set<Local> boundLocals = new HashSet<Local>();
+		
+		//find all localc bound by shadows of the given tracematch		
+		for (Stmt stmt : (Collection<Stmt>)b.getUnits()) {
+			if(stmt.hasTag(SymbolShadowTag.NAME)) {
+				SymbolShadowTag tag = (SymbolShadowTag) stmt.getTag(SymbolShadowTag.NAME);
+				Set<SymbolShadow> matchesForTracematch = tag.getMatchesForTracematch(tm);
+				for (SymbolShadow shadow : matchesForTracematch) {
+					boundLocals.addAll(shadow.getTmFormalToAdviceLocal().values());
+				}
+			}
+		}
+		
+		Map<Local,Stmt> localToStmtAfterDefStmt = new HashMap<Local, Stmt>();
+		
+		Set<Local> rhsLocals = new HashSet<Local>(); 
+		for (Stmt stmt : (Collection<Stmt>)b.getUnits()) {
+            for (soot.ValueBox vb : (Collection<soot.ValueBox>)stmt.getDefBoxes()) {
+                soot.Value v = vb.getValue();
+                if(boundLocals.contains(v)) {
+                	rhsLocals.add((Local)((AssignStmt)stmt).getRightOp());
+
+                	//we know that such def statements always have the form "adviceLocal = someLocal;",
+                	//hence taking the first successor is always sound
+                	localToStmtAfterDefStmt.put((Local)v, (Stmt)g.getSuccsOf(stmt).get(0));
+                }
+            }			
+		}
+		
+		for (Stmt stmt : (Collection<Stmt>)b.getUnits()) {
+            for (soot.ValueBox vb : (Collection<soot.ValueBox>)stmt.getDefBoxes()) {
+                soot.Value v = vb.getValue();
+                if(rhsLocals.contains(v)) {
+                	if(((PathsReachingFlowAnalysis.Box)pathsReachingFlowAnalysis.getFlowAfter(stmt)).getValue() == PathsReachingFlowAnalysis.MANY) {
+                		throw new RuntimeException("multiple defs");
+                	}
+            	}
+            }
+		}
+
+		return localToStmtAfterDefStmt;		
+	}
 
 	protected static IntraproceduralAnalysis instance;
 

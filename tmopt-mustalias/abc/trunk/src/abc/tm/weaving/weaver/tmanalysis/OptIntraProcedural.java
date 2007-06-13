@@ -22,6 +22,7 @@ package abc.tm.weaving.weaver.tmanalysis;
 import abc.main.AbcTimer;
 import abc.main.Main;
 import abc.tm.weaving.aspectinfo.TMGlobalAspectInfo;
+import abc.tm.weaving.weaver.tmanalysis.query.ShadowRegistry;
 import abc.tm.weaving.weaver.tmanalysis.stages.IntraproceduralAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.util.Statistics;
 import abc.weaving.weaver.AbstractReweavingAnalysis;
@@ -75,7 +76,7 @@ public class OptIntraProcedural extends AbstractReweavingAnalysis {
 	 * {@inheritDoc}
 	 */
 	public void cleanup() {		
-		//TODO
+		ShadowRegistry.v().dumpShadows();
 	}
 
     
@@ -83,42 +84,47 @@ public class OptIntraProcedural extends AbstractReweavingAnalysis {
      * {@inheritDoc}
      */
     public void defaultSootArgs(java.util.List sootArgs) {
-        //keep line numbers
-        sootArgs.add("-keep-line-number");
-    	//enable whole program mode
-        sootArgs.add("-w");
+         //keep line numbers
+         sootArgs.add("-keep-line-number");
+    	 //enable whole program mode
+         sootArgs.add("-w");
 
-//         //disable all packs we do not need
-//         sootArgs.add("-p");
-//         sootArgs.add("wjtp");
-//         sootArgs.add("enabled:false");
-//         sootArgs.add("-p");
-//         sootArgs.add("wjop");
-//         sootArgs.add("enabled:false");
-//         sootArgs.add("-p");
-//         sootArgs.add("wjap");
-//         sootArgs.add("enabled:false");
+         sootArgs.add("-p");
+         sootArgs.add("jb");
+         sootArgs.add("use-original-names:true");
+
+         //disable all packs we do not need
+         sootArgs.add("-p");
+         sootArgs.add("wjtp");
+         sootArgs.add("enabled:false");
+         sootArgs.add("-p");
+         sootArgs.add("wjop");
+         sootArgs.add("enabled:false");
+         sootArgs.add("-p");
+         sootArgs.add("wjap");
+         sootArgs.add("enabled:false");
         
-//     	//enable points-to analysis
-//         sootArgs.add("-p");
-//         sootArgs.add("cg");
-//         sootArgs.add("enabled:true");
+     	//enable points-to analysis
+         sootArgs.add("-p");
+         sootArgs.add("cg");
+         sootArgs.add("enabled:true");
 
-//         //enable Spark
-//         sootArgs.add("-p");
-//         sootArgs.add("cg.spark");
-//         sootArgs.add("enabled:true");
+         //enable Spark
+         sootArgs.add("-p");
+         sootArgs.add("cg.spark");
+         sootArgs.add("enabled:true");
 
-//         //use on-demand points-to analysis within Spark
-//         sootArgs.add("-p");
-//         sootArgs.add("cg.spark");
-//         sootArgs.add("cs-demand:true");
+         //use on-demand points-to analysis within Spark
+         sootArgs.add("-p");
+         sootArgs.add("cg.spark");
+         sootArgs.add("cs-demand:true");
 
         //in order to generate points-to sets for weaving variables, we have to
         //disable the straightlinecode optimizations which take place right
         //after weaving;
         //we store the old state and reset it after the analysis
         disableStraightlineCodeOptimizations();
+        
     }
 
 	protected boolean originalState_cleanupAfterAdviceWeave;
