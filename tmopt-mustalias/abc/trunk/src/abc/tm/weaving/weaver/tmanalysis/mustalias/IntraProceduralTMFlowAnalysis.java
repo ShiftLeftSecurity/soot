@@ -112,21 +112,33 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implement
 		Stmt stmt = (Stmt) d;
 		ConfigurationBox cout = (ConfigurationBox) out;		
 				
+		//if there are no shadows at all at this statement, just copy over and return
 		if(!stmt.hasTag(SymbolShadowTag.NAME)) {
-			cout.set(cin.get());
+			copy(cin,cout);
 			return;
 		}
 
+		//retrive matches fot the current tracematch
 		SymbolShadowTag tag = (SymbolShadowTag) stmt.getTag(SymbolShadowTag.NAME);		
 		Configuration inConfig = cin.get();
-		Configuration join = new Configuration(this); 
-		for (SymbolShadow shadow : tag.getMatchesForTracematch(tracematch)) {
+		Set<SymbolShadow> matchesForThisTracematch = tag.getMatchesForTracematch(tracematch);
+
+		//"join" is initialized to the initial configuration (the neutral element of the join operation)
+		Configuration join = new Configuration(this);		
+		//for each match, if it is still active, compute the successor and join 
+		boolean foundEnabledShadow = false;
+		for (SymbolShadow shadow : matchesForThisTracematch) {
 			if(shadow.isEnabled()) {				
+				foundEnabledShadow = true;
 				Configuration newConfig = inConfig.doTransition(shadow);
 				join = join.getJoinWith(newConfig);
 			}
-		}		
-		cout.set(join);
+		}
+		//if we actually computed a join, set it, else copy over 
+		if(foundEnabledShadow)
+			cout.set(join);
+		else
+			copy(cin, cout);
 	}
 
 	/**
@@ -182,31 +194,21 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implement
 		ConfigurationBox cin1 = (ConfigurationBox) in1;
 		ConfigurationBox cin2 = (ConfigurationBox) in2;
 		ConfigurationBox cout = (ConfigurationBox) out;
+
+		assert !cin1.isEmpty() && !cin2.isEmpty();
 		
-		if(cin1.isEmpty()) {
-			copy(cin2,cout);
-		} else if(cin2.isEmpty()) {
-			copy(cin1,cout);
-		} else {
-			Configuration c1 = cin1.get();
-			Configuration c2 = cin2.get();
-			assert c1.getStates().equals(c2.getStates());
-			
-			cout.set(c1.getJoinWith(c2));
-			
-			ConfigurationBox copyin2 = new ConfigurationBox();
-			copy(cin2,copyin2);
-			ConfigurationBox copyout = new ConfigurationBox();
-			copy(cout,copyout);
-		}
+		Configuration c1 = cin1.get();
+		Configuration c2 = cin2.get();
+		assert c1.getStates().equals(c2.getStates());
 		
+		cout.set(c1.getJoinWith(c2));
 	}
 	
 	/** 
 	 * {@inheritDoc}
 	 */
 	protected Object newInitialFlow() {
-		return new ConfigurationBox();
+		return entryInitialFlow();
 	}
 
 	/**
