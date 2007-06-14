@@ -167,7 +167,7 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
             for (soot.ValueBox vb : (Collection<soot.ValueBox>)stmt.getDefBoxes()) {
                 soot.Value v = vb.getValue();
                 if(rhsLocals.contains(v)) {
-                	if(((PathsReachingFlowAnalysis.Box)pathsReachingFlowAnalysis.getFlowAfter(stmt)).getValue() == PathsReachingFlowAnalysis.MANY) {
+                	if(pathsReachingFlowAnalysis.getVisitCount(stmt) == PathsReachingFlowAnalysis.MANY) {
                 		throw new RuntimeException("multiple defs");
                 	}
             	}

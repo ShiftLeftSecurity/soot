@@ -93,7 +93,7 @@ public class LocalMustAliasAnalysis extends ForwardFlowAnalysis
             Value lhs = ds.getLeftOp();
             Value rhs = ds.getRightOp();
 
-            if (((PathsReachingFlowAnalysis.Box)prf.getFlowAfter(s)).getValue() == PathsReachingFlowAnalysis.ONE) {
+            if (prf.getVisitCount(s) == PathsReachingFlowAnalysis.ONE) {
                 if (lhs instanceof Local && lhs.getType() instanceof RefLikeType) {
                     if (rhs instanceof NewExpr ||
                         rhs instanceof InvokeExpr || 
