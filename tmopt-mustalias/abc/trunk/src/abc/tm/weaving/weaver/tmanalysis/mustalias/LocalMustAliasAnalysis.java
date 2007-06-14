@@ -2,7 +2,6 @@ package abc.tm.weaving.weaver.tmanalysis.mustalias;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -34,15 +33,15 @@ public class LocalMustAliasAnalysis extends ForwardFlowAnalysis
     private static final Object UNKNOWN = new Object() {
     	public String toString() { return "UNKNOWN"; }
     };
+    private static final Object NOTHING = new Object() {
+    	public String toString() { return "NOTHING"; }
+    };
     
     private List<Local> locals;
-
-    private PathsReachingFlowAnalysis prf;
 
     public LocalMustAliasAnalysis(UnitGraph g)
     {
         super(g);
-        this.prf = new PathsReachingFlowAnalysis(g);
         this.locals = new LinkedList<Local>(); 
 
         for (Local l : (Collection<Local>) g.getBody().getLocals()) {
@@ -63,6 +62,10 @@ public class LocalMustAliasAnalysis extends ForwardFlowAnalysis
             Object i1 = inMap1.get(l), i2 = inMap2.get(l);
             if (i1 == i2) 
                 outMap.put(l, i1);
+            else if (i1 == NOTHING)
+            	outMap.put(l, i2);
+            else if (i2 == NOTHING)
+            	outMap.put(l, i1);
             else
                 outMap.put(l, UNKNOWN);
         }
@@ -93,21 +96,19 @@ public class LocalMustAliasAnalysis extends ForwardFlowAnalysis
             Value lhs = ds.getLeftOp();
             Value rhs = ds.getRightOp();
 
-            if (prf.getVisitCount(s) == PathsReachingFlowAnalysis.ONE) {
-                if (lhs instanceof Local && lhs.getType() instanceof RefLikeType) {
-                    if (rhs instanceof NewExpr ||
-                        rhs instanceof InvokeExpr || 
-                        rhs instanceof ParameterRef || 
-                        rhs instanceof ThisRef) {
-                        // use the newexpr, invokeexpr, parameterref,
-                        // or thisref as an ID; this should be OK for
-                        // must-alias analysis.
-                        out.put(lhs, rhs);
-                    } else if (rhs instanceof Local) {
-                        out.put(lhs, in.get(rhs));
-                    } else out.put(lhs, UNKNOWN);
-                }
-            } else out.put(lhs, UNKNOWN);
+            if (lhs instanceof Local && lhs.getType() instanceof RefLikeType) {
+                if (rhs instanceof NewExpr ||
+                    rhs instanceof InvokeExpr || 
+                    rhs instanceof ParameterRef || 
+                    rhs instanceof ThisRef) {
+                    // use the newexpr, invokeexpr, parameterref,
+                    // or thisref as an ID; this should be OK for
+                    // must-alias analysis.
+                    out.put(lhs, rhs);
+                } else if (rhs instanceof Local) {
+                    out.put(lhs, in.get(rhs));
+                } else out.put(lhs, UNKNOWN);
+            }
         }
     }
 
@@ -126,8 +127,7 @@ public class LocalMustAliasAnalysis extends ForwardFlowAnalysis
     {
         HashMap m = new HashMap();
         for (Local l : (Collection<Local>) locals) {
-            HashSet s = new HashSet(); s.add(UNKNOWN);
-            m.put(l, s);
+            m.put(l, UNKNOWN);
         }
         return m;
     }
@@ -137,8 +137,7 @@ public class LocalMustAliasAnalysis extends ForwardFlowAnalysis
     {
         HashMap m = new HashMap();
         for (Local l : (Collection<Local>) locals) {
-            HashSet s = new HashSet(); 
-            m.put(l, s);
+            m.put(l, NOTHING);
         }
         return m;
     }

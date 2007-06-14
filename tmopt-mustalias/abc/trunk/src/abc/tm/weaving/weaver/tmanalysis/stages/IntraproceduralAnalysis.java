@@ -108,7 +108,7 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
                 
                 Map<Local,Stmt> tmLocalsToDefStatements = findTmLocalDefinitions(g,tm);
                 System.err.println("Analyzing: "+m+" on tracematch: "+tm.getName());
-    			new IntraProceduralTMFlowAnalysis(
+    			IntraProceduralTMFlowAnalysis flowAnalysis = new IntraProceduralTMFlowAnalysis(
                 		tm,
                 		g,
                 		new MustMayNotAliasDisjunct(
@@ -118,6 +118,22 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
                 		),
                 		IntraProceduralTMFlowAnalysis.InitKind.MINIMAL_ASSUMPTION
                 );
+    			
+    			for (Stmt s : (Collection<Stmt>)g.getBody().getUnits()) {
+					if(s.hasTag(SymbolShadowTag.NAME)) {
+						SymbolShadowTag tag = (SymbolShadowTag) s.getTag(SymbolShadowTag.NAME);
+						if(!tag.getMatchesForTracematch(tm).isEmpty()) {
+							System.err.println();
+							System.err.println();
+							System.err.println(flowAnalysis.getFlowBefore(s));
+							System.err.println(s);
+							for (SymbolShadow shadow : tag.getMatchesForTracematch(tm)) {
+								System.err.println(shadow.getUniqueShadowId());
+							}
+							System.err.println(flowAnalysis.getFlowAfter(s));
+						}
+					}
+				}
 			}
         }
 	}
@@ -167,7 +183,7 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
             for (soot.ValueBox vb : (Collection<soot.ValueBox>)stmt.getDefBoxes()) {
                 soot.Value v = vb.getValue();
                 if(rhsLocals.contains(v)) {
-                	if(pathsReachingFlowAnalysis.getVisitCount(stmt) == PathsReachingFlowAnalysis.MANY) {
+                	if(pathsReachingFlowAnalysis.visitedPotentiallyManyTimes(stmt)) {
                 		throw new RuntimeException("multiple defs");
                 	}
             	}

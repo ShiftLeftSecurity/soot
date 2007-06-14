@@ -3,39 +3,25 @@
 
 package abc.tm.weaving.weaver.tmanalysis.mustalias;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-
 import soot.Unit;
+import soot.toolkits.graph.StronglyConnectedComponents;
 import soot.toolkits.graph.UnitGraph;
 
+/**
+ * PathsReachingFlowAnalysis
+ *
+ * @author Eric Bodden
+ */
+@Deprecated()
 public class PathsReachingFlowAnalysis {
-    public static final Object NONE = new Object();
-    public static final Object ONE = new Object();
-    public static final Object MANY = new Object();
 
-    HashMap<Unit, Object> visitCount = new HashMap();
-    
+	protected StronglyConnectedComponents sccAnalysis;
+
 	public PathsReachingFlowAnalysis(UnitGraph g) {
-        for (Unit u : (Collection<Unit>)g.getBody().getUnits())
-            visitCount.put(u, NONE);
-
-        LinkedList<Unit> visitQueue = new LinkedList();
-        visitQueue.addAll(g.getHeads());
-
-        while (!visitQueue.isEmpty()) {
-            Unit u = visitQueue.removeFirst();
-            Object o = visitCount.get(u);
-            if (o == NONE)
-                visitCount.put(u, ONE);
-            else if (o == ONE)
-                visitCount.put(u, MANY);
-            visitQueue.addAll((Collection<Unit>)g.getSuccsOf(u));
-        }
+		sccAnalysis = new StronglyConnectedComponents(g);		
     }
 
-    public Object getVisitCount(Unit u) {
-        return visitCount.get(u);
+    public boolean visitedPotentiallyManyTimes(Unit u) {
+    	return sccAnalysis.getComponentOf(u).size()>1;
     }
 }
