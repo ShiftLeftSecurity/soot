@@ -59,6 +59,7 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 	protected void doAnalysis() {
 		TMShadowTagger.v().apply();
 		CallGraph cg; 
+		@SuppressWarnings("unused") //maybe used later
 		IThreadLocalObjectsAnalysis tloa;
 		if(MAKE_SAFE) {
 			CallGraphAbstraction.v().apply();
@@ -93,7 +94,7 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
                 UnitGraph g = new ExceptionalUnitGraph(m.retrieveActiveBody());
                 
                 Map<Local,Stmt> tmLocalsToDefStatements = findTmLocalDefinitions(g,tm);
-                System.err.println("Analyzing: "+m);
+                System.err.println("Analyzing: "+m+" on tracematch: "+tm.getName());
     			TMFlowAnalysis flowAnalysis = new IntraProceduralTMFlowAnalysis(
                 		tm,
                 		g,
