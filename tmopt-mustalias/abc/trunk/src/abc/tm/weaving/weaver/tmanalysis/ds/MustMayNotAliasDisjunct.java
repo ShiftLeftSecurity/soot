@@ -1,9 +1,22 @@
-/*
- * Created on 13-Jun-07
+/* abc - The AspectBench Compiler
+ * Copyright (C) 2007 Eric Bodden
  *
- * To change the template for this generated file go to
- * Window - Preferences - Java - Code Generation - Code and Comments
+ * This compiler is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This compiler is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this compiler, in the file LESSER-GPL;
+ * if not, write to the Free Software Foundation, Inc.,
+ * 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+
 package abc.tm.weaving.weaver.tmanalysis.ds;
 
 import java.util.Collection;
@@ -15,7 +28,7 @@ import abc.tm.weaving.weaver.tmanalysis.mustalias.LocalMustAliasAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.LocalNotMayAliasAnalysis;
 
 /**
- * MustMayNotAliasDisjunct
+ * A disjuncts making use of must and not-may alias information.
  *
  * @author Eric Bodden
  */
@@ -48,7 +61,7 @@ public class MustMayNotAliasDisjunct extends Disjunct {
 				//make a copy
 				clone.varBinding.put(tmVar, toBind);
 				//keep track of that this edge was taken
-				clone.history.add(shadowId);
+				//clone.history.add(shadowId);
 			} 			
 		}
 		
@@ -64,7 +77,7 @@ public class MustMayNotAliasDisjunct extends Disjunct {
 			return FALSE;
 		} else {
 			Disjunct clone = copy();
-			clone.history.add(shadowId);
+			//clone.history.add(shadowId);
 			return clone.intern();
 		}
 	}

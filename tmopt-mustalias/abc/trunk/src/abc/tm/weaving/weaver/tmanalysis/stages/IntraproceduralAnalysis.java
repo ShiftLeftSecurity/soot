@@ -1,8 +1,21 @@
-/*
- * Created on 12-Feb-07
+/* abc - The AspectBench Compiler
+ * Copyright (C) 2007 Patrick Lam
+ * Copyright (C) 2007 Eric Bodden
  *
- * To change the template for this generated file go to
- * Window - Preferences - Java - Code Generation - Code and Comments
+ * This compiler is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This compiler is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this compiler, in the file LESSER-GPL;
+ * if not, write to the Free Software Foundation, Inc.,
+ * 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 package abc.tm.weaving.weaver.tmanalysis.stages;
 
@@ -34,7 +47,6 @@ import abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.LocalMustAliasAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.LocalNotMayAliasAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.PathsReachingFlowAnalysis;
-import abc.tm.weaving.weaver.tmanalysis.mustalias.TMFlowAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.query.ReachableShadowFinder;
 import abc.tm.weaving.weaver.tmanalysis.query.Shadow;
 import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowTag;
@@ -46,6 +58,7 @@ import abc.tm.weaving.weaver.tmanalysis.util.SymbolShadow;
  * automaton states through the method.
  *
  * @author Patrick Lam
+ * @author Eric Bodden
  */
 public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 	
@@ -95,17 +108,16 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
                 
                 Map<Local,Stmt> tmLocalsToDefStatements = findTmLocalDefinitions(g,tm);
                 System.err.println("Analyzing: "+m+" on tracematch: "+tm.getName());
-    			TMFlowAnalysis flowAnalysis = new IntraProceduralTMFlowAnalysis(
+    			new IntraProceduralTMFlowAnalysis(
                 		tm,
                 		g,
                 		new MustMayNotAliasDisjunct(
                 				new LocalMustAliasAnalysis(g),
                 				new LocalNotMayAliasAnalysis(g),
                 				tmLocalsToDefStatements
-                		)
+                		),
+                		IntraProceduralTMFlowAnalysis.InitKind.MINIMAL_ASSUMPTION
                 );
-    			
-    			System.err.println(flowAnalysis.getActiveShadows());
 			}
         }
 	}

@@ -18,8 +18,6 @@
  */
 package abc.tm.weaving.weaver.tmanalysis.mustalias;
 
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Set;
 
@@ -53,19 +51,38 @@ import abc.tm.weaving.weaver.tmanalysis.util.SymbolShadow;
 public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implements TMFlowAnalysis {
 
 	/**
+	 * Determines the configuration used for initialization at the method entry point.
+	 *
+	 * @author Eric Bodden
+	 */
+	public enum InitKind {
+		/** Minimal assumption: TRUE for any initial state, FALSE else. */
+		MINIMAL_ASSUMPTION {
+			public Configuration getEntryInitialConfiguration(TMFlowAnalysis analysis) {
+				return new Configuration(analysis);
+			}
+		},
+		/** Maximal assumption: TRUE for any non-final state, FALSE for any final state. */
+		MAXIMAL_ASSUMPTION{ 
+			public Configuration getEntryInitialConfiguration(TMFlowAnalysis analysis) {
+				return new Configuration(analysis).getMaximalAssumption();
+			}
+		};
+		public abstract Configuration getEntryInitialConfiguration(TMFlowAnalysis analysis);
+	}
+
+	/**
 	 * The state machine to interpret.
 	 */
 	protected final TMStateMachine stateMachine;	
 	
 	protected final TraceMatch tracematch;	
 	
-	protected final Set activeShadows;
-	
-	protected final Configuration initialConfiguration;
-
 	protected boolean analysisFinished;
 
 	protected final UnitGraph ug;
+
+	protected final InitKind initializationKind;
 
 	/**
 	 * Creates and performs a new flow analysis.
@@ -75,12 +92,13 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implement
 	 * @param fullIteration if <code>true</code>, we do a full, unoptimized iteration
 	 * @param defaultOrder if <code>true</code>, we use the (inappropriate) default iteration order
 	 */
-	public IntraProceduralTMFlowAnalysis(TraceMatch tm, UnitGraph ug, Disjunct prototype) {
+	public IntraProceduralTMFlowAnalysis(TraceMatch tm, UnitGraph ug, Disjunct prototype, InitKind initializationKind) {
 		super(ug);
 		
 		Disjunct.PROTOTYPE = prototype;
 		
 		this.ug = ug;
+		this.initializationKind = initializationKind;
 
 		//since we are iterating over state machine edges, which implement equals(..)
 		//we need to separate those edges by using identity hash maps
@@ -91,10 +109,7 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implement
 		
 		this.stateMachine = (TMStateMachine) tm.getStateMachine();
 		this.tracematch = tm;
-		this.activeShadows = new HashSet();		
 
-		this.initialConfiguration = new Configuration(this);
-		
 		//do the analysis
 		this.analysisFinished = false;
 		doAnalysis();
@@ -142,27 +157,6 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implement
 	}
 
 	/**
-	 * Registeres shadows as <i>active</i>, i.e. as being used in order
-	 * to reach a final state.
-	 * @param activeShadows a list of shadow IDs (int) for all active shadows
-	 */
-	public void registerActiveShadows(Set activeShadows) {
-		if(analysisFinished) {
-			throw new RuntimeException("This is only to be used from within the analysis.");			
-		}
-		this.activeShadows.addAll(activeShadows);
-	}
-
-	/**
-	 * Returns the set of <i>active</i> shadows, i.e. shadows being used in order
-	 * to reach a final state.
-	 * @return a list of shadow IDs (int) for all active shadows
-	 */
-	public Set<String> getActiveShadows() {
-		return Collections.unmodifiableSet(activeShadows);
-	}
-
-	/**
 	 * @return the tracematch
 	 */
 	public TraceMatch getTracematch() {
@@ -182,11 +176,23 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implement
 	 * {@inheritDoc}
 	 */
 	protected Object entryInitialFlow() {
-		ConfigurationBox initialFlow = new ConfigurationBox();
-		initialFlow.set(initialConfiguration);
+		ConfigurationBox initialFlow = new ConfigurationBox();		
+		Configuration entryInitialConfiguration = initializationKind.getEntryInitialConfiguration(this);
+		initialFlow.set(entryInitialConfiguration);
 		return initialFlow;
 	}
 
+	/** 
+	 * {@inheritDoc}
+	 */
+	protected Object newInitialFlow() {
+		//intial configuration (neutral element for "join")
+		ConfigurationBox initialFlow = new ConfigurationBox();
+		Configuration initialConfiguration = new Configuration(this);
+		initialFlow.set(initialConfiguration);
+		return initialFlow;
+	}
+	
 	/** 
 	 * {@inheritDoc}
 	 */
@@ -204,13 +210,6 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implement
 		cout.set(c1.getJoinWith(c2));
 	}
 	
-	/** 
-	 * {@inheritDoc}
-	 */
-	protected Object newInitialFlow() {
-		return entryInitialFlow();
-	}
-
 	/**
 	 * @return the stateMachine
 	 */

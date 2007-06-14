@@ -58,7 +58,7 @@ public class Configuration implements Cloneable {
 
 
 	/** The mapping from states to constraints. */
-	protected HashMap stateToConstraint;
+	protected HashMap<State,Constraint> stateToConstraint;
 	
 	/** Statistical iteration counter. */
 	public static int iterationCount;
@@ -171,8 +171,6 @@ public class Configuration implements Cloneable {
 
 		//disjointly merge the constraints of tmp and skip
 		tmp = tmp.getJoinWith(skip);
-		//cleanup the resulting configuration
-		tmp.cleanup();
 		//return an interned version of the result
 		return tmp.intern();
 	}	
@@ -224,17 +222,6 @@ public class Configuration implements Cloneable {
 	}
 	
 	/**
-	 * Cleans up this configuration.
-	 * @see Constraint#cleanup()
-	 */
-	public void cleanup() {
-		for (Iterator constIter = stateToConstraint.values().iterator(); constIter.hasNext();) {
-			Constraint c = (Constraint) constIter.next();
-			c.cleanup();
-		}
-	}
-	
-	/**
 	 * Interns the configuration, i.e. returns a (usually) unique equal instance for it.
 	 * @return a unique instance that is equal to this 
 	 */
@@ -278,6 +265,20 @@ public class Configuration implements Cloneable {
 	}
 	
 	/**
+	 * Creates a new constraint representing the <i>maximally worst assumption</i> that we
+	 * are in all states but the final state, i.e. all constraints but the ones for final states
+	 * are set to {@link Constraint#TRUE} (the ones for final states are set to {@link Constraint#FALSE}).
+	 */
+	public Configuration getMaximalAssumption() {
+		Configuration clone = clone();
+		for (Entry<State,Constraint> entry : clone.stateToConstraint.entrySet()) {
+			State state = entry.getKey();
+			entry.setValue(state.isFinalNode() ? Constraint.FALSE : Constraint.TRUE);
+		}		
+		return clone;
+	}
+	
+	/**
 	 * {@inheritDoc}
 	 */
 	public String toString() {
@@ -301,7 +302,7 @@ public class Configuration implements Cloneable {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected Object clone() {
+	protected Configuration clone() {
 		Configuration clone;
 		try {
 			clone = (Configuration) super.clone();
@@ -346,5 +347,4 @@ public class Configuration implements Cloneable {
 		assert this.tm.equals(other.tm);
 		return true;
 	}
-
 }

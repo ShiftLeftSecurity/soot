@@ -1,24 +1,21 @@
 package abc.tm.weaving.weaver.tmanalysis.mustalias;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 
 import soot.Local;
+import soot.RefLikeType;
 import soot.Value;
 import soot.ValueBox;
-import soot.RefLikeType;
-import soot.jimple.NewExpr;
-import soot.jimple.InvokeExpr;
-import soot.jimple.ParameterRef;
-import soot.jimple.ThisRef;
 import soot.jimple.DefinitionStmt;
+import soot.jimple.InvokeExpr;
+import soot.jimple.NewExpr;
+import soot.jimple.ParameterRef;
 import soot.jimple.Stmt;
+import soot.jimple.ThisRef;
 import soot.toolkits.graph.UnitGraph;
 import soot.toolkits.scalar.ForwardFlowAnalysis;
 
@@ -34,7 +31,6 @@ import soot.toolkits.scalar.ForwardFlowAnalysis;
  * This is like constant propagation on abstract objects. */
 public class LocalMustAliasAnalysis extends ForwardFlowAnalysis
 {
-    private Map objectMap = new HashMap();
     private static final Object UNKNOWN = new Object();
     private List<Local> locals;
 

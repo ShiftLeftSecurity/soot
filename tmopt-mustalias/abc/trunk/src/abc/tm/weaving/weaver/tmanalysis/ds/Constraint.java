@@ -159,8 +159,8 @@ public class Constraint implements Cloneable {
 			resultDisjuncts.add(newDisjunct);
 			
 			//if we just hit a final node
-			if(to.isFinalNode()) {					
-				flowAnalysis.registerActiveShadows(newDisjunct.getHistory());
+			if(to.isFinalNode()) {
+				//TODO do we want to do something in this case?
 			}
 		}
 		
@@ -259,60 +259,6 @@ public class Constraint implements Cloneable {
 		}
 	}
 	
-	/**
-	 * Removes redundant disjuncts from this constraint. A disjunct d is redundant if there exists another disjunct e
-	 * with the same binding as d but with a history that is a superset of the one of d.
-	 */
-	public void cleanup() {
-		mergeDisjuncts();
-	}
-
-	/**
-	 * 
-	 */
-	protected void mergeDisjuncts() {
-		HashSet pruned = new HashSet();		
-		int i=0;
-		for (Iterator disjunctIter = disjuncts.iterator(); disjunctIter.hasNext();i++) {
-			Disjunct d1 = (Disjunct) disjunctIter.next();
-			boolean didMerge = false;
-			int j=0;
-			for (Iterator disjunctIter2 = disjuncts.iterator(); disjunctIter2.hasNext();j++) {
-					Disjunct d2 = (Disjunct) disjunctIter2.next();
-					if(d1!=d2 && d1.hasSameBindings(d2)) {
-						pruned.add(d1.mergeWith(d2));
-						didMerge = true;
-					}
-			}
-			if(!didMerge) {
-				pruned.add(d1);
-			}
-		}
-		this.disjuncts = pruned;
-	}
-
-	/**
-	 * 
-	 */
-	protected void removeOlder() {
-		HashSet pruned = new HashSet();
-		for (Iterator disjunctIter = disjuncts.iterator(); disjunctIter.hasNext();) {
-			Disjunct d1 = (Disjunct) disjunctIter.next();
-			boolean d1CanGo = false;
-			for (Iterator disjunctIter2 = disjuncts.iterator(); disjunctIter2.hasNext() && !d1CanGo;) {
-				Disjunct d2 = (Disjunct) disjunctIter2.next();
-				if(d1!=d2 && d1.isSmallerThan(d2)) {
-					d1CanGo = true;
-					break;
-				}
-			}
-			if(!d1CanGo) {
-				pruned.add(d1);
-			}
-		}
-		this.disjuncts = pruned;
-	}
-
 	/**
 	 * @returnthe number of disjuncts in this constraint
 	 */

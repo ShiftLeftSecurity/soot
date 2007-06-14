@@ -76,7 +76,8 @@ public abstract class Disjunct implements Cloneable {
 			return PROTOTYPE.copy(); 
 		}
 		
-		/**
+		/**				clone.history.add(shadowId);
+
 		 * {@inheritDoc}
 		 */
 		@Override
@@ -99,11 +100,6 @@ public abstract class Disjunct implements Cloneable {
 		}
 	};
 
-	/** The history holds the edges we came from.
-	 *  If we reach a final state, all those edges have be to marked
-	 *  as "this edge may be used for reaching a final state". */
-	protected HashSet history;
-		
 	/** The variable mapping of the form {@link String} to {@link PointsToSet}. */
 	protected HashMap varBinding;
 	
@@ -116,7 +112,6 @@ public abstract class Disjunct implements Cloneable {
 	 */
 	protected Disjunct() {
 		this.varBinding = new HashMap();
-		this.history = new HashSet();
 	}
 	
 	/**
@@ -180,15 +175,6 @@ public abstract class Disjunct implements Cloneable {
 	protected abstract Disjunct addNegativeBindingsForVariable(String varName, Object object, String shadowId);
 	
 	/**
-	 * Returns the history for this disjunct.
-	 * @return A set containing IDs of all shadows that triggered a transition
-	 * which drove this disjunct into its current state.
-	 */
-	public Set getHistory() {
-		return Collections.unmodifiableSet(history);
-	}
-
-	/**
 	 * Creates a copy of this disjunct. The method assures that this copy can
 	 * be altered.
 	 * @return this default implementation returns {@link #clone()}
@@ -217,7 +203,6 @@ public abstract class Disjunct implements Cloneable {
 		try {
 			Disjunct clone = (Disjunct) super.clone();
 			clone.varBinding = (HashMap) varBinding.clone();
-			clone.history = (HashSet) history.clone();
 			return clone;
 		} catch (CloneNotSupportedException e) {
 			throw new RuntimeException(e);
@@ -237,7 +222,6 @@ public abstract class Disjunct implements Cloneable {
 	public int hashCode() {
 		final int PRIME = 31;
 		int result = 1;
-		result = PRIME * result + ((history == null) ? 0 : history.hashCode());
 		result = PRIME * result + ((varBinding == null) ? 0 : varBinding.hashCode());
 		return result;
 	}
@@ -253,11 +237,6 @@ public abstract class Disjunct implements Cloneable {
 		if (getClass() != obj.getClass())
 			return false;
 		final Disjunct other = (Disjunct) obj;
-		if (history == null) {
-			if (other.history != null)
-				return false;
-		} else if (!history.equals(other.history))
-			return false;
 		if (varBinding == null) {
 			if (other.varBinding != null)
 				return false;
@@ -266,35 +245,8 @@ public abstract class Disjunct implements Cloneable {
 		return true;
 	}
 	
-	public boolean isSmallerThan(Disjunct other) {
-		return other.history.containsAll(history) && (other.history.size()>history.size()) && other.varBinding.equals(varBinding); 
-	}
-
 	public boolean hasSameBindings(Disjunct other) {
 		return varBinding.hashCode()==other.varBinding.hashCode() && varBinding.equals(other.varBinding);
 	}
 	
-//	/**
-//	 * WARNING: This comparator is NOT (!!!) consistent with equals()!
-//	 *
-//	 * @author Eric Bodden
-//	 */
-//	protected static class BindingsOnlyComparator implements Comparator {
-//
-//		public int compare(Object o1, Object o2) {
-//			Disjunct d1 = (Disjunct) o1;
-//			Disjunct d2 = (Disjunct) o2;
-//			return d1.varBinding.hashCode() - d2.varBinding.hashCode();
-//		}
-//	}
-//	
-//	public final static Comparator BINDINGS_ONLY = new BindingsOnlyComparator();
-
-	public Disjunct mergeWith(Disjunct other) {
-		assert hasSameBindings(other);
-		Disjunct merged = copy();
-		merged.history.addAll(other.history);
-		return merged;
-	}
-
 }
