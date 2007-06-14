@@ -28,7 +28,7 @@ public class ConfigurationBox {
 	 * {@inheritDoc}
 	 */
 	public String toString() {
-		return "Box<"+config.toString()+">";
+		return "Box<"+config+">";
 	}
 	
 	/**
