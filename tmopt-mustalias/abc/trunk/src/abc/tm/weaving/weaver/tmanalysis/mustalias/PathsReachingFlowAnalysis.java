@@ -3,12 +3,12 @@
 
 package abc.tm.weaving.weaver.tmanalysis.mustalias;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 
 import soot.Unit;
 import soot.toolkits.graph.UnitGraph;
-import soot.toolkits.scalar.ForwardFlowAnalysis;
 
 public class PathsReachingFlowAnalysis {
     public static final Object NONE = new Object();
@@ -18,7 +18,7 @@ public class PathsReachingFlowAnalysis {
     HashMap<Unit, Object> visitCount = new HashMap();
     
 	public PathsReachingFlowAnalysis(UnitGraph g) {
-        for (Unit u : g.getBody().getUnits())
+        for (Unit u : (Collection<Unit>)g.getBody().getUnits())
             visitCount.put(u, NONE);
 
         LinkedList<Unit> visitQueue = new LinkedList();
@@ -31,7 +31,7 @@ public class PathsReachingFlowAnalysis {
                 visitCount.put(u, ONE);
             else if (o == ONE)
                 visitCount.put(u, MANY);
-            visitQueue.addAll(u, g.getSuccsOf(u));
+            visitQueue.addAll((Collection<Unit>)g.getSuccsOf(u));
         }
     }
 
