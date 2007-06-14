@@ -76,8 +76,9 @@ public class MustMayNotAliasDisjunct extends Disjunct {
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected Disjunct addNegativeBindingsForVariable(String varName, Object negativeBinding, String shadowId) {
-		if(mustAliased(varName, varBinding)) {
+	protected Disjunct addNegativeBindingsForVariable(String tmVar, Object negativeBinding, String shadowId) {
+		Local curBinding = (Local) varBinding.get(tmVar);
+		if(curBinding!=null && mustAliased(tmVar, varBinding)) {
 			return FALSE;
 		} else {
 			Disjunct clone = copy();
