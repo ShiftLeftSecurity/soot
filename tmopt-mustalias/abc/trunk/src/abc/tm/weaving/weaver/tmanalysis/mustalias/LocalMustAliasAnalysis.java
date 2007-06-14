@@ -31,7 +31,10 @@ import soot.toolkits.scalar.ForwardFlowAnalysis;
  * This is like constant propagation on abstract objects. */
 public class LocalMustAliasAnalysis extends ForwardFlowAnalysis
 {
-    private static final Object UNKNOWN = new Object();
+    private static final Object UNKNOWN = new Object() {
+    	public String toString() { return "UNKNOWN"; }
+    };
+    
     private List<Local> locals;
 
     private PathsReachingFlowAnalysis prf;
