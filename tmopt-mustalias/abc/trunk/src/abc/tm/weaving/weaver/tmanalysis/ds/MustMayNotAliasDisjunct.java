@@ -57,16 +57,14 @@ public class MustMayNotAliasDisjunct extends Disjunct {
 			//get the current binding
 			Local curBinding = (Local) varBinding.get(tmVar);
 			
-			if(curBinding==null || !notMayAliased(tmVar, bindings)) {
-				//optimization: set the new binding only if there is no binding yet or if the new and old binding
-				//are not must-aliased
-				if(curBinding==null || !mustAliased(tmVar, bindings)) {
-					//set the new binding
-					clone.varBinding.put(tmVar, toBind);
-				}
+			if(curBinding==null) {
+				//set the new binding
+				clone.varBinding.put(tmVar, toBind);
 				//keep track of that this edge was taken
 				//clone.history.add(shadowId);
-			} 			
+			} else if(notMayAliased(tmVar, bindings)) {
+				return FALSE;			
+			}
 		}
 		
 		return clone.intern();
