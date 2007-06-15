@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import soot.Local;
 import soot.RefLikeType;
@@ -141,6 +142,25 @@ public class LocalMustAliasAnalysis extends ForwardFlowAnalysis
         }
         return m;
     }
+    
+    public String instanceKeyString(Local l, Stmt s) {
+        Object ln = ((HashMap)getFlowBefore(s)).get(l);
+        int hashCode = System.identityHashCode(ln);
+        Integer number = numbering.get(hashCode);
+        int num;
+        if(number==null) {
+        	num = nextNumber++;
+        	numbering.put(hashCode, num);
+        } else {
+        	num = number;
+        }
+        return Integer.toString(num);
+    }
+    
+    protected Map<Integer,Integer> numbering = new HashMap<Integer, Integer>();
+    
+    protected int nextNumber = 1;
+    
 
     /**
      * @return true if values of l1 (at s1) and l2 (at s2) have the

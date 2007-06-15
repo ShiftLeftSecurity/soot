@@ -115,7 +115,7 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
                 				new LocalNotMayAliasAnalysis(g),
                 				tmLocalsToDefStatements
                 		),
-                		IntraProceduralTMFlowAnalysis.InitKind.MINIMAL_ASSUMPTION
+                		IntraProceduralTMFlowAnalysis.InitKind.MAXIMAL_ASSUMPTION
                 );
     			
     			for (Stmt s : (Collection<Stmt>)g.getBody().getUnits()) {

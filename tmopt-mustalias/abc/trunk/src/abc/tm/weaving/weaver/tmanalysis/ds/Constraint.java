@@ -79,16 +79,6 @@ public class Constraint implements Cloneable {
 				return "FALSE";
 			}
 			
-			public Constraint or(Constraint other) {
-				if(this==other) {
-					//FALSE or FALSE = FALSE
-					return this;
-				}
-				
-				//FALSE or x = x
-				return (Constraint) other.clone();
-			}
-			
 			/**
 			 * Returns this (FALSE).
 			 */
@@ -105,10 +95,12 @@ public class Constraint implements Cloneable {
 				return this;
 			}
 			
+			protected Object clone() {
+				return new Constraint(disjuncts);
+			}
 		};
 		
-		//initialize TRUE; this holds a single empty disjunct;
-		//here we must NOT override the add*Bindings* methods, as very well bindings could be (well, have to be) added to the (initially empty) disjunct
+		//initialize TRUE; this holds a single empty disjunct
 		HashSet set = new HashSet();
 		set.add(Disjunct.FALSE);		
 		TRUE = new Constraint(set) {
@@ -116,9 +108,8 @@ public class Constraint implements Cloneable {
 				return "TRUE";
 			}
 			
-			public Constraint or(Constraint other) {
-				//TRUE or x = TRUE
-				return this;
+			protected Object clone() {
+				return new Constraint(disjuncts);
 			}
 		};
 	}
@@ -192,14 +183,6 @@ public class Constraint implements Cloneable {
 	 * @return the updated constraint; this is a fresh instance or {@link #FALSE} 
 	 */
 	public Constraint addNegativeBindingsForSymbol(Collection allVariables, SMNode state, Map bindings, String shadowId) {
-		//if this tracematch has no variables, there can be no bindings and
-		//there is nothing to delete, so we return FALSE
-		if(allVariables.isEmpty()) {
-			//in a tracematch without variables, if this is not FALSE, it can only be TRUE
-			assert this==TRUE;			
-			return FALSE;
-		}		
-		
 		HashSet resultDisjuncts = new HashSet();
 		//for each disjunct
 		for (Iterator iter = disjuncts.iterator(); iter.hasNext();) {

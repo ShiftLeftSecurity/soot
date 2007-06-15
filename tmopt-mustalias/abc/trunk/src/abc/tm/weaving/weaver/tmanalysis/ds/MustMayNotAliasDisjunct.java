@@ -20,7 +20,9 @@
 package abc.tm.weaving.weaver.tmanalysis.ds;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import soot.Local;
 import soot.jimple.Stmt;
@@ -32,7 +34,7 @@ import abc.tm.weaving.weaver.tmanalysis.mustalias.LocalNotMayAliasAnalysis;
  *
  * @author Eric Bodden
  */
-public class MustMayNotAliasDisjunct extends Disjunct {
+public class MustMayNotAliasDisjunct extends Disjunct<Local> {
 	
 	protected final LocalMustAliasAnalysis lmaa;
 	protected final LocalNotMayAliasAnalysis lmna;
@@ -49,10 +51,15 @@ public class MustMayNotAliasDisjunct extends Disjunct {
 	 */
 	@Override
 	public Disjunct addBindingsForSymbol(Collection allVariables, Map bindings, String shadowId) {
-		Disjunct clone = copy();
+		Disjunct clone = clone();
 		//for each tracematch variable
 		for (String tmVar : (Collection<String>)allVariables) {
 			Local toBind = (Local) bindings.get(tmVar);
+
+			//clash with negative binding?
+			if(clashWithNegativeBinding(tmVar,toBind)) {
+				return FALSE;
+			}
 			
 			//get the current binding
 			Local curBinding = (Local) varBinding.get(tmVar);
@@ -69,20 +76,30 @@ public class MustMayNotAliasDisjunct extends Disjunct {
 		
 		return clone.intern();
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected Disjunct addNegativeBindingsForVariable(String tmVar, Object negativeBinding, String shadowId) {
+	protected Disjunct addNegativeBindingsForVariable(String tmVar, Local newBinding, String shadowId) {
 		Local curBinding = (Local) varBinding.get(tmVar);
-		if(curBinding!=null && mustAliased(tmVar, varBinding)) {
+		if(curBinding!=null && mustAliased(tmVar, newBinding)) {
 			return FALSE;
 		} else {
-			Disjunct clone = copy();
-			//clone.history.add(shadowId);
-			return clone.intern();
+			return addNegativeBinding(tmVar, newBinding);
 		}
+	}
+	
+	private boolean clashWithNegativeBinding(String tmVar, Local toBind) {
+		Set<Local> negBindingsForVar = negVarBinding.get(tmVar);
+		if(negBindingsForVar!=null) {
+			for (Local negBinding : negBindingsForVar) {
+				if(mustAliased(negBinding,toBind)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	protected boolean notMayAliased(String s, Map binding) {
@@ -92,11 +109,54 @@ public class MustMayNotAliasDisjunct extends Disjunct {
 		return lmna.notMayAlias(currBinding, tmLocalsToDefStatements.get(currBinding), newBinding, tmLocalsToDefStatements.get(newBinding));
 	}
 	
-	protected boolean mustAliased(String s, Map binding) {
+	protected boolean mustAliased(String s, Local newBinding) {
 		Local currBinding = (Local) varBinding.get(s);
-		Local newBinding = (Local) binding.get(s);
 
 		return lmaa.mustAlias(currBinding, tmLocalsToDefStatements.get(currBinding), newBinding, tmLocalsToDefStatements.get(newBinding));
+	}
+	
+	protected boolean mustAliased(Local l1, Local l2) {
+		return lmaa.mustAlias(l1, tmLocalsToDefStatements.get(l1), l2, tmLocalsToDefStatements.get(l2));
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append("[pos(");
+		for (Iterator<Map.Entry<String,Local>> iterator = varBinding.entrySet().iterator(); iterator.hasNext();) {
+			Map.Entry<String,Local> entry = iterator.next();
+			String tmVariable = entry.getKey();
+			sb.append(tmVariable);
+			sb.append("->");
+			Local l = entry.getValue();
+			String stringRepresentation = lmaa.instanceKeyString(l, tmLocalsToDefStatements.get(l));
+			sb.append(stringRepresentation);
+			if(iterator.hasNext())
+				sb.append(", ");
+		}
+		sb.append(")-neg(");			
+		for (Iterator<Map.Entry<String,Set<Local>>> iterator = negVarBinding.entrySet().iterator(); iterator.hasNext();) {
+			Map.Entry<String,Set<Local>> entry = iterator.next();
+			String tmVariable = entry.getKey();
+			sb.append(tmVariable);
+			sb.append("->");
+			Set<Local> locals = entry.getValue();
+			sb.append("{");			
+			for (Iterator localIter = locals.iterator(); localIter.hasNext();) {
+				Local l = (Local) localIter.next();
+				String stringRepresentation = lmaa.instanceKeyString(l, tmLocalsToDefStatements.get(l));
+				sb.append(stringRepresentation);
+				if(localIter.hasNext())
+					sb.append(", ");
+			}
+			sb.append("}");			
+			if(iterator.hasNext())
+				sb.append(", ");
+		}
+		sb.append(")]");			
+		return sb.toString();
 	}
 	
 	

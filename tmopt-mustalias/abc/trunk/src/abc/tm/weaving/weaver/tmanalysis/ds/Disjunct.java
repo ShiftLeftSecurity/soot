@@ -34,17 +34,17 @@ import soot.PointsToSet;
  * creation sites (type {@link PointsToSet}).
  * Also it holds a history, which is the set of shadow-ids of the shadows
  * of all edges in the program-graph that drove this disjunct into its current state.
+ *
+ * @param <A> the abstraction type representing an object
  * 
- * This class is <i>not</i> threadsafe due to {@link #COMPARE_ON_HISTORY}.
- * 
- *  DDisjuncts are produced using the prototype pattern, i.e. via cloning. The prototype is
+ * Disjuncts are produced using the prototype pattern, i.e. via cloning. The prototype is
  * {@link #FALSE}. Other Disjuncts can then be created by calling
  * {@link #addBindingsForSymbol(Collection, Map, String)} and  
  * {@link #addNegativeBindingsForSymbol(Collection, Map, String)}.
  *
  * @author Eric Bodden
  */
-public abstract class Disjunct implements Cloneable {
+public abstract class Disjunct<A> implements Cloneable {
 	
 	/**
 	 * a most-recently used cache to cache equal disjuncts; the idea is that equality checks
@@ -58,50 +58,11 @@ public abstract class Disjunct implements Cloneable {
 		disjunctToUniqueDisjunct.clear();
 	}
 	
-	public static Disjunct PROTOTYPE;
-
 	/** The unique FALSE disjunct. It holds no mapping and no history. */
-	protected static Disjunct FALSE = new Disjunct() {
+	public static Disjunct FALSE;
 
-		public String toString() {
-			return "FALSE";
-		}
-		
-		/**
-		 * @return a fresh, empty disjunct
-		 */
-		protected Disjunct copy() {
-			//we do not clone here, because then the clone would
-			//always show "FALSE" in toString()
-			return PROTOTYPE.copy(); 
-		}
-		
-		/**				clone.history.add(shadowId);
-
-		 * {@inheritDoc}
-		 */
-		@Override
-		public Disjunct addBindingsForSymbol(Collection allVariables, Map bindings, String shadowId) {
-			return PROTOTYPE.addBindingsForSymbol(allVariables, bindings, shadowId);
-		}
-		
-		/**
-		 * Returns the empty set.
-		 */
-		public Set addNegativeBindingsForSymbol(Collection allVariables, Map bindings, String shadowId) {
-			//return no disjuncts, because there is nothing to remove
-			return Collections.EMPTY_SET;
-		}
-
-		@Override
-		protected Disjunct addNegativeBindingsForVariable(String varName,
-				Object negativeBinding, String shadowId) {
-			throw new RuntimeException("Should never be called.");
-		}
-	};
-
-	/** The variable mapping of the form {@link String} to {@link PointsToSet}. */
-	protected HashMap varBinding;
+	protected HashMap<String,A> varBinding;
+	protected HashMap<String,Set<A>> negVarBinding;
 	
 	/**
 	 * Creates a new disjunct with empty bindings and history.
@@ -111,7 +72,8 @@ public abstract class Disjunct implements Cloneable {
 	 * {@link #addNegativeBindingsForSymbol(Collection, Map, String)}.
 	 */
 	protected Disjunct() {
-		this.varBinding = new HashMap();
+		this.varBinding = new HashMap<String, A>();
+		this.negVarBinding = new HashMap<String, Set<A>>();
 	}
 	
 	/**
@@ -123,7 +85,7 @@ public abstract class Disjunct implements Cloneable {
 	 * the disjuncts of this copy hold the history of the disjuncts of this constraint plus
 	 * the shadowId that is passed in
 	 */
-	public abstract Disjunct addBindingsForSymbol(Collection allVariables, Map bindings, String shadowId);
+	public abstract Disjunct addBindingsForSymbol(Collection allVariables, Map<String,A> bindings, String shadowId);
 		
 	
 	/**
@@ -138,7 +100,7 @@ public abstract class Disjunct implements Cloneable {
 	 * @param analysis 
 	 * @return the updated constraint; this is a fresh instance or {@link #FALSE} 
 	 */
-	public Set addNegativeBindingsForSymbol(Collection allVariables, Map bindings, String shadowId) {		
+	public Set addNegativeBindingsForSymbol(Collection allVariables, Map<String,A> bindings, String shadowId) {		
 		
 		/*
 		 * TODO (Eric)
@@ -158,6 +120,7 @@ public abstract class Disjunct implements Cloneable {
 		for (Iterator varIter = allVariables.iterator(); varIter.hasNext();) {
 			String varName = (String) varIter.next();
 
+			//FIXME Here is still something wrong... Should this not be disjoint?
 			resultSet.add( addNegativeBindingsForVariable(varName, bindings.get(varName), shadowId) );
 		}
 		
@@ -168,27 +131,18 @@ public abstract class Disjunct implements Cloneable {
 	 * Currently this just returns a clone of <code>this</code>. We need a must-alias and must--flow analysis
 	 * in order to do anything more clever.
 	 * @param varName the name of the variable for which the binding is to be updated
-	 * @param object the negative binding this variable should be updated with
+	 * @param negBinding the negative binding this variable should be updated with
 	 * @param shadowId the shadow-id of the shadow that triggered this edge
 	 * @return
 	 */
-	protected abstract Disjunct addNegativeBindingsForVariable(String varName, Object object, String shadowId);
-	
-	/**
-	 * Creates a copy of this disjunct. The method assures that this copy can
-	 * be altered.
-	 * @return this default implementation returns {@link #clone()}
-	 */
-	protected Disjunct copy() {		
-		return (Disjunct) clone();
-	}
+	protected abstract Disjunct addNegativeBindingsForVariable(String varName, A negBinding, String shadowId);
 	
 	/**
 	 * Interns the disjunct, i.e. returns a (usually) unique equal instance for it.
 	 * @return a unique instance that is equal to this 
 	 */
-	protected Disjunct intern() {
-		Disjunct cached = (Disjunct) disjunctToUniqueDisjunct.get(this);
+	protected Disjunct<A> intern() {
+		Disjunct<A> cached = (Disjunct) disjunctToUniqueDisjunct.get(this);
 		if(cached==null) {
 			cached = this;
 			disjunctToUniqueDisjunct.put(this, this);
@@ -199,10 +153,16 @@ public abstract class Disjunct implements Cloneable {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected Object clone() {		
+	protected Disjunct<A> clone() {		
 		try {
-			Disjunct clone = (Disjunct) super.clone();
+			Disjunct<A> clone = (Disjunct<A>) super.clone();
 			clone.varBinding = (HashMap) varBinding.clone();
+			//deep clone negative bindings
+			clone.negVarBinding = (HashMap) negVarBinding.clone();
+			for (Map.Entry<String,Set<A>> entry : clone.negVarBinding.entrySet()) {
+				HashSet<A> clonedSet = (HashSet<A>) ((HashSet)entry.getValue()).clone();
+				entry.setValue(clonedSet);
+			}
 			return clone;
 		} catch (CloneNotSupportedException e) {
 			throw new RuntimeException(e);
@@ -212,31 +172,32 @@ public abstract class Disjunct implements Cloneable {
 	/**
 	 * {@inheritDoc}
 	 */
-	public String toString() {
-		return varBinding.toString();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public int hashCode() {
-		final int PRIME = 31;
+		final int prime = 31;
 		int result = 1;
-		result = PRIME * result + ((varBinding == null) ? 0 : varBinding.hashCode());
+		result = prime * result
+				+ ((negVarBinding == null) ? 0 : negVarBinding.hashCode());
+		result = prime * result
+				+ ((varBinding == null) ? 0 : varBinding.hashCode());
 		return result;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
-			return false;
 		if (getClass() != obj.getClass())
 			return false;
 		final Disjunct other = (Disjunct) obj;
+		if (negVarBinding == null) {
+			if (other.negVarBinding != null)
+				return false;
+		} else if (!negVarBinding.equals(other.negVarBinding))
+			return false;
 		if (varBinding == null) {
 			if (other.varBinding != null)
 				return false;
@@ -245,8 +206,15 @@ public abstract class Disjunct implements Cloneable {
 		return true;
 	}
 	
-	public boolean hasSameBindings(Disjunct other) {
-		return varBinding.hashCode()==other.varBinding.hashCode() && varBinding.equals(other.varBinding);
+	protected Disjunct<A> addNegativeBinding(String tmVar, A negBinding) {
+		Disjunct<A> clone = clone();
+		Set<A> negBindingsForVariable = clone.negVarBinding.get(tmVar);
+		if(negBindingsForVariable==null) {
+			negBindingsForVariable = new HashSet<A>();
+			clone.negVarBinding.put(tmVar, negBindingsForVariable);
+		}
+		negBindingsForVariable.add(negBinding);
+		return clone.intern();
 	}
 	
 }

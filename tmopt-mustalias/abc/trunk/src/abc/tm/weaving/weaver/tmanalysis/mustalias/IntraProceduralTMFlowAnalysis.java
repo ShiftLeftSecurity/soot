@@ -95,7 +95,7 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implement
 	public IntraProceduralTMFlowAnalysis(TraceMatch tm, UnitGraph ug, Disjunct prototype, InitKind initializationKind) {
 		super(ug);
 		
-		Disjunct.PROTOTYPE = prototype;
+		Disjunct.FALSE = prototype;
 		
 		this.ug = ug;
 		this.initializationKind = initializationKind;
@@ -215,6 +215,13 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implement
 	 */
 	public TMStateMachine getStateMachine() {
 		return stateMachine;
+	}
+
+	/**
+	 * @return the initializationKind
+	 */
+	public InitKind getInitializationKind() {
+		return initializationKind;
 	}
 
 }
