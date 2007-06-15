@@ -46,7 +46,6 @@ import abc.tm.weaving.weaver.tmanalysis.ds.MustMayNotAliasDisjunct;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.LocalMustAliasAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.LocalNotMayAliasAnalysis;
-import abc.tm.weaving.weaver.tmanalysis.mustalias.PathsReachingFlowAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.query.ReachableShadowFinder;
 import abc.tm.weaving.weaver.tmanalysis.query.Shadow;
 import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowTag;
@@ -147,7 +146,6 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 	 */
 	private Map<Local, Stmt> findTmLocalDefinitions(UnitGraph g, TraceMatch tm) {
 		
-		PathsReachingFlowAnalysis pathsReachingFlowAnalysis = new PathsReachingFlowAnalysis(g);
 		Body b = g.getBody();
 		
 		Set<Local> boundLocals = new HashSet<Local>();
@@ -179,11 +177,13 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
             }			
 		}
 		
+		Set<Local> oneDef = new HashSet<Local>();
 		for (Stmt stmt : (Collection<Stmt>)b.getUnits()) {
             for (soot.ValueBox vb : (Collection<soot.ValueBox>)stmt.getDefBoxes()) {
                 soot.Value v = vb.getValue();
                 if(rhsLocals.contains(v)) {
-                	if(pathsReachingFlowAnalysis.visitedPotentiallyManyTimes(stmt)) {
+                	//if was already added, we have multiple (static) defs of v
+               		if(!oneDef.add((Local)v)) {
                 		throw new RuntimeException("multiple defs");
                 	}
             	}
