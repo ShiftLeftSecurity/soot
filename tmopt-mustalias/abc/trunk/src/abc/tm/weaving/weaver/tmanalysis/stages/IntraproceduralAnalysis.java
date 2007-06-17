@@ -22,6 +22,8 @@ package abc.tm.weaving.weaver.tmanalysis.stages;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -95,7 +97,7 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 		Set reachableShadows = ReachableShadowFinder.v().reachableShadows(cg);
 		Map tmNameToShadows = ShadowsPerTMSplitter.splitShadows(reachableShadows);
 		
-		Set<InitKind> initKinds = new HashSet<InitKind>();
+		List<InitKind> initKinds = new LinkedList<InitKind>();
 		initKinds.add(InitKind.MINIMAL_ASSUMPTION);
 		initKinds.add(InitKind.MAXIMAL_ASSUMPTION);
 		
