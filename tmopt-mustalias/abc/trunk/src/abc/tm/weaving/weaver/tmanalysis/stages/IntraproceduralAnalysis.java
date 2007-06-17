@@ -46,6 +46,7 @@ import abc.tm.weaving.weaver.tmanalysis.ds.MustMayNotAliasDisjunct;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.LocalMustAliasAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.LocalNotMayAliasAnalysis;
+import abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.InitKind;
 import abc.tm.weaving.weaver.tmanalysis.query.ReachableShadowFinder;
 import abc.tm.weaving.weaver.tmanalysis.query.Shadow;
 import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowTag;
@@ -93,48 +94,54 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 		
 		Set reachableShadows = ReachableShadowFinder.v().reachableShadows(cg);
 		Map tmNameToShadows = ShadowsPerTMSplitter.splitShadows(reachableShadows);
-				
-        for (TraceMatch tm : (Collection<TraceMatch>)gai.getTraceMatches()) {
-        	Set<SootMethod> methodsWithShadows = new HashSet<SootMethod>();
-        	Set<Shadow> thisTMsShadows = (Set<Shadow>) tmNameToShadows.get(tm.getName());
-            for (Shadow s : thisTMsShadows) {
-                SootMethod m = s.getContainer();
-                methodsWithShadows.add(m);
-            }
+		
+		Set<InitKind> initKinds = new HashSet<InitKind>();
+		initKinds.add(InitKind.MINIMAL_ASSUMPTION);
+		initKinds.add(InitKind.MAXIMAL_ASSUMPTION);
+		
+		for (InitKind initKind : initKinds) {
+	        for (TraceMatch tm : (Collection<TraceMatch>)gai.getTraceMatches()) {
+	        	Set<SootMethod> methodsWithShadows = new HashSet<SootMethod>();
+	        	Set<Shadow> thisTMsShadows = (Set<Shadow>) tmNameToShadows.get(tm.getName());
+	            for (Shadow s : thisTMsShadows) {
+	                SootMethod m = s.getContainer();
+	                methodsWithShadows.add(m);
+	            }
 
-            for (SootMethod m : methodsWithShadows) {
-                UnitGraph g = new ExceptionalUnitGraph(m.retrieveActiveBody());
-                
-                Map<Local,Stmt> tmLocalsToDefStatements = findTmLocalDefinitions(g,tm);
-                System.err.println("Analyzing: "+m+" on tracematch: "+tm.getName());
-    			IntraProceduralTMFlowAnalysis flowAnalysis = new IntraProceduralTMFlowAnalysis(
-                		tm,
-                		g,
-                		new MustMayNotAliasDisjunct(
-                				new LocalMustAliasAnalysis(g),
-                				new LocalNotMayAliasAnalysis(g),
-                				tmLocalsToDefStatements
-                		),
-                		IntraProceduralTMFlowAnalysis.InitKind.MAXIMAL_ASSUMPTION
-                );
-    			
-    			for (Stmt s : (Collection<Stmt>)g.getBody().getUnits()) {
-					if(s.hasTag(SymbolShadowTag.NAME)) {
-						SymbolShadowTag tag = (SymbolShadowTag) s.getTag(SymbolShadowTag.NAME);
-						if(!tag.getMatchesForTracematch(tm).isEmpty()) {
-							System.err.println();
-							System.err.println();
-							System.err.println(flowAnalysis.getFlowBefore(s));
-							System.err.println(s);
-							for (SymbolShadow shadow : tag.getMatchesForTracematch(tm)) {
-								System.err.println(shadow.getUniqueShadowId());
+	            for (SootMethod m : methodsWithShadows) {
+	                UnitGraph g = new ExceptionalUnitGraph(m.retrieveActiveBody());
+	                
+	                Map<Local,Stmt> tmLocalsToDefStatements = findTmLocalDefinitions(g,tm);
+	                System.err.println("Analyzing: "+m+" on tracematch: "+tm.getName());
+	    			IntraProceduralTMFlowAnalysis flowAnalysis = new IntraProceduralTMFlowAnalysis(
+	                		tm,
+	                		g,
+	                		new MustMayNotAliasDisjunct(
+	                				new LocalMustAliasAnalysis(g),
+	                				new LocalNotMayAliasAnalysis(g),
+	                				tmLocalsToDefStatements
+	                		),
+	                		initKind
+	                );
+	    			
+	    			for (Stmt s : (Collection<Stmt>)g.getBody().getUnits()) {
+						if(s.hasTag(SymbolShadowTag.NAME)) {
+							SymbolShadowTag tag = (SymbolShadowTag) s.getTag(SymbolShadowTag.NAME);
+							if(!tag.getMatchesForTracematch(tm).isEmpty()) {
+								System.err.println();
+								System.err.println();
+								System.err.println(flowAnalysis.getFlowBefore(s));
+								System.err.println(s);
+								for (SymbolShadow shadow : tag.getMatchesForTracematch(tm)) {
+									System.err.println(shadow.getUniqueShadowId());
+								}
+								System.err.println(flowAnalysis.getFlowAfter(s));
 							}
-							System.err.println(flowAnalysis.getFlowAfter(s));
 						}
 					}
 				}
-			}
-        }
+	        }
+		}
 	}
 	
 	//singleton pattern
