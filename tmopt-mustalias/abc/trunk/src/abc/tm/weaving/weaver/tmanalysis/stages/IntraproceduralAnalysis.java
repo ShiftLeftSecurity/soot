@@ -101,16 +101,16 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 		initKinds.add(InitKind.MINIMAL_ASSUMPTION);
 		initKinds.add(InitKind.MAXIMAL_ASSUMPTION);
 		
-		for (InitKind initKind : initKinds) {
-	        for (TraceMatch tm : (Collection<TraceMatch>)gai.getTraceMatches()) {
-	        	Set<SootMethod> methodsWithShadows = new HashSet<SootMethod>();
-	        	Set<Shadow> thisTMsShadows = (Set<Shadow>) tmNameToShadows.get(tm.getName());
-	            for (Shadow s : thisTMsShadows) {
-	                SootMethod m = s.getContainer();
-	                methodsWithShadows.add(m);
-	            }
+        for (TraceMatch tm : (Collection<TraceMatch>)gai.getTraceMatches()) {
+        	Set<SootMethod> methodsWithShadows = new HashSet<SootMethod>();
+        	Set<Shadow> thisTMsShadows = (Set<Shadow>) tmNameToShadows.get(tm.getName());
+            for (Shadow s : thisTMsShadows) {
+                SootMethod m = s.getContainer();
+                methodsWithShadows.add(m);
+            }
 
-	            for (SootMethod m : methodsWithShadows) {
+            for (SootMethod m : methodsWithShadows) {
+        		for (InitKind initKind : initKinds) {
 	                UnitGraph g = new ExceptionalUnitGraph(m.retrieveActiveBody());
 	                
 	                Map<Local,Stmt> tmLocalsToDefStatements = findTmLocalDefinitions(g,tm);
