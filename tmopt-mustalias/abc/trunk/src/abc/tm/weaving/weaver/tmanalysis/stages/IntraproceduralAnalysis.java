@@ -37,8 +37,6 @@ import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.jimple.toolkits.callgraph.CallGraphBuilder;
 import soot.jimple.toolkits.pointer.DumbPointerAnalysis;
 import soot.jimple.toolkits.thread.IThreadLocalObjectsAnalysis;
-import soot.jimple.toolkits.thread.ThreadLocalObjectsAnalysis;
-import soot.jimple.toolkits.thread.mhp.UnsynchronizedMhpAnalysis;
 import soot.toolkits.graph.ExceptionalUnitGraph;
 import soot.toolkits.graph.UnitGraph;
 import abc.main.Main;
@@ -64,7 +62,7 @@ import abc.tm.weaving.weaver.tmanalysis.util.SymbolShadow;
  */
 public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 	
-	protected final static boolean MAKE_SAFE = false;
+	protected final static boolean RUN_REAL_POINTS_TO = true;
 	
 	protected static TMGlobalAspectInfo gai = (TMGlobalAspectInfo) Main.v().getAbcExtension().getGlobalAspectInfo();
 
@@ -75,23 +73,20 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 		TMShadowTagger.v().apply();
 		CallGraph cg; 
 		@SuppressWarnings("unused") //maybe used later
-		IThreadLocalObjectsAnalysis tloa;
-		if(MAKE_SAFE) {
-			CallGraphAbstraction.v().apply();
+		IThreadLocalObjectsAnalysis tloa = new IThreadLocalObjectsAnalysis() {
+			public boolean isObjectThreadLocal(Value localOrRef,SootMethod sm) {
+				//assume that any variable is thread-local;
+				//THIS IS UNSAFE!
+				return true;
+			}
+		};
+		if(RUN_REAL_POINTS_TO) {
 			cg = CallGraphAbstraction.v().abstractedCallGraph();
-			tloa = new ThreadLocalObjectsAnalysis(new UnsynchronizedMhpAnalysis());
 		} else {
 			CallGraphBuilder cgb = new CallGraphBuilder(DumbPointerAnalysis.v());
 			soot.Scene.v().setPointsToAnalysis(DumbPointerAnalysis.v());
 			cg = cgb.getCallGraph();
 			cgb.build();
-			tloa = new IThreadLocalObjectsAnalysis() {
-				public boolean isObjectThreadLocal(Value localOrRef,SootMethod sm) {
-					//assume that any variable is thread-local;
-					//THIS IS UNSAFE!
-					return true;
-				}
-			};
 		}
 		
 		Set reachableShadows = ReachableShadowFinder.v().reachableShadows(cg);
@@ -121,7 +116,8 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 	                		new MustMayNotAliasDisjunct(
 	                				new LocalMustAliasAnalysis(g),
 	                				new LocalNotMayAliasAnalysis(g),
-	                				tmLocalsToDefStatements
+	                				tmLocalsToDefStatements,
+	                				m
 	                		),
 	                		initKind
 	                );
