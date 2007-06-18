@@ -28,6 +28,7 @@ import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.matching.TMStateMachine;
 import abc.tm.weaving.weaver.tmanalysis.ds.Configuration;
 import abc.tm.weaving.weaver.tmanalysis.ds.ConfigurationBox;
+import abc.tm.weaving.weaver.tmanalysis.ds.Constraint;
 import abc.tm.weaving.weaver.tmanalysis.ds.Disjunct;
 import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowTag;
 import abc.tm.weaving.weaver.tmanalysis.util.SymbolShadow;
@@ -95,7 +96,8 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implement
 	public IntraProceduralTMFlowAnalysis(TraceMatch tm, UnitGraph ug, Disjunct prototype, InitKind initializationKind) {
 		super(ug);
 		
-		Disjunct.FALSE = prototype;
+		//initialize prototypes
+		Constraint.initialize(prototype);
 		
 		this.ug = ug;
 		this.initializationKind = initializationKind;
@@ -115,6 +117,10 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implement
 		doAnalysis();
 		this.analysisFinished = true;
 		
+		//clear caches
+		Disjunct.reset();
+		Constraint.reset();
+		Configuration.reset();
 	}
 
 	/**

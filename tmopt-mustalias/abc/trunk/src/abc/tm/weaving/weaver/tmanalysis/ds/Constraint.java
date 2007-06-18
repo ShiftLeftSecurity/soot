@@ -67,12 +67,16 @@ public class Constraint implements Cloneable {
 	protected HashSet disjuncts;
 	
 	/** The unique false constraint. */
-	public final static Constraint FALSE;
+	public static Constraint FALSE;
 	
 	/** The unique true constraint. */
-	public final static Constraint TRUE;
+	public static Constraint TRUE;
 	
-	static {
+	/**
+	 * Initialized the prototype constraints TRUE and FALSE. 
+	 * @param falseProtoType the prototype disjunct for {@link Disjunct#FALSE}.
+	 */
+	public static void initialize(Disjunct falseProtoType) {
 		//initialize FALSE
 		FALSE = new Constraint(new HashSet()) {			
 			public String toString() {
@@ -102,7 +106,7 @@ public class Constraint implements Cloneable {
 		
 		//initialize TRUE; this holds a single empty disjunct
 		HashSet set = new HashSet();
-		set.add(Disjunct.FALSE);		
+		set.add(falseProtoType);		
 		TRUE = new Constraint(set) {
 			public String toString() {
 				return "TRUE";
@@ -112,6 +116,8 @@ public class Constraint implements Cloneable {
 				return new Constraint(disjuncts);
 			}
 		};
+		
+		Disjunct.FALSE = falseProtoType;
 	}
 	
 	/**
@@ -147,6 +153,7 @@ public class Constraint implements Cloneable {
 
 			//delegate to the disjunct
 			Disjunct newDisjunct = disjunct.addBindingsForSymbol(allVariables,bindings,shadowId);
+			assert newDisjunct!=null;
 			resultDisjuncts.add(newDisjunct);
 			
 			//if we just hit a final node
