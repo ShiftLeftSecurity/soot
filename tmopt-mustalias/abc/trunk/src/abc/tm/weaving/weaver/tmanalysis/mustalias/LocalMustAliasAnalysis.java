@@ -1,3 +1,21 @@
+/* abc - The AspectBench Compiler
+ * Copyright (C) 2007 Patrick Lam 
+ *
+ * This compiler is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This compiler is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this compiler, in the file LESSER-GPL;
+ * if not, write to the Free Software Foundation, Inc.,
+ * 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
 package abc.tm.weaving.weaver.tmanalysis.mustalias;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,7 +46,10 @@ import soot.toolkits.scalar.ForwardFlowAnalysis;
  * of the value (a NewExpr, InvokeExpr, or ParameterRef). If two
  * variables have the same source, then they are equal.
  *
- * This is like constant propagation on abstract objects. */
+ * This is like constant propagation on abstract objects.
+ * 
+ * @author Patrick Lam
+ * */
 public class LocalMustAliasAnalysis extends ForwardFlowAnalysis
 {
     private static final Object UNKNOWN = new Object() {
