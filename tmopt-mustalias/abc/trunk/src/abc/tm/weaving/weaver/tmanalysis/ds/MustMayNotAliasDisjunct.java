@@ -20,6 +20,7 @@
 package abc.tm.weaving.weaver.tmanalysis.ds;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -90,7 +91,33 @@ public class MustMayNotAliasDisjunct extends Disjunct<Local> {
 		}
 	}
 	
-	private boolean clashWithNegativeBinding(String tmVar, Local toBind) {
+	protected Disjunct addNegativeBinding(String tmVar, Local negBinding) {
+		//check if we need to add...
+		//we do *not* need to add a mapping v->l is there is alreade a mapping
+		//v->m with mustAlias(l,m)
+		Set<Local> thisNegBindingsForVariable = negVarBinding.get(tmVar);
+		if(thisNegBindingsForVariable!=null) {
+			for (Local local : thisNegBindingsForVariable) {
+				if(mustAliased(negBinding, local)) {
+					return this;
+				}
+			}
+		}
+		//else clone and actually add the binding...
+		
+		MustMayNotAliasDisjunct clone = (MustMayNotAliasDisjunct) clone();
+		Set<Local> negBindingsForVariable = clone.negVarBinding.get(tmVar);
+		//initialize if necessary
+		if(negBindingsForVariable==null) {
+			negBindingsForVariable = new HashSet<Local>();
+			clone.negVarBinding.put(tmVar, negBindingsForVariable);
+		}
+		negBindingsForVariable.add(negBinding);
+		return clone.intern();
+	}
+
+	
+	protected boolean clashWithNegativeBinding(String tmVar, Local toBind) {
 		Set<Local> negBindingsForVar = negVarBinding.get(tmVar);
 		if(negBindingsForVar!=null) {
 			for (Local negBinding : negBindingsForVar) {

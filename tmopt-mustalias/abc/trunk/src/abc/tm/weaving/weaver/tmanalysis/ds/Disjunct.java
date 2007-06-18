@@ -205,16 +205,4 @@ public abstract class Disjunct<A> implements Cloneable {
 			return false;
 		return true;
 	}
-	
-	protected Disjunct<A> addNegativeBinding(String tmVar, A negBinding) {
-		Disjunct<A> clone = clone();
-		Set<A> negBindingsForVariable = clone.negVarBinding.get(tmVar);
-		if(negBindingsForVariable==null) {
-			negBindingsForVariable = new HashSet<A>();
-			clone.negVarBinding.put(tmVar, negBindingsForVariable);
-		}
-		negBindingsForVariable.add(negBinding);
-		return clone.intern();
-	}
-	
 }
