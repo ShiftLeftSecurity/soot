@@ -28,8 +28,9 @@ import java.util.Set;
 import soot.Local;
 import soot.SootMethod;
 import soot.jimple.Stmt;
-import abc.tm.weaving.weaver.tmanalysis.mustalias.LocalMustAliasAnalysis;
-import abc.tm.weaving.weaver.tmanalysis.mustalias.LocalNotMayAliasAnalysis;
+import soot.jimple.toolkits.pointer.LocalMustAliasAnalysis;
+import soot.jimple.toolkits.pointer.LocalNotMayAliasAnalysis;
+import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.ShadowSideEffectsAnalysis;
 
 /**
@@ -43,12 +44,14 @@ public class MustMayNotAliasDisjunct extends Disjunct<Local> {
 	protected final LocalNotMayAliasAnalysis lmna;
 	protected final Map<Local, Stmt> tmLocalsToDefStatements;
 	protected final SootMethod container;
+	protected final TraceMatch tm;
 
-	public MustMayNotAliasDisjunct(LocalMustAliasAnalysis lmaa, LocalNotMayAliasAnalysis lmna, Map<Local, Stmt> tmLocalsToDefStatements, SootMethod container) {
+	public MustMayNotAliasDisjunct(LocalMustAliasAnalysis lmaa, LocalNotMayAliasAnalysis lmna, Map<Local, Stmt> tmLocalsToDefStatements, SootMethod container, TraceMatch tm) {
 		this.lmaa = lmaa;
 		this.lmna = lmna;
 		this.tmLocalsToDefStatements = tmLocalsToDefStatements;
 		this.container = container;
+		this.tm = tm;
 	}
 	
 	/**
@@ -115,7 +118,7 @@ public class MustMayNotAliasDisjunct extends Disjunct<Local> {
 	 * @param negBinding the negative binding we have for negVar
 	 */
 	protected boolean leadsToContradiction(String tmVar, Local toBind, String negVar, Local negBinding) {
-		return ShadowSideEffectsAnalysis.v().leadsToContradiction(tmVar, toBind, negVar, negBinding, container);
+		return ShadowSideEffectsAnalysis.v().leadsToContradiction(tmVar, toBind, negVar, negBinding, container, tm);
 	}
 	
 	/**

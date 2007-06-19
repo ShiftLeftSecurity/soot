@@ -36,6 +36,8 @@ import soot.jimple.Stmt;
 import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.jimple.toolkits.callgraph.CallGraphBuilder;
 import soot.jimple.toolkits.pointer.DumbPointerAnalysis;
+import soot.jimple.toolkits.pointer.LocalMustAliasAnalysis;
+import soot.jimple.toolkits.pointer.LocalNotMayAliasAnalysis;
 import soot.jimple.toolkits.thread.IThreadLocalObjectsAnalysis;
 import soot.toolkits.graph.ExceptionalUnitGraph;
 import soot.toolkits.graph.UnitGraph;
@@ -44,8 +46,6 @@ import abc.tm.weaving.aspectinfo.TMGlobalAspectInfo;
 import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.weaver.tmanalysis.ds.MustMayNotAliasDisjunct;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis;
-import abc.tm.weaving.weaver.tmanalysis.mustalias.LocalMustAliasAnalysis;
-import abc.tm.weaving.weaver.tmanalysis.mustalias.LocalNotMayAliasAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.InitKind;
 import abc.tm.weaving.weaver.tmanalysis.query.ReachableShadowFinder;
 import abc.tm.weaving.weaver.tmanalysis.query.Shadow;
@@ -117,7 +117,8 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 	                				new LocalMustAliasAnalysis(g),
 	                				new LocalNotMayAliasAnalysis(g),
 	                				tmLocalsToDefStatements,
-	                				m
+	                				m,
+	                				tm
 	                		),
 	                		initKind
 	                );

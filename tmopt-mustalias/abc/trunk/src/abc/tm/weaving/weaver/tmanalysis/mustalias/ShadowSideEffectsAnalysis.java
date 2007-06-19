@@ -26,6 +26,7 @@ import soot.PointsToAnalysis;
 import soot.PointsToSet;
 import soot.Scene;
 import soot.SootMethod;
+import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.weaver.tmanalysis.query.Shadow;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroup;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroupRegistry;
@@ -48,8 +49,9 @@ public class ShadowSideEffectsAnalysis  {
 	 * @param negVar the variable for an existing negative binding
 	 * @param negBinding the negative binding we have for negVar
 	 * @param container the method hokding toBind and negBinding
+	 * @param tm tracematch we focus on 
 	 */
-	public boolean leadsToContradiction(String tmVar, Local toBind, String negVar, Local negBinding, SootMethod container) {
+	public boolean leadsToContradiction(String tmVar, Local toBind, String negVar, Local negBinding, SootMethod container, TraceMatch tm) {
 		PointsToAnalysis pta = Scene.v().getPointsToAnalysis();
 		PointsToSet toBindPts = pta.reachingObjects(toBind);
 		PointsToSet negBindingPts = pta.reachingObjects(negBinding);
@@ -58,9 +60,11 @@ public class ShadowSideEffectsAnalysis  {
 		
 		Set<ShadowGroup> allShadowGroups = ShadowGroupRegistry.v().getAllShadowGroups();
 		for (ShadowGroup shadowGroup : allShadowGroups) {
-			if(shadowGroup.hasCompatibleBinding(negVar,negBindingPts)) {
-				if(shadowGroup.hasCompatibleBinding(tmVar, toBindPts)) {
-					overlaps.addAll(shadowGroup.getAllShadows());
+			if(shadowGroup.getTraceMatch().equals(tm)) {
+				if(shadowGroup.hasCompatibleBinding(negVar,negBindingPts)) {
+					if(shadowGroup.hasCompatibleBinding(tmVar, toBindPts)) {
+						overlaps.addAll(shadowGroup.getAllShadows());
+					}
 				}
 			}
 		}
