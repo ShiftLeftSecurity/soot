@@ -125,15 +125,19 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 	                		initKind
 	                );
 	    			
+	    			System.err.println("Analysis done.");
+	    			
 	    			for (Stmt s : flowAnalysis.shadowStatementsReachingFixedPointAtOnce()) {
 						SymbolShadowTag tag = (SymbolShadowTag) s.getTag(SymbolShadowTag.NAME);
 						System.err.println();
+						System.err.println("Can apply optimization to:");
 						System.err.println(s);
 						for (SymbolShadow shadow : tag.getMatchesForTracematch(tm)) {
 							System.err.println(shadow.getUniqueShadowId());
 							ShadowRegistry.v().conjoinShadowWithResidue(shadow.getUniqueShadowId(), new OncePerMethodExecutionResidue());
 						}
 					}
+	    			
 //	    			
 //	    			for (Stmt s : (Collection<Stmt>)g.getBody().getUnits()) {
 //						if(s.hasTag(SymbolShadowTag.NAME)) {

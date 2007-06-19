@@ -133,6 +133,7 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implement
 		Disjunct.reset();
 		Constraint.reset();
 		Configuration.reset();
+		ShadowSideEffectsAnalysis.reset();
 	}
 
 	/**

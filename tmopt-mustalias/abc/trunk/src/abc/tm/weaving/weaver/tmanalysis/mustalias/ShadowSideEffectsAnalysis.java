@@ -18,7 +18,9 @@
  */
 package abc.tm.weaving.weaver.tmanalysis.mustalias;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import soot.Local;
@@ -40,6 +42,8 @@ import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroupRegistry;
  */
 public class ShadowSideEffectsAnalysis  {
 	
+	protected Map<Local,PointsToSet> localToPts = new HashMap<Local, PointsToSet>();
+	
 	/**
 	 * Assume we have a negative binding <code>x!=o</code> and we want to combine it with a positive
 	 * binding <code>y=p</code>. If we can prove that <code>y=p</code> can only ever occur with
@@ -52,9 +56,8 @@ public class ShadowSideEffectsAnalysis  {
 	 * @param tm tracematch we focus on 
 	 */
 	public boolean leadsToContradiction(String tmVar, Local toBind, String negVar, Local negBinding, SootMethod container, TraceMatch tm) {
-		PointsToAnalysis pta = Scene.v().getPointsToAnalysis();
-		PointsToSet toBindPts = pta.reachingObjects(toBind);
-		PointsToSet negBindingPts = pta.reachingObjects(negBinding);
+		PointsToSet toBindPts = getPointsToSetOf(toBind);
+		PointsToSet negBindingPts = getPointsToSetOf(negBinding);
 		
 		Set<Shadow> overlaps = new HashSet<Shadow>();
 		
@@ -76,6 +79,16 @@ public class ShadowSideEffectsAnalysis  {
 		}
 
 		return true;
+	}
+
+	protected PointsToSet getPointsToSetOf(Local toBind) {
+		PointsToSet pointsToSet = localToPts.get(toBind);
+		if(pointsToSet==null) {
+			PointsToAnalysis pta = Scene.v().getPointsToAnalysis();
+			pointsToSet = pta.reachingObjects(toBind);
+			localToPts.put(toBind, pointsToSet);
+		}
+		return pointsToSet;
 	}
 	
 
