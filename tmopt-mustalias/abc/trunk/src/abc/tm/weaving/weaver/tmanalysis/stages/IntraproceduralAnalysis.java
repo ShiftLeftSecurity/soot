@@ -49,9 +49,11 @@ import abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.InitKind;
 import abc.tm.weaving.weaver.tmanalysis.query.ReachableShadowFinder;
 import abc.tm.weaving.weaver.tmanalysis.query.Shadow;
+import abc.tm.weaving.weaver.tmanalysis.query.ShadowRegistry;
 import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowTag;
 import abc.tm.weaving.weaver.tmanalysis.util.ShadowsPerTMSplitter;
 import abc.tm.weaving.weaver.tmanalysis.util.SymbolShadow;
+import abc.weaving.residues.OncePerMethodExecutionResidue;
 
 /**
  * IntraproceduralAnalysis: This analysis propagates tracematch
@@ -93,7 +95,7 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 		Map tmNameToShadows = ShadowsPerTMSplitter.splitShadows(reachableShadows);
 		
 		List<InitKind> initKinds = new LinkedList<InitKind>();
-		initKinds.add(InitKind.MINIMAL_ASSUMPTION);
+//		initKinds.add(InitKind.MINIMAL_ASSUMPTION);
 		initKinds.add(InitKind.MAXIMAL_ASSUMPTION);
 		
         for (TraceMatch tm : (Collection<TraceMatch>)gai.getTraceMatches()) {
@@ -123,21 +125,31 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 	                		initKind
 	                );
 	    			
-	    			for (Stmt s : (Collection<Stmt>)g.getBody().getUnits()) {
-						if(s.hasTag(SymbolShadowTag.NAME)) {
-							SymbolShadowTag tag = (SymbolShadowTag) s.getTag(SymbolShadowTag.NAME);
-							if(!tag.getMatchesForTracematch(tm).isEmpty()) {
-								System.err.println();
-								System.err.println();
-								System.err.println(flowAnalysis.getFlowBefore(s));
-								System.err.println(s);
-								for (SymbolShadow shadow : tag.getMatchesForTracematch(tm)) {
-									System.err.println(shadow.getUniqueShadowId());
-								}
-								System.err.println(flowAnalysis.getFlowAfter(s));
-							}
+	    			for (Stmt s : flowAnalysis.shadowStatementsReachingFixedPointAtOnce()) {
+						SymbolShadowTag tag = (SymbolShadowTag) s.getTag(SymbolShadowTag.NAME);
+						System.err.println();
+						System.err.println(s);
+						for (SymbolShadow shadow : tag.getMatchesForTracematch(tm)) {
+							System.err.println(shadow.getUniqueShadowId());
+							ShadowRegistry.v().conjoinShadowWithResidue(shadow.getUniqueShadowId(), new OncePerMethodExecutionResidue());
 						}
 					}
+//	    			
+//	    			for (Stmt s : (Collection<Stmt>)g.getBody().getUnits()) {
+//						if(s.hasTag(SymbolShadowTag.NAME)) {
+//							SymbolShadowTag tag = (SymbolShadowTag) s.getTag(SymbolShadowTag.NAME);
+//							if(!tag.getMatchesForTracematch(tm).isEmpty()) {
+//								System.err.println();
+//								System.err.println();
+//								System.err.println(flowAnalysis.getFlowBefore(s));
+//								System.err.println(s);
+//								for (SymbolShadow shadow : tag.getMatchesForTracematch(tm)) {
+//									System.err.println(shadow.getUniqueShadowId());
+//								}
+//								System.err.println(flowAnalysis.getFlowAfter(s));
+//							}
+//						}
+//					}
 				}
 	        }
 		}

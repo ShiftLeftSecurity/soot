@@ -1,5 +1,5 @@
 /* abc - The AspectBench Compiler
- * Copyright (C) 2006 Eric Bodden
+ * Copyright (C) 2007 Eric Bodden
  *
  * This compiler is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,7 +18,10 @@
  */
 package abc.tm.weaving.weaver.tmanalysis.mustalias;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.Map;
 import java.util.Set;
 
 import soot.jimple.Stmt;
@@ -30,6 +33,8 @@ import abc.tm.weaving.weaver.tmanalysis.ds.Configuration;
 import abc.tm.weaving.weaver.tmanalysis.ds.ConfigurationBox;
 import abc.tm.weaving.weaver.tmanalysis.ds.Constraint;
 import abc.tm.weaving.weaver.tmanalysis.ds.Disjunct;
+import abc.tm.weaving.weaver.tmanalysis.query.PathInfoFinder;
+import abc.tm.weaving.weaver.tmanalysis.query.PathInfoFinder.PathInfo;
 import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowTag;
 import abc.tm.weaving.weaver.tmanalysis.util.SymbolShadow;
 
@@ -84,6 +89,10 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implement
 	protected final UnitGraph ug;
 
 	protected final InitKind initializationKind;
+	
+	protected final Set<Stmt> visited;
+	
+	protected final Map<Stmt,Configuration> shadowStmtToFirstAfterFlow;
 
 	/**
 	 * Creates and performs a new flow analysis.
@@ -112,6 +121,9 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implement
 		this.stateMachine = (TMStateMachine) tm.getStateMachine();
 		this.tracematch = tm;
 
+		this.visited = new HashSet<Stmt>();
+		this.shadowStmtToFirstAfterFlow = new HashMap<Stmt,Configuration>();
+		
 		//do the analysis
 		this.analysisFinished = false;
 		doAnalysis();
@@ -156,9 +168,15 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implement
 			}
 		}
 		//if we actually computed a join, set it, else copy over 
-		if(foundEnabledShadow)
+		if(foundEnabledShadow) {
 			cout.set(join);
-		else
+			//if not yet visited...
+			if(!visited.contains(stmt)) {
+				visited.add(stmt);
+				//...record this after-flow for comparison
+				shadowStmtToFirstAfterFlow.put(stmt, join);
+			}			
+		} else
 			copy(cin, cout);
 	}
 
@@ -228,6 +246,51 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implement
 	 */
 	public InitKind getInitializationKind() {
 		return initializationKind;
+	}
+	
+	/**
+	 * Determines all statements that are contained in the associated methods
+	 * which are annotated with a shadow and are in a loop but for which it is guaranteed that
+	 * one loop iteration suffices to reach the fixed point.
+	 * @return
+	 */
+	public Set<Stmt> shadowStatementsReachingFixedPointAtOnce() {
+		Set<PathInfo> pathInfos = new PathInfoFinder(tracematch).getPathInfos();
+		
+		PathsReachingFlowAnalysis prf = new PathsReachingFlowAnalysis(ug);
+		
+		Set<Stmt> result = new HashSet<Stmt>();
+		
+		//for each statement with an active shadow
+		for (Stmt stmt : shadowStmtToFirstAfterFlow.keySet()) {
+			//if contained in a loop
+			if(prf.visitedPotentiallyManyTimes(stmt)) {
+				//if the first after-flow is equal to the final one
+				Configuration firstAfterFlow = shadowStmtToFirstAfterFlow.get(stmt);
+				Configuration finalAfterFlow = ((ConfigurationBox) getFlowAfter(stmt)).get();
+				assert firstAfterFlow!=null && finalAfterFlow!=null;
+				//is the first after-flow equal to the last?
+				if(firstAfterFlow.equals(finalAfterFlow)) {
+					//still need to check for cases where we have to see a symbol more than once, e.g. a pattern "a a".
+					//in this case, the maximal assumption is *too* conservative: it assumes that the first a could
+					//already have been seen, which is generally unsound;
+					//so if a path info contains a symbol "a" more than once, we bail
+					boolean allSymbolsOnlyOnceOnPathInfo = true;
+					SymbolShadowTag tag = (SymbolShadowTag) stmt.getTag(SymbolShadowTag.NAME);
+					for (SymbolShadow shadow : tag.getAllMatches()) {
+						String symbolName = shadow.getSymbolName();
+						for (PathInfo pathInfo : pathInfos) {
+							if(pathInfo.getDominatingLabels().countOf(symbolName)>1) {
+								allSymbolsOnlyOnceOnPathInfo = false;
+							}
+						}
+					}
+					if(allSymbolsOnlyOnceOnPathInfo)
+						result.add(stmt);
+				}
+			}
+		}		
+		return result;
 	}
 
 }
