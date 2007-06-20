@@ -33,6 +33,7 @@ import abc.tm.weaving.matching.SMEdge;
 import abc.tm.weaving.matching.SMNode;
 import abc.tm.weaving.matching.State;
 import abc.tm.weaving.matching.TMStateMachine;
+import abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.TMFlowAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.util.SymbolShadow;
 
@@ -70,10 +71,8 @@ public class Configuration implements Cloneable {
 	/**
 	 * Creates a new configuration holding a mapping for the given states and registering active
 	 * shadows with the given analysis.
-	 * @param stateIter an iterator over {@link SMNode}s of the associated tracematch state machine
-	 * @param callback the analysis to call back in the case an active shadow is found
 	 */
-	public Configuration(TMFlowAnalysis flowAnalysis) {
+	public Configuration(TMFlowAnalysis flowAnalysis,State additionalInitialState) {
 		this.flowAnalysis = flowAnalysis;
 		this.tm = flowAnalysis.getTracematch();
 		stateToConstraint = new HashMap();
@@ -83,11 +82,15 @@ public class Configuration implements Cloneable {
 		Iterator<State> stateIter = tm.getStateMachine().getStateIterator();
 		while(stateIter.hasNext()) {
 			SMNode state = (SMNode) stateIter.next();
-			Constraint constraint = state.isInitialNode() ? Constraint.TRUE : Constraint.FALSE; 
+			Constraint constraint = (state.isInitialNode()||state==additionalInitialState) ? Constraint.TRUE : Constraint.FALSE; 
 			stateToConstraint.put(state, constraint);
 		}
 	}
 	
+	public Configuration(IntraProceduralTMFlowAnalysis flowAnalysis) {
+		this(flowAnalysis, null);
+	}
+
 	/**
 	 * Returns the successor configuration of this configuration under edge.
 	 * Processes all currently active threads which are registered.

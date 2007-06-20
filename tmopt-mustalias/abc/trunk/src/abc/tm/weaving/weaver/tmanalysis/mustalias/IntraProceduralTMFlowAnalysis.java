@@ -18,6 +18,10 @@
  */
 package abc.tm.weaving.weaver.tmanalysis.mustalias;
 
+import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.ABORTED_CALLS_OTHER_METHOD_WITH_SHADOWS;
+import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.FINISHED;
+import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.RUNNING;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -25,56 +29,45 @@ import java.util.Map;
 import java.util.Set;
 
 import soot.jimple.Stmt;
+import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.toolkits.graph.UnitGraph;
 import soot.toolkits.scalar.ForwardFlowAnalysis;
 import abc.tm.weaving.aspectinfo.TraceMatch;
+import abc.tm.weaving.matching.State;
 import abc.tm.weaving.matching.TMStateMachine;
 import abc.tm.weaving.weaver.tmanalysis.ds.Configuration;
 import abc.tm.weaving.weaver.tmanalysis.ds.ConfigurationBox;
 import abc.tm.weaving.weaver.tmanalysis.ds.Constraint;
 import abc.tm.weaving.weaver.tmanalysis.ds.Disjunct;
-import abc.tm.weaving.weaver.tmanalysis.query.PathInfoFinder;
-import abc.tm.weaving.weaver.tmanalysis.query.PathInfoFinder.PathInfo;
+import abc.tm.weaving.weaver.tmanalysis.stages.CallGraphAbstraction;
 import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowTag;
 import abc.tm.weaving.weaver.tmanalysis.util.SymbolShadow;
 
-/**
- * This analysis computes a "may control flow" analysis for tracematches.
- * The bit that is important here to understand is the form of the directed graph that we analyze
- * and the analysis information we use. Opposed to standard flow analyses where we have an in-set and
- * an out-set for each <i>node</i> in a directed graph, we want to say something about <i>edges</i> here.
- * Hence, we model edges as nodes and nodes as edges. This is done by the adapter
- * {@link TMStateMachineAsGraph}, which does this conversion on-the-fly.
- * Our analysis information in the fixed point is for each edge the set of possible
- * tracematch transition that <i>could possibly be taken</i> at runtime when triggering the symbol
- * that is associated with this edge.<br>
- * Hence, the out-set of an edge p -s-> q holds all transitions p' -s-> q' for which
- * a transition n' -t-> p' is already in the in-set for some symbol t'.<br>
- * Unused edges can then be accessed via {@link #unusedEdgeIterator()}.
- * TODO additional comments about variables
- * @author Eric Bodden
- */
 public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implements TMFlowAnalysis {
 
 	/**
-	 * Determines the configuration used for initialization at the method entry point.
+	 * Status
 	 *
 	 * @author Eric Bodden
 	 */
-	public enum InitKind {
-		/** Minimal assumption: TRUE for any initial state, FALSE else. */
-		MINIMAL_ASSUMPTION {
-			public Configuration getEntryInitialConfiguration(TMFlowAnalysis analysis) {
-				return new Configuration(analysis);
-			}
+	public enum Status {
+		RUNNING{
+			public boolean isAborted() { return false; }
+			public boolean isFinishedSuccessfully() { return false; }
+			public String toString() { return "running"; }
 		},
-		/** Maximal assumption: TRUE for any non-final state, FALSE for any final state. */
-		MAXIMAL_ASSUMPTION{ 
-			public Configuration getEntryInitialConfiguration(TMFlowAnalysis analysis) {
-				return new Configuration(analysis).getMaximalAssumption();
-			}
+		ABORTED_CALLS_OTHER_METHOD_WITH_SHADOWS {
+			public boolean isAborted() { return true; }
+			public boolean isFinishedSuccessfully() { return false; }
+			public String toString() { return "aborted (calls other method with shadows)"; }
+		},
+		FINISHED {
+			public boolean isAborted() { return false; }
+			public boolean isFinishedSuccessfully() { return true; }
+			public String toString() { return "finished"; }
 		};
-		public abstract Configuration getEntryInitialConfiguration(TMFlowAnalysis analysis);
+		public abstract boolean isAborted(); 
+		public abstract boolean isFinishedSuccessfully();
 	}
 
 	/**
@@ -84,15 +77,17 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implement
 	
 	protected final TraceMatch tracematch;	
 	
-	protected boolean analysisFinished;
-
 	protected final UnitGraph ug;
 
-	protected final InitKind initializationKind;
-	
 	protected final Set<Stmt> visited;
 	
 	protected final Map<Stmt,Configuration> shadowStmtToFirstAfterFlow;
+
+	protected final CallGraph abstractedCallGraph;
+	
+	protected final State additionalInitialState;
+
+	protected Status status;
 
 	/**
 	 * Creates and performs a new flow analysis.
@@ -102,14 +97,14 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implement
 	 * @param fullIteration if <code>true</code>, we do a full, unoptimized iteration
 	 * @param defaultOrder if <code>true</code>, we use the (inappropriate) default iteration order
 	 */
-	public IntraProceduralTMFlowAnalysis(TraceMatch tm, UnitGraph ug, Disjunct prototype, InitKind initializationKind) {
+	public IntraProceduralTMFlowAnalysis(TraceMatch tm, UnitGraph ug, Disjunct prototype, State additionalInitialState) {
 		super(ug);
 		
 		//initialize prototypes
 		Constraint.initialize(prototype);
 		
 		this.ug = ug;
-		this.initializationKind = initializationKind;
+		this.additionalInitialState = additionalInitialState;
 
 		//since we are iterating over state machine edges, which implement equals(..)
 		//we need to separate those edges by using identity hash maps
@@ -124,10 +119,12 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implement
 		this.visited = new HashSet<Stmt>();
 		this.shadowStmtToFirstAfterFlow = new HashMap<Stmt,Configuration>();
 		
+		abstractedCallGraph = CallGraphAbstraction.v().abstractedCallGraph();
+
 		//do the analysis
-		this.analysisFinished = false;
+		this.status = RUNNING;
 		doAnalysis();
-		this.analysisFinished = true;
+		if(!this.status.isAborted()) this.status = FINISHED;
 		
 		//clear caches
 		Disjunct.reset();
@@ -136,15 +133,17 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implement
 		ShadowSideEffectsAnalysis.reset();
 	}
 
-	/**
-	 * @param beforeFlow
-	 * @param s
-	 * @param afterFlow
-	 */
 	protected void flowThrough(Object in, Object d, Object out) {
 		ConfigurationBox cin = (ConfigurationBox) in;		
 		Stmt stmt = (Stmt) d;
 		ConfigurationBox cout = (ConfigurationBox) out;		
+
+		//check for side-effects
+		if(mightCallOtherShadows(stmt)) {
+			status = ABORTED_CALLS_OTHER_METHOD_WITH_SHADOWS;
+		}
+		//abort if we have side-effects
+		if(status.isAborted()) return;
 				
 		//if there are no shadows at all at this statement, just copy over and return
 		if(!stmt.hasTag(SymbolShadowTag.NAME)) {
@@ -180,6 +179,15 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implement
 		} else
 			copy(cin, cout);
 	}
+	
+	/**
+	 * Returns <code>true</code> if the given statement has call edges out to other methods
+	 * which contain a shadow. This is inferred using the abstracted call graph.
+	 * @param s any statement
+	 */
+	protected boolean mightCallOtherShadows(Stmt s) {
+		return abstractedCallGraph.edgesOutOf(s).hasNext();
+	}
 
 	/**
 	 * @return the tracematch
@@ -201,8 +209,8 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implement
 	 * {@inheritDoc}
 	 */
 	protected Object entryInitialFlow() {
-		ConfigurationBox initialFlow = new ConfigurationBox();		
-		Configuration entryInitialConfiguration = initializationKind.getEntryInitialConfiguration(this);
+		ConfigurationBox initialFlow = new ConfigurationBox();
+		Configuration entryInitialConfiguration = new Configuration(this,additionalInitialState);
 		initialFlow.set(entryInitialConfiguration);
 		return initialFlow;
 	}
@@ -243,55 +251,26 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implement
 	}
 
 	/**
-	 * @return the initializationKind
+	 * Returns all statements for which at least one active shadow exists.
 	 */
-	public InitKind getInitializationKind() {
-		return initializationKind;
+	public Set<Stmt> statemementsWithActiveShadows() {
+		return shadowStmtToFirstAfterFlow.keySet();
 	}
 	
+	public Configuration getFirstAfterFlow(Stmt statementWithShadow) {
+		assert shadowStmtToFirstAfterFlow.containsKey(statementWithShadow);
+		return shadowStmtToFirstAfterFlow.get(statementWithShadow);
+	}
+	
+	public UnitGraph getUnitGraph() {
+		return (UnitGraph) graph;
+	}
+
 	/**
-	 * Determines all statements that are contained in the associated methods
-	 * which are annotated with a shadow and are in a loop but for which it is guaranteed that
-	 * one loop iteration suffices to reach the fixed point.
-	 * @return
+	 * @return the status
 	 */
-	public Set<Stmt> shadowStatementsReachingFixedPointAtOnce() {
-		Set<PathInfo> pathInfos = new PathInfoFinder(tracematch).getPathInfos();
-		
-		PathsReachingFlowAnalysis prf = new PathsReachingFlowAnalysis(ug);
-		
-		Set<Stmt> result = new HashSet<Stmt>();
-		
-		//for each statement with an active shadow
-		for (Stmt stmt : shadowStmtToFirstAfterFlow.keySet()) {
-			//if contained in a loop
-			if(prf.visitedPotentiallyManyTimes(stmt)) {
-				//if the first after-flow is equal to the final one
-				Configuration firstAfterFlow = shadowStmtToFirstAfterFlow.get(stmt);
-				Configuration finalAfterFlow = ((ConfigurationBox) getFlowAfter(stmt)).get();
-				assert firstAfterFlow!=null && finalAfterFlow!=null;
-				//is the first after-flow equal to the last?
-				if(firstAfterFlow.equals(finalAfterFlow)) {
-					//still need to check for cases where we have to see a symbol more than once, e.g. a pattern "a a".
-					//in this case, the maximal assumption is *too* conservative: it assumes that the first a could
-					//already have been seen, which is generally unsound;
-					//so if a path info contains a symbol "a" more than once, we bail
-					boolean allSymbolsOnlyOnceOnPathInfo = true;
-					SymbolShadowTag tag = (SymbolShadowTag) stmt.getTag(SymbolShadowTag.NAME);
-					for (SymbolShadow shadow : tag.getAllMatches()) {
-						String symbolName = shadow.getSymbolName();
-						for (PathInfo pathInfo : pathInfos) {
-							if(pathInfo.getDominatingLabels().countOf(symbolName)>1) {
-								allSymbolsOnlyOnceOnPathInfo = false;
-							}
-						}
-					}
-					if(allSymbolsOnlyOnceOnPathInfo)
-						result.add(stmt);
-				}
-			}
-		}		
-		return result;
+	public Status getStatus() {
+		return status;
 	}
 
 }

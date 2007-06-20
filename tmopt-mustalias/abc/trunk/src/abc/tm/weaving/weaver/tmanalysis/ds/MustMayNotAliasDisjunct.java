@@ -19,7 +19,10 @@
 
 package abc.tm.weaving.weaver.tmanalysis.ds;
 
+import static soot.jimple.toolkits.pointer.LocalMustAliasAnalysis.UNKNOWN_LABEL;
+
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -229,5 +232,122 @@ public class MustMayNotAliasDisjunct extends Disjunct<Local> {
 		return sb.toString();
 	}
 	
+	/**
+	 * Computes the hash code in such a way that is is equal even if different locals are bound for the same
+	 * tracematch variable, as long as those locals have the same instance key.
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((negVarBinding == null) ? 0 : negHashCode(negVarBinding));
+		result = prime * result
+				+ ((varBinding == null) ? 0 : posHashCode(varBinding));
+		return result;
+	}
+
+	/**
+	 * Computes hashcode for positive bindings based on must-alias instance keys. 
+	 */
+	private int posHashCode(HashMap<String, Local> varBinding) {
+		final int prime = 31;
+		int result = 1;
+		for (Map.Entry<String,Local> entry : varBinding.entrySet()) {
+			String tmVar = entry.getKey();
+			Local local = entry.getValue();
+			int v = (local == null) ? 0 : lmaa.instanceKeyString(local, tmLocalsToDefStatements.get(local)).hashCode();
+			int k = ((tmVar == null) ? 0 : tmVar.hashCode()) ^ v;
+			result = prime * result + k;
+		}		
+		return 0;
+	}
+
+	/**
+	 * Computes hashcode for negative bindings based on must-alias instance keys. 
+	 */
+	private int negHashCode(HashMap<String, Set<Local>> varBinding) {
+		final int prime = 31;
+		int result = 1;
+		for (Map.Entry<String,Set<Local>> entry : varBinding.entrySet()) {
+			String tmVar = entry.getKey();
+			Set<Local> locals = entry.getValue();
+			for (Local local : locals) {
+				int v = (local == null) ? 0 : lmaa.instanceKeyString(local, tmLocalsToDefStatements.get(local)).hashCode();
+				int k = ((tmVar == null) ? 0 : tmVar.hashCode()) ^ v;
+				result = prime * result + k;
+			}
+		}		
+		return 0;
+	}
+
+	/**
+	 * Computes whether the disjuncts have the same variable bindings.
+	 * A binding x->l is considered equal to a binding x->m if mustAlias(m,dm,l,dl)
+	 * (if dm is the unique static definition of m and dl the unique static definition of l).
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		//TODO this is pretty suboptimal;
+		//consider using proper instance keys instead
+		if (this == obj)
+			return true;
+		if (getClass() != obj.getClass())
+			return false;
+		final Disjunct other = (Disjunct) obj;
+		if (negVarBinding == null) {
+			if (other.negVarBinding != null)
+				return false;
+		} else if (!equivNegBinding(negVarBinding,other.negVarBinding))
+			return false;
+		if (varBinding == null) {
+			if (other.varBinding != null)
+				return false;
+		} else if (!equivPosBinding(varBinding,other.varBinding))
+			return false;
+		return true;
+	}
+
+	private boolean equivPosBinding(HashMap<String, Local> negVarBinding, HashMap<String, Local> negVarBinding2) {
+		if(!negVarBinding.keySet().equals(negVarBinding2.keySet())) {
+			return false;
+		}
+		for (Map.Entry<String,Local> entry : negVarBinding.entrySet()) {
+			String tmVar = entry.getKey();
+			Local local = entry.getValue();
+			String instanceKeyString = lmaa.instanceKeyString(local, tmLocalsToDefStatements.get(local));
+			Local local2 = negVarBinding2.get(tmVar);
+			String instanceKeyString2 = lmaa.instanceKeyString(local2, tmLocalsToDefStatements.get(local2));
+			if(instanceKeyString.equals(UNKNOWN_LABEL) || instanceKeyString2.equals(UNKNOWN_LABEL) ||
+			   !instanceKeyString.equals(instanceKeyString2)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private boolean equivNegBinding(HashMap<String, Set<Local>> negVarBinding, HashMap<String, Set<Local>> negVarBinding2) {
+		if(!negVarBinding.keySet().equals(negVarBinding2.keySet())) {
+			return false;
+		}
+		for (Map.Entry<String,Set<Local>> entry : negVarBinding.entrySet()) {
+			String tmVar = entry.getKey();
+			Set<String> instanceKeyStrings = new HashSet<String>();
+			Set<Local> locals = entry.getValue();
+			for (Local local : locals) {
+				instanceKeyStrings.add(lmaa.instanceKeyString(local, tmLocalsToDefStatements.get(local)));
+			}
+			Set<String> instanceKeyStrings2 = new HashSet<String>();
+			Set<Local> locals2 = negVarBinding2.get(tmVar);
+			for (Local local : locals2) {
+				instanceKeyStrings2.add(lmaa.instanceKeyString(local, tmLocalsToDefStatements.get(local)));
+			}
+			if(instanceKeyStrings.contains(UNKNOWN_LABEL) || instanceKeyStrings2.contains(UNKNOWN_LABEL) ||
+			   !instanceKeyStrings.equals(instanceKeyStrings2)) {
+				return false;
+			}
+		}
+		return true;
+	}
 	
 }
