@@ -162,7 +162,7 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 					System.err.println("Applying optimization 'execute only once per method execution'.");
 					for (SymbolShadow shadow : tag.getMatchesForTracematch(tm)) {
 						System.err.println(shadow.getUniqueShadowId());
-						ShadowRegistry.v().conjoinShadowWithResidue(shadow.getUniqueShadowId(), new OncePerMethodExecutionResidue());
+						ShadowRegistry.v().conjoinShadowWithResidue(shadow.getUniqueShadowId(), OncePerMethodExecutionResidue.v());
 					}
 					System.err.println();
 				}
