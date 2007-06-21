@@ -22,6 +22,7 @@ import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAn
 import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.FINISHED;
 import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.RUNNING;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -87,18 +88,17 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implement
 	
 	protected final State additionalInitialState;
 
+	protected final Collection<Stmt> projection;
+
 	protected Status status;
+
 
 	/**
 	 * Creates and performs a new flow analysis.
-	 * @param tm a tracematch
-	 * @param programGraph the program graph to iterate over 
-	 * @param stateMachine the tracematch statemachine to use
-	 * @param fullIteration if <code>true</code>, we do a full, unoptimized iteration
-	 * @param defaultOrder if <code>true</code>, we use the (inappropriate) default iteration order
 	 */
-	public IntraProceduralTMFlowAnalysis(TraceMatch tm, UnitGraph ug, Disjunct prototype, State additionalInitialState) {
+	public IntraProceduralTMFlowAnalysis(TraceMatch tm, UnitGraph ug, Disjunct prototype, State additionalInitialState, Collection<Stmt> projection) {
 		super(ug);
+		this.projection = new HashSet(projection);
 		
 		//initialize prototypes
 		Constraint.initialize(prototype);
@@ -145,12 +145,18 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implement
 		//abort if we have side-effects
 		if(status.isAborted()) return;
 				
+		//if we are to ignore this statement
+		if(!projection.contains(stmt)) {
+			copy(cin,cout);
+			return;
+		}
+
 		//if there are no shadows at all at this statement, just copy over and return
 		if(!stmt.hasTag(SymbolShadowTag.NAME)) {
 			copy(cin,cout);
 			return;
 		}
-
+		
 		//retrive matches fot the current tracematch
 		SymbolShadowTag tag = (SymbolShadowTag) stmt.getTag(SymbolShadowTag.NAME);		
 		Configuration inConfig = cin.get();

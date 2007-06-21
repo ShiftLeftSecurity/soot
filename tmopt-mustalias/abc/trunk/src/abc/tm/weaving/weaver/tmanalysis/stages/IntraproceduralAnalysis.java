@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -39,13 +40,16 @@ import soot.jimple.toolkits.pointer.LocalMustAliasAnalysis;
 import soot.jimple.toolkits.pointer.LocalNotMayAliasAnalysis;
 import soot.jimple.toolkits.thread.IThreadLocalObjectsAnalysis;
 import soot.toolkits.graph.ExceptionalUnitGraph;
+import soot.toolkits.graph.PostDominatorAnalysis;
 import soot.toolkits.graph.UnitGraph;
+import soot.toolkits.scalar.Pair;
 import abc.main.Main;
 import abc.tm.weaving.aspectinfo.TMGlobalAspectInfo;
 import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.matching.SMNode;
 import abc.tm.weaving.weaver.tmanalysis.ds.Configuration;
 import abc.tm.weaving.weaver.tmanalysis.ds.ConfigurationBox;
+import abc.tm.weaving.weaver.tmanalysis.ds.LoopNestTree;
 import abc.tm.weaving.weaver.tmanalysis.ds.MustMayNotAliasDisjunct;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.PathsReachingFlowAnalysis;
@@ -56,7 +60,7 @@ import abc.tm.weaving.weaver.tmanalysis.query.ShadowRegistry;
 import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowTag;
 import abc.tm.weaving.weaver.tmanalysis.util.ShadowsPerTMSplitter;
 import abc.tm.weaving.weaver.tmanalysis.util.SymbolShadow;
-import abc.weaving.residues.OncePerMethodExecutionResidue;
+import abc.weaving.residues.OnceResidue;
 
 /**
  * IntraproceduralAnalysis: This analysis propagates tracematch
@@ -105,84 +109,122 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
                 methodsWithShadows.add(m);
             }
 
-            ForEachMethod:
             for (SootMethod m : methodsWithShadows) {
-                UnitGraph g = new ExceptionalUnitGraph(m.retrieveActiveBody());
-                
-                Map<Local,Stmt> tmLocalsToDefStatements = findTmLocalDefinitions(g,tm);
                 System.err.println("Analyzing: "+m+" on tracematch: "+tm.getName());
                 
+                UnitGraph g = new ExceptionalUnitGraph(m.retrieveActiveBody());
+                Map<Local,Stmt> tmLocalsToDefStatements = findTmLocalDefinitions(g,tm);
     			LocalMustAliasAnalysis localMustAliasAnalysis = new LocalMustAliasAnalysis(g);
 				LocalNotMayAliasAnalysis localNotMayAliasAnalysis = new LocalNotMayAliasAnalysis(g);
+				PostDominatorAnalysis pda = new PostDominatorAnalysis(g);
+				LoopNestTree loopNestTree = new LoopNestTree(m.getActiveBody());
 
-				//initialize to the maximal set, i.e. all units
-				Set<Stmt> shadowStatementsReachingFixedPointAtOnce = new HashSet<Stmt>(m.getActiveBody().getUnits());
-				Set<Stmt> sameBeforeAndAfterFlow = new HashSet<Stmt>(m.getActiveBody().getUnits());
+				//for each loop, in ascending order (inner loops first) 
+				for (Pair<Stmt, List<Stmt>> pair : loopNestTree) {
+					Stmt loopHead = pair.getO1();
+					List<Stmt> loopStatements = pair.getO2();
+					optimizeLoop(m, tm, g, tmLocalsToDefStatements,localMustAliasAnalysis, localNotMayAliasAnalysis, pda, loopStatements, loopHead);
+				}
 				
-    			for (Iterator stateIter = tm.getStateMachine().getStateIterator(); stateIter.hasNext();) {
-					SMNode s = (SMNode) stateIter.next();
-					if(!s.isFinalNode()) {
-
-						System.err.println("Running analysis with additional initial state number "+s.getNumber()+".");
-						
-						IntraProceduralTMFlowAnalysis flowAnalysis = new IntraProceduralTMFlowAnalysis(
-		                		tm,
-		                		g,
-		                		new MustMayNotAliasDisjunct(
-		                				localMustAliasAnalysis,
-		                				localNotMayAliasAnalysis,
-		                				tmLocalsToDefStatements,
-		                				m,
-		                				tm
-		                		),
-		                		s
-		                );
-		    			
-		    			Status status = flowAnalysis.getStatus();
-						System.err.println("Analysis done with status: "+status);
-
-						//if we abort once, we are gonna abort for the other additional initial states, too so
-						//just proceed with the same method
-						if(status.isAborted()) continue ForEachMethod;
-						
-						assert status.isFinishedSuccessfully();
-						
-						//retain only those statements that reach the fixed point after one iteration (i.e. we intersect here over all additional initial states)
-						shadowStatementsReachingFixedPointAtOnce.retainAll(shadowStatementsReachingFixedPointAtOnce(flowAnalysis));
-						//retain only those statements that have the same before and after-flow (i.e. we intersect here over all additional initial states)						
-						sameBeforeAndAfterFlow.retainAll(sameBeforeAndAfterFlow(flowAnalysis));
-					}
-				}
-    			
-    			for (Stmt s : shadowStatementsReachingFixedPointAtOnce) {
-					SymbolShadowTag tag = (SymbolShadowTag) s.getTag(SymbolShadowTag.NAME);
-					System.err.println();
-					System.err.println("The following shadow statement is contained in a loop but the shadow only needs to be executed once:");
-					System.err.println(s);
-					System.err.println("Applying optimization 'execute only once per method execution'.");
-					for (SymbolShadow shadow : tag.getMatchesForTracematch(tm)) {
-						System.err.println(shadow.getUniqueShadowId());
-						ShadowRegistry.v().conjoinShadowWithResidue(shadow.getUniqueShadowId(), OncePerMethodExecutionResidue.v());
-					}
-					System.err.println();
-				}
-    			
-    			for (Stmt s : sameBeforeAndAfterFlow) {
-					SymbolShadowTag tag = (SymbolShadowTag) s.getTag(SymbolShadowTag.NAME);
-					System.err.println();
-					System.err.println("The following shadow statement does not have any effect (same before and after flow):");
-					System.err.println(s);
-					System.err.println("Disabling shadows.");
-					for (SymbolShadow shadow : tag.getMatchesForTracematch(tm)) {
-						String uniqueShadowId = shadow.getUniqueShadowId();
-						System.err.println(uniqueShadowId);
-						disableShadow(uniqueShadowId);
-					}
-					System.err.println();
-				}
+				
+				
     			
                 System.err.println("Done analyzing: "+m+" on tracematch: "+tm.getName());    			
 	        }
+		}
+	}
+
+	/**
+	 * @param m
+	 * @param tm
+	 * @param g
+	 * @param tmLocalsToDefStatements
+	 * @param localMustAliasAnalysis
+	 * @param localNotMayAliasAnalysis
+	 * @param pda 
+	 * @param loopStatements 
+	 * @param loopHead 
+	 */
+	private void optimizeLoop(SootMethod m, TraceMatch tm, UnitGraph g, Map<Local, Stmt> tmLocalsToDefStatements, LocalMustAliasAnalysis localMustAliasAnalysis,
+			LocalNotMayAliasAnalysis localNotMayAliasAnalysis, PostDominatorAnalysis pda, List<Stmt> loopStatements, Stmt loopHead) {
+		//initialize to the maximal set, i.e. all units
+		Set<Stmt> shadowStatementsReachingFixedPointAtOnce = new HashSet<Stmt>(m.getActiveBody().getUnits());
+		Set<Stmt> sameBeforeAndAfterFlow = new HashSet<Stmt>(m.getActiveBody().getUnits());
+		
+		for (Iterator stateIter = tm.getStateMachine().getStateIterator(); stateIter.hasNext();) {
+			SMNode s = (SMNode) stateIter.next();
+			if(!s.isFinalNode()) {
+
+				System.err.println("Running analysis with additional initial state number "+s.getNumber()+".");
+				
+				IntraProceduralTMFlowAnalysis flowAnalysis = new IntraProceduralTMFlowAnalysis(
+		        		tm,
+		        		g,
+		        		new MustMayNotAliasDisjunct(
+		        				localMustAliasAnalysis,
+		        				localNotMayAliasAnalysis,
+		        				tmLocalsToDefStatements,
+		        				m,
+		        				tm
+		        		),
+		        		s,
+		        		loopStatements
+		        );
+				
+				Status status = flowAnalysis.getStatus();
+				System.err.println("Analysis done with status: "+status);
+
+				//if we abort once, we are gonna abort for the other additional initial states, too so
+				//just proceed with the same method
+				if(status.isAborted()) return;
+				
+				assert status.isFinishedSuccessfully();
+				
+				//retain only those statements that reach the fixed point after one iteration (i.e. we intersect here over all additional initial states)
+				shadowStatementsReachingFixedPointAtOnce.retainAll(shadowStatementsReachingFixedPointAtOnce(flowAnalysis));
+				//retain only those statements that have the same before and after-flow (i.e. we intersect here over all additional initial states)						
+				sameBeforeAndAfterFlow.retainAll(sameBeforeAndAfterFlow(flowAnalysis));
+			}
+		}
+
+		//eliminate all shadows which have the same before-flow and after-flow upon reaching the fixed point
+		for (Stmt s : sameBeforeAndAfterFlow) {
+			SymbolShadowTag tag = (SymbolShadowTag) s.getTag(SymbolShadowTag.NAME);
+			System.err.println();
+			System.err.println("The following shadow statement does not have any effect (same before and after flow):");
+			System.err.println(s);
+			System.err.println("Disabling shadows.");
+			for (SymbolShadow shadow : tag.getMatchesForTracematch(tm)) {
+				String uniqueShadowId = shadow.getUniqueShadowId();
+				System.err.println(uniqueShadowId);
+				disableShadow(uniqueShadowId);
+			}
+			System.err.println();
+		}
+		
+		for(Stmt s : shadowStatementsReachingFixedPointAtOnce) {
+			SymbolShadowTag tag = (SymbolShadowTag) s.getTag(SymbolShadowTag.NAME);
+			System.err.println();
+			if(pda.postDominates(loopHead,s)) {
+				System.err.println("The following shadow statement is contained in a loop, has an effect but only needs to be executed once\n" +
+						"and is post-dominated by the loop header.");
+				System.err.println(s);
+				System.err.println("Disabling shadows.");
+				for (SymbolShadow shadow : tag.getMatchesForTracematch(tm)) {
+					String uniqueShadowId = shadow.getUniqueShadowId();
+					System.err.println(uniqueShadowId);
+					disableShadow(uniqueShadowId);
+				}
+			} else {
+				System.err.println("The following shadow statement is contained in a loop but the shadow only needs to be executed once:");
+				System.err.println(s);
+				System.err.println("Applying optimization 'execute only once per method execution'.");
+				for (SymbolShadow shadow : tag.getMatchesForTracematch(tm)) {
+					System.err.println(shadow.getUniqueShadowId());
+					ShadowRegistry.v().conjoinShadowWithResidue(shadow.getUniqueShadowId(), new OnceResidue(loopHead));
+				}
+			}
+			System.err.println();
 		}
 	}
 	
