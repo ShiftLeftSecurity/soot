@@ -121,7 +121,7 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 				
     			for (Iterator stateIter = tm.getStateMachine().getStateIterator(); stateIter.hasNext();) {
 					SMNode s = (SMNode) stateIter.next();
-					if(!s.isFinalNode()&&!s.isInitialNode()) {
+					if(!s.isFinalNode()) {
 
 						System.err.println("Running analysis with additional initial state number "+s.getNumber()+".");
 						
