@@ -23,6 +23,7 @@ import abc.main.AbcTimer;
 import abc.main.Main;
 import abc.tm.weaving.aspectinfo.TMGlobalAspectInfo;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowRegistry;
+import abc.tm.weaving.weaver.tmanalysis.stages.CallGraphAbstraction;
 import abc.tm.weaving.weaver.tmanalysis.stages.IntraproceduralAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.util.Statistics;
 import abc.weaving.weaver.AbstractReweavingAnalysis;
@@ -64,8 +65,11 @@ public class OptIntraProcedural extends AbstractReweavingAnalysis {
 	 */
 	protected void doAnalyze() {
 
-		//analysis goes here
-		
+		//take into account effects of the earlier stages
+		CallGraphAbstraction.v().rebuildAbstractedCallGraph();
+
+		AbcTimer.mark("Reabstraction of call graph");
+
 		IntraproceduralAnalysis.v().apply();
 		
 		AbcTimer.mark("Intra-procedural analysis (POPL'08)");
