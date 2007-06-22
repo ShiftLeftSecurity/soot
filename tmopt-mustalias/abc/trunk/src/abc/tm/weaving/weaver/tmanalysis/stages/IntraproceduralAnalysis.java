@@ -61,6 +61,7 @@ import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowTag;
 import abc.tm.weaving.weaver.tmanalysis.util.ShadowsPerTMSplitter;
 import abc.tm.weaving.weaver.tmanalysis.util.SymbolShadow;
 import abc.weaving.residues.OnceResidue;
+import abc.weaving.weaver.Weaver;
 
 /**
  * IntraproceduralAnalysis: This analysis propagates tracematch
@@ -202,6 +203,8 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 			System.err.println();
 		}
 		
+		Weaver weaver = abc.main.Main.v().getAbcExtension().getWeaver();
+		
 		for(Stmt s : shadowStatementsReachingFixedPointAtOnce) {
 			SymbolShadowTag tag = (SymbolShadowTag) s.getTag(SymbolShadowTag.NAME);
 			System.err.println();
@@ -221,7 +224,7 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 				System.err.println("Applying optimization 'execute only once per method execution'.");
 				for (SymbolShadow shadow : tag.getMatchesForTracematch(tm)) {
 					System.err.println(shadow.getUniqueShadowId());
-					ShadowRegistry.v().conjoinShadowWithResidue(shadow.getUniqueShadowId(), new OnceResidue(loopHead));
+					ShadowRegistry.v().conjoinShadowWithResidue(shadow.getUniqueShadowId(), new OnceResidue((Stmt) weaver.reverseRebind(loopHead)));
 				}
 			}
 			System.err.println();
