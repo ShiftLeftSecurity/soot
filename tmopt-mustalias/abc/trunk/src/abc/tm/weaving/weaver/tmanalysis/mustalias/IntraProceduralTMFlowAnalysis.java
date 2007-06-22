@@ -47,6 +47,9 @@ import abc.tm.weaving.weaver.tmanalysis.ds.Configuration;
 import abc.tm.weaving.weaver.tmanalysis.ds.ConfigurationBox;
 import abc.tm.weaving.weaver.tmanalysis.ds.Constraint;
 import abc.tm.weaving.weaver.tmanalysis.ds.Disjunct;
+import abc.tm.weaving.weaver.tmanalysis.query.Shadow;
+import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroup;
+import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroupRegistry;
 import abc.tm.weaving.weaver.tmanalysis.stages.CallGraphAbstraction;
 import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowTag;
 import abc.tm.weaving.weaver.tmanalysis.util.SymbolShadow;
@@ -97,6 +100,8 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implement
 
 	protected final Collection<Stmt> projection;
 
+	protected final Collection<String> overlappingShadowIDs;
+
 	protected Status status;
 
 
@@ -126,8 +131,39 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implement
 		this.visited = new HashSet<Stmt>();
 		this.shadowStmtToFirstAfterFlow = new HashMap<Stmt,Configuration>();
 		
-		abstractedCallGraph = CallGraphAbstraction.v().abstractedCallGraph();
+		this.abstractedCallGraph = CallGraphAbstraction.v().abstractedCallGraph();
 
+		//see which shadow groups are present in the code we look at
+		Set<SymbolShadow> allShadows = new HashSet<SymbolShadow>();
+		for (Stmt stmt : projection) {
+            if(stmt.hasTag(SymbolShadowTag.NAME)) {
+            	SymbolShadowTag tag = (SymbolShadowTag) stmt.getTag(SymbolShadowTag.NAME);
+            	for (SymbolShadow match : tag.getAllMatches()) {
+					if(match.isEnabled()) {
+						allShadows.add(match);
+					}
+				}
+            }
+		}
+		Set<ShadowGroup> allShadowGroups = ShadowGroupRegistry.v().getAllShadowGroups();
+		Set<ShadowGroup> shadowGroups = new HashSet<ShadowGroup>();
+		for (ShadowGroup shadowGroup : allShadowGroups) {
+			for (Shadow shadowInGroup : shadowGroup.getAllShadows()) {
+				for (SymbolShadow shadowHere : allShadows) {
+					if(shadowInGroup.getUniqueShadowId().equals(shadowHere.getUniqueShadowId())) {
+						shadowGroups.add(shadowGroup);
+					}
+				}
+			}
+		}
+        //store all IDs of shadows in those groups
+        this.overlappingShadowIDs= new HashSet<String>();
+        for (ShadowGroup shadowGroup : shadowGroups) {
+            for (Shadow shadow : shadowGroup.getAllShadows()) {
+                this.overlappingShadowIDs.add(shadow.getUniqueShadowId());
+            }
+        }		
+		
 		//do the analysis
 		this.status = RUNNING;
 		doAnalysis();
@@ -146,7 +182,7 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implement
 		ConfigurationBox cout = (ConfigurationBox) out;		
 
 		//check for side-effects
-		if(mightCallOtherShadows(stmt)) {
+		if(mightHaveSideEffects(stmt)) {
 			status = ABORTED_CALLS_OTHER_METHOD_WITH_SHADOWS;
 		}
 		//abort if we have side-effects
@@ -193,13 +229,14 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implement
 			copy(cin, cout);
 	}
 	
-	/**
-	 * Returns <code>true</code> if the given statement has call edges out to other methods
-	 * which contain a shadow. This is inferred using the abstracted call graph.
-	 * @param s any statement
-	 */
-	protected boolean mightCallOtherShadows(Stmt s) {
-		return abstractedCallGraph.edgesOutOf(s).hasNext();
+	protected boolean mightHaveSideEffects(Stmt s) {
+		Collection<SymbolShadow> shadows = transitivelyCalledShadows(s);
+		for (SymbolShadow shadow : shadows) {
+			if(overlappingShadowIDs.contains(shadow.getUniqueShadowId())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
