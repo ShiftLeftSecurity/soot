@@ -120,6 +120,9 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
                 Map<Local,Stmt> tmLocalsToDefStatements = findTmLocalDefinitions(g,tm);
 				MHGPostDominatorsFinder pda = new MHGPostDominatorsFinder(new BriefUnitGraph(m.retrieveActiveBody()));
 				LoopNestTree loopNestTree = new LoopNestTree(m.getActiveBody());
+                if(loopNestTree.hasNestedLoops()) {
+                    System.err.println("Method has nested loops.");
+                }
 
 				//for each loop, in ascending order (inner loops first) 
 				for (Pair<Stmt, List<Stmt>> pair : loopNestTree) {
