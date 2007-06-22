@@ -23,14 +23,21 @@ import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAn
 import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.RUNNING;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
+import soot.MethodOrMethodContext;
+import soot.Body;
+import soot.Unit;
+import soot.SootMethod;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.callgraph.CallGraph;
+import soot.jimple.toolkits.callgraph.Edge;
 import soot.toolkits.graph.UnitGraph;
 import soot.toolkits.scalar.ForwardFlowAnalysis;
 import abc.tm.weaving.aspectinfo.TraceMatch;
@@ -193,6 +200,58 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implement
 	 */
 	protected boolean mightCallOtherShadows(Stmt s) {
 		return abstractedCallGraph.edgesOutOf(s).hasNext();
+	}
+
+	/**
+	 * Returns the collection of <code>SymbolShadow</code>s triggered in transitive callees from <code>s</code>.
+	 * @param s any statement
+	 */
+	protected Collection<SymbolShadow> transitivelyCalledShadows(Stmt s) {
+        HashSet<SymbolShadow> symbols = new HashSet<SymbolShadow>();
+        HashSet<SootMethod> calleeMethods = new HashSet<SootMethod>();
+        LinkedList<MethodOrMethodContext> methodsToProcess = new LinkedList();
+
+        // Collect initial edges out of given statement in methodsToProcess
+        Iterator<Edge> initialEdges = abstractedCallGraph.edgesOutOf(s);
+        while (initialEdges.hasNext()) {
+            Edge e = initialEdges.next();
+            methodsToProcess.add(e.getTgt());
+            calleeMethods.add(e.getTgt().method());
+        }
+
+        // Collect transitive callees of methodsToProcess
+        while (!methodsToProcess.isEmpty()) {
+            MethodOrMethodContext mm = methodsToProcess.removeFirst();
+            Iterator mIt = abstractedCallGraph.edgesOutOf(mm);
+
+            while (mIt.hasNext()) {
+                Edge e = (Edge)mIt.next();
+                if (!calleeMethods.contains(e.getTgt().method())) {
+                    methodsToProcess.add(e.getTgt());
+                    calleeMethods.add(e.getTgt().method());
+                }
+            }
+        }
+
+        // Collect all shadows in calleeMethods
+        for (SootMethod method : calleeMethods) {
+	        if(method.hasActiveBody()) {
+	            Body body = method.getActiveBody();
+	            
+	            for (Iterator iter = body.getUnits().iterator(); iter.hasNext();) {
+	                Unit u = (Unit) iter.next();
+	                if(u.hasTag(SymbolShadowTag.NAME)) {
+	                	SymbolShadowTag tag = (SymbolShadowTag) u.getTag(SymbolShadowTag.NAME);
+	                	for (SymbolShadow match : tag.getAllMatches()) {
+							if(match.isEnabled()) {
+								symbols.add(match);
+							}
+						}
+	                }
+	            }
+	        }
+        }
+        return symbols;
 	}
 
 	/**
