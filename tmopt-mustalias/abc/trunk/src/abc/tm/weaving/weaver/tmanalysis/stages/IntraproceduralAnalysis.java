@@ -181,7 +181,7 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 
 				//if we abort once, we are gonna abort for the other additional initial states, too so
 				//just proceed with the same method
-				if(status.isAborted()) return;
+				if(status.isAborted() || status.hitFinal()) return;
 				
 				assert status.isFinishedSuccessfully();
 				

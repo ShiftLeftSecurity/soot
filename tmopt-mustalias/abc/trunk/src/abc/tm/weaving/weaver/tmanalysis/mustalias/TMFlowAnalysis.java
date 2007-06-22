@@ -31,5 +31,10 @@ public interface TMFlowAnalysis {
 	 * @return returns the associated tracematch
 	 */
 	public TraceMatch getTracematch();
+        
+    /**
+     * notifies the analysis that a final state was hit. 
+     */
+    public void hitFinal();
 
 }

@@ -156,9 +156,9 @@ public class Constraint implements Cloneable {
 			assert newDisjunct!=null;
 			resultDisjuncts.add(newDisjunct);
 			
-			//if we just hit a final node
+			//if we just hit a final node, notify the analysis
 			if(to.isFinalNode()) {
-				//TODO do we want to do something in this case?
+				flowAnalysis.hitFinal();
 			}
 		}
 		

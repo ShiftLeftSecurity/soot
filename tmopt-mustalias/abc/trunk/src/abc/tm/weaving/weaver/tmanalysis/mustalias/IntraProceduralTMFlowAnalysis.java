@@ -20,7 +20,9 @@ package abc.tm.weaving.weaver.tmanalysis.mustalias;
 
 import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.ABORTED_CALLS_OTHER_METHOD_WITH_SHADOWS;
 import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.FINISHED;
+import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.FINISHED_HIT_FINAL;
 import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.RUNNING;
+import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.RUNNING_HIT_FINAL;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -65,20 +67,36 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implement
 		RUNNING{
 			public boolean isAborted() { return false; }
 			public boolean isFinishedSuccessfully() { return false; }
+            public boolean hitFinal() { return false; }
 			public String toString() { return "running"; }
 		},
+        RUNNING_HIT_FINAL{
+            public boolean isAborted() { return false; }
+            public boolean isFinishedSuccessfully() { return false; }
+            public boolean hitFinal() { return true; }
+            public String toString() { return "running, hit final state"; }
+        },
 		ABORTED_CALLS_OTHER_METHOD_WITH_SHADOWS {
 			public boolean isAborted() { return true; }
 			public boolean isFinishedSuccessfully() { return false; }
+            public boolean hitFinal() { return false; }
 			public String toString() { return "aborted (calls other method with shadows)"; }
 		},
 		FINISHED {
 			public boolean isAborted() { return false; }
 			public boolean isFinishedSuccessfully() { return true; }
+            public boolean hitFinal() { return false; }
 			public String toString() { return "finished"; }
-		};
+		},
+        FINISHED_HIT_FINAL {
+            public boolean isAborted() { return false; }
+            public boolean isFinishedSuccessfully() { return true; }
+            public boolean hitFinal() { return true; }
+            public String toString() { return "finished, hit final state"; }
+        };
 		public abstract boolean isAborted(); 
 		public abstract boolean isFinishedSuccessfully();
+        public abstract boolean hitFinal();
 	}
 
 	/**
@@ -167,7 +185,13 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implement
 		//do the analysis
 		this.status = RUNNING;
 		doAnalysis();
-		if(!this.status.isAborted()) this.status = FINISHED;
+		if(!this.status.isAborted()) {
+            if(this.status.hitFinal()) {
+                this.status = FINISHED_HIT_FINAL;
+            } else {
+                this.status = FINISHED;
+            }
+        }
 		
 		//clear caches
 		Disjunct.reset();
@@ -374,5 +398,10 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implement
 	public Status getStatus() {
 		return status;
 	}
+    
+    public void hitFinal() {
+        assert !status.isAborted() && !status.isFinishedSuccessfully();
+        status = RUNNING_HIT_FINAL;
+    }
 
 }
