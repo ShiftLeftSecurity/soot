@@ -1,7 +1,0 @@
-CVS
-*~
-*.output
-.#*
-.cvsignore
-*.class
-aspectj_ppg.cup
