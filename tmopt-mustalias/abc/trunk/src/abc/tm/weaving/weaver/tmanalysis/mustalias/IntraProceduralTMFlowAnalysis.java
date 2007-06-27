@@ -25,18 +25,18 @@ import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAn
 import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.RUNNING_HIT_FINAL;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
-import soot.MethodOrMethodContext;
 import soot.Body;
-import soot.Unit;
+import soot.MethodOrMethodContext;
 import soot.SootMethod;
+import soot.Unit;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.jimple.toolkits.callgraph.Edge;
@@ -46,7 +46,6 @@ import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.matching.State;
 import abc.tm.weaving.matching.TMStateMachine;
 import abc.tm.weaving.weaver.tmanalysis.ds.Configuration;
-import abc.tm.weaving.weaver.tmanalysis.ds.ConfigurationBox;
 import abc.tm.weaving.weaver.tmanalysis.ds.Constraint;
 import abc.tm.weaving.weaver.tmanalysis.ds.Disjunct;
 import abc.tm.weaving.weaver.tmanalysis.query.Shadow;
@@ -56,7 +55,7 @@ import abc.tm.weaving.weaver.tmanalysis.stages.CallGraphAbstraction;
 import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowTag;
 import abc.tm.weaving.weaver.tmanalysis.util.SymbolShadow;
 
-public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implements TMFlowAnalysis {
+public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<Configuration>> implements TMFlowAnalysis {
 
 	/**
 	 * Status
@@ -110,7 +109,7 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implement
 
 	protected final Set<Stmt> visited;
 	
-	protected final Map<Stmt,Configuration> shadowStmtToFirstAfterFlow;
+	protected final Map<Stmt,Set<Configuration>> shadowStmtToFirstAfterFlow;
 
 	protected final CallGraph abstractedCallGraph;
 	
@@ -147,7 +146,7 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implement
 		this.tracematch = tm;
 
 		this.visited = new HashSet<Stmt>();
-		this.shadowStmtToFirstAfterFlow = new HashMap<Stmt,Configuration>();
+		this.shadowStmtToFirstAfterFlow = new HashMap<Stmt,Set<Configuration>>();
 		
 		this.abstractedCallGraph = CallGraphAbstraction.v().abstractedCallGraph();
 
@@ -200,11 +199,8 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implement
 		ShadowSideEffectsAnalysis.reset();
 	}
 
-	protected void flowThrough(Object in, Object d, Object out) {
-		ConfigurationBox cin = (ConfigurationBox) in;		
-		Stmt stmt = (Stmt) d;
-		ConfigurationBox cout = (ConfigurationBox) out;		
-
+	protected void flowThrough(Set<Configuration> in, Unit u, Set<Configuration> out) {
+        Stmt stmt = (Stmt) u;
 		//check for side-effects
 		if(mightHaveSideEffects(stmt)) {
 			status = ABORTED_CALLS_OTHER_METHOD_WITH_SHADOWS;
@@ -214,43 +210,44 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implement
 				
 		//if we are to ignore this statement
 		if(!projection.contains(stmt)) {
-			copy(cin,cout);
+			copy(in,out);
 			return;
 		}
 
 		//if there are no shadows at all at this statement, just copy over and return
 		if(!stmt.hasTag(SymbolShadowTag.NAME)) {
-			copy(cin,cout);
+			copy(in,out);
 			return;
 		}
 		
 		//retrive matches fot the current tracematch
 		SymbolShadowTag tag = (SymbolShadowTag) stmt.getTag(SymbolShadowTag.NAME);		
-		Configuration inConfig = cin.get();
 		Set<SymbolShadow> matchesForThisTracematch = tag.getMatchesForTracematch(tracematch);
 
-		//"join" is initialized to the initial configuration (the neutral element of the join operation)
-		Configuration join = new Configuration(this);		
-		//for each match, if it is still active, compute the successor and join 
-		boolean foundEnabledShadow = false;
-		for (SymbolShadow shadow : matchesForThisTracematch) {
-			if(shadow.isEnabled()) {				
-				foundEnabledShadow = true;
-				Configuration newConfig = inConfig.doTransition(shadow);
-				join = join.getJoinWith(newConfig);
-			}
-		}
-		//if we actually computed a join, set it, else copy over 
-		if(foundEnabledShadow) {
-			cout.set(join);
-			//if not yet visited...
-			if(!visited.contains(stmt)) {
-				visited.add(stmt);
-				//...record this after-flow for comparison
-				shadowStmtToFirstAfterFlow.put(stmt, join);
-			}			
-		} else
-			copy(cin, cout);
+        out.clear();
+        
+        boolean foundEnabledShadow = false;
+        //for each match, if it is still active, compute the successor and join 
+        for (SymbolShadow shadow : matchesForThisTracematch) {
+            if(shadow.isEnabled()) {                
+                foundEnabledShadow = true;
+                for (Configuration inConfig : in) {
+                    Configuration newConfig = inConfig.doTransition(shadow);
+                    out.add(newConfig);
+                }
+            }
+        }
+        if(foundEnabledShadow) {
+            //if not yet visited...
+            if(!visited.contains(stmt)) {
+                visited.add(stmt);
+                //...record this after-flow for comparison
+                shadowStmtToFirstAfterFlow.put(stmt, out);
+            }           
+        } else {
+            //if we not actually computed a join, copy instead 
+            copy(in, out);
+        }
 	}
 	
 	protected boolean mightHaveSideEffects(Stmt s) {
@@ -325,48 +322,35 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implement
 	/** 
 	 * {@inheritDoc}
 	 */
-	protected void copy(Object source, Object dest) {
-		ConfigurationBox s = (ConfigurationBox) source;		
-		ConfigurationBox d = (ConfigurationBox) dest;
-		d.set(s.get());
+	protected void copy(Set<Configuration> source, Set<Configuration> dest) {
+        dest.clear();
+        dest.addAll(source);
 	}
 
 	/** 
 	 * {@inheritDoc}
 	 */
-	protected Object entryInitialFlow() {
-		ConfigurationBox initialFlow = new ConfigurationBox();
+	protected Set<Configuration> entryInitialFlow() {
+        Set<Configuration> configs = new HashSet<Configuration>();
 		Configuration entryInitialConfiguration = new Configuration(this,additionalInitialState);
-		initialFlow.set(entryInitialConfiguration);
-		return initialFlow;
+		configs.add(entryInitialConfiguration);
+		return configs;
 	}
 
 	/** 
 	 * {@inheritDoc}
 	 */
-	protected Object newInitialFlow() {
-		//intial configuration (neutral element for "join")
-		ConfigurationBox initialFlow = new ConfigurationBox();
-		Configuration initialConfiguration = new Configuration(this);
-		initialFlow.set(initialConfiguration);
-		return initialFlow;
+	protected Set<Configuration> newInitialFlow() {
+		return new HashSet<Configuration>();
 	}
 	
 	/** 
 	 * {@inheritDoc}
 	 */
-	protected void merge(Object in1, Object in2, Object out) {
-		ConfigurationBox cin1 = (ConfigurationBox) in1;
-		ConfigurationBox cin2 = (ConfigurationBox) in2;
-		ConfigurationBox cout = (ConfigurationBox) out;
-
-		assert !cin1.isEmpty() && !cin2.isEmpty();
-		
-		Configuration c1 = cin1.get();
-		Configuration c2 = cin2.get();
-		assert c1.getStates().equals(c2.getStates());
-		
-		cout.set(c1.getJoinWith(c2));
+	protected void merge(Set<Configuration> in1, Set<Configuration> in2, Set<Configuration> out) {
+        out.clear();
+        out.addAll(in1);
+        out.addAll(in2);
 	}
 	
 	/**
@@ -383,7 +367,7 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis implement
 		return shadowStmtToFirstAfterFlow.keySet();
 	}
 	
-	public Configuration getFirstAfterFlow(Stmt statementWithShadow) {
+	public Set<Configuration> getFirstAfterFlow(Stmt statementWithShadow) {
 		assert shadowStmtToFirstAfterFlow.containsKey(statementWithShadow);
 		return shadowStmtToFirstAfterFlow.get(statementWithShadow);
 	}

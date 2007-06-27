@@ -30,6 +30,7 @@ import java.util.Set;
 import soot.Body;
 import soot.Local;
 import soot.SootMethod;
+import soot.Unit;
 import soot.Value;
 import soot.jimple.AssignStmt;
 import soot.jimple.Stmt;
@@ -50,7 +51,6 @@ import abc.tm.weaving.aspectinfo.TMGlobalAspectInfo;
 import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.matching.SMNode;
 import abc.tm.weaving.weaver.tmanalysis.ds.Configuration;
-import abc.tm.weaving.weaver.tmanalysis.ds.ConfigurationBox;
 import abc.tm.weaving.weaver.tmanalysis.ds.MustMayNotAliasDisjunct;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.PathsReachingFlowAnalysis;
@@ -154,7 +154,7 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 			MHGPostDominatorsFinder pda, List<Stmt> loopStatements, Stmt loopHead) {
 		SootMethod m = g.getBody().getMethod();
 		//initialize to the maximal set, i.e. all units
-		Set<Stmt> shadowStatementsReachingFixedPointAtOnce = new HashSet<Stmt>(m.getActiveBody().getUnits());
+		Set<Stmt> shadowStatementsReachingFixedPointAtOnce = new HashSet<Stmt>((Collection<? extends Stmt>) m.getActiveBody().getUnits());
 		
 		for (Iterator stateIter = tm.getStateMachine().getStateIterator(); stateIter.hasNext();) {
 			SMNode s = (SMNode) stateIter.next();
@@ -242,7 +242,7 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 	private void removeQuasiNopStmts(TraceMatch tm, UnitGraph g, Map<Local, Stmt> tmLocalsToDefStatements, LocalMustAliasAnalysis localMustAliasAnalysis, LocalNotMayAliasAnalysis localNotMayAliasAnalysis) {
 		SootMethod m = g.getBody().getMethod();
 		//initialize to the maximal set, i.e. all units
-		Set<Stmt> sameBeforeAndAfterFlow = new HashSet<Stmt>(m.getActiveBody().getUnits());
+		Set<Stmt> sameBeforeAndAfterFlow = new HashSet<Stmt>((Collection<? extends Stmt>) m.getActiveBody().getUnits());
 		
 		for (Iterator stateIter = tm.getStateMachine().getStateIterator(); stateIter.hasNext();) {
 			SMNode s = (SMNode) stateIter.next();
@@ -250,6 +250,12 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 
 				System.err.println("Running analysis with additional initial state number "+s.getNumber()+".");
 				
+                Collection<Stmt> filterStmts = new HashSet<Stmt>();
+                for (Unit u : g.getBody().getUnits()) {
+                    Stmt st = (Stmt)u;
+                    filterStmts.add(st);
+                }
+                
 				IntraProceduralTMFlowAnalysis flowAnalysis = new IntraProceduralTMFlowAnalysis(
 		        		tm,
 		        		g,
@@ -261,7 +267,7 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 		        				tm
 		        		),
 		        		s,
-		        		g.getBody().getUnits()
+		        		filterStmts
 		        );
 				
 				Status status = flowAnalysis.getStatus();
@@ -300,11 +306,10 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 		
 		//for each statement with an active shadow
 		for (Stmt stmt : flowAnalysis.statemementsWithActiveShadows()) {
-			Configuration beforeFlow = ((ConfigurationBox) flowAnalysis.getFlowBefore(stmt)).get();
-			Configuration afterFlow = ((ConfigurationBox) flowAnalysis.getFlowAfter(stmt)).get();
-			assert beforeFlow!=null && afterFlow!=null;
+            Set<Configuration> flowBefore = flowAnalysis.getFlowBefore(stmt);
+            Set<Configuration> flowAfter = flowAnalysis.getFlowAfter(stmt);
 			//is the before-flow equal to the after-flow?
-			if(beforeFlow.equals(afterFlow)) {
+			if(flowBefore.equals(flowAfter)) {
 				result.add(stmt);
 			}
 		}		
@@ -328,8 +333,8 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 			//if contained in a loop
 			if(prf.visitedPotentiallyManyTimes(stmt)) {
 				//if the first after-flow is equal to the final one
-				Configuration firstAfterFlow = flowAnalysis.getFirstAfterFlow(stmt);
-				Configuration finalAfterFlow = ((ConfigurationBox) flowAnalysis.getFlowAfter(stmt)).get();
+				Set<Configuration> firstAfterFlow = flowAnalysis.getFirstAfterFlow(stmt);
+				Set<Configuration> finalAfterFlow = flowAnalysis.getFlowAfter(stmt);
 				assert firstAfterFlow!=null && finalAfterFlow!=null;
 				//is the first after-flow equal to the last?
 				if(firstAfterFlow.equals(finalAfterFlow)) {
@@ -352,7 +357,8 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 		Set<Local> boundLocals = new HashSet<Local>();
 		
 		//find all localc bound by shadows of the given tracematch		
-		for (Stmt stmt : (Collection<Stmt>)b.getUnits()) {
+		for (Unit u: b.getUnits()) {
+            Stmt stmt = (Stmt)u;
 			if(stmt.hasTag(SymbolShadowTag.NAME)) {
 				SymbolShadowTag tag = (SymbolShadowTag) stmt.getTag(SymbolShadowTag.NAME);
 				Set<SymbolShadow> matchesForTracematch = tag.getMatchesForTracematch(tm);
@@ -365,7 +371,8 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 		Map<Local,Stmt> localToStmtAfterDefStmt = new HashMap<Local, Stmt>();
 		
 		Set<Local> rhsLocals = new HashSet<Local>(); 
-		for (Stmt stmt : (Collection<Stmt>)b.getUnits()) {
+        for (Unit u: b.getUnits()) {
+            Stmt stmt = (Stmt)u;
             for (soot.ValueBox vb : (Collection<soot.ValueBox>)stmt.getDefBoxes()) {
                 soot.Value v = vb.getValue();
                 if(boundLocals.contains(v)) {
@@ -379,7 +386,8 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 		}
 		
 		Set<Local> oneDef = new HashSet<Local>();
-		for (Stmt stmt : (Collection<Stmt>)b.getUnits()) {
+        for (Unit u: b.getUnits()) {
+            Stmt stmt = (Stmt)u;
             for (soot.ValueBox vb : (Collection<soot.ValueBox>)stmt.getDefBoxes()) {
                 soot.Value v = vb.getValue();
                 if(rhsLocals.contains(v)) {
