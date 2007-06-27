@@ -22,13 +22,11 @@ package abc.tm.weaving.weaver.tmanalysis;
 import java.util.Iterator;
 
 import soot.Kind;
-import soot.Scene;
 import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.jimple.toolkits.callgraph.Edge;
 import abc.main.AbcTimer;
 import abc.main.Main;
 import abc.tm.weaving.aspectinfo.TMGlobalAspectInfo;
-import abc.tm.weaving.weaver.tmanalysis.query.ShadowRegistry;
 import abc.tm.weaving.weaver.tmanalysis.stages.CallGraphAbstraction;
 import abc.tm.weaving.weaver.tmanalysis.stages.IntraproceduralAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.util.Statistics;
@@ -53,12 +51,15 @@ public class OptIntraProcedural extends AbstractReweavingAnalysis {
     	}
         
         //if any thread may be started, abort
-        CallGraph callGraph = Scene.v().getCallGraph();
+        CallGraph callGraph = CallGraphAbstraction.v().abstractedCallGraph();
         for (Iterator iterator = callGraph.listener(); iterator.hasNext();) {
             Edge edge = (Edge) iterator.next();
             if(edge.kind().equals(Kind.THREAD)) {
-                System.err.println("Application starts threads. Cannot apply Inftraprocedural analysis.");
-                return false;
+                System.err.println("#####################################################");
+                System.err.println(" - WARNING - WARNING - WARNING - WARNING - WARNING - ");
+                System.err.println(" Application may start threads that execute shadows! ");
+                System.err.println("#####################################################");
+                break;
             }
         }
     	
@@ -90,13 +91,6 @@ public class OptIntraProcedural extends AbstractReweavingAnalysis {
 		
 		AbcTimer.mark("Intra-procedural analysis (POPL'08)");
     	
-	}
-	
-	/** 
-	 * {@inheritDoc}
-	 */
-	public void cleanup() {		
-		ShadowRegistry.v().dumpShadows();
 	}
 
 }
