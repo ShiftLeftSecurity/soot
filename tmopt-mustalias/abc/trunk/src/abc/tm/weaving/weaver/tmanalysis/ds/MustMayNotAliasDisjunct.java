@@ -19,6 +19,8 @@
 
 package abc.tm.weaving.weaver.tmanalysis.ds;
 
+import static soot.jimple.toolkits.pointer.LocalMustAliasAnalysis.UNKNOWN_LABEL;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -188,7 +190,7 @@ public class MustMayNotAliasDisjunct extends Disjunct<Local> {
 	
 	protected boolean mustAliased(Local l1, Local l2) {
 		return lmaa.mustAlias(l1, tmLocalsToDefStatements.get(l1), l2, tmLocalsToDefStatements.get(l2));
-	}
+    }
 	
 	/**
 	 * {@inheritDoc}
@@ -316,7 +318,8 @@ public class MustMayNotAliasDisjunct extends Disjunct<Local> {
 			String instanceKeyString = lmaa.instanceKeyString(local, tmLocalsToDefStatements.get(local));
 			Local local2 = negVarBinding2.get(tmVar);
 			String instanceKeyString2 = lmaa.instanceKeyString(local2, tmLocalsToDefStatements.get(local2));
-			if(!instanceKeyString.equals(instanceKeyString2)) {
+			if(instanceKeyString.equals(UNKNOWN_LABEL) || instanceKeyString2.equals(UNKNOWN_LABEL) ||
+			   !instanceKeyString.equals(instanceKeyString2)) {
 				return false;
 			}
 		}
@@ -339,7 +342,8 @@ public class MustMayNotAliasDisjunct extends Disjunct<Local> {
 			for (Local local : locals2) {
 				instanceKeyStrings2.add(lmaa.instanceKeyString(local, tmLocalsToDefStatements.get(local)));
 			}
-			if(!instanceKeyStrings.equals(instanceKeyStrings2)) {
+			if(instanceKeyStrings.contains(UNKNOWN_LABEL) || instanceKeyStrings2.contains(UNKNOWN_LABEL) ||
+			   !instanceKeyStrings.equals(instanceKeyStrings2)) {
 				return false;
 			}
 		}
