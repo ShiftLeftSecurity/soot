@@ -19,6 +19,12 @@
  */
 package abc.tm.weaving.weaver.tmanalysis;
 
+import java.util.Iterator;
+
+import soot.Kind;
+import soot.Scene;
+import soot.jimple.toolkits.callgraph.CallGraph;
+import soot.jimple.toolkits.callgraph.Edge;
 import abc.main.AbcTimer;
 import abc.main.Main;
 import abc.tm.weaving.aspectinfo.TMGlobalAspectInfo;
@@ -45,6 +51,16 @@ public class OptIntraProcedural extends AbstractReweavingAnalysis {
     	if(gai.getTraceMatches().size()==0) {
     		return false;
     	}
+        
+        //if any thread may be started, abort
+        CallGraph callGraph = Scene.v().getCallGraph();
+        for (Iterator iterator = callGraph.listener(); iterator.hasNext();) {
+            Edge edge = (Edge) iterator.next();
+            if(edge.kind().equals(Kind.THREAD)) {
+                System.err.println("Application starts threads. Cannot apply Inftraprocedural analysis.");
+                return false;
+            }
+        }
     	
     	try {
     		doAnalyze();
