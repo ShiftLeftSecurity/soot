@@ -19,11 +19,6 @@
  */
 package abc.tm.weaving.weaver.tmanalysis;
 
-import java.util.Iterator;
-
-import soot.Kind;
-import soot.jimple.toolkits.callgraph.CallGraph;
-import soot.jimple.toolkits.callgraph.Edge;
 import abc.main.AbcTimer;
 import abc.main.Main;
 import abc.tm.weaving.aspectinfo.TMGlobalAspectInfo;
@@ -50,19 +45,6 @@ public class OptIntraProcedural extends AbstractReweavingAnalysis {
     		return false;
     	}
         
-        //if any thread may be started, abort
-        CallGraph callGraph = CallGraphAbstraction.v().abstractedCallGraph();
-        for (Iterator iterator = callGraph.listener(); iterator.hasNext();) {
-            Edge edge = (Edge) iterator.next();
-            if(edge.kind().equals(Kind.THREAD)) {
-                System.err.println("#####################################################");
-                System.err.println(" - WARNING - WARNING - WARNING - WARNING - WARNING - ");
-                System.err.println(" Application may start threads that execute shadows! ");
-                System.err.println("#####################################################");
-                break;
-            }
-        }
-    	
     	try {
     		doAnalyze();
     	} catch (Error e) {

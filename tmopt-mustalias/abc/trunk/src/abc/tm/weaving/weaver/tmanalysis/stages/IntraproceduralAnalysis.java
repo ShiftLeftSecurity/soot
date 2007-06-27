@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 
 import soot.Body;
+import soot.Kind;
 import soot.Local;
 import soot.SootMethod;
 import soot.Unit;
@@ -36,6 +37,7 @@ import soot.jimple.AssignStmt;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.jimple.toolkits.callgraph.CallGraphBuilder;
+import soot.jimple.toolkits.callgraph.Edge;
 import soot.jimple.toolkits.pointer.DumbPointerAnalysis;
 import soot.jimple.toolkits.pointer.LocalMustAliasAnalysis;
 import soot.jimple.toolkits.pointer.LocalNotMayAliasAnalysis;
@@ -104,7 +106,18 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 		Set reachableShadows = ReachableShadowFinder.v().reachableShadows(cg);
 		Map tmNameToShadows = ShadowsPerTMSplitter.splitShadows(reachableShadows);
 		
+        boolean mayStartThreads = mayStartThreads();
+        
         for (TraceMatch tm : (Collection<TraceMatch>)gai.getTraceMatches()) {
+            if(mayStartThreads && !tm.isPerThread()) {
+                System.err.println("#####################################################");
+                System.err.println(" Application may start threads that execute shadows! ");
+                System.err.println(" Tracematch "+tm.getName()+" is not per-thread and " +
+                                   " will not be analyzed! ");
+                System.err.println("#####################################################");
+                continue;
+            }
+            
         	Set<SootMethod> methodsWithShadows = new HashSet<SootMethod>();
         	Set<Shadow> thisTMsShadows = (Set<Shadow>) tmNameToShadows.get(tm.getName());
             for (Shadow s : thisTMsShadows) {
@@ -138,6 +151,17 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 	        }
 		}
 	}
+
+    private boolean mayStartThreads() {
+        CallGraph callGraph = CallGraphAbstraction.v().abstractedCallGraph();
+        for (Iterator iterator = callGraph.listener(); iterator.hasNext();) {
+            Edge edge = (Edge) iterator.next();
+            if(edge.kind().equals(Kind.THREAD)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 	/**
 	 * @param tm
