@@ -50,6 +50,7 @@ import abc.main.Main;
 import abc.tm.weaving.aspectinfo.TMGlobalAspectInfo;
 import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.matching.SMNode;
+import abc.tm.weaving.weaver.tmanalysis.Util;
 import abc.tm.weaving.weaver.tmanalysis.ds.Configuration;
 import abc.tm.weaving.weaver.tmanalysis.ds.MustMayNotAliasDisjunct;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis;
@@ -241,8 +242,8 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 	 */
 	private void removeQuasiNopStmts(TraceMatch tm, UnitGraph g, Map<Local, Stmt> tmLocalsToDefStatements, LocalMustAliasAnalysis localMustAliasAnalysis, LocalNotMayAliasAnalysis localNotMayAliasAnalysis) {
 		SootMethod m = g.getBody().getMethod();
-		//initialize to the maximal set, i.e. all units
-		Set<Stmt> sameBeforeAndAfterFlow = new HashSet<Stmt>((Collection<? extends Stmt>) m.getActiveBody().getUnits());
+		//initialize to the maximal set, i.e. all active shadows
+		Set<SymbolShadow> invariantShadows = Util.getAllActiveShadows(g.getBody().getUnits());
 		
 		for (Iterator stateIter = tm.getStateMachine().getStateIterator(); stateIter.hasNext();) {
 			SMNode s = (SMNode) stateIter.next();
@@ -250,10 +251,10 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 
 				System.err.println("Running analysis with additional initial state number "+s.getNumber()+".");
 				
-                Collection<Stmt> filterStmts = new HashSet<Stmt>();
+                Collection<Stmt> allStmts = new HashSet<Stmt>();
                 for (Unit u : g.getBody().getUnits()) {
                     Stmt st = (Stmt)u;
-                    filterStmts.add(st);
+                    allStmts.add(st);
                 }
                 
 				IntraProceduralTMFlowAnalysis flowAnalysis = new IntraProceduralTMFlowAnalysis(
@@ -267,7 +268,7 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 		        				tm
 		        		),
 		        		s,
-		        		filterStmts
+		        		allStmts
 		        );
 				
 				Status status = flowAnalysis.getStatus();
@@ -279,23 +280,20 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 				
 				assert status.isFinishedSuccessfully();
 				
-				//retain only those statements that have the same before and after-flow (i.e. we intersect here over all additional initial states)						
-				sameBeforeAndAfterFlow.retainAll(sameBeforeAndAfterFlow(flowAnalysis));
+				//retain only those shadows that are invariant (i.e. we intersect here over all additional initial states)						
+				invariantShadows.retainAll(flowAnalysis.getInvariantShadows());
 			}
 		}
 
 		//eliminate all shadows which have the same before-flow and after-flow upon reaching the fixed point
-		for (Stmt s : sameBeforeAndAfterFlow) {
-			SymbolShadowTag tag = (SymbolShadowTag) s.getTag(SymbolShadowTag.NAME);
+		for (SymbolShadow shadow : invariantShadows) {
 			System.err.println();
-			System.err.println("The following shadow statement does not have any effect (same before and after flow):");
-			System.err.println(s);
-			System.err.println("Disabling shadows.");
-			for (SymbolShadow shadow : tag.getMatchesForTracematch(tm)) {
-				String uniqueShadowId = shadow.getUniqueShadowId();
-				System.err.println(uniqueShadowId);
-				disableShadow(uniqueShadowId);
-			}
+			System.err.println("The following shadow does not have any effect (same before and after flow):");
+			System.err.println(shadow);
+			System.err.println("Shadow will be disabled.");
+			String uniqueShadowId = shadow.getUniqueShadowId();
+			System.err.println(uniqueShadowId);
+			disableShadow(uniqueShadowId);
 			System.err.println();
 		}
 		
