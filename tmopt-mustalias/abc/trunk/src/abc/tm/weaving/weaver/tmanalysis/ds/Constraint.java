@@ -154,16 +154,18 @@ public class Constraint implements Cloneable {
 			//delegate to the disjunct
 			Disjunct newDisjunct = disjunct.addBindingsForSymbol(allVariables,bindings,shadowId);
 			assert newDisjunct!=null;
-			resultDisjuncts.add(newDisjunct);
-			
-			//if we just hit a final node, notify the analysis
-			if(to.isFinalNode()) {
-				flowAnalysis.hitFinal();
-			}
+            
+            //references to FALSE are useless in DNF so only add if it's not FALSE
+            if(newDisjunct!= Disjunct.FALSE) {
+                resultDisjuncts.add(newDisjunct);
+
+                //if we just hit a final node, notify the analysis
+                if(to.isFinalNode()) {
+                    flowAnalysis.hitFinal();
+                }
+            }
 		}
 		
-		//references to FALSE are useless in DNF
-		resultDisjuncts.remove(Disjunct.FALSE);
 		if(resultDisjuncts.isEmpty()) {
 			//if no disjunts are left, this means nothing else but FALSE
 			return FALSE;	
