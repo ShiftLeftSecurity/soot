@@ -136,9 +136,11 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 
 				//for each loop, in ascending order (inner loops first) 
 				for (Loop loop : loopNestTree) {
+                    System.err.println("Optimizing loop...");
 					optimizeLoop(tm, g, tmLocalsToDefStatements, localMustAliasAnalysis,localNotMayAliasAnalysis, pda, loop);
 				}
 				
+                System.err.println("Method body...");
 				removeQuasiNopStmts(tm, g, tmLocalsToDefStatements, localMustAliasAnalysis, localNotMayAliasAnalysis);
     			
                 System.err.println("Done analyzing: "+m+" on tracematch: "+tm.getName());    			
