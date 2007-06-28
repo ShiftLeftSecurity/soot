@@ -136,9 +136,7 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 
 				//for each loop, in ascending order (inner loops first) 
 				for (Loop loop : loopNestTree) {
-					Stmt loopHead = loop.getHead();
-					Collection<Stmt> loopStatements = loop.getLoopStatements();
-					optimizeLoop(tm, g, tmLocalsToDefStatements, localMustAliasAnalysis,localNotMayAliasAnalysis, pda, loopStatements, loopHead);
+					optimizeLoop(tm, g, tmLocalsToDefStatements, localMustAliasAnalysis,localNotMayAliasAnalysis, pda, loop);
 				}
 				
 				removeQuasiNopStmts(tm, g, tmLocalsToDefStatements, localMustAliasAnalysis, localNotMayAliasAnalysis);
@@ -172,7 +170,14 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 	 * @param pda2 
 	 */
 	private void optimizeLoop(TraceMatch tm, UnitGraph g, Map<Local, Stmt> tmLocalsToDefStatements, LocalMustAliasAnalysis localMustAliasAnalysis, LocalNotMayAliasAnalysis localNotMayAliasAnalysis,
-			MHGPostDominatorsFinder pda, Collection<Stmt> loopStatements, Stmt loopHead) {
+			MHGPostDominatorsFinder pda, Loop loop) {
+        if(!loop.hasSingleExit()) {
+            System.err.println("Loop has multiple exists. Not optimizing.");
+            return;
+        }
+        
+        Stmt loopHead = loop.getHead();
+        Collection<Stmt> loopStatements = loop.getLoopStatements();
 		SootMethod m = g.getBody().getMethod();
 		//initialize to the maximal set, i.e. all units
 		Set<Stmt> shadowStatementsReachingFixedPointAtOnce = new HashSet<Stmt>((Collection<? extends Stmt>) m.getActiveBody().getUnits());
