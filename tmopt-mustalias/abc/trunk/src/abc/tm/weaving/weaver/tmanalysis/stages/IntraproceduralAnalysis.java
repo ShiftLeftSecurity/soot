@@ -23,7 +23,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -34,6 +33,7 @@ import soot.SootMethod;
 import soot.Unit;
 import soot.Value;
 import soot.jimple.Stmt;
+import soot.jimple.toolkits.annotation.logic.Loop;
 import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.jimple.toolkits.callgraph.CallGraphBuilder;
 import soot.jimple.toolkits.callgraph.Edge;
@@ -46,7 +46,6 @@ import soot.toolkits.graph.ExceptionalUnitGraph;
 import soot.toolkits.graph.LoopNestTree;
 import soot.toolkits.graph.MHGPostDominatorsFinder;
 import soot.toolkits.graph.UnitGraph;
-import soot.toolkits.scalar.Pair;
 import abc.main.Main;
 import abc.tm.weaving.aspectinfo.TMGlobalAspectInfo;
 import abc.tm.weaving.aspectinfo.TraceMatch;
@@ -136,9 +135,9 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
                 }
 
 				//for each loop, in ascending order (inner loops first) 
-				for (Pair<Stmt, List<Stmt>> pair : loopNestTree) {
-					Stmt loopHead = pair.getO1();
-					List<Stmt> loopStatements = pair.getO2();
+				for (Loop loop : loopNestTree) {
+					Stmt loopHead = loop.getHead();
+					Collection<Stmt> loopStatements = loop.getLoopStatements();
 					optimizeLoop(tm, g, tmLocalsToDefStatements, localMustAliasAnalysis,localNotMayAliasAnalysis, pda, loopStatements, loopHead);
 				}
 				
@@ -173,7 +172,7 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 	 * @param pda2 
 	 */
 	private void optimizeLoop(TraceMatch tm, UnitGraph g, Map<Local, Stmt> tmLocalsToDefStatements, LocalMustAliasAnalysis localMustAliasAnalysis, LocalNotMayAliasAnalysis localNotMayAliasAnalysis,
-			MHGPostDominatorsFinder pda, List<Stmt> loopStatements, Stmt loopHead) {
+			MHGPostDominatorsFinder pda, Collection<Stmt> loopStatements, Stmt loopHead) {
 		SootMethod m = g.getBody().getMethod();
 		//initialize to the maximal set, i.e. all units
 		Set<Stmt> shadowStatementsReachingFixedPointAtOnce = new HashSet<Stmt>((Collection<? extends Stmt>) m.getActiveBody().getUnits());
