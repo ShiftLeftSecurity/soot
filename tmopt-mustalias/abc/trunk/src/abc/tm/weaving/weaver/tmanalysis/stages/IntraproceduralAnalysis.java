@@ -33,7 +33,6 @@ import soot.Local;
 import soot.SootMethod;
 import soot.Unit;
 import soot.Value;
-import soot.jimple.AssignStmt;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.jimple.toolkits.callgraph.CallGraphBuilder;
@@ -112,10 +111,8 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
             if(mayStartThreads && !tm.isPerThread()) {
                 System.err.println("#####################################################");
                 System.err.println(" Application may start threads that execute shadows! ");
-                System.err.println(" Tracematch "+tm.getName()+" is not per-thread and " +
-                                   " will not be analyzed! ");
+                System.err.println(" Tracematch "+tm.getName()+" is not per-thread!");
                 System.err.println("#####################################################");
-                continue;
             }
             
         	Set<SootMethod> methodsWithShadows = new HashSet<SootMethod>();
@@ -392,14 +389,16 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 		
 		Map<Local,Stmt> localToStmtAfterDefStmt = new HashMap<Local, Stmt>();
 		
-		Set<Local> rhsLocals = new HashSet<Local>(); 
         for (Unit u: b.getUnits()) {
             Stmt stmt = (Stmt)u;
             for (soot.ValueBox vb : (Collection<soot.ValueBox>)stmt.getDefBoxes()) {
                 soot.Value v = vb.getValue();
                 if(boundLocals.contains(v)) {
-                	rhsLocals.add((Local)((AssignStmt)stmt).getRightOp());
-
+                    //have a definition of v already!
+                    if(localToStmtAfterDefStmt.containsKey(v)) {
+                        throw new RuntimeException("multiple defs");
+                    }
+                    
                 	//we know that such def statements always have the form "adviceLocal = someLocal;",
                 	//hence taking the first successor is always sound
                 	localToStmtAfterDefStmt.put((Local)v, (Stmt)g.getSuccsOf(stmt).get(0));
@@ -407,20 +406,6 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
             }			
 		}
 		
-		Set<Local> oneDef = new HashSet<Local>();
-        for (Unit u: b.getUnits()) {
-            Stmt stmt = (Stmt)u;
-            for (soot.ValueBox vb : (Collection<soot.ValueBox>)stmt.getDefBoxes()) {
-                soot.Value v = vb.getValue();
-                if(rhsLocals.contains(v)) {
-                	//if was already added, we have multiple (static) defs of v
-               		if(!oneDef.add((Local)v)) {
-                		throw new RuntimeException("multiple defs");
-                	}
-            	}
-            }
-		}
-
 		return localToStmtAfterDefStmt;		
 	}
 
