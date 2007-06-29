@@ -114,28 +114,30 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
 
 	protected final CallGraph abstractedCallGraph;
 	
-	protected final State additionalInitialState;
+	protected final Set<State> additionalInitialStates;
 
-	protected final Collection<Stmt> projection;
+	protected final Collection<Stmt> stmtsToAnalyze;
 
 	protected final Collection<String> overlappingShadowIDs;
-    
-    protected final Set<SymbolShadow> invariantShadows;
+
+    /* An unnecessary shadow does not change any of its known input configurations. */
+    protected final Set<SymbolShadow> unnecessaryShadows;
 
 	protected Status status;
     
 	/**
-	 * Creates and performs a new flow analysis.
+	 * Performs the tracematch-state flow analysis on the given tracematch and unitgraph.
+     * @param initialDisjunct Initial disjunct (functionally copied everywhere)
+     * @param stmtsToAnalyze Statements to consider for this analysis.
 	 */
-	public IntraProceduralTMFlowAnalysis(TraceMatch tm, UnitGraph ug, Disjunct prototype, State additionalInitialState, Collection<Stmt> projection) {
+	public IntraProceduralTMFlowAnalysis(TraceMatch tm, UnitGraph ug, Disjunct initialDisjunct, Set<State> additionalInitialStates, Collection<Stmt> stmtsToAnalyze) {
 		super(ug);
-		this.projection = new HashSet(projection);
+		this.stmtsToAnalyze = new HashSet(stmtsToAnalyze);
 		
-		//initialize prototypes
-		Constraint.initialize(prototype);
+		Constraint.initialize(initialDisjunct);
 		
 		this.ug = ug;
-		this.additionalInitialState = additionalInitialState;
+		this.additionalInitialStates = additionalInitialStates;
 
 		//since we are iterating over state machine edges, which implement equals(..)
 		//we need to separate those edges by using identity hash maps
@@ -154,9 +156,9 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
 
 		//see which shadow groups are present in the code we look at;
         //also initialize invariantStatements to the set of all statements with a shadow
-		Set<SymbolShadow> allShadows = Util.getAllActiveShadows(projection);
+		Set<SymbolShadow> allShadows = Util.getAllActiveShadows(stmtsToAnalyze);
         
-        this.invariantShadows = new HashSet<SymbolShadow>(allShadows);
+        this.unnecessaryShadows = new HashSet<SymbolShadow>(allShadows);
 
         Set<ShadowGroup> allShadowGroups = ShadowGroupRegistry.v().getAllShadowGroups();
 		Set<ShadowGroup> shadowGroups = new HashSet<ShadowGroup>();
@@ -204,8 +206,8 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
 		//abort if we have side-effects
 		if(status.isAborted()) return;
 				
-		//if we are to ignore this statement
-		if(!projection.contains(stmt)) {
+        // ignore this statement if it's not "to-be-analyzed"
+		if(!stmtsToAnalyze.contains(stmt)) {
 			copy(in,out);
 			return;
 		}
@@ -231,7 +233,7 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
                     Configuration newConfig = oldConfig.doTransition(shadow);
                     if(!newConfig.equals(oldConfig)) {
                         //shadow is not invariant
-                        invariantShadows.remove(shadow);
+                        unnecessaryShadows.remove(shadow);
                     }
                     out.add(newConfig);
                 }
@@ -332,7 +334,7 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
 	 */
 	protected Set<Configuration> entryInitialFlow() {
         Set<Configuration> configs = new HashSet<Configuration>();
-		Configuration entryInitialConfiguration = new Configuration(this,additionalInitialState);
+		Configuration entryInitialConfiguration = new Configuration(this,additionalInitialStates);
 		configs.add(entryInitialConfiguration);
 		return configs;
 	}
@@ -391,8 +393,8 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
     /**
      * @return
      */
-    public Collection<SymbolShadow> getInvariantShadows() {
-        return new HashSet<SymbolShadow>(invariantShadows); 
+    public Collection<SymbolShadow> getUnnecessaryShadows() {
+        return new HashSet<SymbolShadow>(unnecessaryShadows); 
     }
 
 }

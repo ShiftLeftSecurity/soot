@@ -72,7 +72,7 @@ public class Configuration implements Cloneable {
 	 * Creates a new configuration holding a mapping for the given states and registering active
 	 * shadows with the given analysis.
 	 */
-	public Configuration(TMFlowAnalysis flowAnalysis,State additionalInitialState) {
+	public Configuration(TMFlowAnalysis flowAnalysis,Set<State> additionalInitialStates) {
 		this.flowAnalysis = flowAnalysis;
 		this.tm = flowAnalysis.getTracematch();
 		stateToConstraint = new HashMap();
@@ -82,7 +82,8 @@ public class Configuration implements Cloneable {
 		Iterator<State> stateIter = tm.getStateMachine().getStateIterator();
 		while(stateIter.hasNext()) {
 			SMNode state = (SMNode) stateIter.next();
-			Constraint constraint = (state.isInitialNode()||state==additionalInitialState) ? Constraint.TRUE : Constraint.FALSE; 
+			Constraint constraint = (state.isInitialNode() || additionalInitialStates.contains(state)) ?
+                Constraint.TRUE : Constraint.FALSE; 
 			stateToConstraint.put(state, constraint);
 		}
 	}
