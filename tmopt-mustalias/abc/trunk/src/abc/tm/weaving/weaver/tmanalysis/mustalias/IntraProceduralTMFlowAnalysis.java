@@ -110,7 +110,7 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
 
 	protected final Set<Stmt> visited;
 	
-	protected final Map<Stmt,Set<Configuration>> shadowStmtToFirstAfterFlow;
+	protected final Map<Stmt,Set<Configuration>> stmtToFirstAfterFlow;
 
 	protected final CallGraph abstractedCallGraph;
 	
@@ -119,7 +119,7 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
 	protected final Collection<Stmt> stmtsToAnalyze;
 
 	protected final Collection<String> overlappingShadowIDs;
-
+    
     /* An unnecessary shadow does not change any of its known input configurations. */
     protected final Set<SymbolShadow> unnecessaryShadows;
 
@@ -150,7 +150,7 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
 		this.tracematch = tm;
 
 		this.visited = new HashSet<Stmt>();
-		this.shadowStmtToFirstAfterFlow = new HashMap<Stmt,Set<Configuration>>();
+		this.stmtToFirstAfterFlow = new HashMap<Stmt,Set<Configuration>>();
 		
 		this.abstractedCallGraph = CallGraphAbstraction.v().abstractedCallGraph();
 
@@ -206,51 +206,45 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
 		//abort if we have side-effects
 		if(status.isAborted()) return;
 				
-        // ignore this statement if it's not "to-be-analyzed"
-		if(!stmtsToAnalyze.contains(stmt)) {
-			copy(in,out);
-			return;
-		}
-
-		//if there are no shadows at all at this statement, just copy over and return
-		if(!stmt.hasTag(SymbolShadowTag.NAME)) {
-			copy(in,out);
-			return;
-		}
-		
-		//retrive matches fot the current tracematch
-		SymbolShadowTag tag = (SymbolShadowTag) stmt.getTag(SymbolShadowTag.NAME);		
-		Set<SymbolShadow> matchesForThisTracematch = tag.getMatchesForTracematch(tracematch);
-
-        out.clear();
-        
         boolean foundEnabledShadow = false;
-        //for each match, if it is still active, compute the successor and join 
-        for (SymbolShadow shadow : matchesForThisTracematch) {
-            if(shadow.isEnabled()) {                
-                foundEnabledShadow = true;
-                for (Configuration oldConfig : in) {
-                    Configuration newConfig = oldConfig.doTransition(shadow);
-                    if(!newConfig.equals(oldConfig)) {
-                        //shadow is not invariant
-                        unnecessaryShadows.remove(shadow);
+        //if we care about the shadow and it has a tag...
+		if(stmtsToAnalyze.contains(stmt) && stmt.hasTag(SymbolShadowTag.NAME)) {
+
+    		//retrive matches fot the current tracematch
+    		SymbolShadowTag tag = (SymbolShadowTag) stmt.getTag(SymbolShadowTag.NAME);		
+    		Set<SymbolShadow> matchesForThisTracematch = tag.getMatchesForTracematch(tracematch);
+    
+            out.clear();
+            
+            //for each match, if it is still active, compute the successor and join 
+            for (SymbolShadow shadow : matchesForThisTracematch) {
+                if(shadow.isEnabled()) {                
+                    foundEnabledShadow = true;
+                    for (Configuration oldConfig : in) {
+                        Configuration newConfig = oldConfig.doTransition(shadow);
+                        if(!newConfig.equals(oldConfig)) {
+                            //shadow is not invariant
+                            unnecessaryShadows.remove(shadow);
+                        }
+                        out.add(newConfig);
                     }
-                    out.add(newConfig);
                 }
             }
+            
         }
-        if(foundEnabledShadow) {
-            //if not yet visited...
-            if(!visited.contains(stmt)) {
-                visited.add(stmt);
-                //...record this after-flow for comparison
-                shadowStmtToFirstAfterFlow.put(stmt, out);
-            }           
-        } else {
+
+        if(!foundEnabledShadow) {
             //if we not actually computed a join, copy instead 
             copy(in, out);
         }
-	}
+
+        //if not yet visited...
+        if(!visited.contains(stmt)) {
+            visited.add(stmt);
+            //...record this after-flow for comparison
+            stmtToFirstAfterFlow.put(stmt, out);
+        }           
+    }
 	
 	protected boolean mightHaveSideEffects(Stmt s) {
 		Collection<SymbolShadow> shadows = transitivelyCalledShadows(s);
@@ -366,12 +360,12 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
 	 * Returns all statements for which at least one active shadow exists.
 	 */
 	public Set<Stmt> statemementsWithActiveShadows() {
-		return shadowStmtToFirstAfterFlow.keySet();
+		return stmtToFirstAfterFlow.keySet();
 	}
 	
-	public Set<Configuration> getFirstAfterFlow(Stmt statementWithShadow) {
-		assert shadowStmtToFirstAfterFlow.containsKey(statementWithShadow);
-		return shadowStmtToFirstAfterFlow.get(statementWithShadow);
+	public Set<Configuration> getFirstAfterFlow(Stmt stmt) {
+		assert stmtToFirstAfterFlow.containsKey(stmt);
+		return stmtToFirstAfterFlow.get(stmt);
 	}
 	
 	public UnitGraph getUnitGraph() {
@@ -395,6 +389,29 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
      */
     public Collection<SymbolShadow> getUnnecessaryShadows() {
         return new HashSet<SymbolShadow>(unnecessaryShadows); 
+    }
+    
+    /**
+     * Determines all statements that are in scope but for which it is guaranteed that
+     * one loop iteration suffices to reach the fixed point.
+     * @return
+     */
+    public Set<Stmt> statementsReachingFixedPointAtOnce() {
+        
+        Set<Stmt> result = new HashSet<Stmt>();
+        
+        //for each statement 
+        for (Stmt stmt : stmtsToAnalyze) {
+            //if the first after-flow is equal to the final one
+            Set<Configuration> firstAfterFlow = getFirstAfterFlow(stmt);
+            Set<Configuration> finalAfterFlow = getFlowAfter(stmt);
+            assert firstAfterFlow!=null && finalAfterFlow!=null;
+            //is the first after-flow equal to the last?
+            if(firstAfterFlow.equals(finalAfterFlow)) {
+                result.add(stmt);
+            }
+        }       
+        return result;
     }
 
 }

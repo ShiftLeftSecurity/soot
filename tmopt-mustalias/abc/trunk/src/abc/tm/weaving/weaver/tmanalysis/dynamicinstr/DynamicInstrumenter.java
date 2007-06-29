@@ -83,7 +83,7 @@ public class DynamicInstrumenter {
 		// Conjoin the residues of all enabled shadows with a {@link DynamicInstrumentationResidue}.
 		for (Iterator enabledIter = ShadowRegistry.v().enabledShadows().iterator(); enabledIter.hasNext();) {
 			String uniqueShadowId = (String) enabledIter.next();
-			AdviceApplication aa = (AdviceApplication) ShadowRegistry.v().getAdviceApplicationForShadow(uniqueShadowId);
+			AdviceApplication aa = (AdviceApplication) ShadowRegistry.v().getSymbolAdviceApplicationForShadow(uniqueShadowId);
 			Residue originalResidue = aa.getResidue();
 			aa.setResidue(
 					AndResidue.construct(					

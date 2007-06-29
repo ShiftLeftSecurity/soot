@@ -20,11 +20,13 @@
 package abc.tm.weaving.weaver.tmanalysis.stages;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 
 import soot.Body;
 import soot.Kind;
@@ -55,7 +57,6 @@ import abc.tm.weaving.weaver.tmanalysis.Util;
 import abc.tm.weaving.weaver.tmanalysis.ds.Configuration;
 import abc.tm.weaving.weaver.tmanalysis.ds.MustMayNotAliasDisjunct;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis;
-import abc.tm.weaving.weaver.tmanalysis.mustalias.PathsReachingFlowAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status;
 import abc.tm.weaving.weaver.tmanalysis.query.ReachableShadowFinder;
 import abc.tm.weaving.weaver.tmanalysis.query.Shadow;
@@ -63,7 +64,9 @@ import abc.tm.weaving.weaver.tmanalysis.query.ShadowRegistry;
 import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowTag;
 import abc.tm.weaving.weaver.tmanalysis.util.ShadowsPerTMSplitter;
 import abc.tm.weaving.weaver.tmanalysis.util.SymbolShadow;
-import abc.weaving.residues.OnceResidue;
+import abc.weaving.matching.AdviceApplication;
+import abc.weaving.matching.MethodAdviceList;
+import abc.weaving.residues.NeverMatch;
 import abc.weaving.weaver.Weaver;
 
 /**
@@ -126,12 +129,9 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
                 System.err.println("Analyzing: "+m+" on tracematch: "+tm.getName());
                 
                 UnitGraph g = new ExceptionalUnitGraph(m.retrieveActiveBody());
-    			LocalMustAliasAnalysis lma = new LocalMustAliasAnalysis(g);
-				LocalNotMayAliasAnalysis lnma = new LocalNotMayAliasAnalysis(g);
+    			LocalMustAliasAnalysis localMustAliasAnalysis = new LocalMustAliasAnalysis(g);
+				LocalNotMayAliasAnalysis localNotMayAliasAnalysis = new LocalNotMayAliasAnalysis(g);
                 Map<Local,Stmt> tmLocalsToDefStatements = findTmLocalDefinitions(g,tm);
-
-                optimizeNeverStored(tm, g, tmLocalsToDefStatements, lma, lnma);
-
 				MHGPostDominatorsFinder pda = new MHGPostDominatorsFinder(new BriefUnitGraph(m.retrieveActiveBody()));
 				LoopNestTree loopNestTree = new LoopNestTree(m.getActiveBody());
                 if(loopNestTree.hasNestedLoops()) {
@@ -141,70 +141,23 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 				//for each loop, in ascending order (inner loops first) 
 				for (Loop loop : loopNestTree) {
                     System.err.println("Optimizing loop...");
-					optimizeLoop(tm, g, tmLocalsToDefStatements, lma, lnma, pda, loop);
+					optimizeLoop(tm, g, tmLocalsToDefStatements, localMustAliasAnalysis,localNotMayAliasAnalysis, pda, loop);
 				}
 				
                 System.err.println("Method body...");
-				removeQuasiNopStmts(tm, g, tmLocalsToDefStatements, lma, lnma);
+				removeQuasiNopStmts(tm, g, tmLocalsToDefStatements, localMustAliasAnalysis, localNotMayAliasAnalysis);
     			
                 System.err.println("Done analyzing: "+m+" on tracematch: "+tm.getName());    			
 	        }
 		}
+        
+//        //set shadow-points
+//        Weaver weaver = Main.v().getAbcExtension().getWeaver();        
+//        ShadowPointsSetter sps = new ShadowPointsSetter(weaver.getUnitBindings());
+//        for (SootClass c : classesWithReroutetShadows) {
+//            sps.setShadowPointsPass1(c);
+//        }
 	}
-
-    private void optimizeNeverStored(TraceMatch tm, UnitGraph g, Map<Local, Stmt> tmLocalsToDefStatements, LocalMustAliasAnalysis localMustAliasAnalysis, LocalNotMayAliasAnalysis localNotMayAliasAnalysis) {
-		SootMethod m = g.getBody().getMethod();
-
-		Set<SymbolShadow> activeShadows = Util.getAllActiveShadows(g.getBody().getUnits());
-		
-		for (Iterator stateIter = tm.getStateMachine().getStateIterator(); stateIter.hasNext();) {
-			SMNode s = (SMNode) stateIter.next();
-			if(!s.isFinalNode()) {
-
-				System.err.println("Running analysis with additional initial state number "+s.getNumber()+".");
-				
-                Collection<Stmt> allStmts = new HashSet<Stmt>();
-                for (Unit u : g.getBody().getUnits()) {
-                    Stmt st = (Stmt)u;
-                    allStmts.add(st);
-                }
-
-                HashSet<State> initialStates = new HashSet<State>();
-                initialStates.add(s);
-                
-				IntraProceduralTMFlowAnalysis flowAnalysis = new IntraProceduralTMFlowAnalysis(
-		        		tm,
-		        		g,
-		        		new MustMayNotAliasDisjunct(
-		        				localMustAliasAnalysis,
-		        				localNotMayAliasAnalysis,
-		        				tmLocalsToDefStatements,
-		        				m,
-		        				tm
-		        		),
-		        		initialStates,
-		        		allStmts
-		        );
-				
-				Status status = flowAnalysis.getStatus();
-				System.err.println("Analysis done with status: "+status);
-				
-				assert status.isFinishedSuccessfully();
-			}
-		}
-
-		//eliminate all shadows which have the same before-flow and after-flow upon reaching the fixed point
-		for (SymbolShadow shadow : activeShadows) {
-			System.err.println();
-			System.err.println("The following shadow does not have any effect (same before and after flow):");
-			System.err.println(shadow);
-			System.err.println("Shadow will be disabled.");
-			String uniqueShadowId = shadow.getUniqueShadowId();
-			System.err.println(uniqueShadowId);
-			disableShadow(uniqueShadowId);
-			System.err.println();
-		}
-    }
 
     private boolean mayStartThreads() {
         CallGraph callGraph = CallGraphAbstraction.v().abstractedCallGraph();
@@ -231,16 +184,10 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 	 */
 	private void optimizeLoop(TraceMatch tm, UnitGraph g, Map<Local, Stmt> tmLocalsToDefStatements, LocalMustAliasAnalysis localMustAliasAnalysis, LocalNotMayAliasAnalysis localNotMayAliasAnalysis,
 			MHGPostDominatorsFinder pda, Loop loop) {
-        if(!loop.hasSingleExit()) {
-            System.err.println("Loop has multiple exists. Not optimizing.");
-            return;
-        }
-        
-        Stmt loopHead = loop.getHead();
         Collection<Stmt> loopStatements = loop.getLoopStatements();
 		SootMethod m = g.getBody().getMethod();
 		//initialize to the maximal set, i.e. all units
-		Set<Unit> shadowStatementsReachingFixedPointAtOnce = new HashSet<Unit>((Collection<Unit>) m.getActiveBody().getUnits());
+		Set<Unit> shadowStatementsReachingFixedPointAtOnce = new HashSet<Unit>(m.getActiveBody().getUnits());
 		
 		for (Iterator stateIter = tm.getStateMachine().getStateIterator(); stateIter.hasNext();) {
 			SMNode s = (SMNode) stateIter.next();
@@ -248,10 +195,9 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 
 				System.err.println("Running analysis with additional initial state number "+s.getNumber()+".");
 				
-                HashSet<State> initialStates = new HashSet<State>();
-                initialStates.add(s);
-
-				IntraProceduralTMFlowAnalysis flowAnalysis = new IntraProceduralTMFlowAnalysis(
+				HashSet<State> singleton = new HashSet<State>();
+                singleton.add(s);
+                IntraProceduralTMFlowAnalysis flowAnalysis = new IntraProceduralTMFlowAnalysis(
 		        		tm,
 		        		g,
 		        		new MustMayNotAliasDisjunct(
@@ -261,7 +207,7 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 		        				m,
 		        				tm
 		        		),
-		        		initialStates,
+		        		singleton,
 		        		loopStatements
 		        );
 				
@@ -275,46 +221,73 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 				assert status.isFinishedSuccessfully();
 				
 				//retain only those statements that reach the fixed point after one iteration (i.e. we intersect here over all additional initial states)
-				shadowStatementsReachingFixedPointAtOnce.retainAll(shadowStatementsReachingFixedPointAtOnce(flowAnalysis));
+				shadowStatementsReachingFixedPointAtOnce.retainAll(flowAnalysis.statementsReachingFixedPointAtOnce());
 			}
 		}
 
-		Weaver weaver = abc.main.Main.v().getAbcExtension().getWeaver();
-		
-		for(Unit s : shadowStatementsReachingFixedPointAtOnce) {
-			SymbolShadowTag tag = (SymbolShadowTag) s.getTag(SymbolShadowTag.NAME);
-			System.err.println();
-			boolean postDominatedByOtherLoopShadowStmt = false;
-			for(Unit otherStmt : shadowStatementsReachingFixedPointAtOnce) {
-				if(pda.isDominatedBy(s, otherStmt) && s!=otherStmt) {
-					postDominatedByOtherLoopShadowStmt = true;
-					break;
-				}
-			}			
-			//if s is post-dominated by another shadow in the loop
-			if(postDominatedByOtherLoopShadowStmt) {
-				System.err.println("The following shadow statement is contained in a loop, has an effect but only needs to be executed once\n" +
-						"and is post-dominated by the another shadow in the loop.");
-				System.err.println(s);
-				System.err.println("Disabling shadows.");
-				for (SymbolShadow shadow : tag.getMatchesForTracematch(tm)) {
-					String uniqueShadowId = shadow.getUniqueShadowId();
-					System.err.println(uniqueShadowId);
-					disableShadow(uniqueShadowId);
-				}
-			} else {
-				System.err.println("The following shadow statement is contained in a loop but the shadow only needs to be executed once:");
-				System.err.println(s);
-				System.err.println("Applying optimization 'execute only once per method execution'.");
-				for (SymbolShadow shadow : tag.getMatchesForTracematch(tm)) {
-					System.err.println(shadow.getUniqueShadowId());
-					ShadowRegistry.v().conjoinShadowWithResidue(shadow.getUniqueShadowId(), new OnceResidue((Stmt) weaver.reverseRebind(loopHead)));
-				}
-			}
-			System.err.println();
-		}
+        Weaver weaver = Main.v().getAbcExtension().getWeaver();
+        
+        MethodAdviceList adviceList = gai.getAdviceList(m);
+        adviceList.unflush();
+        //for each loop exit
+        for (Stmt loopExit : loop.getLoopExits()) {
+            if(!shadowStatementsReachingFixedPointAtOnce.contains(loopExit)) {
+                System.err.println("FP not reached after one iteration. Cannot optimize.");
+                break;
+            }
+            
+            //walk through all statements in the loop, recording all shadows up to the loop exit 
+            Stack<Set<SymbolShadow>> shadowsOnPath = new Stack<Set<SymbolShadow>>();
+            for (Stmt stmt : loop.getLoopStatements()) {
+                Set<SymbolShadow> shadows = Util.getAllActiveShadows(Collections.singleton(stmt));
+                if(!shadows.isEmpty()) {
+                    shadowsOnPath.push(shadows);
+                }
+                if(stmt.equals(loopExit)) {
+                    break;
+                }
+            }
+            
+            for (Stmt target : loop.targetsOfLoopExit(loopExit)) {
+                
+                Stmt originalTarget = (Stmt)weaver.reverseRebind(target);
+                for (Set<SymbolShadow> shadows : shadowsOnPath) {
+                    if(!shadows.isEmpty()) {
+                        
+                        //get sync advice for those shadows;
+                        //they all have the same sync advice so we can just get the one for the first symbol advice
+                        SymbolShadow firstShadow = shadows.iterator().next();                                
+                        AdviceApplication syncAa = ShadowRegistry.v().getSyncAdviceApplicationForSymbolShadow(firstShadow.getUniqueShadowId());
+                        //copy over sync advice
+                        adviceList.copyAdviceApplication(syncAa,originalTarget);
+                        //now process al symbol shadows
+                        for (SymbolShadow shadow : shadows) {
+                            AdviceApplication symbolAa = ShadowRegistry.v().getSymbolAdviceApplicationForShadow(shadow.getUniqueShadowId());
+                            //copy over symbol advice
+                            adviceList.copyAdviceApplication(symbolAa,originalTarget);
+                            //disable origianl advice
+                            ShadowRegistry.v().conjoinShadowWithResidue(shadow.getUniqueShadowId(), NeverMatch.v());
+                        }
+                        AdviceApplication someAa = ShadowRegistry.v().getSomeAdviceApplicationForSymbolShadow(firstShadow.getUniqueShadowId());
+                        //copy over sync advice
+                        adviceList.copyAdviceApplication(someAa,originalTarget);
+                        //handle body
+                        AdviceApplication bodyAa = ShadowRegistry.v().getBodyAdviceApplicationForSymbolShadow(firstShadow.getUniqueShadowId());
+                        //copy over body advice if present
+                        if(bodyAa!=null)
+                            adviceList.copyAdviceApplication(bodyAa,originalTarget);
+                    }
+                }
+            }
+        }
+        adviceList.flush();
+        //disable all shadows in the loop
+        Set<SymbolShadow> loopShadows = Util.getAllActiveShadows(loop.getLoopStatements());
+        for (SymbolShadow shadow : loopShadows) {
+            ShadowRegistry.v().disableShadow(shadow.getUniqueShadowId());
+        }
 	}
-	
+    
 	/**
 	 * @param m
 	 * @param tm
@@ -344,10 +317,9 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
                     Stmt st = (Stmt)u;
                     allStmts.add(st);
                 }
-                
-                HashSet<State> initialStates = new HashSet<State>();
-                initialStates.add(s);
 
+                HashSet<State> singleton = new HashSet<State>();
+                singleton.add(s);
 				IntraProceduralTMFlowAnalysis flowAnalysis = new IntraProceduralTMFlowAnalysis(
 		        		tm,
 		        		g,
@@ -358,7 +330,7 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 		        				m,
 		        				tm
 		        		),
-		        		initialStates,
+		        		singleton,
 		        		allStmts
 		        );
 				
@@ -405,35 +377,6 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 		return result;
 	}
 
-	/**
-	 * Determines all statements that are contained in the associated methods
-	 * which are annotated with a shadow and are in a loop but for which it is guaranteed that
-	 * one loop iteration suffices to reach the fixed point.
-	 * @param flowAnalysis 
-	 * @return
-	 */
-	public Set<Stmt> shadowStatementsReachingFixedPointAtOnce(IntraProceduralTMFlowAnalysis flowAnalysis) {
-		PathsReachingFlowAnalysis prf = new PathsReachingFlowAnalysis(flowAnalysis.getUnitGraph());
-		
-		Set<Stmt> result = new HashSet<Stmt>();
-		
-		//for each statement with an active shadow
-		for (Stmt stmt : flowAnalysis.statemementsWithActiveShadows()) {
-			//if contained in a loop
-			if(prf.visitedPotentiallyManyTimes(stmt)) {
-				//if the first after-flow is equal to the final one
-				Set<Configuration> firstAfterFlow = flowAnalysis.getFirstAfterFlow(stmt);
-				Set<Configuration> finalAfterFlow = flowAnalysis.getFlowAfter(stmt);
-				assert firstAfterFlow!=null && finalAfterFlow!=null;
-				//is the first after-flow equal to the last?
-				if(firstAfterFlow.equals(finalAfterFlow)) {
-					result.add(stmt);
-				}
-			}
-		}		
-		return result;
-	}
-	
 	/**
 	 * @param b
 	 * @param tm 
