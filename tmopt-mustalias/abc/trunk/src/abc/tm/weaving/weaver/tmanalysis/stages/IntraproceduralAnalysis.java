@@ -66,7 +66,6 @@ import abc.tm.weaving.weaver.tmanalysis.util.ShadowsPerTMSplitter;
 import abc.tm.weaving.weaver.tmanalysis.util.SymbolShadow;
 import abc.weaving.matching.AdviceApplication;
 import abc.weaving.matching.MethodAdviceList;
-import abc.weaving.residues.NeverMatch;
 import abc.weaving.weaver.Weaver;
 
 /**
@@ -265,8 +264,6 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
                             AdviceApplication symbolAa = ShadowRegistry.v().getSymbolAdviceApplicationForShadow(shadow.getUniqueShadowId());
                             //copy over symbol advice
                             adviceList.copyAdviceApplication(symbolAa,originalTarget);
-                            //disable origianl advice
-                            ShadowRegistry.v().conjoinShadowWithResidue(shadow.getUniqueShadowId(), NeverMatch.v());
                         }
                         AdviceApplication someAa = ShadowRegistry.v().getSomeAdviceApplicationForSymbolShadow(firstShadow.getUniqueShadowId());
                         //copy over sync advice
@@ -280,12 +277,13 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
                 }
             }
         }
-        adviceList.flush();
         //disable all shadows in the loop
         Set<SymbolShadow> loopShadows = Util.getAllActiveShadows(loop.getLoopStatements());
         for (SymbolShadow shadow : loopShadows) {
             ShadowRegistry.v().disableShadow(shadow.getUniqueShadowId());
         }
+        ShadowRegistry.v().disableAllUnneededSomeSyncAndBodyAdvice();
+        adviceList.flush();
 	}
     
 	/**
