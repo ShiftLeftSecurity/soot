@@ -131,7 +131,10 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
     			LocalMustAliasAnalysis localMustAliasAnalysis = new LocalMustAliasAnalysis(g);
 				LocalNotMayAliasAnalysis localNotMayAliasAnalysis = new LocalNotMayAliasAnalysis(g);
                 Map<Local,Stmt> tmLocalsToDefStatements = findTmLocalDefinitions(g,tm);
-				MHGPostDominatorsFinder pda = new MHGPostDominatorsFinder(new BriefUnitGraph(m.retrieveActiveBody()));
+
+                //optimizeNeverStored(tm, g, tmLocalsToDefStatements, localMustAliasAnalysis, localNotMayAliasAnalysis);
+                
+                MHGPostDominatorsFinder pda = new MHGPostDominatorsFinder(new BriefUnitGraph(m.retrieveActiveBody()));
 				LoopNestTree loopNestTree = new LoopNestTree(m.getActiveBody());
                 if(loopNestTree.hasNestedLoops()) {
                     System.err.println("Method has nested loops.");
@@ -169,6 +172,60 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
         return false;
     }
 
+    private void optimizeNeverStored(TraceMatch tm, UnitGraph g, Map<Local, Stmt> tmLocalsToDefStatements, LocalMustAliasAnalysis localMustAliasAnalysis, LocalNotMayAliasAnalysis localNotMayAliasAnalysis) {
+        SootMethod m = g.getBody().getMethod();
+
+        Set<SymbolShadow> activeShadows = Util.getAllActiveShadows(g.getBody().getUnits());
+        
+        for (Iterator stateIter = tm.getStateMachine().getStateIterator(); stateIter.hasNext();) {
+            SMNode s = (SMNode) stateIter.next();
+            if(!s.isFinalNode()) {
+
+                System.err.println("Running analysis with additional initial state number "+s.getNumber()+".");
+                
+                Collection<Stmt> allStmts = new HashSet<Stmt>();
+                for (Unit u : g.getBody().getUnits()) {
+                    Stmt st = (Stmt)u;
+                    allStmts.add(st);
+                }
+
+                HashSet<State> initialStates = new HashSet<State>();
+                initialStates.add(s);
+                
+                IntraProceduralTMFlowAnalysis flowAnalysis = new IntraProceduralTMFlowAnalysis(
+                        tm,
+                        g,
+                        new MustMayNotAliasDisjunct(
+                                localMustAliasAnalysis,
+                                localNotMayAliasAnalysis,
+                                tmLocalsToDefStatements,
+                                m,
+                                tm
+                        ),
+                        initialStates,
+                        allStmts
+                );
+                
+                Status status = flowAnalysis.getStatus();
+                System.err.println("Analysis done with status: "+status);
+                
+                assert status.isFinishedSuccessfully();
+            }
+        }
+
+        //eliminate all shadows which have the same before-flow and after-flow upon reaching the fixed point
+        for (SymbolShadow shadow : activeShadows) {
+            System.err.println();
+            System.err.println("The following shadow does not have any effect (same before and after flow):");
+            System.err.println(shadow);
+            System.err.println("Shadow will be disabled.");
+            String uniqueShadowId = shadow.getUniqueShadowId();
+            System.err.println(uniqueShadowId);
+            disableShadow(uniqueShadowId);
+            System.err.println();
+        }
+    }
+    
 	/**
 	 * @param tm
 	 * @param g
