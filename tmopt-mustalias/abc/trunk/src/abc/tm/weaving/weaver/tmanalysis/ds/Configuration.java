@@ -109,7 +109,7 @@ public class Configuration implements Cloneable {
 		//get the current symbol name
 		final String symbolName = shadow.getSymbolName();
 		//and the variable binding
-		final Map bindings = shadow.getTmFormalToAdviceLocal();
+		final Map bindings = reMap(shadow.getTmFormalToAdviceLocal());
 		//the shadow id
 		final String shadowId = shadow.getUniqueShadowId();
 		//all variables of the state machine
@@ -180,6 +180,14 @@ public class Configuration implements Cloneable {
 	}	
 	
 	/**
+     * Subclasses can overwrite this method to modify a variable binding before
+     * it is processed.
+     */
+    protected Map reMap(Map bindings) {
+        return bindings;
+    }
+
+    /**
 	 * Merges the constraint disjoiuntly with the one currently associated with the state,
 	 * updating this constraint of state.
 	 * @param state any state in {@link #getStates()}

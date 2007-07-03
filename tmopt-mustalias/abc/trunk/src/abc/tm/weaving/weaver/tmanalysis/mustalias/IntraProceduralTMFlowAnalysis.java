@@ -34,12 +34,15 @@ import java.util.Map;
 import java.util.Set;
 
 import soot.Body;
+import soot.Local;
 import soot.MethodOrMethodContext;
 import soot.SootMethod;
 import soot.Unit;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.jimple.toolkits.callgraph.Edge;
+import soot.jimple.toolkits.pointer.LocalMustAliasAnalysis;
+import soot.jimple.toolkits.pointer.LocalNotMayAliasAnalysis;
 import soot.toolkits.graph.DirectedGraph;
 import soot.toolkits.graph.UnitGraph;
 import soot.toolkits.scalar.ForwardFlowAnalysis;
@@ -56,6 +59,7 @@ import abc.tm.weaving.weaver.tmanalysis.query.SymbolShadowWithPTS;
 import abc.tm.weaving.weaver.tmanalysis.stages.CallGraphAbstraction;
 import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowTag;
 import abc.tm.weaving.weaver.tmanalysis.util.ISymbolShadow;
+import abc.tm.weaving.weaver.tmanalysis.util.SymbolShadow;
 
 public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<Configuration>> implements TMFlowAnalysis {
 
@@ -121,18 +125,30 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
 
 	protected final Collection<String> overlappingShadowIDs;
     
+    protected final LocalMustAliasAnalysis lmaa;
+
+    protected final LocalNotMayAliasAnalysis lmna;
+
     /* An unnecessary shadow does not change any of its known input configurations. */
     protected final Set<ISymbolShadow> unnecessaryShadows;
 
-	protected Status status;
-    
+    protected final SootMethod container;
+
+    protected final Map<Local, Stmt> tmLocalDefs;
+
+    protected Status status;
+
 	/**
 	 * Performs the tracematch-state flow analysis on the given tracematch and unitgraph.
      * @param initialDisjunct Initial disjunct (functionally copied everywhere)
      * @param stmtsToAnalyze Statements to consider for this analysis.
 	 */
-	public IntraProceduralTMFlowAnalysis(TraceMatch tm, DirectedGraph<Unit> ug, Disjunct initialDisjunct, Set<State> additionalInitialStates, Collection<Stmt> stmtsToAnalyze) {
+	public IntraProceduralTMFlowAnalysis(TraceMatch tm, DirectedGraph<Unit> ug, SootMethod container, Map<Local, Stmt> tmLocalDefs, Disjunct initialDisjunct, Set<State> additionalInitialStates, Collection<Stmt> stmtsToAnalyze, LocalMustAliasAnalysis lmaa, LocalNotMayAliasAnalysis lmna) {
 		super(ug);
+        this.container = container;
+        this.tmLocalDefs = tmLocalDefs;
+        this.lmaa = lmaa;
+        this.lmna = lmna;
 		this.stmtsToAnalyze = new HashSet(stmtsToAnalyze);
 		
 		Constraint.initialize(initialDisjunct);
@@ -161,24 +177,10 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
         
         this.unnecessaryShadows = new HashSet<ISymbolShadow>(allShadows);
 
-        Set<ShadowGroup> allShadowGroups = ShadowGroupRegistry.v().getAllShadowGroups();
-		Set<ShadowGroup> shadowGroups = new HashSet<ShadowGroup>();
-		for (ShadowGroup shadowGroup : allShadowGroups) {
-			for (SymbolShadowWithPTS shadowInGroup : shadowGroup.getAllShadows()) {
-				for (ISymbolShadow shadowHere : allShadows) {
-					if(shadowInGroup.getUniqueShadowId().equals(shadowHere.getUniqueShadowId())) {
-						shadowGroups.add(shadowGroup);
-					}
-				}
-			}
-		}
+        Set<ISymbolShadow> overlappingShadows = Util.sameShadowGroup(allShadows);
+        
         //store all IDs of shadows in those groups
-        this.overlappingShadowIDs= new HashSet<String>();
-        for (ShadowGroup shadowGroup : shadowGroups) {
-            for (SymbolShadowWithPTS shadow : shadowGroup.getAllShadows()) {
-                this.overlappingShadowIDs.add(shadow.getUniqueShadowId());
-            }
-        }		
+        this.overlappingShadowIDs = SymbolShadow.uniqueShadowIDsOf(overlappingShadows);
 		
 		//do the analysis
 		this.status = RUNNING;
@@ -329,7 +331,24 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
 	 */
 	protected Set<Configuration> entryInitialFlow() {
         Set<Configuration> configs = new HashSet<Configuration>();
-		Configuration entryInitialConfiguration = new Configuration(this,additionalInitialStates);
+		Configuration entryInitialConfiguration = new Configuration(this,additionalInitialStates) {
+		    /**
+		     * Rewrites the mapping from tracematch variables to locals to a mapping from
+             * tracematch variables to instance keys.
+		     */
+		    protected Map reMap(Map bindings) {
+                Map<String,Local> origBinding = bindings;
+                Map<String,InstanceKey> newBinding = new HashMap<String, InstanceKey>();
+                for (Map.Entry<String,Local> entry : origBinding.entrySet()) {
+                    String tmVar = entry.getKey();
+                    Local adviceLocal = entry.getValue();
+                    Stmt stmt = tmLocalDefs.get(adviceLocal); //may be null, if adviceLocal is not part of this method
+                    InstanceKey instanceKey = new InstanceKey(adviceLocal,stmt,container,lmaa,lmna);
+                    newBinding.put(tmVar, instanceKey);
+                }
+		        return newBinding;
+		    }
+        };
 		configs.add(entryInitialConfiguration);
 		return configs;
 	}
@@ -386,7 +405,7 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
     }
 
     /**
-     * @return
+     * Returns the set of shadows that never changed any configuration during the analysis.
      */
     public Collection<ISymbolShadow> getUnnecessaryShadows() {
         return new HashSet<ISymbolShadow>(unnecessaryShadows); 

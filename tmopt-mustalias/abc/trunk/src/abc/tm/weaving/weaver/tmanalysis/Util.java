@@ -20,9 +20,20 @@ package abc.tm.weaving.weaver.tmanalysis;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Set;
 
+import soot.Body;
+import soot.MethodOrMethodContext;
+import soot.SootMethod;
 import soot.Unit;
+import soot.jimple.Stmt;
+import soot.jimple.toolkits.callgraph.CallGraph;
+import soot.jimple.toolkits.callgraph.Edge;
+import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroup;
+import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroupRegistry;
+import abc.tm.weaving.weaver.tmanalysis.stages.CallGraphAbstraction;
 import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowTag;
 import abc.tm.weaving.weaver.tmanalysis.util.ISymbolShadow;
 
@@ -49,6 +60,84 @@ public class Util {
             }
     	}
         return allShadows;
+    }
+    
+    
+    /**
+     * Returns the collection of <code>ISymbolShadow</code>s triggered in transitive callees from <code>s</code>.
+     * @param s any statement
+     */
+    protected static Collection<ISymbolShadow> transitivelyCalledShadows(Stmt s) {
+        CallGraph abstractedCallGraph = CallGraphAbstraction.v().abstractedCallGraph();
+        HashSet<ISymbolShadow> symbols = new HashSet<ISymbolShadow>();
+        HashSet<SootMethod> calleeMethods = new HashSet<SootMethod>();
+        LinkedList<MethodOrMethodContext> methodsToProcess = new LinkedList();
+
+        // Collect initial edges out of given statement in methodsToProcess
+        Iterator<Edge> initialEdges = abstractedCallGraph.edgesOutOf(s);
+        while (initialEdges.hasNext()) {
+            Edge e = initialEdges.next();
+            methodsToProcess.add(e.getTgt());
+            calleeMethods.add(e.getTgt().method());
+        }
+
+        // Collect transitive callees of methodsToProcess
+        while (!methodsToProcess.isEmpty()) {
+            MethodOrMethodContext mm = methodsToProcess.removeFirst();
+            Iterator mIt = abstractedCallGraph.edgesOutOf(mm);
+
+            while (mIt.hasNext()) {
+                Edge e = (Edge)mIt.next();
+                if (!calleeMethods.contains(e.getTgt().method())) {
+                    methodsToProcess.add(e.getTgt());
+                    calleeMethods.add(e.getTgt().method());
+                }
+            }
+        }
+
+        // Collect all shadows in calleeMethods
+        for (SootMethod method : calleeMethods) {
+            if(method.hasActiveBody()) {
+                Body body = method.getActiveBody();
+                
+                for (Iterator iter = body.getUnits().iterator(); iter.hasNext();) {
+                    Unit u = (Unit) iter.next();
+                    if(u.hasTag(SymbolShadowTag.NAME)) {
+                        SymbolShadowTag tag = (SymbolShadowTag) u.getTag(SymbolShadowTag.NAME);
+                        for (ISymbolShadow match : tag.getAllMatches()) {
+                            if(match.isEnabled()) {
+                                symbols.add(match);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return symbols;
+    }
+
+
+    /**
+     * Computes the set of all shadows that share a shadow group with one of the shadows in the input set.
+     */
+    public static Set<ISymbolShadow> sameShadowGroup(Set<ISymbolShadow> shadows) {
+        //collect all shadow groups which have shadows in common with the current method
+        Set<ShadowGroup> allShadowGroups = ShadowGroupRegistry.v().getAllShadowGroups();
+        Set<ShadowGroup> overlappingShadowGroups = new HashSet<ShadowGroup>();
+        for (ShadowGroup shadowGroup : allShadowGroups) {
+            for (ISymbolShadow shadowInGroup : shadowGroup.getAllShadows()) {
+                for (ISymbolShadow shadowHere : shadows) {
+                    if(shadowInGroup.getUniqueShadowId().equals(shadowHere.getUniqueShadowId())) {
+                        overlappingShadowGroups.add(shadowGroup);
+                    }
+                }
+            }
+        }
+        Set<ISymbolShadow> overlappingShadows = new HashSet<ISymbolShadow>();
+        for (ShadowGroup shadowGroup : overlappingShadowGroups) {
+            overlappingShadows.addAll(shadowGroup.getAllShadows());         
+        }
+        return overlappingShadows;
     }
 
 }

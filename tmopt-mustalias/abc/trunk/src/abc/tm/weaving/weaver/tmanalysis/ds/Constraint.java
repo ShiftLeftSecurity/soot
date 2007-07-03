@@ -79,9 +79,6 @@ public class Constraint implements Cloneable {
 	public static void initialize(Disjunct falseProtoType) {
 		//initialize FALSE
 		FALSE = new Constraint(new HashSet()) {			
-			public String toString() {
-				return "FALSE";
-			}
 			
 			/**
 			 * Returns this (FALSE).
@@ -108,9 +105,6 @@ public class Constraint implements Cloneable {
 		HashSet set = new HashSet();
 		set.add(falseProtoType);		
 		TRUE = new Constraint(set) {
-			public String toString() {
-				return "TRUE";
-			}
 			
 			protected Object clone() {
 				return new Constraint(disjuncts);
