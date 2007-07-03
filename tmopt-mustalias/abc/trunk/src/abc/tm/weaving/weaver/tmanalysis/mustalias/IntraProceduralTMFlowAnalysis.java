@@ -417,7 +417,6 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
 	}
     
     public void hitFinal() {
-        assert !status.isAborted() && !status.isFinishedSuccessfully();
         if(abortWhenHittingFinal) {
             status = ABORTED_HIT_FINAL;
         } else {
