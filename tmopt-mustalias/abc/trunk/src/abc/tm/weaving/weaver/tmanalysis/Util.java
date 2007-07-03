@@ -24,7 +24,7 @@ import java.util.Set;
 
 import soot.Unit;
 import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowTag;
-import abc.tm.weaving.weaver.tmanalysis.util.SymbolShadow;
+import abc.tm.weaving.weaver.tmanalysis.util.ISymbolShadow;
 
 /**
  * Some utility methods.
@@ -36,12 +36,12 @@ public class Util {
     /**
      * Returns a set of all active shadows in the given list of units.
      */
-    public static Set<SymbolShadow> getAllActiveShadows(Collection<? extends Unit> units) {
-        Set<SymbolShadow> allShadows = new HashSet<SymbolShadow>();
+    public static Set<ISymbolShadow> getAllActiveShadows(Collection<? extends Unit> units) {
+        Set<ISymbolShadow> allShadows = new HashSet<ISymbolShadow>();
     	for (Unit unit : units) {
             if(unit.hasTag(SymbolShadowTag.NAME)) {
             	SymbolShadowTag tag = (SymbolShadowTag) unit.getTag(SymbolShadowTag.NAME);
-            	for (SymbolShadow match : tag.getAllMatches()) {
+            	for (ISymbolShadow match : tag.getAllMatches()) {
     				if(match.isEnabled()) {
     					allShadows.add(match);
     				}

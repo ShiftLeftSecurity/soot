@@ -19,11 +19,13 @@
  */
 package abc.tm.weaving.weaver.tmanalysis.stages;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
@@ -34,6 +36,8 @@ import soot.Local;
 import soot.SootMethod;
 import soot.Unit;
 import soot.Value;
+import soot.jimple.Jimple;
+import soot.jimple.NopStmt;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.annotation.logic.Loop;
 import soot.jimple.toolkits.callgraph.CallGraph;
@@ -44,6 +48,7 @@ import soot.jimple.toolkits.pointer.LocalMustAliasAnalysis;
 import soot.jimple.toolkits.pointer.LocalNotMayAliasAnalysis;
 import soot.jimple.toolkits.thread.IThreadLocalObjectsAnalysis;
 import soot.toolkits.graph.BriefUnitGraph;
+import soot.toolkits.graph.DirectedGraph;
 import soot.toolkits.graph.ExceptionalUnitGraph;
 import soot.toolkits.graph.LoopNestTree;
 import soot.toolkits.graph.MHGPostDominatorsFinder;
@@ -59,11 +64,13 @@ import abc.tm.weaving.weaver.tmanalysis.ds.MustMayNotAliasDisjunct;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status;
 import abc.tm.weaving.weaver.tmanalysis.query.ReachableShadowFinder;
-import abc.tm.weaving.weaver.tmanalysis.query.Shadow;
+import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroup;
+import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroupRegistry;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowRegistry;
+import abc.tm.weaving.weaver.tmanalysis.query.SymbolShadowWithPTS;
 import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowTag;
+import abc.tm.weaving.weaver.tmanalysis.util.ISymbolShadow;
 import abc.tm.weaving.weaver.tmanalysis.util.ShadowsPerTMSplitter;
-import abc.tm.weaving.weaver.tmanalysis.util.SymbolShadow;
 import abc.weaving.matching.AdviceApplication;
 import abc.weaving.matching.MethodAdviceList;
 import abc.weaving.weaver.Weaver;
@@ -118,8 +125,8 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
             }
             
         	Set<SootMethod> methodsWithShadows = new HashSet<SootMethod>();
-        	Set<Shadow> thisTMsShadows = (Set<Shadow>) tmNameToShadows.get(tm.getName());
-            for (Shadow s : thisTMsShadows) {
+        	Set<SymbolShadowWithPTS> thisTMsShadows = (Set<SymbolShadowWithPTS>) tmNameToShadows.get(tm.getName());
+            for (SymbolShadowWithPTS s : thisTMsShadows) {
                 SootMethod m = s.getContainer();
                 methodsWithShadows.add(m);
             }
@@ -175,55 +182,131 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
     private void optimizeNeverStored(TraceMatch tm, UnitGraph g, Map<Local, Stmt> tmLocalsToDefStatements, LocalMustAliasAnalysis localMustAliasAnalysis, LocalNotMayAliasAnalysis localNotMayAliasAnalysis) {
         SootMethod m = g.getBody().getMethod();
 
-        Set<SymbolShadow> activeShadows = Util.getAllActiveShadows(g.getBody().getUnits());
+        Set<ISymbolShadow> activeShadows = Util.getAllActiveShadows(g.getBody().getUnits());
         
+        System.err.println("Running never-stored analysis...");
+        
+        Collection<Stmt> allStmts = new HashSet<Stmt>();
+        for (Unit u : g.getBody().getUnits()) {
+            Stmt st = (Stmt)u;
+            allStmts.add(st);
+        }
+
+        HashSet<State> nonFinalStates = new HashSet<State>();
         for (Iterator stateIter = tm.getStateMachine().getStateIterator(); stateIter.hasNext();) {
-            SMNode s = (SMNode) stateIter.next();
-            if(!s.isFinalNode()) {
-
-                System.err.println("Running analysis with additional initial state number "+s.getNumber()+".");
-                
-                Collection<Stmt> allStmts = new HashSet<Stmt>();
-                for (Unit u : g.getBody().getUnits()) {
-                    Stmt st = (Stmt)u;
-                    allStmts.add(st);
-                }
-
-                HashSet<State> initialStates = new HashSet<State>();
-                initialStates.add(s);
-                
-                IntraProceduralTMFlowAnalysis flowAnalysis = new IntraProceduralTMFlowAnalysis(
-                        tm,
-                        g,
-                        new MustMayNotAliasDisjunct(
-                                localMustAliasAnalysis,
-                                localNotMayAliasAnalysis,
-                                tmLocalsToDefStatements,
-                                m,
-                                tm
-                        ),
-                        initialStates,
-                        allStmts
-                );
-                
-                Status status = flowAnalysis.getStatus();
-                System.err.println("Analysis done with status: "+status);
-                
-                assert status.isFinishedSuccessfully();
-            }
+			State state = (State) stateIter.next();
+			if(!state.isFinalNode())
+				nonFinalStates.add(state);
+		}
+        
+		IntraProceduralTMFlowAnalysis flowAnalysis = new IntraProceduralTMFlowAnalysis(
+                tm,
+                g,
+                new MustMayNotAliasDisjunct(
+                        localMustAliasAnalysis,
+                        localNotMayAliasAnalysis,
+                        tmLocalsToDefStatements,
+                        m,
+                        tm
+                ),
+                nonFinalStates,
+                allStmts
+        );
+        
+        Status status = flowAnalysis.getStatus();
+        System.err.println("Analysis done with status: "+status);
+        
+        if(!status.isFinishedSuccessfully() || status.hitFinal()) {
+        	return;
         }
+        
+        //check if shadows in other methods could have any effect 
+        
+        //collect all shadow groups which have shadows in common with the current method
+        Set<ShadowGroup> allShadowGroups = ShadowGroupRegistry.v().getAllShadowGroups();
+		Set<ShadowGroup> overlappingShadowGroups = new HashSet<ShadowGroup>();
+		for (ShadowGroup shadowGroup : allShadowGroups) {
+			for (ISymbolShadow shadowInGroup : shadowGroup.getAllShadows()) {
+				for (ISymbolShadow shadowHere : activeShadows) {
+					if(shadowInGroup.getUniqueShadowId().equals(shadowHere.getUniqueShadowId())) {
+						overlappingShadowGroups.add(shadowGroup);
+					}
+				}
+			}
+		}
+		
+		//generate a fake unit graph holding n nop-units labeled with all shadows
+		//that overlap
+		Set<ISymbolShadow> overlappingShadows = new HashSet<ISymbolShadow>();
+		for (ShadowGroup shadowGroup : overlappingShadowGroups) {
+			overlappingShadows.addAll(shadowGroup.getAllShadows());			
+		}        
+		int lengthOfLongestPath = FlowInsensitiveAnalysis.v().lengthOfLongestPathFor(tm);
+		
+		Map<TraceMatch,Set<ISymbolShadow>> tmToShadows = new HashMap<TraceMatch, Set<ISymbolShadow>>();
+		tmToShadows.put(tm, overlappingShadows);
+				
+		final List<Unit> units = new ArrayList<Unit>(); 
+		for(int i=0; i <lengthOfLongestPath; i++) {
+			NopStmt nop = Jimple.v().newNopStmt();
+			nop.addTag( new SymbolShadowTag(tmToShadows) );
+		}
+		
+		DirectedGraph<Unit> fakeUnitGraph = new DirectedGraph<Unit>() {
 
-        //eliminate all shadows which have the same before-flow and after-flow upon reaching the fixed point
-        for (SymbolShadow shadow : activeShadows) {
-            System.err.println();
-            System.err.println("The following shadow does not have any effect (same before and after flow):");
-            System.err.println(shadow);
-            System.err.println("Shadow will be disabled.");
-            String uniqueShadowId = shadow.getUniqueShadowId();
-            System.err.println(uniqueShadowId);
-            disableShadow(uniqueShadowId);
-            System.err.println();
-        }
+			public List<Unit> getHeads() {
+				//return first unit
+				return Collections.singletonList(units.get(0));
+			}
+
+			public List<Unit> getPredsOf(Unit s) {
+				int index = units.indexOf(s);
+				assert index>-1;
+				if(index==0) {
+					//first element
+					return Collections.emptyList();
+				} else {
+					return Collections.singletonList(units.get(index-1));
+				}				
+			}
+
+			public List<Unit> getSuccsOf(Unit s) {
+				int index = units.indexOf(s);
+				assert index>-1;
+				if(index==units.size()-1) {
+					//last element
+					return Collections.emptyList();
+				} else {
+					return Collections.singletonList(units.get(index+1));
+				}				
+			}
+
+			public List<Unit> getTails() {
+				//return last unit
+				return Collections.singletonList(units.get(units.size()-1));
+			}
+
+			public Iterator iterator() {
+				return units.iterator();
+			}
+
+			public int size() {
+				return units.size();
+			}			
+		};
+		
+
+//        //eliminate all shadows which have the same before-flow and after-flow upon reaching the fixed point
+//        for (SymbolShadow shadow : activeShadows) {
+//            System.err.println();
+//            System.err.println("The following shadow does not have any effect (same before and after flow):");
+//            System.err.println(shadow);
+//            System.err.println("Shadow will be disabled.");
+//            String uniqueShadowId = shadow.getUniqueShadowId();
+//            System.err.println(uniqueShadowId);
+//            disableShadow(uniqueShadowId);
+//            System.err.println();
+//        }
     }
     
 	/**
@@ -293,9 +376,9 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
             }
             
             //walk through all statements in the loop, recording all shadows up to the loop exit 
-            Stack<Set<SymbolShadow>> shadowsOnPath = new Stack<Set<SymbolShadow>>();
+            Stack<Set<ISymbolShadow>> shadowsOnPath = new Stack<Set<ISymbolShadow>>();
             for (Stmt stmt : loop.getLoopStatements()) {
-                Set<SymbolShadow> shadows = Util.getAllActiveShadows(Collections.singleton(stmt));
+                Set<ISymbolShadow> shadows = Util.getAllActiveShadows(Collections.singleton(stmt));
                 if(!shadows.isEmpty()) {
                     shadowsOnPath.push(shadows);
                 }
@@ -307,17 +390,17 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
             for (Stmt target : loop.targetsOfLoopExit(loopExit)) {
                 
                 Stmt originalTarget = (Stmt)weaver.reverseRebind(target);
-                for (Set<SymbolShadow> shadows : shadowsOnPath) {
+                for (Set<ISymbolShadow> shadows : shadowsOnPath) {
                     if(!shadows.isEmpty()) {
                         
                         //get sync advice for those shadows;
                         //they all have the same sync advice so we can just get the one for the first symbol advice
-                        SymbolShadow firstShadow = shadows.iterator().next();                                
+                        ISymbolShadow firstShadow = shadows.iterator().next();                                
                         AdviceApplication syncAa = ShadowRegistry.v().getSyncAdviceApplicationForSymbolShadow(firstShadow.getUniqueShadowId());
                         //copy over sync advice
                         adviceList.copyAdviceApplication(syncAa,originalTarget);
                         //now process al symbol shadows
-                        for (SymbolShadow shadow : shadows) {
+                        for (ISymbolShadow shadow : shadows) {
                             AdviceApplication symbolAa = ShadowRegistry.v().getSymbolAdviceApplicationForShadow(shadow.getUniqueShadowId());
                             //copy over symbol advice
                             adviceList.copyAdviceApplication(symbolAa,originalTarget);
@@ -335,8 +418,8 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
             }
         }
         //disable all shadows in the loop
-        Set<SymbolShadow> loopShadows = Util.getAllActiveShadows(loop.getLoopStatements());
-        for (SymbolShadow shadow : loopShadows) {
+        Set<ISymbolShadow> loopShadows = Util.getAllActiveShadows(loop.getLoopStatements());
+        for (ISymbolShadow shadow : loopShadows) {
             ShadowRegistry.v().disableShadow(shadow.getUniqueShadowId());
         }
         ShadowRegistry.v().disableAllUnneededSomeSyncAndBodyAdvice();
@@ -359,7 +442,7 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 	private void removeQuasiNopStmts(TraceMatch tm, UnitGraph g, Map<Local, Stmt> tmLocalsToDefStatements, LocalMustAliasAnalysis localMustAliasAnalysis, LocalNotMayAliasAnalysis localNotMayAliasAnalysis) {
 		SootMethod m = g.getBody().getMethod();
 		//initialize to the maximal set, i.e. all active shadows
-		Set<SymbolShadow> invariantShadows = Util.getAllActiveShadows(g.getBody().getUnits());
+		Set<ISymbolShadow> invariantShadows = Util.getAllActiveShadows(g.getBody().getUnits());
 		
 		for (Iterator stateIter = tm.getStateMachine().getStateIterator(); stateIter.hasNext();) {
 			SMNode s = (SMNode) stateIter.next();
@@ -404,7 +487,7 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 		}
 
 		//eliminate all shadows which have the same before-flow and after-flow upon reaching the fixed point
-		for (SymbolShadow shadow : invariantShadows) {
+		for (ISymbolShadow shadow : invariantShadows) {
 			System.err.println();
 			System.err.println("The following shadow does not have any effect (same before and after flow):");
 			System.err.println(shadow);
@@ -448,9 +531,9 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
             Stmt stmt = (Stmt)u;
 			if(stmt.hasTag(SymbolShadowTag.NAME)) {
 				SymbolShadowTag tag = (SymbolShadowTag) stmt.getTag(SymbolShadowTag.NAME);
-				Set<SymbolShadow> matchesForTracematch = tag.getMatchesForTracematch(tm);
-				for (SymbolShadow shadow : matchesForTracematch) {
-					boundLocals.addAll(shadow.getTmFormalToAdviceLocal().values());
+				Set<ISymbolShadow> matchesForTracematch = tag.getMatchesForTracematch(tm);
+				for (ISymbolShadow shadow : matchesForTracematch) {
+					boundLocals.addAll(shadow.getAdviceLocals());
 				}
 			}
 		}

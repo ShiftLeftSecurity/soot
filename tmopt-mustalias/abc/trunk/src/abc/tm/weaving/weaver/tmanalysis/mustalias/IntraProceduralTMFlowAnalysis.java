@@ -40,6 +40,7 @@ import soot.Unit;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.jimple.toolkits.callgraph.Edge;
+import soot.toolkits.graph.DirectedGraph;
 import soot.toolkits.graph.UnitGraph;
 import soot.toolkits.scalar.ForwardFlowAnalysis;
 import abc.tm.weaving.aspectinfo.TraceMatch;
@@ -49,12 +50,12 @@ import abc.tm.weaving.weaver.tmanalysis.Util;
 import abc.tm.weaving.weaver.tmanalysis.ds.Configuration;
 import abc.tm.weaving.weaver.tmanalysis.ds.Constraint;
 import abc.tm.weaving.weaver.tmanalysis.ds.Disjunct;
-import abc.tm.weaving.weaver.tmanalysis.query.Shadow;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroup;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroupRegistry;
+import abc.tm.weaving.weaver.tmanalysis.query.SymbolShadowWithPTS;
 import abc.tm.weaving.weaver.tmanalysis.stages.CallGraphAbstraction;
 import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowTag;
-import abc.tm.weaving.weaver.tmanalysis.util.SymbolShadow;
+import abc.tm.weaving.weaver.tmanalysis.util.ISymbolShadow;
 
 public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<Configuration>> implements TMFlowAnalysis {
 
@@ -106,7 +107,7 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
 	
 	protected final TraceMatch tracematch;	
 	
-	protected final UnitGraph ug;
+	protected final DirectedGraph<Unit> ug;
 
 	protected final Set<Stmt> visited;
 	
@@ -121,7 +122,7 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
 	protected final Collection<String> overlappingShadowIDs;
     
     /* An unnecessary shadow does not change any of its known input configurations. */
-    protected final Set<SymbolShadow> unnecessaryShadows;
+    protected final Set<ISymbolShadow> unnecessaryShadows;
 
 	protected Status status;
     
@@ -130,7 +131,7 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
      * @param initialDisjunct Initial disjunct (functionally copied everywhere)
      * @param stmtsToAnalyze Statements to consider for this analysis.
 	 */
-	public IntraProceduralTMFlowAnalysis(TraceMatch tm, UnitGraph ug, Disjunct initialDisjunct, Set<State> additionalInitialStates, Collection<Stmt> stmtsToAnalyze) {
+	public IntraProceduralTMFlowAnalysis(TraceMatch tm, DirectedGraph<Unit> ug, Disjunct initialDisjunct, Set<State> additionalInitialStates, Collection<Stmt> stmtsToAnalyze) {
 		super(ug);
 		this.stmtsToAnalyze = new HashSet(stmtsToAnalyze);
 		
@@ -156,15 +157,15 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
 
 		//see which shadow groups are present in the code we look at;
         //also initialize invariantStatements to the set of all statements with a shadow
-		Set<SymbolShadow> allShadows = Util.getAllActiveShadows(stmtsToAnalyze);
+		Set<ISymbolShadow> allShadows = Util.getAllActiveShadows(stmtsToAnalyze);
         
-        this.unnecessaryShadows = new HashSet<SymbolShadow>(allShadows);
+        this.unnecessaryShadows = new HashSet<ISymbolShadow>(allShadows);
 
         Set<ShadowGroup> allShadowGroups = ShadowGroupRegistry.v().getAllShadowGroups();
 		Set<ShadowGroup> shadowGroups = new HashSet<ShadowGroup>();
 		for (ShadowGroup shadowGroup : allShadowGroups) {
-			for (Shadow shadowInGroup : shadowGroup.getAllShadows()) {
-				for (SymbolShadow shadowHere : allShadows) {
+			for (SymbolShadowWithPTS shadowInGroup : shadowGroup.getAllShadows()) {
+				for (ISymbolShadow shadowHere : allShadows) {
 					if(shadowInGroup.getUniqueShadowId().equals(shadowHere.getUniqueShadowId())) {
 						shadowGroups.add(shadowGroup);
 					}
@@ -174,7 +175,7 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
         //store all IDs of shadows in those groups
         this.overlappingShadowIDs= new HashSet<String>();
         for (ShadowGroup shadowGroup : shadowGroups) {
-            for (Shadow shadow : shadowGroup.getAllShadows()) {
+            for (SymbolShadowWithPTS shadow : shadowGroup.getAllShadows()) {
                 this.overlappingShadowIDs.add(shadow.getUniqueShadowId());
             }
         }		
@@ -212,12 +213,12 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
 
     		//retrive matches fot the current tracematch
     		SymbolShadowTag tag = (SymbolShadowTag) stmt.getTag(SymbolShadowTag.NAME);		
-    		Set<SymbolShadow> matchesForThisTracematch = tag.getMatchesForTracematch(tracematch);
+    		Set<ISymbolShadow> matchesForThisTracematch = tag.getMatchesForTracematch(tracematch);
     
             out.clear();
             
             //for each match, if it is still active, compute the successor and join 
-            for (SymbolShadow shadow : matchesForThisTracematch) {
+            for (ISymbolShadow shadow : matchesForThisTracematch) {
                 if(shadow.isEnabled()) {                
                     foundEnabledShadow = true;
                     for (Configuration oldConfig : in) {
@@ -247,8 +248,8 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
     }
 	
 	protected boolean mightHaveSideEffects(Stmt s) {
-		Collection<SymbolShadow> shadows = transitivelyCalledShadows(s);
-		for (SymbolShadow shadow : shadows) {
+		Collection<ISymbolShadow> shadows = transitivelyCalledShadows(s);
+		for (ISymbolShadow shadow : shadows) {
 			if(overlappingShadowIDs.contains(shadow.getUniqueShadowId())) {
 				return true;
 			}
@@ -257,11 +258,11 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
 	}
 
 	/**
-	 * Returns the collection of <code>SymbolShadow</code>s triggered in transitive callees from <code>s</code>.
+	 * Returns the collection of <code>ISymbolShadow</code>s triggered in transitive callees from <code>s</code>.
 	 * @param s any statement
 	 */
-	protected Collection<SymbolShadow> transitivelyCalledShadows(Stmt s) {
-        HashSet<SymbolShadow> symbols = new HashSet<SymbolShadow>();
+	protected Collection<ISymbolShadow> transitivelyCalledShadows(Stmt s) {
+        HashSet<ISymbolShadow> symbols = new HashSet<ISymbolShadow>();
         HashSet<SootMethod> calleeMethods = new HashSet<SootMethod>();
         LinkedList<MethodOrMethodContext> methodsToProcess = new LinkedList();
 
@@ -296,7 +297,7 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
 	                Unit u = (Unit) iter.next();
 	                if(u.hasTag(SymbolShadowTag.NAME)) {
 	                	SymbolShadowTag tag = (SymbolShadowTag) u.getTag(SymbolShadowTag.NAME);
-	                	for (SymbolShadow match : tag.getAllMatches()) {
+	                	for (ISymbolShadow match : tag.getAllMatches()) {
 							if(match.isEnabled()) {
 								symbols.add(match);
 							}
@@ -387,8 +388,8 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
     /**
      * @return
      */
-    public Collection<SymbolShadow> getUnnecessaryShadows() {
-        return new HashSet<SymbolShadow>(unnecessaryShadows); 
+    public Collection<ISymbolShadow> getUnnecessaryShadows() {
+        return new HashSet<ISymbolShadow>(unnecessaryShadows); 
     }
     
     /**

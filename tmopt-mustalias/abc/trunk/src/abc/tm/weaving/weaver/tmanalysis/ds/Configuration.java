@@ -35,7 +35,7 @@ import abc.tm.weaving.matching.State;
 import abc.tm.weaving.matching.TMStateMachine;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.TMFlowAnalysis;
-import abc.tm.weaving.weaver.tmanalysis.util.SymbolShadow;
+import abc.tm.weaving.weaver.tmanalysis.util.ISymbolShadow;
 
 /**
  * An abstract state machine configuration. It holds a mapping from states to
@@ -98,7 +98,7 @@ public class Configuration implements Cloneable {
 	 * @param edge and {@link SMVariableEdge} of the program graph
 	 * @return the successor configuration under edge
 	 */
-	public Configuration doTransition(SymbolShadow shadow) {
+	public Configuration doTransition(ISymbolShadow shadow) {
 		//the skip-copy has to be initialized as a copy of this configuration
 		Configuration skip = (Configuration) clone();
 		//the tmp-copy needs to be initialized to false on all states,
@@ -108,7 +108,7 @@ public class Configuration implements Cloneable {
 		
 		//get the current symbol name
 		final String symbolName = shadow.getSymbolName();
-		//and thee variable binding
+		//and the variable binding
 		final Map bindings = shadow.getTmFormalToAdviceLocal();
 		//the shadow id
 		final String shadowId = shadow.getUniqueShadowId();

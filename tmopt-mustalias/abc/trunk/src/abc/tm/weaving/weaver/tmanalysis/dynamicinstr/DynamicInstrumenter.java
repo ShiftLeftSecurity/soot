@@ -32,8 +32,8 @@ import soot.jimple.StaticFieldRef;
 import soot.jimple.VirtualInvokeExpr;
 import abc.main.Debug;
 import abc.main.Main;
-import abc.tm.weaving.weaver.tmanalysis.query.Shadow;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowRegistry;
+import abc.tm.weaving.weaver.tmanalysis.util.SymbolShadow;
 import abc.weaving.aspectinfo.MethodCategory;
 import abc.weaving.matching.AdviceApplication;
 import abc.weaving.residues.AndResidue;
@@ -270,7 +270,7 @@ public class DynamicInstrumenter {
 		PatchingChain units = body.getUnits();
 
 		// get the IDs of all shadows in the group and the unique group number
-		Set shadowsOfGroup = Shadow.uniqueShadowIDsOf(probe.getShadows());
+		Set shadowsOfGroup = SymbolShadow.uniqueShadowIDsOf(probe.getShadows());
 		int groupNumber = probe.getNumber();
 
 		//boolean[][] groupTable = ShadowSwitch.groupTable 

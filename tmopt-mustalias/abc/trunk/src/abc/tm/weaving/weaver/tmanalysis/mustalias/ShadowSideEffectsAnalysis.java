@@ -29,7 +29,7 @@ import soot.PointsToSet;
 import soot.Scene;
 import soot.SootMethod;
 import abc.tm.weaving.aspectinfo.TraceMatch;
-import abc.tm.weaving.weaver.tmanalysis.query.Shadow;
+import abc.tm.weaving.weaver.tmanalysis.query.SymbolShadowWithPTS;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroup;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroupRegistry;
 
@@ -59,7 +59,7 @@ public class ShadowSideEffectsAnalysis  {
 		PointsToSet toBindPts = getPointsToSetOf(toBind);
 		PointsToSet negBindingPts = getPointsToSetOf(negBinding);
 		
-		Set<Shadow> overlaps = new HashSet<Shadow>();
+		Set<SymbolShadowWithPTS> overlaps = new HashSet<SymbolShadowWithPTS>();
 		
 		Set<ShadowGroup> allShadowGroups = ShadowGroupRegistry.v().getAllShadowGroups();
 		for (ShadowGroup shadowGroup : allShadowGroups) {
@@ -72,7 +72,7 @@ public class ShadowSideEffectsAnalysis  {
 			}
 		}
 		
-		for (Shadow shadow : overlaps) {
+		for (SymbolShadowWithPTS shadow : overlaps) {
 			if(!shadow.getContainer().equals(container)) {
 				return false;
 			}
