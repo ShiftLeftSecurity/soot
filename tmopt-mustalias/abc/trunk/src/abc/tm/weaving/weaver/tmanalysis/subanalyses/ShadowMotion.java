@@ -105,7 +105,10 @@ public class ShadowMotion {
 
         //if we abort once, we are gonna abort for the other additional initial states too, so
         //just return, to preceed with the next loop
-        if(status.isAborted()) return;
+        
+        //FIXME: optimization for case of status.hitFinal() does not work yet: reach FP after one iteration even in cate of call_next+
+        //Do we need skip-loops on final states?
+        if(status.isAborted() || status.hitFinal()) return;
         
         assert status.isFinishedSuccessfully();
     
