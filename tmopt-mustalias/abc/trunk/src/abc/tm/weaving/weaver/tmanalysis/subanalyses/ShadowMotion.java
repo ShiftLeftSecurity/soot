@@ -49,6 +49,7 @@ import abc.tm.weaving.weaver.tmanalysis.util.ISymbolShadow;
 import abc.weaving.matching.AdviceApplication;
 import abc.weaving.matching.MethodAdviceList;
 import abc.weaving.residues.NeverMatch;
+import abc.weaving.residues.OnceResidue;
 import abc.weaving.weaver.Weaver;
 
 /**
@@ -96,15 +97,15 @@ public class ShadowMotion {
                 loopStatements,
                 localMustAliasAnalysis,
                 localNotMayAliasAnalysis,
-                true
+                false
         );
         
         Status status = flowAnalysis.getStatus();
         System.err.println("Analysis done with status: "+status);
 
-        //if we abort once, we are gonna abort for the other additional initial states, too so
-        //just proceed with the same method
-        if(status.isAborted() || status.hitFinal()) return;
+        //if we abort once, we are gonna abort for the other additional initial states too, so
+        //just return, to preceed with the next loop
+        if(status.isAborted()) return;
         
         assert status.isFinishedSuccessfully();
     
@@ -206,14 +207,21 @@ public class ShadowMotion {
         //disable all shadows in the loop
         Set<ISymbolShadow> loopShadows = Util.getAllActiveShadows(loop.getLoopStatements());
         for (ISymbolShadow shadow : loopShadows) {
-            if(shadowsThatWereMoved.contains(shadow)) {
-                //TODO actually we should really re-tag the statements appropriately and also reconcile the shadow registry 
-                
-                //do *not* call ShadowRegistry.v().disableShadow(shadow.getUniqueShadowId()) because the shadow is not actually disabled (it just moved);
-                //if we called this method, this could falsify the results of any subsequent analysis stage 
-                ShadowRegistry.v().conjoinShadowWithResidue(shadow.getUniqueShadowId(), NeverMatch.v());
-            } else {
-                ShadowRegistry.v().disableShadow(shadow.getUniqueShadowId());
+            if(status.hitFinal()) {
+                //we hit the final state; hence, it is not ok to disable the shadows in the loop completely;
+                //however it is ok to only execute them once, because we know that the final state can only be hit once
+                System.err.println("Executing shadow once because the final state can be hit only in the first iteration: "+shadow.getUniqueShadowId());
+                ShadowRegistry.v().conjoinShadowWithResidue(shadow.getUniqueShadowId(), new OnceResidue((Stmt)weaver.reverseRebind(loop.getHead())));
+            } else {           
+                if(shadowsThatWereMoved.contains(shadow)) {
+                    //TODO actually we should really re-tag the statements appropriately and also reconcile the shadow registry 
+                    
+                    //do *not* call ShadowRegistry.v().disableShadow(shadow.getUniqueShadowId()) because the shadow is not actually disabled (it just moved);
+                    //if we called this method, this could falsify the results of any subsequent analysis stage 
+                    ShadowRegistry.v().conjoinShadowWithResidue(shadow.getUniqueShadowId(), NeverMatch.v());
+                } else {
+                    ShadowRegistry.v().disableShadow(shadow.getUniqueShadowId());
+                }
             }
         }
         //disable all unneeded supporting advice
