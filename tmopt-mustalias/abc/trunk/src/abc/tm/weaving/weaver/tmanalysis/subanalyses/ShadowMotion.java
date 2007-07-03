@@ -47,6 +47,7 @@ import abc.tm.weaving.weaver.tmanalysis.stages.IntraproceduralAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.util.ISymbolShadow;
 import abc.weaving.matching.AdviceApplication;
 import abc.weaving.matching.MethodAdviceList;
+import abc.weaving.residues.NeverMatch;
 import abc.weaving.weaver.Weaver;
 
 /**
@@ -189,7 +190,11 @@ public class ShadowMotion {
         //disable all shadows in the loop
         Set<ISymbolShadow> loopShadows = Util.getAllActiveShadows(loop.getLoopStatements());
         for (ISymbolShadow shadow : loopShadows) {
-            ShadowRegistry.v().disableShadow(shadow.getUniqueShadowId());
+            //TODO actually we should really re-tag the statements appropriately and also reconcile the shadow registry 
+            
+            //do *not* call ShadowRegistry.v().disableShadow(shadow.getUniqueShadowId()) because the shadow is not actually disabled (it just moved);
+            //if we called this method, this could falsify the results of any subsequent analysis stage 
+            ShadowRegistry.v().conjoinShadowWithResidue(shadow.getUniqueShadowId(), NeverMatch.v());
         }
         //disable all unneeded supporting advice
         ShadowRegistry.v().disableAllUnneededSomeSyncAndBodyAdvice();
