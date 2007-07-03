@@ -39,6 +39,7 @@ import abc.main.Main;
 import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.matching.State;
 import abc.tm.weaving.weaver.tmanalysis.Util;
+import abc.tm.weaving.weaver.tmanalysis.ds.Configuration;
 import abc.tm.weaving.weaver.tmanalysis.ds.MustMayNotAliasDisjunct;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status;
@@ -109,6 +110,8 @@ public class ShadowMotion {
     
         Weaver weaver = Main.v().getAbcExtension().getWeaver();
         
+        Set<ISymbolShadow> shadowsThatWereMoved = new HashSet<ISymbolShadow>();
+        
         //get the advice list for that method
         MethodAdviceList adviceList = IntraproceduralAnalysis.gai.getAdviceList(g.getBody().getMethod());
         //unflush it (open it for modifications)
@@ -127,16 +130,27 @@ public class ShadowMotion {
                 assert flowAnalysis.statementsReachingFixedPointAtOnce().contains(loopStmt);
             }
             
+            //get the flow that wraps around the loop
+            Set<Configuration> wrapFlow = flowAnalysis.getFlowAfter(loop.getBackJumpStmt());
+            
             //walk through all statements in the loop, recording all shadows up to the loop exit;
             //we store a set for each statement that is annotated with shadows
             Stack<Set<ISymbolShadow>> shadowsOnPath = new Stack<Set<ISymbolShadow>>();
             for (Stmt stmt : loop.getLoopStatements()) {
-                Set<ISymbolShadow> shadows = Util.getAllActiveShadows(Collections.singleton(stmt));
-                if(!shadows.isEmpty()) {
-                    shadowsOnPath.push(shadows);
-                }
-                if(stmt.equals(loopExit)) {
-                    break;
+                Set<Configuration> thisFlow = flowAnalysis.getFlowAfter(stmt);
+                if(wrapFlow.equals(thisFlow)) {
+                    //we see a statement after which the analysis information is the same as after
+                    //the back jump; so all shadows we have seen so far are unnecessary;
+                    //hence clear the stack and only record the ones that are still to come
+                    shadowsOnPath.clear();
+                } else {                
+                    Set<ISymbolShadow> shadows = Util.getAllActiveShadows(Collections.singleton(stmt));
+                    if(!shadows.isEmpty()) {
+                        shadowsOnPath.push(shadows);
+                    }
+                    if(stmt.equals(loopExit)) {
+                        break;
+                    }
                 }
             }
 
@@ -174,7 +188,9 @@ public class ShadowMotion {
                     for (ISymbolShadow shadow : shadows) {
                         AdviceApplication symbolAa = ShadowRegistry.v().getSymbolAdviceApplicationForShadow(shadow.getUniqueShadowId());
                         //copy over symbol advice
-                        adviceList.copyAdviceApplication(symbolAa,originalTarget);
+                        adviceList.copyAdviceApplication(symbolAa,originalTarget);                        
+                        //register shadow as being moved (in particular, *not* eliminated)
+                        shadowsThatWereMoved.add(shadow);
                     }
                     AdviceApplication someAa = ShadowRegistry.v().getSomeAdviceApplicationForSymbolShadow(firstShadow.getUniqueShadowId());
                     //copy over sync advice
@@ -190,11 +206,15 @@ public class ShadowMotion {
         //disable all shadows in the loop
         Set<ISymbolShadow> loopShadows = Util.getAllActiveShadows(loop.getLoopStatements());
         for (ISymbolShadow shadow : loopShadows) {
-            //TODO actually we should really re-tag the statements appropriately and also reconcile the shadow registry 
-            
-            //do *not* call ShadowRegistry.v().disableShadow(shadow.getUniqueShadowId()) because the shadow is not actually disabled (it just moved);
-            //if we called this method, this could falsify the results of any subsequent analysis stage 
-            ShadowRegistry.v().conjoinShadowWithResidue(shadow.getUniqueShadowId(), NeverMatch.v());
+            if(shadowsThatWereMoved.contains(shadow)) {
+                //TODO actually we should really re-tag the statements appropriately and also reconcile the shadow registry 
+                
+                //do *not* call ShadowRegistry.v().disableShadow(shadow.getUniqueShadowId()) because the shadow is not actually disabled (it just moved);
+                //if we called this method, this could falsify the results of any subsequent analysis stage 
+                ShadowRegistry.v().conjoinShadowWithResidue(shadow.getUniqueShadowId(), NeverMatch.v());
+            } else {
+                ShadowRegistry.v().disableShadow(shadow.getUniqueShadowId());
+            }
         }
         //disable all unneeded supporting advice
         ShadowRegistry.v().disableAllUnneededSomeSyncAndBodyAdvice();
