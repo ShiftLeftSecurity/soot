@@ -39,7 +39,6 @@ import abc.main.Main;
 import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.matching.State;
 import abc.tm.weaving.weaver.tmanalysis.Util;
-import abc.tm.weaving.weaver.tmanalysis.ds.InitialConfigsUnitGraph;
 import abc.tm.weaving.weaver.tmanalysis.ds.MustMayNotAliasDisjunct;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status;
@@ -58,6 +57,8 @@ import abc.weaving.weaver.Weaver;
 public class ShadowMotion {
 
     public static void apply(TraceMatch tm, UnitGraph g, Map<Local, Stmt> tmLocalsToDefStatements, LocalMustAliasAnalysis localMustAliasAnalysis, LocalNotMayAliasAnalysis localNotMayAliasAnalysis) {
+        System.err.println("Loop optimization...");
+
         //create post-dominator analysis
         MHGPostDominatorsFinder pda = new MHGPostDominatorsFinder(new BriefUnitGraph(g.getBody()));
         //build a loop nest tree
@@ -66,6 +67,10 @@ public class ShadowMotion {
             System.err.println("Method has nested loops.");
         }
     
+        if(loopNestTree.isEmpty()) {
+            System.err.println("Method has no loops.");
+        }
+        
         //for each loop, in ascending order (inner loops first) 
         for (Loop loop : loopNestTree) {
         	optimizeLoop(tm, g, tmLocalsToDefStatements, localMustAliasAnalysis,localNotMayAliasAnalysis, pda, loop);
@@ -77,22 +82,19 @@ public class ShadowMotion {
         System.err.println("Optimizing loop...");
         
         //find all active shadows in the method
-        Set<ISymbolShadow> allMethodShadows = Util.getAllActiveShadows(g.getBody().getUnits());
-        //generate an augmented graph modelling all possible input configurations
-        InitialConfigsUnitGraph augmentedGraph = new InitialConfigsUnitGraph(g,allMethodShadows,tm);
-        
         Collection<Stmt> loopStatements = loop.getLoopStatements();
         
         IntraProceduralTMFlowAnalysis flowAnalysis = new IntraProceduralTMFlowAnalysis(
                 tm,
-                augmentedGraph,
+                g,
                 g.getBody().getMethod(),
                 tmLocalsToDefStatements,
                 new MustMayNotAliasDisjunct(),
                 new HashSet<State>(),
                 loopStatements,
                 localMustAliasAnalysis,
-                localNotMayAliasAnalysis                        
+                localNotMayAliasAnalysis,
+                true
         );
         
         Status status = flowAnalysis.getStatus();

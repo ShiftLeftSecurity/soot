@@ -19,12 +19,14 @@
 package abc.tm.weaving.weaver.tmanalysis.mustalias;
 
 import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.ABORTED_CALLS_OTHER_METHOD_WITH_SHADOWS;
+import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.ABORTED_HIT_FINAL;
 import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.FINISHED;
 import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.FINISHED_HIT_FINAL;
 import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.RUNNING;
 import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.RUNNING_HIT_FINAL;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -53,9 +55,6 @@ import abc.tm.weaving.weaver.tmanalysis.Util;
 import abc.tm.weaving.weaver.tmanalysis.ds.Configuration;
 import abc.tm.weaving.weaver.tmanalysis.ds.Constraint;
 import abc.tm.weaving.weaver.tmanalysis.ds.Disjunct;
-import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroup;
-import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroupRegistry;
-import abc.tm.weaving.weaver.tmanalysis.query.SymbolShadowWithPTS;
 import abc.tm.weaving.weaver.tmanalysis.stages.CallGraphAbstraction;
 import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowTag;
 import abc.tm.weaving.weaver.tmanalysis.util.ISymbolShadow;
@@ -80,6 +79,12 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
             public boolean isFinishedSuccessfully() { return false; }
             public boolean hitFinal() { return true; }
             public String toString() { return "running, hit final state"; }
+        },
+        ABORTED_HIT_FINAL{
+            public boolean isAborted() { return true; }
+            public boolean isFinishedSuccessfully() { return false; }
+            public boolean hitFinal() { return true; }
+            public String toString() { return "aborted, hit final state"; }
         },
 		ABORTED_CALLS_OTHER_METHOD_WITH_SHADOWS {
 			public boolean isAborted() { return true; }
@@ -136,19 +141,23 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
 
     protected final Map<Local, Stmt> tmLocalDefs;
 
+    protected final boolean abortWhenHittingFinal;
+
     protected Status status;
+
 
 	/**
 	 * Performs the tracematch-state flow analysis on the given tracematch and unitgraph.
      * @param initialDisjunct Initial disjunct (functionally copied everywhere)
      * @param stmtsToAnalyze Statements to consider for this analysis.
 	 */
-	public IntraProceduralTMFlowAnalysis(TraceMatch tm, DirectedGraph<Unit> ug, SootMethod container, Map<Local, Stmt> tmLocalDefs, Disjunct initialDisjunct, Set<State> additionalInitialStates, Collection<Stmt> stmtsToAnalyze, LocalMustAliasAnalysis lmaa, LocalNotMayAliasAnalysis lmna) {
+	public IntraProceduralTMFlowAnalysis(TraceMatch tm, DirectedGraph<Unit> ug, SootMethod container, Map<Local, Stmt> tmLocalDefs, Disjunct initialDisjunct, Set<State> additionalInitialStates, Collection<Stmt> stmtsToAnalyze, LocalMustAliasAnalysis lmaa, LocalNotMayAliasAnalysis lmna, boolean abortWhenHittingFinal) {
 		super(ug);
         this.container = container;
         this.tmLocalDefs = tmLocalDefs;
         this.lmaa = lmaa;
         this.lmna = lmna;
+        this.abortWhenHittingFinal = abortWhenHittingFinal;
 		this.stmtsToAnalyze = new HashSet(stmtsToAnalyze);
 		
 		Constraint.initialize(initialDisjunct);
@@ -331,29 +340,37 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
 	 */
 	protected Set<Configuration> entryInitialFlow() {
         Set<Configuration> configs = new HashSet<Configuration>();
-		Configuration entryInitialConfiguration = new Configuration(this,additionalInitialStates) {
-		    /**
-		     * Rewrites the mapping from tracematch variables to locals to a mapping from
-             * tracematch variables to instance keys.
-		     */
-		    protected Map reMap(Map bindings) {
-                Map<String,Local> origBinding = bindings;
-                Map<String,InstanceKey> newBinding = new HashMap<String, InstanceKey>();
-                for (Map.Entry<String,Local> entry : origBinding.entrySet()) {
-                    String tmVar = entry.getKey();
-                    Local adviceLocal = entry.getValue();
-                    Stmt stmt = tmLocalDefs.get(adviceLocal); //may be null, if adviceLocal is not part of this method
-                    InstanceKey instanceKey = new InstanceKey(adviceLocal,stmt,container,lmaa,lmna);
-                    newBinding.put(tmVar, instanceKey);
-                }
-		        return newBinding;
-		    }
-        };
-		configs.add(entryInitialConfiguration);
+        for (Iterator stateIter = stateMachine.getStateIterator(); stateIter.hasNext();) {
+            State state = (State) stateIter.next();
+            if(!state.isFinalNode()) {
+
+                Configuration entryInitialConfiguration = new Configuration(this,Collections.singleton(state)) {
+                    /**
+                     * Rewrites the mapping from tracematch variables to locals to a mapping from
+                     * tracematch variables to instance keys.
+                     */
+                    protected Map reMap(Map bindings) {
+                        Map<String,Local> origBinding = bindings;
+                        Map<String,InstanceKey> newBinding = new HashMap<String, InstanceKey>();
+                        for (Map.Entry<String,Local> entry : origBinding.entrySet()) {
+                            String tmVar = entry.getKey();
+                            Local adviceLocal = entry.getValue();
+                            Stmt stmt = tmLocalDefs.get(adviceLocal); //may be null, if adviceLocal is not part of this method
+                            InstanceKey instanceKey = new InstanceKey(adviceLocal,stmt,container,lmaa,lmna);
+                            newBinding.put(tmVar, instanceKey);
+                        }
+                        return newBinding;
+                    }
+                };
+                configs.add(entryInitialConfiguration);
+            
+            }
+        }
+        
 		return configs;
 	}
 
-	/** 
+	/** points-to 
 	 * {@inheritDoc}
 	 */
 	protected Set<Configuration> newInitialFlow() {
@@ -401,7 +418,11 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
     
     public void hitFinal() {
         assert !status.isAborted() && !status.isFinishedSuccessfully();
-        status = RUNNING_HIT_FINAL;
+        if(abortWhenHittingFinal) {
+            status = ABORTED_HIT_FINAL;
+        } else {
+            status = RUNNING_HIT_FINAL;
+        }
     }
 
     /**

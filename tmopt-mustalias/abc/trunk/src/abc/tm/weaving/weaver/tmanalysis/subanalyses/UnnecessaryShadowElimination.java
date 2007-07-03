@@ -33,7 +33,6 @@ import soot.toolkits.graph.UnitGraph;
 import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.matching.State;
 import abc.tm.weaving.weaver.tmanalysis.Util;
-import abc.tm.weaving.weaver.tmanalysis.ds.InitialConfigsUnitGraph;
 import abc.tm.weaving.weaver.tmanalysis.ds.MustMayNotAliasDisjunct;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status;
@@ -53,12 +52,6 @@ public class UnnecessaryShadowElimination {
 
         SootMethod m = g.getBody().getMethod();
 
-        //get all shadows in the method body
-        Set<ISymbolShadow> allShadows = Util.getAllActiveShadows(g.getBody().getUnits());
-
-        //construct a new graph over units, modelling all possible incoming executuions that can reach this method
-        InitialConfigsUnitGraph augmentedUnitGraph = new InitialConfigsUnitGraph(g,allShadows,tm);
-        
         Collection<Stmt> allStmts = new HashSet<Stmt>();
         for (Unit u : g.getBody().getUnits()) {
             Stmt st = (Stmt)u;
@@ -67,14 +60,15 @@ public class UnnecessaryShadowElimination {
 
 		IntraProceduralTMFlowAnalysis flowAnalysis = new IntraProceduralTMFlowAnalysis(
         		tm,
-        		augmentedUnitGraph,
+        		g,
                 m,
                 tmLocalsToDefStatements,
         		new MustMayNotAliasDisjunct(),
         		new HashSet<State>(),
         		allStmts,
                 localMustAliasAnalysis,
-                localNotMayAliasAnalysis
+                localNotMayAliasAnalysis,
+                false /* do not abort if final state is hit --- we don't care here */
         );
 		
 		Status status = flowAnalysis.getStatus();
@@ -96,6 +90,8 @@ public class UnnecessaryShadowElimination {
     		System.err.println();
     	}
     	
+        //get all shadows in the method body
+        Set<ISymbolShadow> allShadows = Util.getAllActiveShadows(g.getBody().getUnits());
         boolean allRemoved = flowAnalysis.getUnnecessaryShadows().equals(allShadows);
         
         if(allRemoved) {

@@ -35,7 +35,6 @@ import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.matching.State;
 import abc.tm.weaving.weaver.tmanalysis.Util;
 import abc.tm.weaving.weaver.tmanalysis.ds.FinalConfigsUnitGraph;
-import abc.tm.weaving.weaver.tmanalysis.ds.InitialConfigsUnitGraph;
 import abc.tm.weaving.weaver.tmanalysis.ds.MustMayNotAliasDisjunct;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status;
@@ -57,7 +56,7 @@ public class CannotTriggerFinalElimination {
         Set<ISymbolShadow> allMethodShadows = Util.getAllActiveShadows(g.getBody().getUnits());
         
         //generate an augmented unit graph modelling all possible incoming executions to the method and all possible outgoing executions from the method
-        DirectedGraph<Unit> augmentedGraph = new FinalConfigsUnitGraph(new InitialConfigsUnitGraph(g,allMethodShadows,tm),allMethodShadows,tm);
+        DirectedGraph<Unit> augmentedGraph = new FinalConfigsUnitGraph(g,allMethodShadows,tm);
         
         Collection<Stmt> allStmts = new HashSet<Stmt>();
         for (Iterator<Unit> unitIter = augmentedGraph.iterator(); unitIter.hasNext();) {
@@ -74,7 +73,8 @@ public class CannotTriggerFinalElimination {
                 new HashSet<State>(),
                 allStmts,
                 localMustAliasAnalysis,
-                localNotMayAliasAnalysis
+                localNotMayAliasAnalysis,
+                true
         );
         
         Status status = flowAnalysis.getStatus();
