@@ -20,6 +20,7 @@ package abc.tm.weaving.weaver.tmanalysis.mustalias;
 
 import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.ABORTED_CALLS_OTHER_METHOD_WITH_SHADOWS;
 import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.ABORTED_HIT_FINAL;
+import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.ABORTED_MAX_NUM_ITERATIONS;
 import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.FINISHED;
 import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.FINISHED_HIT_FINAL;
 import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.RUNNING;
@@ -86,6 +87,12 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
             public boolean hitFinal() { return true; }
             public String toString() { return "aborted, hit final state"; }
         },
+        ABORTED_MAX_NUM_ITERATIONS{
+            public boolean isAborted() { return true; }
+            public boolean isFinishedSuccessfully() { return false; }
+            public boolean hitFinal() { return false; }
+            public String toString() { return "aborted, exceeded maximal number of iterations ("+MAX_NUM_VISITED+")"; }
+        },
 		ABORTED_CALLS_OTHER_METHOD_WITH_SHADOWS {
 			public boolean isAborted() { return true; }
 			public boolean isFinishedSuccessfully() { return false; }
@@ -142,9 +149,12 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
     protected final Map<Local, Stmt> tmLocalDefs;
 
     protected final boolean abortWhenHittingFinal;
+    
+    protected final Map<Stmt,Integer> numberVisited;
+    
+    protected final static int MAX_NUM_VISITED = 10;
 
     protected Status status;
-
 
 	/**
 	 * Performs the tracematch-state flow analysis on the given tracematch and unitgraph.
@@ -191,6 +201,8 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
         //store all IDs of shadows in those groups
         this.overlappingShadowIDs = SymbolShadow.uniqueShadowIDsOf(overlappingShadows);
 		
+        this.numberVisited = new HashMap<Stmt,Integer>();
+        
 		//do the analysis
 		this.status = RUNNING;
 		doAnalysis();
@@ -251,11 +263,20 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
         }
 
         //if not yet visited...
-        if(!visited.contains(stmt)) {
-            visited.add(stmt);
+        if(!numberVisited.containsKey(stmt)) {
+            numberVisited.put(stmt, 0);
             //...record this after-flow for comparison
             stmtToFirstAfterFlow.put(stmt, out);
-        }           
+        }
+        
+        //increment counter
+        int numVisited = numberVisited.get(stmt);
+        numVisited++;
+        numberVisited.put(stmt, numVisited);
+        
+        if(numVisited>MAX_NUM_VISITED) {
+            status = ABORTED_MAX_NUM_ITERATIONS;
+        }
     }
 	
 	protected boolean mightHaveSideEffects(Stmt s) {

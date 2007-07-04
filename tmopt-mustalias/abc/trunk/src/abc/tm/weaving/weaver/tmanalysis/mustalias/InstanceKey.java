@@ -44,7 +44,6 @@ public class InstanceKey {
      * @param assignedLocal a local that is assigned this value
      */
     public InstanceKey(Local assignedLocal, Stmt stmtAfterAssignStmt, SootMethod owner, LocalMustAliasAnalysis lmaa, LocalNotMayAliasAnalysis lnma) {
-        assert assignedLocal!=null;
         this.assignedLocal = assignedLocal;
         this.owner = owner;
         this.stmtAfterAssignStmt = stmtAfterAssignStmt;
@@ -115,11 +114,9 @@ public class InstanceKey {
                 return false;
         } else if (!owner.equals(other.owner))
             return false;
-        //two keys are equal if they must alias or are both UNKNOWN
-        String instanceKeyString = lmaa.instanceKeyString(assignedLocal, stmtAfterAssignStmt);
-        String otherInstanceKeyString = lmaa.instanceKeyString(other.assignedLocal, other.stmtAfterAssignStmt);
-        if(!instanceKeyString.equals(otherInstanceKeyString)) {
-            return false;
+        //two keys are equal if they must alias
+        if(mustAlias(other)) {
+            return true;
         }
         //or if both have no statement set but the same local
         return (stmtAfterAssignStmt==null && other.stmtAfterAssignStmt==null && assignedLocal==other.assignedLocal);
