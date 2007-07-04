@@ -18,15 +18,20 @@
  */
 package abc.tm.weaving.weaver.tmanalysis.subanalyses;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.Stack;
 
 import soot.Local;
+import soot.Unit;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.annotation.logic.Loop;
 import soot.jimple.toolkits.pointer.LocalMustAliasAnalysis;
@@ -138,26 +143,35 @@ public class ShadowMotion {
             Set<Configuration> wrapFlow = flowAnalysis.getFlowAfter(loop.getBackJumpStmt());
             
             //walk through all statements in the loop, recording all shadows up to the loop exit;
-            //we store a set for each statement that is annotated with shadows
-            Stack<Set<ISymbolShadow>> shadowsOnPath = new Stack<Set<ISymbolShadow>>();
-            for (Stmt stmt : loop.getLoopStatements()) {
-                Set<Configuration> thisFlow = flowAnalysis.getFlowAfter(stmt);
-                if(wrapFlow.equals(thisFlow)) {
-                    //we see a statement after which the analysis information is the same as after
-                    //the back jump; so all shadows we have seen so far are unnecessary;
-                    //hence clear the stack and only record the ones that are still to come
-                    shadowsOnPath.clear();
-                } else {                
-                    Set<ISymbolShadow> shadows = Util.getAllActiveShadows(Collections.singleton(stmt));
-                    if(!shadows.isEmpty()) {
-                        shadowsOnPath.push(shadows);
-                    }
-                    if(stmt.equals(loopExit)) {
-                        break;
-                    }
+            //we store a set for each statement that is annotated with shadows;
+            //we start at the loop exit and then walk backwards through the loop in a depth-first fashion
+            LinkedList<Set<ISymbolShadow>> shadowsOnPath = new LinkedList<Set<ISymbolShadow>>();
+            Queue<Unit> worklist = new LinkedList<Unit>();
+            worklist.add(loopExit);
+            while(!worklist.isEmpty()) {
+                Unit curr = worklist.remove();
+                
+                //we see a statement after which the analysis information is the same as after
+                //the back jump; so all shadows that precede the statement are unnecessary; hence stop
+                Set<Configuration> thisFlow = flowAnalysis.getFlowAfter(curr);
+                if(wrapFlow.equals(thisFlow)) break;
+                
+                Set<ISymbolShadow> shadows = Util.getAllActiveShadows(Collections.singleton(curr));
+                if(!shadows.isEmpty()) {
+                    //add to the front
+                    shadowsOnPath.add(0,shadows);
                 }
-            }
-
+                //stop at the loop head
+                if(curr.equals(loop.getHead())) {
+                    break;
+                }
+                
+                //get all predecessors in the loop and add them to the worklist
+                List<Unit> preds = new ArrayList<Unit>(g.getPredsOf(curr));
+                preds.retainAll(loopStatements);                
+                worklist.addAll(preds);
+            }            
+            
             //debug output
             System.err.println("Shadows for this loop exit:");
             for (Set<ISymbolShadow> shadows : shadowsOnPath) {
