@@ -20,6 +20,7 @@ package abc.tm.weaving.weaver.tmanalysis.mustalias;
 
 import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.ABORTED_CALLS_OTHER_METHOD_WITH_SHADOWS;
 import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.ABORTED_HIT_FINAL;
+import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.ABORTED_MAX_NUM_CONFIGS;
 import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.ABORTED_MAX_NUM_ITERATIONS;
 import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.FINISHED;
 import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.FINISHED_HIT_FINAL;
@@ -93,6 +94,12 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
             public boolean hitFinal() { return false; }
             public String toString() { return "aborted, exceeded maximal number of iterations ("+MAX_NUM_VISITED+")"; }
         },
+        ABORTED_MAX_NUM_CONFIGS{
+            public boolean isAborted() { return true; }
+            public boolean isFinishedSuccessfully() { return false; }
+            public boolean hitFinal() { return false; }
+            public String toString() { return "aborted, exceeded maximal number of configurations ("+MAX_NUM_CONFIGS+")"; }
+        },
 		ABORTED_CALLS_OTHER_METHOD_WITH_SHADOWS {
 			public boolean isAborted() { return true; }
 			public boolean isFinishedSuccessfully() { return false; }
@@ -152,7 +159,9 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
     
     protected final Map<Stmt,Integer> numberVisited;
     
-    protected final static int MAX_NUM_VISITED = 10;
+    protected final static int MAX_NUM_VISITED = 5;
+
+    protected final static int MAX_NUM_CONFIGS = 40;
 
     protected Status status;
 
@@ -234,7 +243,7 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
         //if we care about the shadow and it has a tag...
 		if(stmtsToAnalyze.contains(stmt) && stmt.hasTag(SymbolShadowTag.NAME)) {
 
-    		//retrive matches fot the current tracematch
+    		//retrieve matches for the current tracematch
     		SymbolShadowTag tag = (SymbolShadowTag) stmt.getTag(SymbolShadowTag.NAME);		
     		Set<ISymbolShadow> matchesForThisTracematch = tag.getMatchesForTracematch(tracematch);
     
@@ -251,6 +260,11 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
                             unnecessaryShadows.remove(shadow);
                         }
                         out.add(newConfig);
+
+                        if(out.size()>MAX_NUM_CONFIGS) {
+                            status = ABORTED_MAX_NUM_CONFIGS;
+                            return;
+                        }
                     }
                 }
             }
@@ -261,7 +275,7 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
             //if we not actually computed a join, copy instead 
             copy(in, out);
         }
-
+        
         //if not yet visited...
         if(!numberVisited.containsKey(stmt)) {
             numberVisited.put(stmt, 0);
