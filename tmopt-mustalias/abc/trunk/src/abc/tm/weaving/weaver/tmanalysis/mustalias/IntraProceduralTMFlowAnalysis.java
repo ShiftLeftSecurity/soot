@@ -316,7 +316,7 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
                 if(leftOp instanceof Local && !(rightOp instanceof Local)) {
                     Local local = (Local) leftOp;
                     Unit succ = graph.getSuccsOf(stmt).get(0);
-                    lmaa.addLocalAssignedExpressionTwice(local, succ);
+                    lmaa.invalidateInstanceKeyFor(local, succ);
                 }
             }
         }

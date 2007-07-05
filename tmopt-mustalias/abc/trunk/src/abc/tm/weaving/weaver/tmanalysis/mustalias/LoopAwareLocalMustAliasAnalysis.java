@@ -29,8 +29,19 @@ import soot.jimple.toolkits.pointer.LocalMustAliasAnalysis;
 import soot.toolkits.graph.UnitGraph;
 
 /**
+ * A special version of the local must-alias analysis that can be informed about redefinitions of local variables.
+ * For such variables, the must-alias information is then invalidated and set to {@link LocalMustAliasAnalysis#UNKNOWN}.
+ * E.g. assume the following example:
+ * <code>
+ * while(..) {
+ *   c = foo();        //(1)
+ *   c.doSomething();  //(2)
+ * }
+ * </code>
  * 
- *
+ * While it is certainly true that c at (2) must-alias c at (1) (they have the same value number), it is also true that
+ * in a second iteration, c at (2) may not alias the previous c at (2). Hence, the client analysis can invalidate the value of c
+ * when c is reassigned in a loop.  
  * @author Eric Bodden
  */
 public class LoopAwareLocalMustAliasAnalysis extends LocalMustAliasAnalysis {
@@ -42,7 +53,13 @@ public class LoopAwareLocalMustAliasAnalysis extends LocalMustAliasAnalysis {
         invalidInstanceKeys = new HashSet<Integer>();
     }
     
-    public void addLocalAssignedExpressionTwice(Local l, Unit stmtAfterAssignStmt) {
+    /**
+     * Invalidates the instance key for the given local at the given statement.
+     * @param l a Local variable that is assigned a non-Local value for the second time,
+     *   at the statement preceding stmtAfterAssignStmt  
+     * @param stmtAfterAssignStmt the statement after the statement assigning l
+     */
+    public void invalidateInstanceKeyFor(Local l, Unit stmtAfterAssignStmt) {
         Object key = ((HashMap)getFlowBefore(stmtAfterAssignStmt)).get(l);
         if(key!=UNKNOWN) {
             invalidInstanceKeys.add((Integer) key);
