@@ -37,7 +37,6 @@ import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.jimple.toolkits.callgraph.CallGraphBuilder;
 import soot.jimple.toolkits.callgraph.Edge;
 import soot.jimple.toolkits.pointer.DumbPointerAnalysis;
-import soot.jimple.toolkits.pointer.LocalMustAliasAnalysis;
 import soot.jimple.toolkits.pointer.LocalNotMayAliasAnalysis;
 import soot.jimple.toolkits.thread.IThreadLocalObjectsAnalysis;
 import soot.toolkits.graph.ExceptionalUnitGraph;
@@ -45,6 +44,7 @@ import soot.toolkits.graph.UnitGraph;
 import abc.main.Main;
 import abc.tm.weaving.aspectinfo.TMGlobalAspectInfo;
 import abc.tm.weaving.aspectinfo.TraceMatch;
+import abc.tm.weaving.weaver.tmanalysis.mustalias.LoopAwareLocalMustAliasAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.query.ReachableShadowFinder;
 import abc.tm.weaving.weaver.tmanalysis.query.SymbolShadowWithPTS;
 import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowTag;
@@ -114,7 +114,7 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
                 System.err.println("Analyzing: "+m+" on tracematch: "+tm.getName());
                 
                 UnitGraph g = new ExceptionalUnitGraph(m.retrieveActiveBody());
-    			LocalMustAliasAnalysis localMustAliasAnalysis = new LocalMustAliasAnalysis(g);
+    			LoopAwareLocalMustAliasAnalysis localMustAliasAnalysis = new LoopAwareLocalMustAliasAnalysis(g);
 				LocalNotMayAliasAnalysis localNotMayAliasAnalysis = new LocalNotMayAliasAnalysis(g);
                 Map<Local,Stmt> tmLocalsToDefStatements = findTmLocalDefinitions(g,tm);
 

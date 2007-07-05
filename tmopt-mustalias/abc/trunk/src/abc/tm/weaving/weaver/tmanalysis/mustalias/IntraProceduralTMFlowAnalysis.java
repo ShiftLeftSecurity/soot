@@ -42,10 +42,11 @@ import soot.Local;
 import soot.MethodOrMethodContext;
 import soot.SootMethod;
 import soot.Unit;
+import soot.Value;
+import soot.jimple.AssignStmt;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.jimple.toolkits.callgraph.Edge;
-import soot.jimple.toolkits.pointer.LocalMustAliasAnalysis;
 import soot.jimple.toolkits.pointer.LocalNotMayAliasAnalysis;
 import soot.toolkits.graph.DirectedGraph;
 import soot.toolkits.graph.UnitGraph;
@@ -144,7 +145,7 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
 
 	protected final Collection<String> overlappingShadowIDs;
     
-    protected final LocalMustAliasAnalysis lmaa;
+    protected final LoopAwareLocalMustAliasAnalysis lmaa;
 
     protected final LocalNotMayAliasAnalysis lmna;
 
@@ -170,7 +171,7 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
      * @param initialDisjunct Initial disjunct (functionally copied everywhere)
      * @param stmtsToAnalyze Statements to consider for this analysis.
 	 */
-	public IntraProceduralTMFlowAnalysis(TraceMatch tm, DirectedGraph<Unit> ug, SootMethod container, Map<Local, Stmt> tmLocalDefs, Disjunct initialDisjunct, Set<State> additionalInitialStates, Collection<Stmt> stmtsToAnalyze, LocalMustAliasAnalysis lmaa, LocalNotMayAliasAnalysis lmna, boolean abortWhenHittingFinal) {
+	public IntraProceduralTMFlowAnalysis(TraceMatch tm, DirectedGraph<Unit> ug, SootMethod container, Map<Local, Stmt> tmLocalDefs, Disjunct initialDisjunct, Set<State> additionalInitialStates, Collection<Stmt> stmtsToAnalyze, LoopAwareLocalMustAliasAnalysis lmaa, LocalNotMayAliasAnalysis lmna, boolean abortWhenHittingFinal) {
 		super(ug);
         this.container = container;
         this.tmLocalDefs = tmLocalDefs;
@@ -238,6 +239,23 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
 		}
 		//abort if we have side-effects
 		if(status.isAborted()) return;
+		
+        //if not yet visited, initialize
+        if(!numberVisited.containsKey(stmt)) {
+            numberVisited.put(stmt, 0);
+        }
+        
+        //increment counter
+        int numVisited = numberVisited.get(stmt);
+        numVisited++;
+        numberVisited.put(stmt, numVisited);
+        
+        if(numVisited>MAX_NUM_VISITED) {
+            status = ABORTED_MAX_NUM_ITERATIONS;
+        }
+
+        //update must-alias info
+        updateMustAlias(stmt,numVisited);
 				
         boolean foundEnabledShadow = false;
         //if we care about the shadow and it has a tag...
@@ -270,30 +288,41 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
             }
             
         }
+		
+        //if visited for the first time
+        if(numVisited==1) {
+            //...record this after-flow for comparison
+            stmtToFirstAfterFlow.put(stmt, out);
+        }
 
         if(!foundEnabledShadow) {
             //if we not actually computed a join, copy instead 
             copy(in, out);
         }
         
-        //if not yet visited...
-        if(!numberVisited.containsKey(stmt)) {
-            numberVisited.put(stmt, 0);
-            //...record this after-flow for comparison
-            stmtToFirstAfterFlow.put(stmt, out);
-        }
-        
-        //increment counter
-        int numVisited = numberVisited.get(stmt);
-        numVisited++;
-        numberVisited.put(stmt, numVisited);
-        
-        if(numVisited>MAX_NUM_VISITED) {
-            status = ABORTED_MAX_NUM_ITERATIONS;
-        }
+
     }
 	
-	protected boolean mightHaveSideEffects(Stmt s) {
+	/**
+     * @param stmt
+	 * @param numVisited 
+     */
+    private void updateMustAlias(Stmt stmt, int numVisited) {
+        if(numVisited==2) {
+            if(stmt instanceof AssignStmt) {
+                AssignStmt assignStmt = (AssignStmt) stmt;
+                Value leftOp = assignStmt.getLeftOp();
+                Value rightOp = assignStmt.getRightOp();
+                if(leftOp instanceof Local && !(rightOp instanceof Local)) {
+                    Local local = (Local) leftOp;
+                    Unit succ = graph.getSuccsOf(stmt).get(0);
+                    lmaa.addLocalAssignedExpressionTwice(local, succ);
+                }
+            }
+        }
+    }
+
+    protected boolean mightHaveSideEffects(Stmt s) {
 		Collection<ISymbolShadow> shadows = transitivelyCalledShadows(s);
 		for (ISymbolShadow shadow : shadows) {
 			if(overlappingShadowIDs.contains(shadow.getUniqueShadowId())) {
