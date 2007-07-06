@@ -31,7 +31,6 @@ import soot.Unit;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.jimple.toolkits.callgraph.Edge;
-import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroup;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroupRegistry;
 import abc.tm.weaving.weaver.tmanalysis.stages.CallGraphAbstraction;
 import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowTag;
@@ -120,22 +119,11 @@ public class Util {
     /**
      * Computes the set of all shadows that share a shadow group with one of the shadows in the input set.
      */
-    public static Set<ISymbolShadow> sameShadowGroup(Set<ISymbolShadow> shadows) {
-        //collect all shadow groups which have shadows in common with the current method
-        Set<ShadowGroup> allShadowGroups = ShadowGroupRegistry.v().getAllShadowGroups();
-        Set<ShadowGroup> overlappingShadowGroups = new HashSet<ShadowGroup>();
-        for (ShadowGroup shadowGroup : allShadowGroups) {
-            for (ISymbolShadow shadowInGroup : shadowGroup.getAllShadows()) {
-                for (ISymbolShadow shadowHere : shadows) {
-                    if(shadowInGroup.getUniqueShadowId().equals(shadowHere.getUniqueShadowId())) {
-                        overlappingShadowGroups.add(shadowGroup);
-                    }
-                }
-            }
-        }
-        Set<ISymbolShadow> overlappingShadows = new HashSet<ISymbolShadow>();
-        for (ShadowGroup shadowGroup : overlappingShadowGroups) {
-            overlappingShadows.addAll(shadowGroup.getAllShadows());         
+    public static Set<String> sameShadowGroup(Set<ISymbolShadow> shadows) {
+        Set<String> overlappingShadows = new HashSet<String>();
+        for (ISymbolShadow shadowHere : shadows) {
+            Set<String> overlappingShadowsForShadow = ShadowGroupRegistry.v().getShadowIdsOfShadowsInSameGroups(shadowHere);
+            overlappingShadows.addAll(overlappingShadowsForShadow);
         }
         return overlappingShadows;
     }

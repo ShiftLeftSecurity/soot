@@ -61,7 +61,6 @@ import abc.tm.weaving.weaver.tmanalysis.ds.Disjunct;
 import abc.tm.weaving.weaver.tmanalysis.stages.CallGraphAbstraction;
 import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowTag;
 import abc.tm.weaving.weaver.tmanalysis.util.ISymbolShadow;
-import abc.tm.weaving.weaver.tmanalysis.util.SymbolShadow;
 
 public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<Configuration>> implements TMFlowAnalysis {
 
@@ -206,11 +205,9 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
         
         this.unnecessaryShadows = new HashSet<ISymbolShadow>(allShadows);
 
-        Set<ISymbolShadow> overlappingShadows = Util.sameShadowGroup(allShadows);
-        
         //store all IDs of shadows in those groups
-        this.overlappingShadowIDs = SymbolShadow.uniqueShadowIDsOf(overlappingShadows);
-		
+        this.overlappingShadowIDs  = Util.sameShadowGroup(allShadows);
+        
         this.numberVisited = new HashMap<Stmt,Integer>();
         
 		//do the analysis

@@ -21,6 +21,7 @@ package abc.tm.weaving.weaver.tmanalysis.ds;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +58,15 @@ public class FinalConfigsUnitGraph implements DirectedGraph<Unit> {
     public FinalConfigsUnitGraph(DirectedGraph<Unit> originalGraph, Set<ISymbolShadow> shadowsInMethod, TraceMatch owner) {
         this.originalGraph = originalGraph;
         
-        Set<ISymbolShadow> overlappingShadows = Util.sameShadowGroup(shadowsInMethod);        
+        Set<String> overlappingShadowIDs = Util.sameShadowGroup(shadowsInMethod);
+        Set<ISymbolShadow> overlappingShadows = new HashSet<ISymbolShadow>();
+        for (String uniqueId : overlappingShadowIDs) {
+            SymbolShadow shadow = SymbolShadow.getSymbolShadowForUniqueID(uniqueId);
+            if(shadow.isEnabled()) {
+                overlappingShadows.add(shadow);
+            }
+        }
+        
         Map<TraceMatch,Set<ISymbolShadow>> tmToShadows = new HashMap<TraceMatch, Set<ISymbolShadow>>();
         tmToShadows.put(owner, overlappingShadows);
                 
