@@ -91,6 +91,11 @@ public class ShadowMotion {
         //find all active shadows in the method
         Collection<Stmt> loopStatements = loop.getLoopStatements();
         
+        if(Util.getAllActiveShadows(tm, loopStatements).isEmpty()) {
+            System.err.println("Loop has no shadows.");
+            return;
+        }
+        
         IntraProceduralTMFlowAnalysis flowAnalysis = new IntraProceduralTMFlowAnalysis(
                 tm,
                 g,
