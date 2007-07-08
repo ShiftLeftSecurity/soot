@@ -241,11 +241,6 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
 
     protected void flowThrough(Set<Configuration> in, Unit u, Set<Configuration> out) {
         Stmt stmt = (Stmt) u;
-		//check for side-effects
-		if(mightHaveSideEffects(stmt)) {
-			status = ABORTED_CALLS_OTHER_METHOD_WITH_SHADOWS;
-		}
-		
         //if not yet visited, initialize
         if(!numberVisited.containsKey(stmt)) {
             numberVisited.put(stmt, 0);
@@ -255,9 +250,15 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
         int numVisited = numberVisited.get(stmt);
         numVisited++;
         numberVisited.put(stmt, numVisited);
-        
+
+        //if visited too often, abort
         if(numVisited>MAX_NUM_VISITED) {
             status = ABORTED_MAX_NUM_ITERATIONS;
+        }
+
+        //check for side-effects (only necessary at first visit, as information does not change and we abort anyway, if side-effects exist)
+        if(numVisited==1 && mightHaveSideEffects(stmt)) {
+            status = ABORTED_CALLS_OTHER_METHOD_WITH_SHADOWS;
         }
 
         if(status.isAborted()) throw new AbortedException();
