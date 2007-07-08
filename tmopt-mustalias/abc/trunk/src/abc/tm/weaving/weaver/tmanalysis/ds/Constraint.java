@@ -305,8 +305,6 @@ public class Constraint implements Cloneable {
 			return true;
 		if (obj == null)
 			return false;
-		if (getClass() != obj.getClass())
-			return false;
 		final Constraint other = (Constraint) obj;
 		if (disjuncts == null) {
 			if (other.disjuncts != null)
