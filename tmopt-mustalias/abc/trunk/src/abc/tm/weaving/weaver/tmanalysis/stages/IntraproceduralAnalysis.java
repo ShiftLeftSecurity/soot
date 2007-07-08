@@ -41,11 +41,13 @@ import soot.jimple.toolkits.pointer.LocalNotMayAliasAnalysis;
 import soot.jimple.toolkits.thread.IThreadLocalObjectsAnalysis;
 import soot.toolkits.graph.ExceptionalUnitGraph;
 import soot.toolkits.graph.UnitGraph;
+import abc.main.Debug;
 import abc.main.Main;
 import abc.tm.weaving.aspectinfo.TMGlobalAspectInfo;
 import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.LoopAwareLocalMustAliasAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.query.ReachableShadowFinder;
+import abc.tm.weaving.weaver.tmanalysis.query.ShadowRegistry;
 import abc.tm.weaving.weaver.tmanalysis.query.SymbolShadowWithPTS;
 import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowTag;
 import abc.tm.weaving.weaver.tmanalysis.subanalyses.CannotTriggerFinalElimination;
@@ -66,13 +68,17 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 	protected final static boolean RUN_REAL_POINTS_TO = true;
 	
 	public static TMGlobalAspectInfo gai = (TMGlobalAspectInfo) Main.v().getAbcExtension().getGlobalAspectInfo();
+	
+    protected CallGraph cg;
+
+    protected int numShadowsBefore;
+
 
 	/**
 	 * {@inheritDoc}
 	 */
 	protected void doAnalysis() {
 		TMShadowTagger.v().apply();
-		CallGraph cg; 
 		@SuppressWarnings("unused") //maybe used later
 		IThreadLocalObjectsAnalysis tloa = new IThreadLocalObjectsAnalysis() {
 			public boolean isObjectThreadLocal(Value localOrRef,SootMethod sm) {
@@ -91,7 +97,8 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 		}
 		
 		Set reachableShadows = ReachableShadowFinder.v().reachableShadows(cg);
-		Map tmNameToShadows = ShadowsPerTMSplitter.splitShadows(reachableShadows);
+		numShadowsBefore = reachableShadows.size();
+        Map tmNameToShadows = ShadowsPerTMSplitter.splitShadows(reachableShadows);
 		
         boolean mayStartThreads = mayStartThreads();
         
@@ -191,6 +198,26 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 		return localToStmtAfterDefStmt;		
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	protected void defaultStatistics() {
+        if(Debug.v().tmShadowStatistics) {
+            //recompute reachable shadows 
+            ReachableShadowFinder.reset();
+            Set reachableShadows = ReachableShadowFinder.v().reachableShadows(cg);
+            int numRemainingShadows = ShadowRegistry.v().enabledShadows().size();
+                
+            logToStatistics("shadows-removed", numShadowsBefore-reachableShadows.size()+"");
+            logToStatistics("shadows-retained", "0");
+            logToStatistics("shadows-remaining", numRemainingShadows+"");
+            logToStatistics("stage-time", stageTimer);
+            logToStatistics("shadow-update-time", shadowUpdateTimer);
+        } else {
+            super.defaultStatistics();
+        }
+	}
+	
 	
 	
 	//singleton pattern
