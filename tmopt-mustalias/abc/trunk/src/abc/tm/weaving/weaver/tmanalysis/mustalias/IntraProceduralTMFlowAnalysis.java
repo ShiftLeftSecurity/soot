@@ -149,7 +149,9 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
 
 	protected final Collection<Stmt> stmtsToAnalyze;
 
-	protected final Collection<String> overlappingShadowIDs;
+    protected final Collection<Stmt> stmtsWhichMayNotCallOtherMethodsWithShadows;
+
+    protected final Collection<String> overlappingShadowIDs;
     
     protected final LoopAwareLocalMustAliasAnalysis lmaa;
 
@@ -172,15 +174,18 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
 
     protected Status status;
 
+
 	/**
 	 * Performs the tracematch-state flow analysis on the given tracematch and unitgraph.
      * @param initialDisjunct Initial disjunct (functionally copied everywhere)
      * @param stmtsToAnalyze Statements to consider for this analysis.
+	 * @param patchingChain 
 	 */
-	public IntraProceduralTMFlowAnalysis(TraceMatch tm, DirectedGraph<Unit> ug, SootMethod container, Map<Local, Stmt> tmLocalDefs, Disjunct initialDisjunct, Set<State> additionalInitialStates, Collection<Stmt> stmtsToAnalyze, LoopAwareLocalMustAliasAnalysis lmaa, LocalNotMayAliasAnalysis lmna, boolean abortWhenHittingFinal) {
+	public IntraProceduralTMFlowAnalysis(TraceMatch tm, DirectedGraph<Unit> ug, SootMethod container, Map<Local, Stmt> tmLocalDefs, Disjunct initialDisjunct, Set<State> additionalInitialStates, Collection<Stmt> stmtsToAnalyze, Collection<Stmt> stmtsWhichMayNotCallOtherMethodsWithShadows, LoopAwareLocalMustAliasAnalysis lmaa, LocalNotMayAliasAnalysis lmna, boolean abortWhenHittingFinal) {
 		super(ug);
         this.container = container;
         this.tmLocalDefs = tmLocalDefs;
+        this.stmtsWhichMayNotCallOtherMethodsWithShadows = stmtsWhichMayNotCallOtherMethodsWithShadows;
         this.lmaa = lmaa;
         this.lmna = lmna;
         this.abortWhenHittingFinal = abortWhenHittingFinal;
@@ -256,8 +261,10 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
             status = ABORTED_MAX_NUM_ITERATIONS;
         }
 
-        //check for side-effects (only necessary at first visit, as information does not change and we abort anyway, if side-effects exist)
-        if(numVisited==1 && mightHaveSideEffects(stmt)) {
+        //check for side-effects
+        //(only necessary if the statement is actually part of the body and
+        // only at first visit, as information does not change and we abort anyway, if side-effects exist)
+        if(numVisited==1 && stmtsWhichMayNotCallOtherMethodsWithShadows.contains(stmt) && mightHaveSideEffects(stmt)) {
             status = ABORTED_CALLS_OTHER_METHOD_WITH_SHADOWS;
         }
 

@@ -63,6 +63,12 @@ public class CannotTriggerFinalElimination {
             Stmt st = (Stmt)unitIter.next();
             allStmts.add(st);
         }
+        
+        Collection<Stmt> bodyStmts = new HashSet<Stmt>();
+        for (Unit u : g.getBody().getUnits()) {
+            Stmt st = (Stmt)u;
+            bodyStmts.add(st);
+        }
     
         IntraProceduralTMFlowAnalysis flowAnalysis = new IntraProceduralTMFlowAnalysis(
                 tm,
@@ -72,6 +78,7 @@ public class CannotTriggerFinalElimination {
                 new MustMayNotAliasDisjunct(),
                 new HashSet<State>(),
                 allStmts,
+                bodyStmts,
                 localMustAliasAnalysis,
                 localNotMayAliasAnalysis,
                 true

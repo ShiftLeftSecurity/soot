@@ -104,6 +104,7 @@ public class ShadowMotion {
                 new MustMayNotAliasDisjunct(),
                 new HashSet<State>(),
                 loopStatements,
+                loopStatements,
                 localMustAliasAnalysis,
                 localNotMayAliasAnalysis,
                 false

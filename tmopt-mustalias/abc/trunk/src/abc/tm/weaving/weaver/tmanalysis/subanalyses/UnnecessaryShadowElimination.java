@@ -66,6 +66,7 @@ public class UnnecessaryShadowElimination {
         		new MustMayNotAliasDisjunct(),
         		new HashSet<State>(),
         		allStmts,
+        		allStmts,
                 localMustAliasAnalysis,
                 localNotMayAliasAnalysis,
                 false /* do not abort if final state is hit --- we don't care here */
