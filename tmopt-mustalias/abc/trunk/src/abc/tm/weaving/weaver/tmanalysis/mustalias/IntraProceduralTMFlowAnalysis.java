@@ -65,6 +65,13 @@ import abc.tm.weaving.weaver.tmanalysis.util.ISymbolShadow;
 public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<Configuration>> implements TMFlowAnalysis {
 
 	/**
+     * AbortedException
+     *
+     * @author Eric Bodden
+     */
+    private static class AbortedException extends RuntimeException { }
+
+    /**
 	 * Status
 	 *
 	 * @author Eric Bodden
@@ -212,7 +219,11 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
         
 		//do the analysis
 		this.status = RUNNING;
-		doAnalysis();
+		try {
+		    doAnalysis();
+		} catch(AbortedException e) {
+		    //ignore
+		}
 		if(!this.status.isAborted()) {
             if(this.status.hitFinal()) {
                 this.status = FINISHED_HIT_FINAL;
@@ -234,8 +245,6 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
 		if(mightHaveSideEffects(stmt)) {
 			status = ABORTED_CALLS_OTHER_METHOD_WITH_SHADOWS;
 		}
-		//abort if we have side-effects
-		if(status.isAborted()) return;
 		
         //if not yet visited, initialize
         if(!numberVisited.containsKey(stmt)) {
@@ -250,6 +259,8 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
         if(numVisited>MAX_NUM_VISITED) {
             status = ABORTED_MAX_NUM_ITERATIONS;
         }
+
+        if(status.isAborted()) throw new AbortedException();
 
         //update must-alias info
         updateMustAlias(stmt,numVisited);
