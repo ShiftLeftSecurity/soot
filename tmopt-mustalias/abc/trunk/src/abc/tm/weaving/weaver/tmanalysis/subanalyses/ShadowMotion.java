@@ -42,7 +42,6 @@ import abc.main.Main;
 import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.matching.State;
 import abc.tm.weaving.weaver.tmanalysis.Util;
-import abc.tm.weaving.weaver.tmanalysis.ds.Configuration;
 import abc.tm.weaving.weaver.tmanalysis.ds.MustMayNotAliasDisjunct;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.LoopAwareLocalMustAliasAnalysis;
@@ -108,14 +107,20 @@ public class ShadowMotion {
         System.err.println("Analysis done with status: "+status);
 
         //if we abort once, we are gonna abort for the other additional initial states too, so
-        //just return, to preceed with the next loop
+        //just return, to proceed with the next loop
         
-        //FIXME: optimization for case of status.hitFinal() does not work yet: reach FP after one iteration even in cate of call_next+
-        //Do we need skip-loops on final states?
-        if(status.isAborted() || status.hitFinal()) return;
+        if(status.isAborted()) return;
         
         assert status.isFinishedSuccessfully();
     
+        //check how often we had to iterate...
+        for (Stmt loopExit : loop.getLoopExits()) {
+            if(!flowAnalysis.statementsReachingFixedPointAtOnce().contains(loopExit)) {
+                System.err.println("FP not reached after one iteration. Cannot optimize.");
+                return;
+            }
+        }
+        
         Weaver weaver = Main.v().getAbcExtension().getWeaver();
         
         Set<ISymbolShadow> shadowsThatWereMoved = new HashSet<ISymbolShadow>();
@@ -126,20 +131,10 @@ public class ShadowMotion {
         adviceList.unflush();
         //for each loop exit
         for (Stmt loopExit : loop.getLoopExits()) {
-            if(!flowAnalysis.statementsReachingFixedPointAtOnce().contains(loopExit)) {
-                System.err.println("FP not reached after one iteration. Cannot optimize.");
-                break;
-            }
-            
             System.err.println("Processing loop exit: "+loopExit);
 
-            //should either all reach the fixed point at once or none of them
-            for (Stmt loopStmt : loopStatements) {
-                assert flowAnalysis.statementsReachingFixedPointAtOnce().contains(loopStmt);
-            }
-            
             //get the flow that wraps around the loop
-            Set<Configuration> wrapFlow = flowAnalysis.getFlowAfter(loop.getBackJumpStmt());
+//            Set<Configuration> wrapFlow = flowAnalysis.getFlowAfter(loop.getBackJumpStmt());
             
             //walk through all statements in the loop, recording all shadows up to the loop exit;
             //we store a set for each statement that is annotated with shadows;
@@ -150,12 +145,13 @@ public class ShadowMotion {
             while(!worklist.isEmpty()) {
                 Unit curr = worklist.remove();
                 
-                //we see a statement after which the analysis information is the same as after
-                //the back jump; so all shadows that precede the statement are unnecessary; hence stop
-                Set<Configuration> thisFlow = flowAnalysis.getFlowAfter(curr);
-                if(wrapFlow.equals(thisFlow)) break;
+//                //we see a statement after which the analysis information is the same as after
+//                //the back jump; so all shadows that precede the statement are unnecessary; hence stop
+//                //TODO unsound -> what do we actually want here?
+//                Set<Configuration> thisFlow = flowAnalysis.getFlowAfter(curr);
+//                if(wrapFlow.equals(thisFlow)) break;
                 
-                Set<ISymbolShadow> shadows = Util.getAllActiveShadows(Collections.singleton(curr));
+                Set<ISymbolShadow> shadows = Util.getAllActiveShadows(tm,Collections.singleton(curr));
                 if(!shadows.isEmpty()) {
                     //add to the front
                     shadowsOnPath.add(0,shadows);
@@ -221,7 +217,7 @@ public class ShadowMotion {
             }
         }
         //disable all shadows in the loop
-        Set<ISymbolShadow> loopShadows = Util.getAllActiveShadows(loop.getLoopStatements());
+        Set<ISymbolShadow> loopShadows = Util.getAllActiveShadows(tm,loop.getLoopStatements());
         for (ISymbolShadow shadow : loopShadows) {
             if(status.hitFinal()) {
                 //we hit the final state; hence, it is not ok to disable the shadows in the loop completely;

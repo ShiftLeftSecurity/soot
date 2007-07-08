@@ -31,6 +31,7 @@ import soot.Unit;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.jimple.toolkits.callgraph.Edge;
+import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroupRegistry;
 import abc.tm.weaving.weaver.tmanalysis.stages.CallGraphAbstraction;
 import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowTag;
@@ -44,14 +45,14 @@ import abc.tm.weaving.weaver.tmanalysis.util.ISymbolShadow;
 public class Util {
 
     /**
-     * Returns a set of all active shadows in the given list of units.
+     * Returns a set of all active shadows for the given {@link TraceMatch} in the given list of units.
      */
-    public static Set<ISymbolShadow> getAllActiveShadows(Collection<? extends Unit> units) {
+    public static Set<ISymbolShadow> getAllActiveShadows(TraceMatch tm, Collection<? extends Unit> units) {
         Set<ISymbolShadow> allShadows = new HashSet<ISymbolShadow>();
     	for (Unit unit : units) {
             if(unit.hasTag(SymbolShadowTag.NAME)) {
             	SymbolShadowTag tag = (SymbolShadowTag) unit.getTag(SymbolShadowTag.NAME);
-            	for (ISymbolShadow match : tag.getAllMatches()) {
+            	for (ISymbolShadow match : tag.getMatchesForTracematch(tm)) {
     				if(match.isEnabled()) {
     					allShadows.add(match);
     				}

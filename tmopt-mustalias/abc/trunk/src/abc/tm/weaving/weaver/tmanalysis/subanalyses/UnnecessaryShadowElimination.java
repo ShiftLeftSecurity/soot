@@ -74,7 +74,7 @@ public class UnnecessaryShadowElimination {
 		Status status = flowAnalysis.getStatus();
 		System.err.println("Analysis done with status: "+status);
 
-		//if we abort once, we are gonna abort for the other additional initial states, too so
+		//if we abort once, we are going to abort for the other additional initial states, too so
 		//just proceed with the same method
 		if(status.isAborted()) return false;
 		
@@ -91,7 +91,7 @@ public class UnnecessaryShadowElimination {
     	}
     	
         //get all shadows in the method body
-        Set<ISymbolShadow> allShadows = Util.getAllActiveShadows(g.getBody().getUnits());
+        Set<ISymbolShadow> allShadows = Util.getAllActiveShadows(tm,g.getBody().getUnits());
         boolean allRemoved = flowAnalysis.getUnnecessaryShadows().equals(allShadows);
         
         if(allRemoved) {

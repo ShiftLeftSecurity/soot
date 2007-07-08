@@ -201,12 +201,12 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
 
 		//see which shadow groups are present in the code we look at;
         //also initialize invariantStatements to the set of all statements with a shadow
-		Set<ISymbolShadow> allShadows = Util.getAllActiveShadows(stmtsToAnalyze);
+		Set<ISymbolShadow> allShadowsForTM = Util.getAllActiveShadows(tm, stmtsToAnalyze);
         
-        this.unnecessaryShadows = new HashSet<ISymbolShadow>(allShadows);
+        this.unnecessaryShadows = new HashSet<ISymbolShadow>(allShadowsForTM);
 
         //store all IDs of shadows in those groups
-        this.overlappingShadowIDs  = Util.sameShadowGroup(allShadows);
+        this.overlappingShadowIDs  = Util.sameShadowGroup(allShadowsForTM);
         
         this.numberVisited = new HashMap<Stmt,Integer>();
         
@@ -286,18 +286,16 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
             
         }
 		
-        //if visited for the first time
-        if(numVisited==1) {
-            //...record this after-flow for comparison
-            stmtToFirstAfterFlow.put(stmt, out);
-        }
-
         if(!foundEnabledShadow) {
             //if we not actually computed a join, copy instead 
             copy(in, out);
         }
         
-
+        //if visited for the first time
+        if(numVisited==1) {
+            //...record this after-flow for comparison
+            stmtToFirstAfterFlow.put(stmt, new HashSet<Configuration>(out));
+        }
     }
 	
 	/**
@@ -405,7 +403,11 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
             State state = (State) stateIter.next();
             if(!state.isFinalNode()) {
 
-                Configuration entryInitialConfiguration = new Configuration(this,Collections.singleton(state)) {
+                Configuration entryInitialConfiguration = new Configuration(
+                		this,
+                		Collections.singleton(state),
+                		!abortWhenHittingFinal //count final-hits, if not aborting when hitting final
+                	) {
                     /**
                      * Rewrites the mapping from tracematch variables to locals to a mapping from
                      * tracematch variables to instance keys.

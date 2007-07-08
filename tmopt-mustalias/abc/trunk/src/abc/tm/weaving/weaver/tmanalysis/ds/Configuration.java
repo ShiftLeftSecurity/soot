@@ -33,7 +33,6 @@ import abc.tm.weaving.matching.SMEdge;
 import abc.tm.weaving.matching.SMNode;
 import abc.tm.weaving.matching.State;
 import abc.tm.weaving.matching.TMStateMachine;
-import abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.TMFlowAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.util.ISymbolShadow;
 
@@ -57,41 +56,46 @@ public class Configuration implements Cloneable {
 		configToUniqueConfig.clear();
 	}
 
-
 	/** The mapping from states to constraints. */
 	protected HashMap<State,Constraint> stateToConstraint;
 	
-	/** Statistical iteration counter. */
-	public static int iterationCount;
-
+	protected int numHitFinal;
+	
 	protected final TraceMatch tm;
 
 	protected final TMFlowAnalysis flowAnalysis;
-	
+
+	private final boolean countFinalHits;
+		
 	/**
 	 * Creates a new configuration holding a mapping for the given states and registering active
 	 * shadows with the given analysis.
 	 */
-	public Configuration(TMFlowAnalysis flowAnalysis,Set<State> additionalInitialStates) {
+	public Configuration(TMFlowAnalysis flowAnalysis, Set<State> additionalInitialStates, boolean countFinalHits) {
 		this.flowAnalysis = flowAnalysis;
+		this.countFinalHits = countFinalHits;
 		this.tm = flowAnalysis.getTracematch();
 		stateToConstraint = new HashMap();
-		iterationCount = 0;
+		numHitFinal = 0;
 
 		//associate each initial state with a TRUE constraint and all other states with a FALSE constraint
 		Iterator<State> stateIter = tm.getStateMachine().getStateIterator();
 		while(stateIter.hasNext()) {
 			SMNode state = (SMNode) stateIter.next();
-			Constraint constraint = (state.isInitialNode() || additionalInitialStates.contains(state)) ?
-                Constraint.TRUE : Constraint.FALSE; 
+			Constraint constraint;
+			if(state.isInitialNode() || additionalInitialStates.contains(state))
+				//initial states and such states that we assume as initial always hold TRUE
+                constraint = Constraint.TRUE;
+			else if(state.isFinalNode())
+				//for final states we can assume the memory-efficient FINAL
+				constraint = Constraint.FINAL;
+			else 
+				//default is FALSE
+				constraint = Constraint.FALSE; 
 			stateToConstraint.put(state, constraint);
 		}
 	}
 	
-	public Configuration(IntraProceduralTMFlowAnalysis flowAnalysis) {
-		this(flowAnalysis, null);
-	}
-
 	/**
 	 * Returns the successor configuration of this configuration under edge.
 	 * Processes all currently active threads which are registered.
@@ -124,10 +128,6 @@ public class Configuration implements Cloneable {
 			
 			//if the labels coincide
 			if(transition.getLabel().equals(symbolName)) {
-
-				//statistics
-				iterationCount++;
-				
 				
 				if(transition.isSkipEdge()) {
 					//if we have a skip transition
@@ -162,9 +162,14 @@ public class Configuration implements Cloneable {
 							allVariables, 
 							transition.getTarget(), 
 							bindings, 
-							shadowId,
-							flowAnalysis
+							shadowId
 					); 
+					
+					if(transition.getTarget().isFinalNode() && !newConstraint.equals(Constraint.FALSE)) {
+						flowAnalysis.hitFinal();
+						if(countFinalHits)
+							tmp.numHitFinal++;
+					}
 
 					//put the new constraint on the target state
 					//via a disjoint update
@@ -175,6 +180,14 @@ public class Configuration implements Cloneable {
 
 		//disjointly merge the constraints of tmp and skip
 		tmp = tmp.getJoinWith(skip);
+		
+		//clear constraints at final states (for efficiency)
+		for (State s : tmp.stateToConstraint.keySet()) {
+			if(s.isFinalNode()) {
+				tmp.stateToConstraint.put(s, Constraint.FINAL);
+			}
+		}
+		
 		//return an interned version of the result
 		return tmp.intern();
 	}	
@@ -307,7 +320,10 @@ public class Configuration implements Cloneable {
 			res += "\t" + state.getNumber() + " -> " + stateToConstraint.get(state) + "\n";			
 		}
 		res += "]\n";
-
+		
+		if(countFinalHits)
+			res += "hit final "+numHitFinal+" times\n";
+		
 		return res;
 	}
 	
@@ -336,6 +352,7 @@ public class Configuration implements Cloneable {
 				* result
 				+ ((stateToConstraint == null) ? 0 : stateToConstraint
 						.hashCode());
+		result = prime * result + numHitFinal;
 		return result;
 	}
 
@@ -356,6 +373,9 @@ public class Configuration implements Cloneable {
 				return false;
 		} else if (!stateToConstraint.equals(other.stateToConstraint))
 			return false;
+		if(numHitFinal!=other.numHitFinal) {
+			return false;
+		}
 		assert this.tm.equals(other.tm);
 		return true;
 	}

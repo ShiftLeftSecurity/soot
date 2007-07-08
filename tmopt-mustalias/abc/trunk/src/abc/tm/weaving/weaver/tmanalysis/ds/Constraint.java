@@ -66,6 +66,9 @@ public class Constraint implements Cloneable {
 	/** The set of disjuncts for this constraint (DNF). */
 	protected HashSet disjuncts;
 	
+	/** The unique constraint for the final states. */
+	public static Constraint FINAL;
+
 	/** The unique false constraint. */
 	public static Constraint FALSE;
 	
@@ -83,7 +86,8 @@ public class Constraint implements Cloneable {
 			/**
 			 * Returns this (FALSE).
 			 */
-			public Constraint addBindingsForSymbol(Collection allVariables, SMNode to, Map bindings, String shadowId, TMFlowAnalysis flowAnalysis) {
+			@Override
+			public Constraint addBindingsForSymbol(Collection allVariables, SMNode to, Map bindings, String shadowId) {
 				//FALSE stays FALSE
 				return this;
 			}
@@ -91,27 +95,62 @@ public class Constraint implements Cloneable {
 			/**
 			 * Returns this (FALSE).
 			 */
+			@Override
 			public Constraint addNegativeBindingsForSymbol(Collection allVariables, SMNode state, Map bindings, String shadowId) {
 				//FALSE stays FALSE
 				return this;
 			}
 			
+			@Override
 			protected Object clone() {
 				return new Constraint(disjuncts);
 			}
-		};
-		
+		}.intern();
+
+		//initialize FINAL
+		FINAL = new Constraint(new HashSet()) {			
+			
+			/**
+			 * Returns this (FALSE).
+			 */
+			@Override
+			public Constraint addBindingsForSymbol(Collection allVariables, SMNode to, Map bindings, String shadowId) {
+				//FINAL stays FINAL
+				return this;
+			}
+			
+			/**
+			 * Returns this (FALSE).
+			 */
+			@Override
+			public Constraint addNegativeBindingsForSymbol(Collection allVariables, SMNode state, Map bindings, String shadowId) {
+				//FINAL stays FINAL
+				return this;
+			}
+			
+			@Override
+			protected Object clone() {
+				return this;
+			}
+			
+			@Override
+			public String toString() {
+				return "FINAL";
+			}
+		}.intern();
+
 		//initialize TRUE; this holds a single empty disjunct
 		HashSet set = new HashSet();
 		set.add(falseProtoType);		
 		TRUE = new Constraint(set) {
 			
+			@Override
 			protected Object clone() {
 				return new Constraint(disjuncts);
 			}
-		};
+		}.intern();
 		
-		Disjunct.FALSE = falseProtoType;
+		Disjunct.FALSE = falseProtoType.intern();
 	}
 	
 	/**
@@ -133,12 +172,11 @@ public class Constraint implements Cloneable {
 	 * @param to the state the state machine is driven into by taking this transition
 	 * @param bindings the bindings of that edge in form of a mapping {@link String} to {@link PointsToSet}
 	 * @param shadowId the shadow-id of the shadow that triggered this edge
-	 * @param flowAnalysis the flow analysis; used as call-back to register active edges
 	 * @return the updated constraint; this is a fresh instance, 
 	 * the disjuncts of this copy hold the history of the disjuncts of this constraint plus
 	 * the shadowId that is passed in
 	 */
-	public Constraint addBindingsForSymbol(Collection allVariables, SMNode to, Map bindings, String shadowId, TMFlowAnalysis flowAnalysis) {
+	public Constraint addBindingsForSymbol(Collection allVariables, SMNode to, Map bindings, String shadowId) {
 		//create a set for the resulting disjuncts
 		HashSet resultDisjuncts = new HashSet();
 		//for all current disjuncts
@@ -149,21 +187,18 @@ public class Constraint implements Cloneable {
 			Disjunct newDisjunct = disjunct.addBindingsForSymbol(allVariables,bindings,shadowId);
 			assert newDisjunct!=null;
             
-            //references to FALSE are useless in DNF so only add if it's not FALSE
+            //FALSE is a marker for "no match"; do not add it as it represents TRUE in the Constraint
             if(newDisjunct!= Disjunct.FALSE) {
                 resultDisjuncts.add(newDisjunct);
-
-                //if we just hit a final node, notify the analysis
-                if(to.isFinalNode()) {
-                    flowAnalysis.hitFinal();
-                }
             }
 		}
 		
 		if(resultDisjuncts.isEmpty()) {
 			//if no disjunts are left, this means nothing else but FALSE
 			return FALSE;	
-
+		} else if(resultDisjuncts.contains(FALSE)) {
+			//if the set of disjuncts contains the empty set, this represents TRUE
+			return TRUE;
 		} else {
 			//return an interned version of the the updated copy;
 			//the disjuncts of this copy hold clones of the history of the original disjuncts
@@ -246,7 +281,7 @@ public class Constraint implements Cloneable {
 	}
 	
 	/**
-	 * @returnthe number of disjuncts in this constraint
+	 * @return the number of disjuncts in this constraint
 	 */
 	public int size() {		
 		return disjuncts.size();

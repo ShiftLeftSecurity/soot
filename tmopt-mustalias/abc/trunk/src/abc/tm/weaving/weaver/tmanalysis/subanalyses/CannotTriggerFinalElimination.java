@@ -53,9 +53,9 @@ public class CannotTriggerFinalElimination {
         System.err.println("Running optimization 'cannot trigger final'...");
 
         //get all active shadows in the method
-        Set<ISymbolShadow> allMethodShadows = Util.getAllActiveShadows(g.getBody().getUnits());
+        Set<ISymbolShadow> allMethodShadows = Util.getAllActiveShadows(tm,g.getBody().getUnits());
         
-        //generate an augmented unit graph modelling all possible incoming executions to the method and all possible outgoing executions from the method
+        //generate an augmented unit graph modeling all possible outgoing executions from the method
         DirectedGraph<Unit> augmentedGraph = new FinalConfigsUnitGraph(g,allMethodShadows,tm);
         
         Collection<Stmt> allStmts = new HashSet<Stmt>();
