@@ -38,6 +38,7 @@ import soot.toolkits.graph.BriefUnitGraph;
 import soot.toolkits.graph.LoopNestTree;
 import soot.toolkits.graph.MHGPostDominatorsFinder;
 import soot.toolkits.graph.UnitGraph;
+import soot.util.IdentityHashSet;
 import abc.main.Main;
 import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.matching.State;
@@ -140,10 +141,12 @@ public class ShadowMotion {
             //we store a set for each statement that is annotated with shadows;
             //we start at the loop exit and then walk backwards through the loop in a depth-first fashion
             LinkedList<Set<ISymbolShadow>> shadowsOnPath = new LinkedList<Set<ISymbolShadow>>();
+            Set<Unit> visited = new IdentityHashSet<Unit>();
             Queue<Unit> worklist = new LinkedList<Unit>();
             worklist.add(loopExit);
             while(!worklist.isEmpty()) {
                 Unit curr = worklist.remove();
+                visited.add(curr);
                 
 //                //we see a statement after which the analysis information is the same as after
 //                //the back jump; so all shadows that precede the statement are unnecessary; hence stop
@@ -163,7 +166,8 @@ public class ShadowMotion {
                 
                 //get all predecessors in the loop and add them to the worklist
                 List<Unit> preds = new ArrayList<Unit>(g.getPredsOf(curr));
-                preds.retainAll(loopStatements);                
+                preds.retainAll(loopStatements);     
+                preds.removeAll(visited);
                 worklist.addAll(preds);
             }            
             
