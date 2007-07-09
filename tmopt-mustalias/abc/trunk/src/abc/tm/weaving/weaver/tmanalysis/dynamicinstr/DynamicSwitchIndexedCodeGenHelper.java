@@ -142,7 +142,6 @@ public class DynamicSwitchIndexedCodeGenHelper extends IndexedCodeGenHelper {
         
         IndexingScheme scheme = tm.getIndexingScheme();
         
-        //FIXME does not compile any more
         boolean stateUsesIndexing = scheme.getStructure(state).height()>0;
         
         String disjunctsFieldName = stateUsesIndexing ? "indexedDisjuncts" : "disjuncts";
