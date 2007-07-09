@@ -47,6 +47,7 @@ import abc.tm.weaving.aspectinfo.TMGlobalAspectInfo;
 import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.LoopAwareLocalMustAliasAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.query.ReachableShadowFinder;
+import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroupRegistry;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowRegistry;
 import abc.tm.weaving.weaver.tmanalysis.query.SymbolShadowWithPTS;
 import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowTag;
@@ -95,8 +96,31 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 			cg = cgb.getCallGraph();
 			cgb.build();
 		}
+
+		int i;
+		for(i=0;i<5;i++) {
+	        oneIteration();
+	        ShadowGroupRegistry.v().pruneShadowGroupsWhichHaveBecomeIncomplete();
+	        if(!ShadowRegistry.v().wasAnyResidueChanged()) {
+	            break;
+	        }
+		}
 		
-		Set reachableShadows = ReachableShadowFinder.v().reachableShadows(cg);
+		System.err.println("Finished after "+(i+1)+" iterations.");
+        
+//        //set shadow-points
+//        Weaver weaver = Main.v().getAbcExtension().getWeaver();        
+//        ShadowPointsSetter sps = new ShadowPointsSetter(weaver.getUnitBindings());
+//        for (SootClass c : classesWithReroutetShadows) {
+//            sps.setShadowPointsPass1(c);
+//        }
+	}
+
+    /**
+     * 
+     */
+    protected void oneIteration() {
+        Set reachableShadows = ReachableShadowFinder.v().reachableShadows(cg);
 		numShadowsBefore = reachableShadows.size();
         Map tmNameToShadows = ShadowsPerTMSplitter.splitShadows(reachableShadows);
 		
@@ -117,6 +141,10 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
                 methodsWithShadows.add(m);
             }
 
+            //FIXME do this properly (re-tag)
+            //do not apply to methods where shadow motion was already applied (because we do not get the tags right yet)
+            methodsWithShadows.removeAll(ShadowMotion.getAffectedMethods());
+            
             for (SootMethod m : methodsWithShadows) {
                 System.err.println("Analyzing: "+m+" on tracematch: "+tm.getName());
                 
@@ -138,14 +166,7 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
                 System.err.println("Done analyzing: "+m+" on tracematch: "+tm.getName());    			
 	        }
 		}
-        
-//        //set shadow-points
-//        Weaver weaver = Main.v().getAbcExtension().getWeaver();        
-//        ShadowPointsSetter sps = new ShadowPointsSetter(weaver.getUnitBindings());
-//        for (SootClass c : classesWithReroutetShadows) {
-//            sps.setShadowPointsPass1(c);
-//        }
-	}
+    }
 
     private boolean mayStartThreads() {
         CallGraph callGraph = CallGraphAbstraction.v().abstractedCallGraph();

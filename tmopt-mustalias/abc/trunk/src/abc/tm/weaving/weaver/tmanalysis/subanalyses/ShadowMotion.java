@@ -30,6 +30,7 @@ import java.util.Queue;
 import java.util.Set;
 
 import soot.Local;
+import soot.SootMethod;
 import soot.Unit;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.annotation.logic.Loop;
@@ -62,6 +63,8 @@ import abc.weaving.weaver.Weaver;
  * @author Eric Bodden
  */
 public class ShadowMotion {
+
+    private static Collection<SootMethod> affectedMethods = new HashSet<SootMethod>();
 
     public static void apply(TraceMatch tm, UnitGraph g, Map<Local, Stmt> tmLocalsToDefStatements, LoopAwareLocalMustAliasAnalysis localMustAliasAnalysis, LocalNotMayAliasAnalysis localNotMayAliasAnalysis) {
         System.err.println("Loop optimization...");
@@ -250,6 +253,16 @@ public class ShadowMotion {
         ShadowRegistry.v().disableAllUnneededSomeSyncAndBodyAdvice();
         //flush (commit) the advice list
         adviceList.flush();
+        
+        //add to set of affected methods
+        affectedMethods.add(g.getBody().getMethod());
+    }
+    
+    /**
+     * Returns the set of methods affected by loop optimizations so far. (I.e. the methods where the optimizations were applied.) 
+     */
+    public static Collection<SootMethod> getAffectedMethods() {
+        return Collections.unmodifiableCollection(affectedMethods);
     }
 
     
