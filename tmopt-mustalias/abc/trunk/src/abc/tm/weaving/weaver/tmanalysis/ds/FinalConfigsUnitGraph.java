@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import soot.SootMethod;
 import soot.Unit;
 import soot.jimple.Jimple;
 import soot.jimple.NopStmt;
@@ -55,14 +56,16 @@ public class FinalConfigsUnitGraph implements DirectedGraph<Unit> {
     protected final DirectedGraph<Unit> originalGraph;
     protected NopStmt finalUnit;
 
-    public FinalConfigsUnitGraph(DirectedGraph<Unit> originalGraph, Set<ISymbolShadow> shadowsInMethod, TraceMatch owner) {
+    public FinalConfigsUnitGraph(DirectedGraph<Unit> originalGraph, SootMethod container, Set<ISymbolShadow> shadowsInMethod, TraceMatch owner) {
         this.originalGraph = originalGraph;
         
         Set<String> overlappingShadowIDs = Util.sameShadowGroup(shadowsInMethod);
         Set<ISymbolShadow> overlappingShadows = new HashSet<ISymbolShadow>();
         for (String uniqueId : overlappingShadowIDs) {
             SymbolShadow shadow = SymbolShadow.getSymbolShadowForUniqueID(uniqueId);
-            if(shadow.isEnabled()) {
+            //do not have to take into account shadows that were already disables or shadows that are in the same method
+            //(as the latter have already been handled conservatively by the initial assumption)
+            if(shadow.isEnabled() && !shadow.getContainer().equals(container)) {
                 overlappingShadows.add(shadow);
             }
         }
