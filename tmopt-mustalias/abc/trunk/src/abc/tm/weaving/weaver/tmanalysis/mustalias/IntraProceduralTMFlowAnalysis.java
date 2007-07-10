@@ -338,6 +338,7 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
 
     protected boolean mightHaveSideEffects(Stmt s) {
 		Collection<ISymbolShadow> shadows = transitivelyCalledShadows(s);
+		filterNewDacapoRun(shadows);
 		for (ISymbolShadow shadow : shadows) {
 			if(overlappingShadowIDs.contains(shadow.getUniqueShadowId())) {
 				return true;
@@ -347,6 +348,21 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
 	}
 
 	/**
+     * Removes shadows that have the symbol name newDaCapoRun, as those
+     * symbols are just an artefact of our measurements. They can safely be ignored, as
+     * they can only bring the automaton back to its initial configuration.  
+     */
+    private void filterNewDacapoRun(Collection<ISymbolShadow> shadows) {
+        for (Iterator shadowIter = shadows.iterator(); shadowIter.hasNext();) {
+            ISymbolShadow shadow = (ISymbolShadow) shadowIter.next();
+            if(shadow.getSymbolName().equals("newDaCapoRun")) {
+                shadowIter.remove();
+            }
+        }
+        
+    }
+
+    /**
 	 * Returns the collection of <code>ISymbolShadow</code>s triggered in transitive callees from <code>s</code>.
 	 * @param s any statement
 	 */
