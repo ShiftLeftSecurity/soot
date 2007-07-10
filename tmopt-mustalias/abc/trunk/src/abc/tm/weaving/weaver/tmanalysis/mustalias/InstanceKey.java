@@ -73,6 +73,12 @@ public class InstanceKey {
         }
     }
     
+    public PointsToSet getPointsToSet() {
+        PointsToAnalysis pta = Scene.v().getPointsToAnalysis();
+        PointsToSet reachingObjects = pta.reachingObjects(assignedLocal);
+        return reachingObjects;
+    }
+    
     public boolean haveLocalInformation() {
         return stmtAfterAssignStmt!=null;
     }
