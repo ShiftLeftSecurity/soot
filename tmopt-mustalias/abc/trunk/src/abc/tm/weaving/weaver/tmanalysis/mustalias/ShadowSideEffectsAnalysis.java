@@ -45,29 +45,18 @@ public class ShadowSideEffectsAnalysis  {
 	protected Map<Local,PointsToSet> localToPts = new HashMap<Local, PointsToSet>();
 	
 	/**
-	 * Assume we have a negative binding <code>x!=o</code> and we want to combine it with a positive
-	 * binding <code>y=p</code>. If we can prove that <code>y=p</code> can only ever occur with
-	 * <code>x=o</code>, this contradicts the negative binding. In this case, we return <code>true</code>.
-	 * @param tmVar the tracematch variable we bind
-	 * @param toBind an incoming positive binding for some variable
-	 * @param negVar the variable for an existing negative binding
-	 * @param negBinding the negative binding we have for negVar
-	 * @param container the method holding toBind and negBinding
-	 * @param tm tracematch we focus on 
+	 * Returns <code>true</code> if all shadows with overlapping bindings for the given variable are in the given method. 
 	 */
-	public boolean leadsToContradiction(String tmVar, Local toBind, String negVar, Local negBinding, SootMethod container, TraceMatch tm) {
+	public boolean allShadowsWithOverLappingBindingInSameMethod(String tmVar, Local toBind, SootMethod container, TraceMatch tm) {
 		PointsToSet toBindPts = getPointsToSetOf(toBind);
-		PointsToSet negBindingPts = getPointsToSetOf(negBinding);
 		
 		Set<SymbolShadowWithPTS> overlaps = new HashSet<SymbolShadowWithPTS>();
 		
 		Set<ShadowGroup> allShadowGroups = ShadowGroupRegistry.v().getAllShadowGroups();
 		for (ShadowGroup shadowGroup : allShadowGroups) {
 			if(shadowGroup.getTraceMatch().equals(tm)) {
-				if(shadowGroup.hasCompatibleBinding(negVar,negBindingPts)) {
-					if(shadowGroup.hasCompatibleBinding(tmVar, toBindPts)) {
-						overlaps.addAll(shadowGroup.getAllShadows());
-					}
+				if(shadowGroup.hasCompatibleBinding(tmVar, toBindPts)) {
+					overlaps.addAll(shadowGroup.getAllShadows());
 				}
 			}
 		}

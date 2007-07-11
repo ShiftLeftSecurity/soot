@@ -24,9 +24,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import soot.Local;
 import soot.SootMethod;
-
 import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.InstanceKey;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.ShadowSideEffectsAnalysis;
@@ -66,7 +64,7 @@ public class MustMayNotAliasDisjunct extends Disjunct<InstanceKey> {
 			}
 			
 			//TODO comment
-			if(contradictsNegativeBinding(tmVar,toBind)) {
+			if(allShadowsWithOverLappingBindingInSameMethod(tmVar,toBind)) {
 				return FALSE;
 			}
 
@@ -95,38 +93,8 @@ public class MustMayNotAliasDisjunct extends Disjunct<InstanceKey> {
 		return clone.intern();
 	}
 
-	/**
-	 * @param tmVar
-	 * @param toBind
-	 * @return
-	 */
-	private boolean contradictsNegativeBinding(String tmVar, InstanceKey toBind) {
-		for (Map.Entry<String,Set<InstanceKey>>  entry : negVarBinding.entrySet()) {
-			String negVar = entry.getKey();
-			Set<Local> negBindings = new HashSet<Local>();
-			for (InstanceKey ik : entry.getValue()) {
-			    negBindings.add(ik.getLocal());
-            }			
-			for (Local negBinding : negBindings) {
-				if(leadsToContradiction(tmVar, toBind.getLocal(), negVar, negBinding)) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Assume we have a negative binding <code>x!=o</code> and we want to combine it with a positive
-	 * binding <code>y=p</code>. If we can prove that <code>y=p</code> can only ever occur with
-	 * <code>x=o</code>, this contradicts the negative binding. In this case, we return <code>true</code>.
-	 * @param tmVar the tracematch variable we bind
-	 * @param toBind an incoming positive binding for some variable
-	 * @param negVar the variable for an existing negative binding
-	 * @param negBinding the negative binding we have for negVar
-	 */
-	protected boolean leadsToContradiction(String tmVar, Local toBind, String negVar, Local negBinding) {
-		return ShadowSideEffectsAnalysis.v().leadsToContradiction(tmVar, toBind, negVar, negBinding, container, tm);
+	protected boolean allShadowsWithOverLappingBindingInSameMethod(String tmVar, InstanceKey toBind) {
+		return ShadowSideEffectsAnalysis.v().allShadowsWithOverLappingBindingInSameMethod(tmVar, toBind.getLocal(), container, tm);
 	}
 	
 	/**
