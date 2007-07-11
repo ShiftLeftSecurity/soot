@@ -61,6 +61,8 @@ public class Configuration implements Cloneable {
 	
 	protected int numHitFinal;
 	
+	protected boolean isTainted;
+	
 	protected final TraceMatch tm;
 
 	protected final TMFlowAnalysis flowAnalysis;
@@ -77,6 +79,7 @@ public class Configuration implements Cloneable {
 		this.tm = flowAnalysis.getTracematch();
 		stateToConstraint = new HashMap();
 		numHitFinal = 0;
+		isTainted = false;
 
 		//associate each initial state with a TRUE constraint and all other states with a FALSE constraint
 		Iterator<State> stateIter = tm.getStateMachine().getStateIterator();
@@ -323,8 +326,27 @@ public class Configuration implements Cloneable {
 		
 		if(countFinalHits)
 			res += "hit final "+numHitFinal+" times\n";
+        if(isTainted)
+            res += "configuration is tainted\n";
 		
 		return res;
+	}
+	
+	public void taint() {
+	    this.isTainted = true;
+	}
+	
+    public boolean isTainted() {
+        return isTainted;
+    }
+    
+    public static boolean hasTainted(Set<Configuration> configurations) {
+	    for (Configuration configuration : configurations) {
+            if(configuration.isTainted) {
+                return true;
+            }
+        }
+	    return false;
 	}
 	
 	/**
@@ -353,6 +375,7 @@ public class Configuration implements Cloneable {
 				+ ((stateToConstraint == null) ? 0 : stateToConstraint
 						.hashCode());
 		result = prime * result + numHitFinal;
+        result = prime * result + (isTainted ? 1 : 0);
 		return result;
 	}
 
@@ -376,7 +399,11 @@ public class Configuration implements Cloneable {
 		if(numHitFinal!=other.numHitFinal) {
 			return false;
 		}
+        if(isTainted!=other.isTainted) {
+            return false;
+        }
 		assert this.tm.equals(other.tm);
 		return true;
 	}
+
 }

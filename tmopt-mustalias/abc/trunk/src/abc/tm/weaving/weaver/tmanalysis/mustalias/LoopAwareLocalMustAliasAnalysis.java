@@ -92,5 +92,12 @@ public class LoopAwareLocalMustAliasAnalysis extends LocalMustAliasAnalysis {
         }
         return super.instanceKeyString(l, s);
     }
+    
+    /**
+     * Sets all instance keys to be valid again.
+     */
+    public void reset() {
+        invalidInstanceKeys.clear();
+    }
 
 }

@@ -18,7 +18,6 @@
  */
 package abc.tm.weaving.weaver.tmanalysis.mustalias;
 
-import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.ABORTED_CALLS_OTHER_METHOD_WITH_SHADOWS;
 import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.ABORTED_HIT_FINAL;
 import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.ABORTED_MAX_NUM_CONFIGS;
 import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.ABORTED_MAX_NUM_ITERATIONS;
@@ -40,6 +39,7 @@ import java.util.Set;
 import soot.Body;
 import soot.Local;
 import soot.MethodOrMethodContext;
+import soot.RefLikeType;
 import soot.SootMethod;
 import soot.Unit;
 import soot.Value;
@@ -237,6 +237,8 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
             }
         }
 		
+		//un-invalidate instance keys again
+		lmaa.reset();
 		//clear caches
 		Disjunct.reset();
 		Constraint.reset();
@@ -261,15 +263,11 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
             status = ABORTED_MAX_NUM_ITERATIONS;
         }
 
-        //check for side-effects
-        //(only necessary if the statement is actually part of the body and
-        // only at first visit, as information does not change and we abort anyway, if side-effects exist)
-        if(numVisited==1 && stmtsWhichMayNotCallOtherMethodsWithShadows.contains(stmt) && mightHaveSideEffects(stmt)) {
-            status = ABORTED_CALLS_OTHER_METHOD_WITH_SHADOWS;
-        }
-
         if(status.isAborted()) throw new AbortedException();
 
+        //check for side-effects
+        boolean mightHaveSideEffects = mightHaveSideEffects(stmt);
+        
         //update must-alias info
         updateMustAlias(stmt,numVisited);
 				
@@ -289,7 +287,10 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
                     foundEnabledShadow = true;
                     for (Configuration oldConfig : in) {
                         Configuration newConfig = oldConfig.doTransition(shadow);
-                        if(!newConfig.equals(oldConfig)) {
+                        if(mightHaveSideEffects) {
+                            newConfig.taint();
+                        }
+                        if(!newConfig.equals(oldConfig) || newConfig.isTainted()) {
                             //shadow is not invariant
                             unnecessaryShadows.remove(shadow);
                         }
@@ -329,8 +330,10 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
                 Value rightOp = assignStmt.getRightOp();
                 if(leftOp instanceof Local && !(rightOp instanceof Local)) {
                     Local local = (Local) leftOp;
-                    Unit succ = graph.getSuccsOf(stmt).get(0);
-                    lmaa.invalidateInstanceKeyFor(local, succ);
+                    if(local.getType() instanceof RefLikeType) {
+                        Unit succ = graph.getSuccsOf(stmt).get(0);
+                        lmaa.invalidateInstanceKeyFor(local, succ);
+                    }
                 }
             }
         }

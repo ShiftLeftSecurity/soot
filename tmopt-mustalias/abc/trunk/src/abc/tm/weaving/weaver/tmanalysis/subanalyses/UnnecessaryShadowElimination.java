@@ -63,7 +63,7 @@ public class UnnecessaryShadowElimination {
         		g,
                 m,
                 tmLocalsToDefStatements,
-        		new MustMayNotAliasDisjunct(),
+        		new MustMayNotAliasDisjunct(g.getBody().getMethod(),tm),
         		new HashSet<State>(),
         		allStmts,
         		allStmts,

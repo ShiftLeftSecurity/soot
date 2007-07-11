@@ -52,7 +52,7 @@ public class ShadowSideEffectsAnalysis  {
 	 * @param toBind an incoming positive binding for some variable
 	 * @param negVar the variable for an existing negative binding
 	 * @param negBinding the negative binding we have for negVar
-	 * @param container the method hokding toBind and negBinding
+	 * @param container the method holding toBind and negBinding
 	 * @param tm tracematch we focus on 
 	 */
 	public boolean leadsToContradiction(String tmVar, Local toBind, String negVar, Local negBinding, SootMethod container, TraceMatch tm) {

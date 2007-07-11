@@ -19,6 +19,7 @@
 package abc.tm.weaving.weaver.tmanalysis.subanalyses;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -33,6 +34,7 @@ import soot.toolkits.graph.UnitGraph;
 import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.matching.State;
 import abc.tm.weaving.weaver.tmanalysis.Util;
+import abc.tm.weaving.weaver.tmanalysis.ds.Configuration;
 import abc.tm.weaving.weaver.tmanalysis.ds.FinalConfigsUnitGraph;
 import abc.tm.weaving.weaver.tmanalysis.ds.MustMayNotAliasDisjunct;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis;
@@ -75,7 +77,7 @@ public class CannotTriggerFinalElimination {
                 augmentedGraph,
                 g.getBody().getMethod(),
                 tmLocalsToDefStatements,
-                new MustMayNotAliasDisjunct(),
+                new MustMayNotAliasDisjunct(g.getBody().getMethod(),tm),
                 new HashSet<State>(),
                 allStmts,
                 bodyStmts,
@@ -89,6 +91,17 @@ public class CannotTriggerFinalElimination {
 
         if(status.isAborted() || status.hitFinal()) {
             return false;
+        }
+        
+        for (Unit unit : g.getBody().getUnits()) {
+            Set<Configuration> flowBefore = flowAnalysis.getFlowBefore(unit);
+            //if there is an active shadow at this unit
+            if(!Util.getAllActiveShadows(tm, Collections.singleton(unit)).isEmpty()) {
+                if(Configuration.hasTainted(flowBefore)) {
+                    System.err.println("Aborting because shadow could have been affected by calls to other methods with shadows.");
+                    return false;
+                }
+            }
         }
         
         //method and everything that follows it can never hit the final state, hence disable all shadows in the method

@@ -79,13 +79,17 @@ public class InstanceKey {
         return reachingObjects;
     }
     
+    public Local getLocal() {
+        return assignedLocal;
+    }
+    
     public boolean haveLocalInformation() {
         return stmtAfterAssignStmt!=null;
     }
 
     public String toString() {
-        String instanceKeyString = stmtAfterAssignStmt!=null ? ":"+lmaa.instanceKeyString(assignedLocal, stmtAfterAssignStmt) : "pts("+assignedLocal+")";
-        return "InstanceKey< "+owner+instanceKeyString+">";
+        String instanceKeyString = stmtAfterAssignStmt!=null ? lmaa.instanceKeyString(assignedLocal, stmtAfterAssignStmt) : "pts("+assignedLocal+")";
+        return instanceKeyString+"("+assignedLocal.getName()+")";
     }
 
     /**

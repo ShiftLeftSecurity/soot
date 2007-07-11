@@ -44,6 +44,7 @@ import abc.main.Main;
 import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.matching.State;
 import abc.tm.weaving.weaver.tmanalysis.Util;
+import abc.tm.weaving.weaver.tmanalysis.ds.Configuration;
 import abc.tm.weaving.weaver.tmanalysis.ds.MustMayNotAliasDisjunct;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.LoopAwareLocalMustAliasAnalysis;
@@ -104,7 +105,7 @@ public class ShadowMotion {
                 g,
                 g.getBody().getMethod(),
                 tmLocalsToDefStatements,
-                new MustMayNotAliasDisjunct(),
+                new MustMayNotAliasDisjunct(g.getBody().getMethod(),tm),
                 new HashSet<State>(),
                 loopStatements,
                 loopStatements,
@@ -116,7 +117,7 @@ public class ShadowMotion {
         Status status = flowAnalysis.getStatus();
         System.err.println("Analysis done with status: "+status);
 
-        //if we abort once, we are gonna abort for the other additional initial states too, so
+        //if we abort once, we are going to abort for the other additional initial states too, so
         //just return, to proceed with the next loop
         
         if(status.isAborted()) return;
@@ -128,6 +129,16 @@ public class ShadowMotion {
             if(!flowAnalysis.statementsReachingFixedPointAtOnce().contains(loopExit)) {
                 System.err.println("FP not reached after one iteration. Cannot optimize.");
                 return;
+            }
+        }
+        for (Stmt loopStmt : loop.getLoopStatements()) {
+            Set<Configuration> flowBefore = flowAnalysis.getFlowBefore(loopStmt);
+            //if there is an active shadow at this unit
+            if(!Util.getAllActiveShadows(tm, Collections.singleton(loopStmt)).isEmpty()) {
+                if(Configuration.hasTainted(flowBefore)) {
+                    System.err.println("Aborting because shadow could have been affected by calls to other methods with shadows.");
+                    return;
+                }
             }
         }
         
