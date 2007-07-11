@@ -58,7 +58,10 @@ public class UnnecessaryShadowElimination {
             allStmts.add(st);
         }
 
-		IntraProceduralTMFlowAnalysis flowAnalysis = new IntraProceduralTMFlowAnalysis(
+        //get all shadows in the method body
+        Set<ISymbolShadow> allShadows = Util.getAllActiveShadows(tm,g.getBody().getUnits());
+
+        IntraProceduralTMFlowAnalysis flowAnalysis = new IntraProceduralTMFlowAnalysis(
         		tm,
         		g,
                 m,
@@ -91,8 +94,6 @@ public class UnnecessaryShadowElimination {
     		System.err.println();
     	}
     	
-        //get all shadows in the method body
-        Set<ISymbolShadow> allShadows = Util.getAllActiveShadows(tm,g.getBody().getUnits());
         boolean allRemoved = flowAnalysis.getUnnecessaryShadows().equals(allShadows);
         
         if(allRemoved) {
