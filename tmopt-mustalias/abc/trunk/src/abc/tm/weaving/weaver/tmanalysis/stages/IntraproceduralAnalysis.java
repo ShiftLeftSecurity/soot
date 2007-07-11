@@ -40,7 +40,6 @@ import soot.jimple.toolkits.pointer.DumbPointerAnalysis;
 import soot.jimple.toolkits.pointer.LocalNotMayAliasAnalysis;
 import soot.jimple.toolkits.thread.IThreadLocalObjectsAnalysis;
 import soot.toolkits.graph.ExceptionalUnitGraph;
-import soot.toolkits.graph.UnitGraph;
 import abc.main.Debug;
 import abc.main.Main;
 import abc.tm.weaving.aspectinfo.TMGlobalAspectInfo;
@@ -148,7 +147,7 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
             for (SootMethod m : methodsWithShadows) {
                 System.err.println("Analyzing: "+m+" on tracematch: "+tm.getName());
                 
-                UnitGraph g = new ExceptionalUnitGraph(m.retrieveActiveBody());
+                ExceptionalUnitGraph g = new ExceptionalUnitGraph(m.retrieveActiveBody());
     			LoopAwareLocalMustAliasAnalysis localMustAliasAnalysis = new LoopAwareLocalMustAliasAnalysis(g);
 				LocalNotMayAliasAnalysis localNotMayAliasAnalysis = new LocalNotMayAliasAnalysis(g);
                 Map<Local,Stmt> tmLocalsToDefStatements = findTmLocalDefinitions(g,tm);
@@ -179,7 +178,7 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
         return false;
     }
     
-	private Map<Local, Stmt> findTmLocalDefinitions(UnitGraph g, TraceMatch tm) {
+	private Map<Local, Stmt> findTmLocalDefinitions(ExceptionalUnitGraph g, TraceMatch tm) {
 		
 		Body b = g.getBody();
 		
@@ -211,7 +210,7 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
                     
                 	//we know that such def statements always have the form "adviceLocal = someLocal;",
                 	//hence taking the first successor is always sound
-                	localToStmtAfterDefStmt.put((Local)v, (Stmt)g.getSuccsOf(stmt).get(0));
+                	localToStmtAfterDefStmt.put((Local)v, (Stmt)g.getUnexceptionalSuccsOf(stmt).get(0));
                 }
             }			
 		}
