@@ -65,7 +65,7 @@ public class OptReiterationFlowInsensitiveAnalysis extends AbstractReweavingAnal
         //do the optimization
         ShadowGroupRegistry.v().pruneShadowGroupsWhichHaveBecomeIncomplete();
 		
-		AbcTimer.mark("Reinteration of flow-insensitive analysis");
+		AbcTimer.mark("Reiteration of flow-insensitive analysis");
     	
 	}
 
