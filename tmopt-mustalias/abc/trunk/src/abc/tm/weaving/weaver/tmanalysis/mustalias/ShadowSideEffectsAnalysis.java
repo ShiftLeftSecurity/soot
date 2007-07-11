@@ -62,7 +62,7 @@ public class ShadowSideEffectsAnalysis  {
 		}
 		
 		for (SymbolShadowWithPTS shadow : overlaps) {
-			if(!shadow.getContainer().equals(container)) {
+			if(!shadow.getContainer().equals(container) && !shadow.isArtificial()) {
 				return false;
 			}
 		}

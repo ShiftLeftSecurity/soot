@@ -352,11 +352,10 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
     private void filterNewDacapoRun(Collection<ISymbolShadow> shadows) {
         for (Iterator shadowIter = shadows.iterator(); shadowIter.hasNext();) {
             ISymbolShadow shadow = (ISymbolShadow) shadowIter.next();
-            if(shadow.getSymbolName().equals("newDaCapoRun")) {
+            if(shadow.isArtificial()) {
                 shadowIter.remove();
             }
-        }
-        
+        }        
     }
 
     /**
