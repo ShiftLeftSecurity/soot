@@ -208,6 +208,10 @@ public class ShadowMotion {
             //for each statement that is target of a loop exit
             for (Stmt target : loop.targetsOfLoopExit(loopExit)) {
                 
+                //the target of the loop exit should *only* be jumped to by the loop exit
+                //see TMLoopExitRestructurer
+                assert g.getPredsOf(target).size()==1 && g.getPredsOf(target).get(0)==loopExit; 
+                
                 System.err.println("Copying shadows to target of loop exit: "+target);
 
                 //get the corresponding Stmt before weaving
