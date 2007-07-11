@@ -52,7 +52,7 @@ public class MustMayNotAliasDisjunct extends Disjunct<InstanceKey> {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Disjunct addBindingsForSymbol(Collection allVariables, Map bindings, String shadowId) {
+	public Disjunct addBindingsForSymbol(Collection allVariables, Map bindings, String shadowId, boolean sourceStateIsInitial) {
 		Disjunct clone = clone();
 		//for each tracematch variable
 		for (String tmVar : (Collection<String>)allVariables) {
@@ -64,7 +64,7 @@ public class MustMayNotAliasDisjunct extends Disjunct<InstanceKey> {
 			}
 			
 			//TODO comment
-			if(allShadowsWithOverLappingBindingInSameMethod(tmVar,toBind)) {
+			if(!sourceStateIsInitial && allShadowsWithOverLappingBindingInSameMethod(tmVar,toBind)) {
 				return FALSE;
 			}
 

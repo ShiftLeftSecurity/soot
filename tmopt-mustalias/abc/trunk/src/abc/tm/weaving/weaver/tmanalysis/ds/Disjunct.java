@@ -39,7 +39,7 @@ import soot.PointsToSet;
  * 
  * Disjuncts are produced using the prototype pattern, i.e. via cloning. The prototype is
  * {@link #FALSE}. Other Disjuncts can then be created by calling
- * {@link #addBindingsForSymbol(Collection, Map, String)} and  
+ * {@link #addBindingsForSymbol(Collection, Map, String, boolean)} and  
  * {@link #addNegativeBindingsForSymbol(Collection, Map, String)}.
  *
  * @author Eric Bodden
@@ -68,7 +68,7 @@ public abstract class Disjunct<A> implements Cloneable {
 	 * Creates a new disjunct with empty bindings and history.
 	 * Only to be called form this class (prototype pattern.) 
 	 * Other disjuncts can be created using
-	 * {@link #addBindingsForSymbol(Collection, Map, String)} and 
+	 * {@link #addBindingsForSymbol(Collection, Map, String, boolean)} and 
 	 * {@link #addNegativeBindingsForSymbol(Collection, Map, String)}.
 	 */
 	protected Disjunct() {
@@ -81,17 +81,18 @@ public abstract class Disjunct<A> implements Cloneable {
 	 * @param allVariables the set of all variables bound by the symbol that is read
 	 * @param bindings the bindings of that edge in form of a mapping {@link String} to {@link PointsToSet}
 	 * @param shadowId the shadow-id of the shadow that triggered this edge
+	 * @param sourceStateIsInitial TODO
 	 * @return the updated disjunct; this is a fresh instance, 
 	 * the disjuncts of this copy hold the history of the disjuncts of this constraint plus
 	 * the shadowId that is passed in
 	 */
-	public abstract Disjunct addBindingsForSymbol(Collection allVariables, Map<String,A> bindings, String shadowId);
+	public abstract Disjunct addBindingsForSymbol(Collection allVariables, Map<String,A> bindings, String shadowId, boolean sourceStateIsInitial);
 		
 	
 	/**
 	 * Adds negative bindings for the case where the given symbol is read by taking a <i>skip</i> edge in the program graph.
 	 * Effectively this deletes all bindings which adhere to the binding which is passed in.
-	 * Note that unlike in {@link #addBindingsForSymbol(Collection, Map, int)}
+	 * Note that unlike in {@link #addBindingsForSymbol(Collection, Map, int, boolean)}
 	 * here we do not need to update the history of the disjuncts, because we know that no skip-loop
 	 * can ever possibly lead to a final node.
 	 * @param allVariables the set of all variables bound by the symbol that is read

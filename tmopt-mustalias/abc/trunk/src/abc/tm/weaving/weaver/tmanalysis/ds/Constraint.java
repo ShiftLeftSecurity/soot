@@ -87,7 +87,7 @@ public class Constraint implements Cloneable {
 			 * Returns this (FALSE).
 			 */
 			@Override
-			public Constraint addBindingsForSymbol(Collection allVariables, SMNode to, Map bindings, String shadowId) {
+			public Constraint addBindingsForSymbol(Collection allVariables, boolean sourceStateIsInitial, SMNode to, Map bindings, String shadowId) {
 				//FALSE stays FALSE
 				return this;
 			}
@@ -114,7 +114,7 @@ public class Constraint implements Cloneable {
 			 * Returns this (FALSE).
 			 */
 			@Override
-			public Constraint addBindingsForSymbol(Collection allVariables, SMNode to, Map bindings, String shadowId) {
+			public Constraint addBindingsForSymbol(Collection allVariables, boolean sourceStateIsInitial, SMNode to, Map bindings, String shadowId) {
 				//FINAL stays FINAL
 				return this;
 			}
@@ -169,6 +169,7 @@ public class Constraint implements Cloneable {
 	 * Also, this adds the shadow-ids of any edges that are on the path to a final state to the
 	 * may-flow analysis. (see {@link TMFlowAnalysis#registerActiveShadows(Set)})
 	 * @param allVariables the set of all variables bound by the symbol that is read
+	 * @param sourceStateIsInitial true if the source state of the transition is an initial state
 	 * @param to the state the state machine is driven into by taking this transition
 	 * @param bindings the bindings of that edge in form of a mapping {@link String} to {@link PointsToSet}
 	 * @param shadowId the shadow-id of the shadow that triggered this edge
@@ -176,7 +177,7 @@ public class Constraint implements Cloneable {
 	 * the disjuncts of this copy hold the history of the disjuncts of this constraint plus
 	 * the shadowId that is passed in
 	 */
-	public Constraint addBindingsForSymbol(Collection allVariables, SMNode to, Map bindings, String shadowId) {
+	public Constraint addBindingsForSymbol(Collection allVariables, boolean sourceStateIsInitial, SMNode to, Map bindings, String shadowId) {
 		//create a set for the resulting disjuncts
 		HashSet resultDisjuncts = new HashSet();
 		//for all current disjuncts
@@ -184,7 +185,7 @@ public class Constraint implements Cloneable {
 			Disjunct disjunct = (Disjunct) iter.next();
 
 			//delegate to the disjunct
-			Disjunct newDisjunct = disjunct.addBindingsForSymbol(allVariables,bindings,shadowId);
+			Disjunct newDisjunct = disjunct.addBindingsForSymbol(allVariables,bindings,shadowId, sourceStateIsInitial);
 			assert newDisjunct!=null;
             
             //FALSE is a marker for "no match"; do not add it as it represents TRUE in the Constraint
