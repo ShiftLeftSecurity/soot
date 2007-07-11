@@ -107,12 +107,6 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
             public boolean hitFinal() { return false; }
             public String toString() { return "aborted, exceeded maximal number of configurations ("+MAX_NUM_CONFIGS+")"; }
         },
-		ABORTED_CALLS_OTHER_METHOD_WITH_SHADOWS {
-			public boolean isAborted() { return true; }
-			public boolean isFinishedSuccessfully() { return false; }
-            public boolean hitFinal() { return false; }
-			public String toString() { return "aborted (calls other method with shadows)"; }
-		},
 		FINISHED {
 			public boolean isAborted() { return false; }
 			public boolean isFinishedSuccessfully() { return true; }
