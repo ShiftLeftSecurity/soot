@@ -350,7 +350,16 @@ public class Configuration implements Cloneable {
 	    return false;
 	}
 	
-	/**
+    public static boolean hasHitFinal(Set<Configuration> configurations) {
+        for (Configuration configuration : configurations) {
+            if(configuration.numHitFinal>0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
 	 * {@inheritDoc}
 	 */
 	protected Configuration clone() {

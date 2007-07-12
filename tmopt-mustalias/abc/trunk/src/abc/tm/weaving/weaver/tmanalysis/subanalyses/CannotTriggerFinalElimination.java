@@ -19,7 +19,6 @@
 package abc.tm.weaving.weaver.tmanalysis.subanalyses;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -33,6 +32,7 @@ import soot.toolkits.graph.DirectedGraph;
 import soot.toolkits.graph.UnitGraph;
 import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.matching.State;
+import abc.tm.weaving.weaver.tmanalysis.ReachingActiveShadowsAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.Util;
 import abc.tm.weaving.weaver.tmanalysis.ds.Configuration;
 import abc.tm.weaving.weaver.tmanalysis.ds.FinalConfigsUnitGraph;
@@ -83,35 +83,48 @@ public class CannotTriggerFinalElimination {
                 bodyStmts,
                 localMustAliasAnalysis,
                 localNotMayAliasAnalysis,
-                true
+                false
         );
         
         Status status = flowAnalysis.getStatus();
         System.err.println("Analysis done with status: "+status);
 
-        if(status.isAborted() || status.hitFinal()) {
+        if(status.isAborted()) {
             return false;
         }
+
+        ReachingActiveShadowsAnalysis reachingShadows = new ReachingActiveShadowsAnalysis(g,tm);
+        
+        //initialize to all shadows in the method
+        Set<ISymbolShadow> shadowsToDisable = new HashSet<ISymbolShadow>(allMethodShadows);
         
         for (Unit unit : g.getBody().getUnits()) {
+
+            //find units whose before-flow is tainted (configurations starting at such units are unreliable)
+            //and units after which a final state was hit (or before that, transitively)
             Set<Configuration> flowBefore = flowAnalysis.getFlowBefore(unit);
-            //if there is an active shadow at this unit
-            if(!Util.getAllActiveShadows(tm, Collections.singleton(unit)).isEmpty()) {
-                if(Configuration.hasTainted(flowBefore)) {
-                    System.err.println("Aborting because shadow could have been affected by calls to other methods with shadows.");
-                    return false;
-                }
+            Set<Configuration> flowAfter = flowAnalysis.getFlowAfter(unit);
+            boolean triggersFinalOrIsTainted = Configuration.hasTainted(flowBefore) || Configuration.hasHitFinal(flowAfter);
+            
+            if(triggersFinalOrIsTainted) {
+                //shadows that might reach such units have to be kept alive
+                Set<ISymbolShadow> reachingShadowsForUnit = reachingShadows.getFlowAfter(unit);
+                shadowsToDisable.removeAll(reachingShadowsForUnit);
             }
         }
         
-        //method and everything that follows it can never hit the final state, hence disable all shadows in the method
-        for (ISymbolShadow shadow : allMethodShadows) {
+        for (ISymbolShadow shadow : shadowsToDisable) {
             ShadowRegistry.v().disableShadow(shadow.getUniqueShadowId());
         }
-        System.err.println("Optimization 'cannot trigger final' removed all shadows.");
-        assert Util.getAllActiveShadows(tm,g.getBody().getUnits()).isEmpty();
-        
-        return true;
+
+        if(shadowsToDisable.size()==allMethodShadows.size()) {
+            System.err.println("Optimization 'cannot trigger final' removed all shadows.");
+            assert Util.getAllActiveShadows(tm,g.getBody().getUnits()).isEmpty();
+            
+            return true;
+        } else {
+            return false;
+        }
     }
 
 
