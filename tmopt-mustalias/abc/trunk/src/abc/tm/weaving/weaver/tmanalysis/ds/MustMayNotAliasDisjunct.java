@@ -63,16 +63,13 @@ public class MustMayNotAliasDisjunct extends Disjunct<InstanceKey> {
 				return FALSE;
 			}
 			
-			//TODO comment
-			if(!sourceStateIsInitial && allShadowsWithOverLappingBindingInSameMethod(tmVar,toBind)) {
-				return FALSE;
-			}
-
 			//get the current binding
 			InstanceKey curBinding = (InstanceKey) varBinding.get(tmVar);
 			
 			if(curBinding==null) {
-			    if(toBind.haveLocalInformation()) {
+			    //if we have no binding, we only generate a new binding if the shadow we get in is from this method and
+			    //either we do a transition out of an initial state or we have shadows with an overlapping binding in other methods			    
+			    if(toBind.haveLocalInformation() && (sourceStateIsInitial || !allShadowsWithOverLappingBindingInSameMethod(tmVar,toBind))) {
     				//set the new binding
     				clone.varBinding.put(tmVar, toBind);
     				//keep track of that this edge was taken
@@ -85,7 +82,7 @@ public class MustMayNotAliasDisjunct extends Disjunct<InstanceKey> {
 			        return FALSE;
 			    }
 			} else if(curBinding.mayNotAlias(toBind)) {
-			    //TODO which positive value do we have to bind here? do we have to bind both, even (at least of they don't must-alias)?
+			    //FIXME which positive value do we have to bind here? do we have to bind both, even (at least of they don't must-alias)?
 				return FALSE;			
 			}
 		}
