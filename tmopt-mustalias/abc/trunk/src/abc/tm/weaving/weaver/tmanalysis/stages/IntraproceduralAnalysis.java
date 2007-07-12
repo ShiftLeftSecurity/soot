@@ -44,6 +44,7 @@ import abc.main.Debug;
 import abc.main.Main;
 import abc.tm.weaving.aspectinfo.TMGlobalAspectInfo;
 import abc.tm.weaving.aspectinfo.TraceMatch;
+import abc.tm.weaving.weaver.tmanalysis.Util;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.LoopAwareLocalMustAliasAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.query.ReachableShadowFinder;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroupRegistry;
@@ -145,6 +146,8 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
             methodsWithShadows.removeAll(ShadowMotion.getAffectedMethods());
             
             for (SootMethod m : methodsWithShadows) {
+                if(Util.getAllActiveShadows(tm, m.getActiveBody().getUnits()).isEmpty()) return; //no active shadows any more
+                
                 System.err.println("Analyzing: "+m+" on tracematch: "+tm.getName());
                 
                 ExceptionalUnitGraph g = new ExceptionalUnitGraph(m.retrieveActiveBody());
