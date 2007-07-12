@@ -93,23 +93,25 @@ public class CannotTriggerFinalElimination {
             return false;
         }
 
-        ReachingActiveShadowsAnalysis reachingShadows = new ReachingActiveShadowsAnalysis(g,tm);
-        
         //initialize to all shadows in the method
         Set<ISymbolShadow> shadowsToDisable = new HashSet<ISymbolShadow>(allMethodShadows);
-        
-        for (Unit unit : g.getBody().getUnits()) {
 
-            //find units whose before-flow is tainted (configurations starting at such units are unreliable)
-            //and units after which a final state was hit (or before that, transitively)
-            Set<Configuration> flowBefore = flowAnalysis.getFlowBefore(unit);
-            Set<Configuration> flowAfter = flowAnalysis.getFlowAfter(unit);
-            boolean triggersFinalOrIsTainted = Configuration.hasTainted(flowBefore) || Configuration.hasHitFinal(flowAfter);
+        if(status.hitFinal()) {
+            ReachingActiveShadowsAnalysis reachingShadows = new ReachingActiveShadowsAnalysis(g,tm);
             
-            if(triggersFinalOrIsTainted) {
-                //shadows that might reach such units have to be kept alive
-                Set<ISymbolShadow> reachingShadowsForUnit = reachingShadows.getFlowAfter(unit);
-                shadowsToDisable.removeAll(reachingShadowsForUnit);
+            for (Unit unit : g.getBody().getUnits()) {
+    
+                //find units whose before-flow is tainted (configurations starting at such units are unreliable)
+                //and units after which a final state was hit (or before that, transitively)
+                Set<Configuration> flowBefore = flowAnalysis.getFlowBefore(unit);
+                Set<Configuration> flowAfter = flowAnalysis.getFlowAfter(unit);
+                boolean triggersFinalOrIsTainted = Configuration.hasTainted(flowBefore) || Configuration.hasHitFinal(flowAfter);
+                
+                if(triggersFinalOrIsTainted) {
+                    //shadows that might reach such units have to be kept alive
+                    Set<ISymbolShadow> reachingShadowsForUnit = reachingShadows.getFlowAfter(unit);
+                    shadowsToDisable.removeAll(reachingShadowsForUnit);
+                }
             }
         }
         
