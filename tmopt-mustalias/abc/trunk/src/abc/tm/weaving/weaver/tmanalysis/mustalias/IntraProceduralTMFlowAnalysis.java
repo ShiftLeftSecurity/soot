@@ -450,7 +450,9 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
                             String tmVar = entry.getKey();
                             Local adviceLocal = entry.getValue();
                             Stmt stmt = tmLocalDefs.get(adviceLocal); //may be null, if adviceLocal is not part of this method
-                            InstanceKey instanceKey = new InstanceKey(adviceLocal,stmt,container,lmaa,lmna);
+                            InstanceKey instanceKey = (adviceLocal.getType() instanceof RefLikeType) ?
+                              new InstanceKey(adviceLocal,stmt,container,lmaa,lmna) :
+                              new InstanceKeyNonRefLikeType(adviceLocal,stmt,container,lmaa,lmna);
                             newBinding.put(tmVar, instanceKey);
                         }
                         return newBinding;

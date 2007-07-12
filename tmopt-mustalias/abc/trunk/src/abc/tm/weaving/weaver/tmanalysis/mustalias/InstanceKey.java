@@ -21,6 +21,7 @@ package abc.tm.weaving.weaver.tmanalysis.mustalias;
 import soot.Local;
 import soot.PointsToAnalysis;
 import soot.PointsToSet;
+import soot.RefLikeType;
 import soot.Scene;
 import soot.SootMethod;
 import soot.jimple.Stmt;
@@ -100,7 +101,7 @@ public class InstanceKey {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((owner == null) ? 0 : owner.hashCode());
-        if(stmtAfterAssignStmt!=null) {
+        if(stmtAfterAssignStmt!=null && (assignedLocal.getType() instanceof RefLikeType)) {
             //compute hash code based on instance key string
             result = prime * result + lmaa.instanceKeyString(assignedLocal, stmtAfterAssignStmt).hashCode();
         }
