@@ -109,6 +109,7 @@ public class CannotTriggerFinalElimination {
             ShadowRegistry.v().disableShadow(shadow.getUniqueShadowId());
         }
         System.err.println("Optimization 'cannot trigger final' removed all shadows.");
+        assert Util.getAllActiveShadows(tm,g.getBody().getUnits()).isEmpty();
         
         return true;
     }
