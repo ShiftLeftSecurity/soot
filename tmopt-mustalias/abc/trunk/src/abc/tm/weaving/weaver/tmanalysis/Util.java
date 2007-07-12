@@ -19,6 +19,7 @@
 package abc.tm.weaving.weaver.tmanalysis;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -44,6 +45,13 @@ import abc.tm.weaving.weaver.tmanalysis.util.ISymbolShadow;
  */
 public class Util {
 
+    /**
+     * Returns a set of all active shadows for the given {@link TraceMatch} at the given unit.
+     */
+    public static Set<ISymbolShadow> getAllActiveShadows(TraceMatch tm, Unit unit) {
+    	return getAllActiveShadows(tm, Collections.singleton(unit));
+    }
+    
     /**
      * Returns a set of all active shadows for the given {@link TraceMatch} in the given list of units.
      */
