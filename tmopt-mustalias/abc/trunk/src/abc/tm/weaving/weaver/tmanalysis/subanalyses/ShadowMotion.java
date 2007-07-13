@@ -35,14 +35,13 @@ import soot.Unit;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.annotation.logic.Loop;
 import soot.jimple.toolkits.pointer.LocalNotMayAliasAnalysis;
-import soot.toolkits.graph.BriefUnitGraph;
 import soot.toolkits.graph.LoopNestTree;
-import soot.toolkits.graph.MHGPostDominatorsFinder;
 import soot.toolkits.graph.UnitGraph;
 import soot.util.IdentityHashSet;
 import abc.main.Main;
 import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.matching.State;
+import abc.tm.weaving.weaver.tmanalysis.Statistics;
 import abc.tm.weaving.weaver.tmanalysis.Util;
 import abc.tm.weaving.weaver.tmanalysis.ds.Configuration;
 import abc.tm.weaving.weaver.tmanalysis.ds.MustMayNotAliasDisjunct;
@@ -70,8 +69,6 @@ public class ShadowMotion {
     public static void apply(TraceMatch tm, UnitGraph g, Map<Local, Stmt> tmLocalsToDefStatements, LoopAwareLocalMustAliasAnalysis localMustAliasAnalysis, LocalNotMayAliasAnalysis localNotMayAliasAnalysis) {
         System.err.println("Loop optimization...");
 
-        //create post-dominator analysis
-        MHGPostDominatorsFinder pda = new MHGPostDominatorsFinder(new BriefUnitGraph(g.getBody()));
         //build a loop nest tree
         LoopNestTree loopNestTree = new LoopNestTree(g.getBody());
         if(loopNestTree.hasNestedLoops()) {
@@ -84,12 +81,12 @@ public class ShadowMotion {
         
         //for each loop, in ascending order (inner loops first) 
         for (Loop loop : loopNestTree) {
-        	optimizeLoop(tm, g, tmLocalsToDefStatements, localMustAliasAnalysis,localNotMayAliasAnalysis, pda, loop);
+        	optimizeLoop(tm, g, tmLocalsToDefStatements, localMustAliasAnalysis,localNotMayAliasAnalysis, loop);
         }
     }
 
     public static void optimizeLoop(TraceMatch tm, UnitGraph g, Map<Local, Stmt> tmLocalsToDefStatements, LoopAwareLocalMustAliasAnalysis localMustAliasAnalysis, LocalNotMayAliasAnalysis localNotMayAliasAnalysis,
-            MHGPostDominatorsFinder pda, Loop loop) {
+            Loop loop) {
         System.err.println("Optimizing loop...");
         
         //find all active shadows in the method
@@ -99,6 +96,9 @@ public class ShadowMotion {
             System.err.println("Loop has no shadows.");
             return;
         }
+        
+        Statistics.v().currAnalysis = ShadowMotion.class;
+        Statistics.v().currMethod = g.getBody().getMethod();
         
         IntraProceduralTMFlowAnalysis flowAnalysis = new IntraProceduralTMFlowAnalysis(
                 tm,
@@ -113,6 +113,8 @@ public class ShadowMotion {
                 localNotMayAliasAnalysis,
                 false
         );
+        
+        Statistics.v().commitdataSet();
         
         Status status = flowAnalysis.getStatus();
         System.err.println("Analysis done with status: "+status);
@@ -232,6 +234,8 @@ public class ShadowMotion {
                         adviceList.copyAdviceApplication(symbolAa,originalTarget);                        
                         //register shadow as being moved (in particular, *not* eliminated)
                         shadowsThatWereMoved.add(shadow);
+                        //statistics
+                        Statistics.v().shadowsMovedCodeMotion++;
                     }
                     AdviceApplication someAa = ShadowRegistry.v().getSomeAdviceApplicationForSymbolShadow(firstShadow.getUniqueShadowId());
                     //copy over sync advice
@@ -248,6 +252,7 @@ public class ShadowMotion {
         Set<ISymbolShadow> loopShadows = Util.getAllActiveShadows(tm,loop.getLoopStatements());
         for (ISymbolShadow shadow : loopShadows) {
             if(status.hitFinal()) {
+                Statistics.v().shadowsOnlyExecuteOnce++;
                 //we hit the final state; hence, it is not ok to disable the shadows in the loop completely;
                 //however it is ok to only execute them once, because we know that the final state can only be hit once
                 System.err.println("Executing shadow once because the final state can be hit only in the first iteration: "+shadow.getUniqueShadowId());
