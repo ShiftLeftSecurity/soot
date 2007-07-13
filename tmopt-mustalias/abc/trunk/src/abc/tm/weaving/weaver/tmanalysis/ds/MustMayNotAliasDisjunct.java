@@ -103,7 +103,12 @@ public class MustMayNotAliasDisjunct extends Disjunct<InstanceKey> {
 		if(curBinding!=null && curBinding.mustAlias(newBinding)) {
 			return FALSE;
 		} else {
-			return addNegativeBinding(tmVar, newBinding);
+		    if(newBinding.haveLocalInformation()) {
+		        return addNegativeBinding(tmVar, newBinding);
+		    } else {
+		        //do not need to store negative bindings from other methods
+		        return this;
+		    }
 		}
 	}
 	
