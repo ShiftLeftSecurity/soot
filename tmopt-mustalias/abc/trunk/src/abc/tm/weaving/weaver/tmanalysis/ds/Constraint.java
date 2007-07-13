@@ -23,6 +23,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -64,7 +66,7 @@ public class Constraint implements Cloneable {
 
 
 	/** The set of disjuncts for this constraint (DNF). */
-	protected HashSet disjuncts;
+	protected HashSet<Disjunct> disjuncts;
 	
 	/** The unique constraint for the final states. */
 	public static Constraint FINAL;
@@ -102,7 +104,7 @@ public class Constraint implements Cloneable {
 			}
 			
 			@Override
-			protected Object clone() {
+			protected Constraint clone() {
 				return new Constraint(disjuncts);
 			}
 		}.intern();
@@ -129,7 +131,7 @@ public class Constraint implements Cloneable {
 			}
 			
 			@Override
-			protected Object clone() {
+			protected Constraint clone() {
 				return this;
 			}
 			
@@ -145,7 +147,7 @@ public class Constraint implements Cloneable {
 		TRUE = new Constraint(set) {
 			
 			@Override
-			protected Object clone() {
+			protected Constraint clone() {
 				return new Constraint(disjuncts);
 			}
 		}.intern();
@@ -179,7 +181,7 @@ public class Constraint implements Cloneable {
 	 */
 	public Constraint addBindingsForSymbol(Collection allVariables, boolean sourceStateIsInitial, SMNode to, Map bindings, String shadowId) {
 		//create a set for the resulting disjuncts
-		HashSet resultDisjuncts = new HashSet();
+		HashSet<Disjunct> resultDisjuncts = new HashSet<Disjunct>();
 		//for all current disjuncts
 		for (Iterator iter = disjuncts.iterator(); iter.hasNext();) {
 			Disjunct disjunct = (Disjunct) iter.next();
@@ -195,11 +197,8 @@ public class Constraint implements Cloneable {
 		}
 		
 		if(resultDisjuncts.isEmpty()) {
-			//if no disjunts are left, this means nothing else but FALSE
+			//if no disjuncts are left, this means nothing else but FALSE
 			return FALSE;	
-		} else if(resultDisjuncts.contains(FALSE)) {
-			//if the set of disjuncts contains the empty set, this represents TRUE
-			return TRUE;
 		} else {
 			//return an interned version of the the updated copy;
 			//the disjuncts of this copy hold clones of the history of the original disjuncts
@@ -208,7 +207,49 @@ public class Constraint implements Cloneable {
 		}		
 	}
 	
-	/**
+    /**
+     * Removes unnecessary negative bindings: If we have one disjunct with x=o, then we can remove
+     * negative bindings x!=o from all disjuncts. This is because x=o subsumes those cases. 
+     * @return the resulting Constraint
+     */
+    public Constraint filterNegativeBindings() {
+        if(disjuncts.isEmpty()) {
+            //nothing to do
+            return this;
+        }
+        
+        //deep clone this constraint
+        Constraint clone = clone();
+        HashSet<Disjunct> clonedDisjuncts = new HashSet<Disjunct>();
+        for (Disjunct d : clone.disjuncts) {
+            clonedDisjuncts.add(d.clone());
+        }
+        clone.disjuncts = clonedDisjuncts; 
+        
+        //store in list, because following deletions will change hash codes
+        List<Disjunct> list = new LinkedList<Disjunct> (clone.disjuncts);
+        
+        //actual removal
+        for (Disjunct d1 : list) {
+            for (Disjunct d2 : list) {
+                for (Iterator<Map.Entry<String,Set>> entryIter = ((Map<String,Set>)d2.negVarBinding).entrySet().iterator(); entryIter.hasNext();) {
+                    Map.Entry<String,Set> entry = entryIter.next();
+                    String var = entry.getKey();
+                    Set s = entry.getValue();
+                    s.remove(d1.varBinding.get(var));
+                    if(s.isEmpty()) {
+                        entryIter.remove();
+                    }
+                }
+            }
+        }
+        
+        //store set with new hash codes
+        clone.disjuncts = new HashSet<Disjunct>(list);
+        return clone.intern();
+    }
+
+    /**
 	 * Adds negative bindings for the case where the given symbol is read by taking a <i>skip</i> edge in the program graph.
 	 * Effectively this deletes all bindings which adhere to the binding which is passed in.
 	 * Note that unlike in {@link #addBindingsForSymbol(Collection, SMNode, Map, int, TMFlowAnalysis)}
@@ -271,7 +312,7 @@ public class Constraint implements Cloneable {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected Object clone() {
+	protected Constraint clone() {
 		try {
 			Constraint clone = (Constraint) super.clone();
 			clone.disjuncts = (HashSet) disjuncts.clone();

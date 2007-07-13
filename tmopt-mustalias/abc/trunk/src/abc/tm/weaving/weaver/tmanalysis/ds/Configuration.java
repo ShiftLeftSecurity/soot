@@ -185,7 +185,12 @@ public class Configuration implements Cloneable {
 		//disjointly merge the constraints of tmp and skip
 		tmp = tmp.getJoinWith(skip);
 		
-		//clear constraints at final states (for efficiency)
+        //filter unnecessary negative bindings
+		tmp = tmp.filterNegativeBindings();
+		
+		tmp.optimizeStatesWithTrue();
+
+        //clear constraints at final states (for efficiency)
 		for (State s : tmp.stateToConstraint.keySet()) {
 			if(s.isFinalNode()) {
 				tmp.stateToConstraint.put(s, Constraint.FINAL);
@@ -233,6 +238,38 @@ public class Configuration implements Cloneable {
 		}
 		return clone;
 	}
+	
+    /**
+     * Calls {@link Constraint#filterNegativeBindings()} on all constraints and returns the result.
+     */
+    public Configuration filterNegativeBindings() {
+        Configuration clone = (Configuration) clone();
+        for (Iterator stateIter = getStates().iterator(); stateIter.hasNext();) {
+            SMNode state = (SMNode) stateIter.next();
+            clone.stateToConstraint.put(state, stateToConstraint.get(state).filterNegativeBindings());
+        }
+        return clone;
+    }
+    
+    /**
+     * If a state holds {@link Disjunct#FALSE}, set it to {@link Constraint#TRUE}, as this is equivalent.
+     */
+    public void optimizeStatesWithTrue() {
+        for (Iterator stateIter = getStates().iterator(); stateIter.hasNext();) {
+            SMNode state = (SMNode) stateIter.next();
+            Constraint constraint = stateToConstraint.get(state);
+            boolean isTrue = false;
+            for (Disjunct d : constraint.disjuncts) {
+                if(d.equals(Disjunct.FALSE)) {
+                    isTrue = true;
+                    break;
+                }
+            }
+            if(isTrue) {
+                stateToConstraint.put(state, Constraint.TRUE);
+            }
+        }
+    }
 
 	/**
 	 * Returns a copy of this configuration but with all constraints reset

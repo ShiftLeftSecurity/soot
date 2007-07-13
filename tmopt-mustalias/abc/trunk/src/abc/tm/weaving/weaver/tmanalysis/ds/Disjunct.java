@@ -191,8 +191,6 @@ public abstract class Disjunct<A> implements Cloneable {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (getClass() != obj.getClass())
-			return false;
 		final Disjunct other = (Disjunct) obj;
 		if (negVarBinding == null) {
 			if (other.negVarBinding != null)
