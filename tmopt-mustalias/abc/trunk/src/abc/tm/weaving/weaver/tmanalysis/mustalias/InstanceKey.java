@@ -40,6 +40,7 @@ public class InstanceKey {
     protected final LocalNotMayAliasAnalysis lnma;
     protected final Stmt stmtAfterAssignStmt;
     protected final SootMethod owner;
+    protected final int hashCode;
 
     /**
      * @param assignedLocal a local that is assigned this value
@@ -50,6 +51,7 @@ public class InstanceKey {
         this.stmtAfterAssignStmt = stmtAfterAssignStmt;
         this.lmaa = lmaa;
         this.lnma = lnma;
+        this.hashCode = computeHashCode();
     }
     
     public boolean mustAlias(InstanceKey otherKey) {
@@ -98,6 +100,15 @@ public class InstanceKey {
      */
     @Override
     public int hashCode() {
+        return hashCode;
+    }
+    
+    /**
+     * The hash code is pretty constant. The result of the call to {@link LocalMustAliasAnalysis#instanceKeyString(Local, Stmt)}
+     * might change, but only if the instance key is invalidated and in this case it's UNKNOWN and does not equal any other key
+     * any more anyway.
+     */
+    protected int computeHashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((owner == null) ? 0 : owner.hashCode());
