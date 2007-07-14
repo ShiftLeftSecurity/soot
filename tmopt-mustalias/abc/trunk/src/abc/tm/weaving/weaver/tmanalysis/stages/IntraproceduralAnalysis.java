@@ -201,13 +201,9 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
             for (soot.ValueBox vb : (Collection<soot.ValueBox>)stmt.getDefBoxes()) {
                 soot.Value v = vb.getValue();
                 if(boundLocals.contains(v)) {
-                	//if the following fails, it is very likely that constant propagation
-                	//or something similar has taken place;
-                	//this is really conterproductive as it may increase aliasing!
-                	assert v.toString().contains("adviceformal");
                     //have a definition of v already!
                     if(localToStmtAfterDefStmt.containsKey(v)) {
-                        throw new RuntimeException("multiple defs");
+                        throw new RuntimeException("Multiple defs! Has LocalSplitter been applied?");
                     }
                     
                 	//we know that such def statements always have the form "adviceLocal = someLocal;",
