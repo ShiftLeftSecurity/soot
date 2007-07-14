@@ -48,6 +48,10 @@ public class ShadowSideEffectsAnalysis  {
 	 * Returns <code>true</code> if all shadows with overlapping bindings for the given variable are in the given method. 
 	 */
 	public boolean allShadowsWithOverLappingBindingInSameMethod(String tmVar, Local toBind, SootMethod container, TraceMatch tm) {
+	    if(!ShadowGroupRegistry.v().hasShadowGroupInfo()) {
+	        return false;
+	    }
+	    
 		PointsToSet toBindPts = getPointsToSetOf(toBind);
 		
 		Set<SymbolShadowWithPTS> overlaps = new HashSet<SymbolShadowWithPTS>();
