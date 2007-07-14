@@ -20,10 +20,12 @@
 package abc.tm.weaving.weaver.tmanalysis;
 
 import abc.main.AbcTimer;
+import abc.main.Debug;
 import abc.main.Main;
 import abc.tm.weaving.aspectinfo.TMGlobalAspectInfo;
 import abc.tm.weaving.weaver.tmanalysis.stages.CallGraphAbstraction;
 import abc.tm.weaving.weaver.tmanalysis.stages.IntraproceduralAnalysis;
+import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger;
 import abc.tm.weaving.weaver.tmanalysis.util.Statistics;
 import abc.weaving.weaver.AbstractReweavingAnalysis;
 
@@ -36,6 +38,8 @@ import abc.weaving.weaver.AbstractReweavingAnalysis;
 public class OptIntraProcedural extends AbstractReweavingAnalysis {
 
 	protected TMGlobalAspectInfo gai;
+	
+	protected int runCounter = 1;
 	
     public boolean analyze() {
     	gai = (TMGlobalAspectInfo) Main.v().getAbcExtension().getGlobalAspectInfo();
@@ -64,12 +68,20 @@ public class OptIntraProcedural extends AbstractReweavingAnalysis {
 	 */
 	protected void doAnalyze() {
 
-		//take into account effects of the earlier stages
-		CallGraphAbstraction.v().rebuildAbstractedCallGraph();
+	    TMShadowTagger.v().apply();
+	    
+	    AbcTimer.mark("Reabstraction of call graph");
 
-		AbcTimer.mark("Reabstraction of call graph");
-
+		if(Debug.v().firstUnnecessary && runCounter==1) {
+		    IntraproceduralAnalysis.v().setOnlyUnnecessaryShadowElimination(true);
+            CallGraphAbstraction.v().apply();
+		} else {
+	        //take into account effects of the earlier stages
+	        CallGraphAbstraction.v().rebuildAbstractedCallGraph();
+		}
 		IntraproceduralAnalysis.v().apply();
+		runCounter++;
+        IntraproceduralAnalysis.v().setOnlyUnnecessaryShadowElimination(false);
 		
 		AbcTimer.mark("Intra-procedural analysis (POPL'08)");
     	

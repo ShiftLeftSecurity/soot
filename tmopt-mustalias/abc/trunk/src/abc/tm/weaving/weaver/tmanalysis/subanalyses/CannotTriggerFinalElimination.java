@@ -33,6 +33,7 @@ import soot.toolkits.graph.UnitGraph;
 import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.matching.State;
 import abc.tm.weaving.weaver.tmanalysis.ReachingActiveShadowsAnalysis;
+import abc.tm.weaving.weaver.tmanalysis.Statistics;
 import abc.tm.weaving.weaver.tmanalysis.Util;
 import abc.tm.weaving.weaver.tmanalysis.ds.Configuration;
 import abc.tm.weaving.weaver.tmanalysis.ds.FinalConfigsUnitGraph;
@@ -72,6 +73,9 @@ public class CannotTriggerFinalElimination {
             bodyStmts.add(st);
         }
     
+        Statistics.v().currAnalysis = CannotTriggerFinalElimination.class;
+        Statistics.v().currMethod = g.getBody().getMethod();
+        
         IntraProceduralTMFlowAnalysis flowAnalysis = new IntraProceduralTMFlowAnalysis(
                 tm,
                 augmentedGraph,
@@ -85,6 +89,8 @@ public class CannotTriggerFinalElimination {
                 localNotMayAliasAnalysis,
                 false
         );
+        
+        Statistics.v().commitdataSet();
         
         Status status = flowAnalysis.getStatus();
         System.err.println("Analysis done with status: "+status);
@@ -119,6 +125,8 @@ public class CannotTriggerFinalElimination {
             ShadowRegistry.v().disableShadow(shadow.getUniqueShadowId());
         }
 
+        Statistics.v().shadowsRemovedCannotTriggerFinal += shadowsToDisable.size();
+        
         if(shadowsToDisable.size()==allMethodShadows.size()) {
             System.err.println("Optimization 'cannot trigger final' removed all shadows.");
             assert Util.getAllActiveShadows(tm,g.getBody().getUnits()).isEmpty();

@@ -31,6 +31,7 @@ import soot.jimple.toolkits.pointer.LocalNotMayAliasAnalysis;
 import soot.toolkits.graph.UnitGraph;
 import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.matching.State;
+import abc.tm.weaving.weaver.tmanalysis.Statistics;
 import abc.tm.weaving.weaver.tmanalysis.Util;
 import abc.tm.weaving.weaver.tmanalysis.ds.MustMayNotAliasDisjunct;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis;
@@ -61,6 +62,10 @@ public class UnnecessaryShadowElimination {
         //get all shadows in the method body
         Set<ISymbolShadow> allShadows = Util.getAllActiveShadows(tm,g.getBody().getUnits());
 
+        
+        Statistics.v().currAnalysis = UnnecessaryShadowElimination.class;
+        Statistics.v().currMethod = g.getBody().getMethod();
+                
         IntraProceduralTMFlowAnalysis flowAnalysis = new IntraProceduralTMFlowAnalysis(
         		tm,
         		g,
@@ -74,6 +79,8 @@ public class UnnecessaryShadowElimination {
                 localNotMayAliasAnalysis,
                 false /* do not abort if final state is hit --- we don't care here */
         );
+                
+        Statistics.v().commitdataSet();
 		
 		Status status = flowAnalysis.getStatus();
 		System.err.println("Analysis done with status: "+status);
@@ -83,7 +90,8 @@ public class UnnecessaryShadowElimination {
 		if(status.isAborted()) return false;
 		
     	//eliminate all shadows which have the same before-flow and after-flow upon reaching the fixed point
-    	for (ISymbolShadow shadow : flowAnalysis.getUnnecessaryShadows()) {
+    	Collection<ISymbolShadow> unnecessaryShadows = flowAnalysis.getUnnecessaryShadows();
+        for (ISymbolShadow shadow : unnecessaryShadows) {
     		System.err.println();
     		System.err.println("The following shadow does not have any effect (same before and after flow):");
     		System.err.println(shadow);
@@ -93,8 +101,10 @@ public class UnnecessaryShadowElimination {
     		ShadowRegistry.v().disableShadow(uniqueShadowId);
     		System.err.println();
     	}
+        
+        Statistics.v().shadowsRemovedUnnecessaryShadows += unnecessaryShadows.size();        
     	
-        boolean allRemoved = flowAnalysis.getUnnecessaryShadows().equals(allShadows);
+        boolean allRemoved = unnecessaryShadows.equals(allShadows);
         
         if(allRemoved) {
             System.err.println("Unnecessary shadow elimination removed all shadows.");

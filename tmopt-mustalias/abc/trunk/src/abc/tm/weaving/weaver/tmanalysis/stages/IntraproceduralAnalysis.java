@@ -31,19 +31,18 @@ import soot.Kind;
 import soot.Local;
 import soot.SootMethod;
 import soot.Unit;
-import soot.Value;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.jimple.toolkits.callgraph.CallGraphBuilder;
 import soot.jimple.toolkits.callgraph.Edge;
 import soot.jimple.toolkits.pointer.DumbPointerAnalysis;
 import soot.jimple.toolkits.pointer.LocalNotMayAliasAnalysis;
-import soot.jimple.toolkits.thread.IThreadLocalObjectsAnalysis;
 import soot.toolkits.graph.ExceptionalUnitGraph;
 import abc.main.Debug;
 import abc.main.Main;
 import abc.tm.weaving.aspectinfo.TMGlobalAspectInfo;
 import abc.tm.weaving.aspectinfo.TraceMatch;
+import abc.tm.weaving.weaver.tmanalysis.Statistics;
 import abc.tm.weaving.weaver.tmanalysis.Util;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.LoopAwareLocalMustAliasAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.query.ReachableShadowFinder;
@@ -73,21 +72,13 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
     protected CallGraph cg;
 
     protected int numShadowsBefore;
-
-
+    
+    protected boolean onlyUnnecessaryShadowElimination = false; 
+    
 	/**
 	 * {@inheritDoc}
 	 */
 	protected void doAnalysis() {
-		TMShadowTagger.v().apply();
-		@SuppressWarnings("unused") //maybe used later
-		IThreadLocalObjectsAnalysis tloa = new IThreadLocalObjectsAnalysis() {
-			public boolean isObjectThreadLocal(Value localOrRef,SootMethod sm) {
-				//assume that any variable is thread-local;
-				//THIS IS UNSAFE!
-				return true;
-			}
-		};
 		if(RUN_REAL_POINTS_TO) {
 			cg = CallGraphAbstraction.v().abstractedCallGraph();
 		} else {
@@ -106,7 +97,9 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 	        }
 		}
 		
-		System.err.println("Finished after "+(i+1)+" iterations.");
+		System.err.println("Finished after "+(i+1)+" iterations.\n\n");
+		
+		Statistics.v().dump();
         
 //        //set shadow-points
 //        Weaver weaver = Main.v().getAbcExtension().getWeaver();        
@@ -136,6 +129,10 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
             
         	Set<SootMethod> methodsWithShadows = new HashSet<SootMethod>();
         	Set<SymbolShadowWithPTS> thisTMsShadows = (Set<SymbolShadowWithPTS>) tmNameToShadows.get(tm.getName());
+        	if(thisTMsShadows==null) {
+        	    //no shadows left
+        	    continue;
+        	}
             for (SymbolShadowWithPTS s : thisTMsShadows) {
                 SootMethod m = s.getContainer();
                 methodsWithShadows.add(m);
@@ -156,6 +153,8 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
                 Map<Local,Stmt> tmLocalsToDefStatements = findTmLocalDefinitions(g,tm);
 
                 boolean allRemoved = UnnecessaryShadowElimination.apply(tm, g, tmLocalsToDefStatements, localMustAliasAnalysis, localNotMayAliasAnalysis);
+                
+                if(onlyUnnecessaryShadowElimination) continue;
                 
                 if(!allRemoved) {
                     allRemoved = CannotTriggerFinalElimination.apply(tm, g, tmLocalsToDefStatements, localMustAliasAnalysis, localNotMayAliasAnalysis);
@@ -241,7 +240,9 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
         }
 	}
 	
-	
+	public void setOnlyUnnecessaryShadowElimination(boolean value) {
+	    onlyUnnecessaryShadowElimination = value;
+	}
 	
 	//singleton pattern
 	

@@ -21,6 +21,7 @@ package abc.tm.weaving.weaver.tmanalysis.mustalias;
 import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.ABORTED_HIT_FINAL;
 import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.ABORTED_MAX_NUM_CONFIGS;
 import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.ABORTED_MAX_NUM_ITERATIONS;
+import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.ABORTED_MAX_SIZE_CONFIG;
 import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.FINISHED;
 import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.FINISHED_HIT_FINAL;
 import static abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status.RUNNING;
@@ -54,10 +55,12 @@ import soot.toolkits.scalar.ForwardFlowAnalysis;
 import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.matching.State;
 import abc.tm.weaving.matching.TMStateMachine;
+import abc.tm.weaving.weaver.tmanalysis.Statistics;
 import abc.tm.weaving.weaver.tmanalysis.Util;
 import abc.tm.weaving.weaver.tmanalysis.ds.Configuration;
 import abc.tm.weaving.weaver.tmanalysis.ds.Constraint;
 import abc.tm.weaving.weaver.tmanalysis.ds.Disjunct;
+import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroupRegistry;
 import abc.tm.weaving.weaver.tmanalysis.stages.CallGraphAbstraction;
 import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowTag;
 import abc.tm.weaving.weaver.tmanalysis.util.ISymbolShadow;
@@ -82,46 +85,77 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
 			public boolean isFinishedSuccessfully() { return false; }
             public boolean hitFinal() { return false; }
 			public String toString() { return "running"; }
+	        public void countForStatistics() {
+	            throw new IllegalStateException("only to be called after analysis finished");
+	        }
 		},
         RUNNING_HIT_FINAL{
             public boolean isAborted() { return false; }
             public boolean isFinishedSuccessfully() { return false; }
             public boolean hitFinal() { return true; }
             public String toString() { return "running, hit final state"; }
+            public void countForStatistics() {
+                throw new IllegalStateException("only to be called after analysis finished");
+            }
         },
         ABORTED_HIT_FINAL{
             public boolean isAborted() { return true; }
             public boolean isFinishedSuccessfully() { return false; }
             public boolean hitFinal() { return true; }
             public String toString() { return "aborted, hit final state"; }
+            public void countForStatistics() {
+                Statistics.v().statusAbortedHitFinal++;
+            }
         },
         ABORTED_MAX_NUM_ITERATIONS{
             public boolean isAborted() { return true; }
             public boolean isFinishedSuccessfully() { return false; }
             public boolean hitFinal() { return false; }
             public String toString() { return "aborted, exceeded maximal number of iterations ("+MAX_NUM_VISITED+")"; }
+            public void countForStatistics() {
+                Statistics.v().statusAbortedMaxNumIterations++;
+            }
         },
         ABORTED_MAX_NUM_CONFIGS{
             public boolean isAborted() { return true; }
             public boolean isFinishedSuccessfully() { return false; }
             public boolean hitFinal() { return false; }
             public String toString() { return "aborted, exceeded maximal number of configurations ("+MAX_NUM_CONFIGS+")"; }
+            public void countForStatistics() {
+                Statistics.v().statusAbortedMaxNumConfigs++;
+            }
+        },
+        ABORTED_MAX_SIZE_CONFIG{
+            public boolean isAborted() { return true; }
+            public boolean isFinishedSuccessfully() { return false; }
+            public boolean hitFinal() { return false; }
+            public String toString() { return "aborted, exceeded maximal size of configurations ("+MAX_SIZE_CONFIG+")"; }
+            public void countForStatistics() {
+                Statistics.v().statusAbortedMaxSizeConfig++;
+            }
         },
 		FINISHED {
 			public boolean isAborted() { return false; }
 			public boolean isFinishedSuccessfully() { return true; }
             public boolean hitFinal() { return false; }
 			public String toString() { return "finished"; }
+            public void countForStatistics() {
+                Statistics.v().statusFinished++;
+            }
 		},
         FINISHED_HIT_FINAL {
             public boolean isAborted() { return false; }
             public boolean isFinishedSuccessfully() { return true; }
             public boolean hitFinal() { return true; }
             public String toString() { return "finished, hit final state"; }
+            public void countForStatistics() {
+                Statistics.v().statusFinishedHitFinal++;
+            }
         };
 		public abstract boolean isAborted(); 
 		public abstract boolean isFinishedSuccessfully();
         public abstract boolean hitFinal();
+        public abstract void countForStatistics();
 	}
 
 	/**
@@ -164,7 +198,9 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
     
     protected final static int MAX_NUM_VISITED = 20;
 
-    protected final static int MAX_NUM_CONFIGS = 70;
+    protected final static int MAX_NUM_CONFIGS = 50;
+
+    protected static int MAX_SIZE_CONFIG;
 
     protected Status status;
 
@@ -184,6 +220,7 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
         this.lmna = lmna;
         this.abortWhenHittingFinal = abortWhenHittingFinal;
 		this.stmtsToAnalyze = new HashSet(stmtsToAnalyze);
+		MAX_SIZE_CONFIG = tm.getStateMachine().getNumberOfStates() * 100; //100 disjuncts per state should be enough
 		
 		Constraint.initialize(initialDisjunct);
 		
@@ -211,13 +248,18 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
         
         this.unnecessaryShadows = new HashSet<ISymbolShadow>(allShadowsForTM);
 
-        //store all IDs of shadows in those groups
-        this.overlappingShadowIDs  = Util.sameShadowGroup(allShadowsForTM);
+        if(ShadowGroupRegistry.v().hasShadowGroupInfo()) {
+            //store all IDs of shadows in those groups
+            this.overlappingShadowIDs = Util.sameShadowGroup(allShadowsForTM);
+        } else {
+            this.overlappingShadowIDs = null;
+        }
         
         this.numberVisited = new HashMap<Stmt,Integer>();
         
 		//do the analysis
-		this.status = RUNNING;
+        Statistics.v().statusStarted++;
+		this.status = RUNNING;		
 		try {
 		    doAnalysis();
 		} catch(AbortedException e) {
@@ -230,6 +272,8 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
                 this.status = FINISHED;
             }
         }
+		
+		this.status.countForStatistics();
 		
 		//un-invalidate instance keys again
 		lmaa.reset();
@@ -290,8 +334,12 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
                         }
                         out.add(newConfig);
 
-                        if(out.size()>MAX_NUM_CONFIGS) {
+                        if(newConfig.size()>MAX_NUM_CONFIGS) {
                             status = ABORTED_MAX_NUM_CONFIGS;
+                            return;
+                        }
+                        if(out.size()>MAX_SIZE_CONFIG) {
+                            status = ABORTED_MAX_SIZE_CONFIG;
                             return;
                         }
                     }
@@ -334,14 +382,20 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
     }
 
     protected boolean mightHaveSideEffects(Stmt s) {
-		Collection<ISymbolShadow> shadows = transitivelyCalledShadows(s);
-		filterNewDacapoRun(shadows);
-		for (ISymbolShadow shadow : shadows) {
-			if(overlappingShadowIDs.contains(shadow.getUniqueShadowId())) {
-				return true;
-			}
-		}
-		return false;
+        Collection<ISymbolShadow> shadows = transitivelyCalledShadows(s);
+        filterNewDacapoRun(shadows);
+        if(!ShadowGroupRegistry.v().hasShadowGroupInfo()) {
+            //do not have any info on shadow groups; hence we say that the statement can have side effects
+            //if it calls any shadow at all
+            return !shadows.isEmpty();
+        } else {
+    		for (ISymbolShadow shadow : shadows) {
+    			if(overlappingShadowIDs.contains(shadow.getUniqueShadowId())) {
+    				return true;
+    			}
+    		}
+    		return false;
+        }
 	}
 
 	/**
