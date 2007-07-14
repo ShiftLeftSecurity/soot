@@ -75,6 +75,8 @@ public class Statistics {
     
     public int shadowsOnlyExecuteOnce = 0;
     
+    public long totalIntraProceduralAnalysisTime = -1;
+    
     //temp structures
     
     public int statusAbortedHitFinal = 0;
@@ -159,6 +161,7 @@ public class Statistics {
         System.err.println("==============================================================================");
         System.err.println(globalRecord);
         
+        System.err.println("XXXXX;totalIntraProceduralAnalysisTime;"+totalIntraProceduralAnalysisTime);
         System.err.println("XXXXX;shadowsRemovedCannotTriggerFinal;"+shadowsRemovedCannotTriggerFinal); 
         System.err.println("XXXXX;shadowsRemovedUnnecessaryShadows;"+shadowsRemovedUnnecessaryShadows); 
         System.err.println("XXXXX;shadowsMovedCodeMotion;"+shadowsMovedCodeMotion);

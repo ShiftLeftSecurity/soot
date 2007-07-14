@@ -88,6 +88,8 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 			cgb.build();
 		}
 
+		long timeBefore = System.currentTimeMillis();
+		
 		int i;
 		for(i=0;i<5;i++) {
 	        oneIteration();
@@ -98,15 +100,9 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 		}
 		
 		System.err.println("Finished after "+(i+1)+" iterations.\n\n");
-		
+
+		Statistics.v().totalIntraProceduralAnalysisTime = System.currentTimeMillis() - timeBefore;		
 		Statistics.v().dump();
-        
-//        //set shadow-points
-//        Weaver weaver = Main.v().getAbcExtension().getWeaver();        
-//        ShadowPointsSetter sps = new ShadowPointsSetter(weaver.getUnitBindings());
-//        for (SootClass c : classesWithReroutetShadows) {
-//            sps.setShadowPointsPass1(c);
-//        }
 	}
 
     /**
