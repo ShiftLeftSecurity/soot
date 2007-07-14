@@ -210,7 +210,7 @@ public class Configuration implements Cloneable {
     }
 
     /**
-	 * Merges the constraint disjoiuntly with the one currently associated with the state,
+	 * Merges the constraint disjointly with the one currently associated with the state,
 	 * updating this constraint of state.
 	 * @param state any state in {@link #getStates()}
 	 * @param constraint the constraint to merge
