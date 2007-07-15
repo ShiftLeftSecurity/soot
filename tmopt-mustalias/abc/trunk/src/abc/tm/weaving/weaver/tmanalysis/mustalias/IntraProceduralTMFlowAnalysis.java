@@ -220,7 +220,7 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
         this.lmna = lmna;
         this.abortWhenHittingFinal = abortWhenHittingFinal;
 		this.stmtsToAnalyze = new HashSet(stmtsToAnalyze);
-		MAX_SIZE_CONFIG = tm.getStateMachine().getNumberOfStates() * 100; //100 disjuncts per state should be enough
+		MAX_SIZE_CONFIG = tm.getStateMachine().getNumberOfStates() * 50; //50 disjuncts per state should be enough
 		
 		Constraint.initialize(initialDisjunct);
 		
