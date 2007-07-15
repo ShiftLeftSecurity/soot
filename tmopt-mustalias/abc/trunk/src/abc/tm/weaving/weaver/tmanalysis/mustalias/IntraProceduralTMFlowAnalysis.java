@@ -306,46 +306,48 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
         //check for side-effects
         boolean mightHaveSideEffects = mightHaveSideEffects(stmt);
         
-        //update must-alias info
-        updateMustAlias(stmt,numVisited);
-				
         boolean foundEnabledShadow = false;
-        //if we care about the shadow and it has a tag...
-		if(stmtsToAnalyze.contains(stmt) && stmt.hasTag(SymbolShadowTag.NAME)) {
+        if (stmtsToAnalyze.contains(stmt)) {
+            //update must-alias info
+            updateMustAlias(stmt,numVisited);
 
-    		//retrieve matches for the current tracematch
-    		SymbolShadowTag tag = (SymbolShadowTag) stmt.getTag(SymbolShadowTag.NAME);		
-    		Set<ISymbolShadow> matchesForThisTracematch = tag.getMatchesForTracematch(tracematch);
-    
-            out.clear();
-            
-            //for each match, if it is still active, compute the successor and join 
-            for (ISymbolShadow shadow : matchesForThisTracematch) {
-                if(shadow.isEnabled()) {                
-                    foundEnabledShadow = true;
-                    for (Configuration oldConfig : in) {
-                        Configuration newConfig = oldConfig.doTransition(shadow);
-                        if(mightHaveSideEffects) {
-                            newConfig.taint();
-                        }
-                        if(!newConfig.equals(oldConfig) || newConfig.isTainted()) {
-                            //shadow is not invariant
-                            unnecessaryShadows.remove(shadow);
-                        }
-                        out.add(newConfig);
+            //if we care about the shadow and it has a tag...
+            if(stmt.hasTag(SymbolShadowTag.NAME)) {
 
-                        if(newConfig.size()>MAX_NUM_CONFIGS) {
-                            status = ABORTED_MAX_NUM_CONFIGS;
-                            return;
-                        }
-                        if(out.size()>MAX_SIZE_CONFIG) {
-                            status = ABORTED_MAX_SIZE_CONFIG;
-                            return;
+            	//retrieve matches for the current tracematch
+            	SymbolShadowTag tag = (SymbolShadowTag) stmt.getTag(SymbolShadowTag.NAME);		
+            	Set<ISymbolShadow> matchesForThisTracematch = tag.getMatchesForTracematch(tracematch);
+
+                out.clear();
+                
+                //for each match, if it is still active, compute the successor and join 
+                for (ISymbolShadow shadow : matchesForThisTracematch) {
+                    if(shadow.isEnabled()) {                
+                        foundEnabledShadow = true;
+                        for (Configuration oldConfig : in) {
+                            Configuration newConfig = oldConfig.doTransition(shadow);
+                            if(mightHaveSideEffects) {
+                                newConfig.taint();
+                            }
+                            if(!newConfig.equals(oldConfig) || newConfig.isTainted()) {
+                                //shadow is not invariant
+                                unnecessaryShadows.remove(shadow);
+                            }
+                            out.add(newConfig);
+
+                            if(newConfig.size()>MAX_NUM_CONFIGS) {
+                                status = ABORTED_MAX_NUM_CONFIGS;
+                                return;
+                            }
+                            if(out.size()>MAX_SIZE_CONFIG) {
+                                status = ABORTED_MAX_SIZE_CONFIG;
+                                return;
+                            }
                         }
                     }
                 }
+                
             }
-            
         }
 		
         if(!foundEnabledShadow) {
