@@ -148,15 +148,23 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 				LocalNotMayAliasAnalysis localNotMayAliasAnalysis = new LocalNotMayAliasAnalysis(g);
                 Map<Local,Stmt> tmLocalsToDefStatements = findTmLocalDefinitions(g,tm);
 
-                boolean allRemoved = UnnecessaryShadowElimination.apply(tm, g, tmLocalsToDefStatements, localMustAliasAnalysis, localNotMayAliasAnalysis);
+                boolean allRemoved = false;
+                
+                if(Debug.v().useUnnecessaryShadow) {
+                    allRemoved = UnnecessaryShadowElimination.apply(tm, g, tmLocalsToDefStatements, localMustAliasAnalysis, localNotMayAliasAnalysis);
+                }
                 
                 if(onlyUnnecessaryShadowElimination) continue;
                 
                 if(!allRemoved) {
-                    allRemoved = CannotTriggerFinalElimination.apply(tm, g, tmLocalsToDefStatements, localMustAliasAnalysis, localNotMayAliasAnalysis);
+                    if(Debug.v().useCannotTriggerFinal) {
+                        allRemoved = CannotTriggerFinalElimination.apply(tm, g, tmLocalsToDefStatements, localMustAliasAnalysis, localNotMayAliasAnalysis);
+                    }
 
                     if(!allRemoved) {
-                        ShadowMotion.apply(tm, g, tmLocalsToDefStatements, localMustAliasAnalysis, localNotMayAliasAnalysis);
+                        if(Debug.v().useShadowMotion) {
+                            ShadowMotion.apply(tm, g, tmLocalsToDefStatements, localMustAliasAnalysis, localNotMayAliasAnalysis);
+                        }
                     }
                 }
 
