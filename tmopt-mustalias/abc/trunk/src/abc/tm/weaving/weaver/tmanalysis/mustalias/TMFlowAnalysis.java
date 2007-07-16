@@ -19,6 +19,7 @@
 package abc.tm.weaving.weaver.tmanalysis.mustalias;
 
 import abc.tm.weaving.aspectinfo.TraceMatch;
+import abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status;
 
 /**
  * Generic interface for a flow-sensitive analysis for static tracematch optimizations.
@@ -36,5 +37,10 @@ public interface TMFlowAnalysis {
      * notifies the analysis that a final state was hit. 
      */
     public void hitFinal();
+
+    /**
+     * @param status the status to set
+     */
+    public void setStatus(Status status);
 
 }

@@ -48,8 +48,11 @@ public class Statistics {
 
         public int statusStarted = 0;
         
+        public int statusAbortedHitFinalOnSyntheticUnit = 0;
+
         public String name;
 
+        
         /**
          * {@inheritDoc}
          */
@@ -59,6 +62,7 @@ public class Statistics {
             res += "\nXXXXX;"+name+";statusAbortedMaxNumIterations;" + statusAbortedMaxNumIterations;
             res += "\nXXXXX;"+name+";statusAbortedMaxNumConfigs;" + statusAbortedMaxNumConfigs;
             res += "\nXXXXX;"+name+";statusAbortedMaxSizeConfig;" + statusAbortedMaxSizeConfig;
+            res += "\nXXXXX;"+name+";statusAbortedHitFinalOnSyntheticUnit;" + statusAbortedHitFinalOnSyntheticUnit;
             res += "\nXXXXX;"+name+";statusFinished;" + statusFinished;
             res += "\nXXXXX;"+name+";statusFinishedHitFinal;" + statusFinishedHitFinal;
             res += "\nXXXXX;"+name+";statusStarted;" + statusStarted;            
@@ -93,6 +97,8 @@ public class Statistics {
 
     public int statusStarted = 0;
     
+    public int statusAbortedHitFinalOnSyntheticUnit = 0;
+
     public SootMethod currMethod;
     
     public Class currAnalysis;
@@ -122,6 +128,7 @@ public class Statistics {
         methodRecord.statusAbortedMaxNumConfigs += statusAbortedMaxNumConfigs;
         methodRecord.statusAbortedMaxSizeConfig += statusAbortedMaxSizeConfig;
         methodRecord.statusAbortedMaxNumIterations += statusAbortedMaxNumIterations;
+        methodRecord.statusAbortedHitFinalOnSyntheticUnit += statusAbortedHitFinalOnSyntheticUnit;
         methodRecord.statusFinished += statusFinished;
         methodRecord.statusFinishedHitFinal += statusFinishedHitFinal;
         methodRecord.statusStarted += statusStarted;
@@ -136,6 +143,7 @@ public class Statistics {
         analysisRecord.statusAbortedMaxNumConfigs += statusAbortedMaxNumConfigs;
         analysisRecord.statusAbortedMaxSizeConfig += statusAbortedMaxSizeConfig;
         analysisRecord.statusAbortedMaxNumIterations += statusAbortedMaxNumIterations;
+        analysisRecord.statusAbortedHitFinalOnSyntheticUnit += statusAbortedHitFinalOnSyntheticUnit;
         analysisRecord.statusFinished += statusFinished;
         analysisRecord.statusFinishedHitFinal += statusFinishedHitFinal;
         analysisRecord.statusStarted += statusStarted;
@@ -145,6 +153,7 @@ public class Statistics {
         globalRecord.statusAbortedMaxNumConfigs += statusAbortedMaxNumConfigs;
         globalRecord.statusAbortedMaxSizeConfig += statusAbortedMaxSizeConfig;
         globalRecord.statusAbortedMaxNumIterations += statusAbortedMaxNumIterations;
+        globalRecord.statusAbortedHitFinalOnSyntheticUnit += statusAbortedHitFinalOnSyntheticUnit;
         globalRecord.statusFinished += statusFinished;
         globalRecord.statusFinishedHitFinal += statusFinishedHitFinal;
         globalRecord.statusStarted += statusStarted;
@@ -153,6 +162,7 @@ public class Statistics {
         statusAbortedMaxNumConfigs = 0;
         statusAbortedMaxSizeConfig = 0;
         statusAbortedMaxNumIterations = 0;
+        statusAbortedHitFinalOnSyntheticUnit = 0;
         statusFinished = 0;
         statusFinishedHitFinal = 0;
         statusStarted = 0;

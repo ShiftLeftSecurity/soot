@@ -33,6 +33,7 @@ import abc.tm.weaving.matching.SMEdge;
 import abc.tm.weaving.matching.SMNode;
 import abc.tm.weaving.matching.State;
 import abc.tm.weaving.matching.TMStateMachine;
+import abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.TMFlowAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.util.ISymbolShadow;
 
@@ -102,10 +103,9 @@ public class Configuration implements Cloneable {
 	/**
 	 * Returns the successor configuration of this configuration under edge.
 	 * Processes all currently active threads which are registered.
-	 * @param edge and {@link SMVariableEdge} of the program graph
 	 * @return the successor configuration under edge
 	 */
-	public Configuration doTransition(ISymbolShadow shadow) {
+	public Configuration doTransition(ISymbolShadow shadow, boolean isSyntheticFinalUnit) {
 		//the skip-copy has to be initialized as a copy of this configuration
 		Configuration skip = (Configuration) clone();
 		//the tmp-copy needs to be initialized to false on all states,
@@ -171,6 +171,11 @@ public class Configuration implements Cloneable {
 					
 					if(transition.getTarget().isFinalNode() && !newConstraint.equals(Constraint.FALSE)) {
 						flowAnalysis.hitFinal();
+                        if(isSyntheticFinalUnit) {
+                            //early abort, nothing to rescue
+                            flowAnalysis.setStatus(IntraProceduralTMFlowAnalysis.Status.ABORTED_HIT_FINAL_OUTSIDE_METHOD);
+                            throw new IntraProceduralTMFlowAnalysis.AbortedException();
+                        }
 						if(countFinalHits)
 							tmp.numHitFinal++;
 					}

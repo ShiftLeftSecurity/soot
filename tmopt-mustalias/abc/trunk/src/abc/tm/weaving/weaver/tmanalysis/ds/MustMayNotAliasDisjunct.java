@@ -67,9 +67,9 @@ public class MustMayNotAliasDisjunct extends Disjunct<InstanceKey> {
 			InstanceKey curBinding = (InstanceKey) varBinding.get(tmVar);
 			
 			if(curBinding==null) {
-			    //if we have no binding, we only generate a new binding if the shadow we get in is from this method and
+			    //if we have no binding, we only generate a new binding if
 			    //either we do a transition out of an initial state or we have shadows with an overlapping binding in other methods			    
-			    if(toBind.haveLocalInformation() && (sourceStateIsInitial || !allShadowsWithOverLappingBindingInSameMethod(tmVar,toBind))) {
+			    if(sourceStateIsInitial || !allShadowsWithOverLappingBindingInSameMethod(tmVar,toBind)) {
     				//set the new binding
     				clone.varBinding.put(tmVar, toBind);
     				//keep track of that this edge was taken

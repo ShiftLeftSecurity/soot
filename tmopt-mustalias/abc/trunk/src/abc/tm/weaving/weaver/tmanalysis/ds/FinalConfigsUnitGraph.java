@@ -53,6 +53,8 @@ import abc.tm.weaving.weaver.tmanalysis.util.SymbolShadow;
  */
 public class FinalConfigsUnitGraph implements DirectedGraph<Unit> {
     
+    protected static Set<Unit> finalUnits = new HashSet<Unit>();
+    
     protected final DirectedGraph<Unit> originalGraph;
     protected NopStmt finalUnit;
 
@@ -77,6 +79,7 @@ public class FinalConfigsUnitGraph implements DirectedGraph<Unit> {
         nop.addTag( new SymbolShadowTag(tmToShadows) );
         
         this.finalUnit = nop; 
+        finalUnits.add(this.finalUnit);
     }
 
     /**
@@ -144,6 +147,10 @@ public class FinalConfigsUnitGraph implements DirectedGraph<Unit> {
      */
     public int size() {
         return originalGraph.size()+1/*(final unit)*/;
+    }
+    
+    public static boolean isASyntheticFinalUnit(Unit u) {
+        return finalUnits.contains(u);
     }
 
 }

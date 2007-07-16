@@ -60,6 +60,7 @@ import abc.tm.weaving.weaver.tmanalysis.Util;
 import abc.tm.weaving.weaver.tmanalysis.ds.Configuration;
 import abc.tm.weaving.weaver.tmanalysis.ds.Constraint;
 import abc.tm.weaving.weaver.tmanalysis.ds.Disjunct;
+import abc.tm.weaving.weaver.tmanalysis.ds.FinalConfigsUnitGraph;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroupRegistry;
 import abc.tm.weaving.weaver.tmanalysis.stages.CallGraphAbstraction;
 import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowTag;
@@ -72,7 +73,7 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
      *
      * @author Eric Bodden
      */
-    private static class AbortedException extends RuntimeException { }
+    public static class AbortedException extends RuntimeException { }
 
     /**
 	 * Status
@@ -132,6 +133,15 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
             public String toString() { return "aborted, exceeded maximal size of configurations ("+MAX_SIZE_CONFIG+")"; }
             public void countForStatistics() {
                 Statistics.v().statusAbortedMaxSizeConfig++;
+            }
+        },
+        ABORTED_HIT_FINAL_OUTSIDE_METHOD {
+            public boolean isAborted() { return true; }
+            public boolean isFinishedSuccessfully() { return false; }
+            public boolean hitFinal() { return true; }
+            public String toString() { return "aborted, hit final state on synthetic final unit"; }
+            public void countForStatistics() {
+                Statistics.v().statusAbortedHitFinalOnSyntheticUnit++;
             }
         },
 		FINISHED {
@@ -334,7 +344,8 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
                     if(shadow.isEnabled()) {                
                         foundEnabledShadow = true;
                         for (Configuration oldConfig : in) {
-                            Configuration newConfig = oldConfig.doTransition(shadow);
+                            boolean isSyntheticFinalUnit = FinalConfigsUnitGraph.isASyntheticFinalUnit(stmt);
+                            Configuration newConfig = oldConfig.doTransition(shadow,isSyntheticFinalUnit);
                             if(mightHaveSideEffects) {
                                 newConfig.taint();
                             }
@@ -617,6 +628,13 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
             }
         }       
         return result;
+    }
+
+    /**
+     * @param status the status to set
+     */
+    public void setStatus(Status status) {
+        this.status = status;
     }
 
 }
