@@ -63,6 +63,7 @@ import abc.tm.weaving.weaver.tmanalysis.ds.Disjunct;
 import abc.tm.weaving.weaver.tmanalysis.ds.FinalConfigsUnitGraph;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroupRegistry;
 import abc.tm.weaving.weaver.tmanalysis.stages.CallGraphAbstraction;
+import abc.tm.weaving.weaver.tmanalysis.stages.FlowInsensitiveAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowTag;
 import abc.tm.weaving.weaver.tmanalysis.util.ISymbolShadow;
 
@@ -327,50 +328,58 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
         
         boolean foundEnabledShadow = false;
         if (stmtsToAnalyze.contains(stmt)) {
-            //update must-alias info
-            updateMustAlias(stmt,numVisited);
+            
+            boolean isSyntheticFinalUnit = FinalConfigsUnitGraph.isASyntheticFinalUnit(stmt);
+            int lengthOfLongestPathInfo = FlowInsensitiveAnalysis.v().lengthOfLongestPathFor(tracematch);
+            
+            if(!(isSyntheticFinalUnit && numVisited>lengthOfLongestPathInfo)) {
+                //if we are visiting the synthetic final unit of cannot-reach-final and we have already propagated through it
+                //as often as the longest path info, we can ignore further iterations, as they will never hit the final state
 
-            //if we care about the shadow and it has a tag...
-            if(stmt.hasTag(SymbolShadowTag.NAME)) {
-
-            	//retrieve matches for the current tracematch
-            	SymbolShadowTag tag = (SymbolShadowTag) stmt.getTag(SymbolShadowTag.NAME);		
-            	Set<ISymbolShadow> matchesForThisTracematch = tag.getMatchesForTracematch(tracematch);
-
-                out.clear();
-                
-                //for each match, if it is still active, compute the successor and join 
-                for (ISymbolShadow shadow : matchesForThisTracematch) {
-                    if(shadow.isEnabled()) {                
-                        foundEnabledShadow = true;
-                        for (Configuration oldConfig : in) {
-                            boolean isSyntheticFinalUnit = FinalConfigsUnitGraph.isASyntheticFinalUnit(stmt);
-                            Configuration newConfig = oldConfig.doTransition(shadow,isSyntheticFinalUnit);
-                            if(mightHaveSideEffects) {
-                                newConfig.taint();
-                            }
-                            if(!newConfig.equals(oldConfig) || newConfig.isTainted()) {
-                                //shadow is not invariant
-                                unnecessaryShadows.remove(shadow);
-                            }
-                            out.add(newConfig);
-
-                            int numNewConfigs = out.size();
-                            maxNumConfigsInThisRun = Math.max(maxNumConfigsInThisRun , numNewConfigs);
-                            if(numNewConfigs>MAX_NUM_CONFIGS) {
-                                status = ABORTED_MAX_NUM_CONFIGS;
-                                return;
-                            }
-                            int configSize = newConfig.size();
-                            maxSizeConfigInThisRun = Math.max(maxSizeConfigInThisRun , configSize);
-                            if(configSize>MAX_SIZE_CONFIG) {
-                                status = ABORTED_MAX_SIZE_CONFIG;
-                                return;
+                //update must-alias info
+                updateMustAlias(stmt,numVisited);
+    
+                //if we care about the shadow and it has a tag...
+                if(stmt.hasTag(SymbolShadowTag.NAME)) {
+    
+                	//retrieve matches for the current tracematch
+                	SymbolShadowTag tag = (SymbolShadowTag) stmt.getTag(SymbolShadowTag.NAME);		
+                	Set<ISymbolShadow> matchesForThisTracematch = tag.getMatchesForTracematch(tracematch);
+    
+                    out.clear();
+                    
+                    //for each match, if it is still active, compute the successor and join 
+                    for (ISymbolShadow shadow : matchesForThisTracematch) {
+                        if(shadow.isEnabled()) {                
+                            foundEnabledShadow = true;
+                            for (Configuration oldConfig : in) {
+                                Configuration newConfig = oldConfig.doTransition(shadow,isSyntheticFinalUnit);
+                                if(mightHaveSideEffects) {
+                                    newConfig.taint();
+                                }
+                                if(!newConfig.equals(oldConfig) || newConfig.isTainted()) {
+                                    //shadow is not invariant
+                                    unnecessaryShadows.remove(shadow);
+                                }
+                                out.add(newConfig);
+    
+                                int numNewConfigs = out.size();
+                                maxNumConfigsInThisRun = Math.max(maxNumConfigsInThisRun , numNewConfigs);
+                                if(numNewConfigs>MAX_NUM_CONFIGS) {
+                                    status = ABORTED_MAX_NUM_CONFIGS;
+                                    return;
+                                }
+                                int configSize = newConfig.size();
+                                maxSizeConfigInThisRun = Math.max(maxSizeConfigInThisRun , configSize);
+                                if(configSize>MAX_SIZE_CONFIG) {
+                                    status = ABORTED_MAX_SIZE_CONFIG;
+                                    return;
+                                }
                             }
                         }
                     }
+                    
                 }
-                
             }
         }
 		
