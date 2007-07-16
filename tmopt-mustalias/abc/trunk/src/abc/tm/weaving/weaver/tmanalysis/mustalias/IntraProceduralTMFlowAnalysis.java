@@ -203,7 +203,12 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
     protected static int MAX_SIZE_CONFIG;
 
     protected Status status;
+    
+    protected transient int maxNumVisitedInThisRun = 0;
 
+    protected transient int maxNumConfigsInThisRun = 0;
+    
+    protected transient int maxSizeConfigInThisRun = 0;
 
 	/**
 	 * Performs the tracematch-state flow analysis on the given tracematch and unitgraph.
@@ -266,13 +271,16 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
 		    //ignore
 		}
 		if(!this.status.isAborted()) {
+	        Statistics.v().maxNumVisitedOnSuccessfulRun = Math.max(Statistics.v().maxNumVisitedOnSuccessfulRun, maxNumVisitedInThisRun); 
+            Statistics.v().maxNumConfigsOnSuccessfulRun = Math.max(Statistics.v().maxNumConfigsOnSuccessfulRun, maxNumConfigsInThisRun); 
+            Statistics.v().maxSizeConfigOnSuccessfulRun = Math.max(Statistics.v().maxSizeConfigOnSuccessfulRun, maxSizeConfigInThisRun); 
             if(this.status.hitFinal()) {
                 this.status = FINISHED_HIT_FINAL;
             } else {
                 this.status = FINISHED;
             }
         }
-		
+				
 		this.status.countForStatistics();
 		
 		//un-invalidate instance keys again
@@ -295,6 +303,7 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
         int numVisited = numberVisited.get(stmt);
         numVisited++;
         numberVisited.put(stmt, numVisited);
+        maxNumVisitedInThisRun = Math.max(maxNumVisitedInThisRun , numVisited);
 
         //if visited too often, abort
         if(numVisited>MAX_NUM_VISITED) {
@@ -335,11 +344,15 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
                             }
                             out.add(newConfig);
 
-                            if(newConfig.size()>MAX_NUM_CONFIGS) {
+                            int numNewConfigs = out.size();
+                            maxNumConfigsInThisRun = Math.max(maxNumConfigsInThisRun , numNewConfigs);
+                            if(numNewConfigs>MAX_NUM_CONFIGS) {
                                 status = ABORTED_MAX_NUM_CONFIGS;
                                 return;
                             }
-                            if(out.size()>MAX_SIZE_CONFIG) {
+                            int configSize = newConfig.size();
+                            maxSizeConfigInThisRun = Math.max(maxSizeConfigInThisRun , configSize);
+                            if(configSize>MAX_SIZE_CONFIG) {
                                 status = ABORTED_MAX_SIZE_CONFIG;
                                 return;
                             }

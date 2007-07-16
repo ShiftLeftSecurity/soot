@@ -103,6 +103,12 @@ public class Statistics {
     
     protected Record globalRecord = new Record("global");
 
+    public int maxNumVisitedOnSuccessfulRun = -1;
+
+    public int maxNumConfigsOnSuccessfulRun = -1;
+
+    public int maxSizeConfigOnSuccessfulRun = -1;
+
     public void commitdataSet() {
         assert currMethod!=null;
         assert currAnalysis!=null;
@@ -166,6 +172,9 @@ public class Statistics {
         System.err.println("XXXXX;shadowsRemovedUnnecessaryShadows;"+shadowsRemovedUnnecessaryShadows); 
         System.err.println("XXXXX;shadowsMovedCodeMotion;"+shadowsMovedCodeMotion);
         System.err.println("XXXXX;shadowsOnlyExecuteOnce;"+shadowsOnlyExecuteOnce);
+        System.err.println("XXXXX;maxNumVisitedOnSuccessfulRun;"+maxNumVisitedOnSuccessfulRun);
+        System.err.println("XXXXX;maxNumConfigsOnSuccessfulRun;"+maxNumConfigsOnSuccessfulRun);
+        System.err.println("XXXXX;maxSizeConfigOnSuccessfulRun;"+maxSizeConfigOnSuccessfulRun);
 
 //        {
 //        System.err.println("==============================================================================");
