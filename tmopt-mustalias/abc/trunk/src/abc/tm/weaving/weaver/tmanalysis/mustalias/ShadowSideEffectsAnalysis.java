@@ -20,6 +20,7 @@ package abc.tm.weaving.weaver.tmanalysis.mustalias;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,9 +30,10 @@ import soot.PointsToSet;
 import soot.Scene;
 import soot.SootMethod;
 import abc.tm.weaving.aspectinfo.TraceMatch;
-import abc.tm.weaving.weaver.tmanalysis.query.SymbolShadowWithPTS;
+import abc.tm.weaving.matching.SMNode;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroup;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroupRegistry;
+import abc.tm.weaving.weaver.tmanalysis.query.SymbolShadowWithPTS;
 
 
 /**
@@ -45,9 +47,9 @@ public class ShadowSideEffectsAnalysis  {
 	protected Map<Local,PointsToSet> localToPts = new HashMap<Local, PointsToSet>();
 	
 	/**
-	 * Returns <code>true</code> if all shadows with overlapping bindings for the given variable are in the given method. 
+	 * TODO RENAME AND COMMENT
 	 */
-	public boolean allShadowsWithOverLappingBindingInSameMethod(String tmVar, Local toBind, SootMethod container, TraceMatch tm) {
+	public boolean allShadowsWithOverLappingBindingInSameMethod(String tmVar, Local toBind, SootMethod container, TraceMatch tm, SMNode from) {
 	    if(!ShadowGroupRegistry.v().hasShadowGroupInfo()) {
 	        return false;
 	    }
@@ -64,14 +66,25 @@ public class ShadowSideEffectsAnalysis  {
 				}
 			}
 		}
-		
-		for (SymbolShadowWithPTS shadow : overlaps) {
-			if(!shadow.getContainer().equals(container) && !shadow.isArtificial()) {
-				return false;
-			}
-		}
 
-		return true;
+		//exclude all shadows from the given container  and artificial shadows
+		for (Iterator<SymbolShadowWithPTS> shadowIter = overlaps.iterator(); shadowIter.hasNext();) {
+		    SymbolShadowWithPTS shadow = (SymbolShadowWithPTS) shadowIter.next();
+            if(shadow.getContainer().equals(container) || shadow.isArtificial()) {
+                shadowIter.remove();
+            }
+        }
+		
+		Set<String> variablesBoundByShadows = new HashSet<String>();
+		for (SymbolShadowWithPTS shadow : overlaps) {
+            variablesBoundByShadows.addAll(shadow.getBoundTmFormals());
+        }
+		
+		if(!variablesBoundByShadows.containsAll(from.boundVars)) {
+		    return true;
+		} else {
+		    return false;
+		}		
 	}
 
 	protected PointsToSet getPointsToSetOf(Local toBind) {

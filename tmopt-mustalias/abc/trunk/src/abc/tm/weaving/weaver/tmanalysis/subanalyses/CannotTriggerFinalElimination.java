@@ -84,7 +84,6 @@ public class CannotTriggerFinalElimination {
                 new MustMayNotAliasDisjunct(g.getBody().getMethod(),tm),
                 new HashSet<State>(),
                 allStmts,
-                bodyStmts,
                 localMustAliasAnalysis,
                 localNotMayAliasAnalysis,
                 false

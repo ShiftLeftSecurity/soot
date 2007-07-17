@@ -188,8 +188,6 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
 
 	protected final Collection<Stmt> stmtsToAnalyze;
 
-    protected final Collection<Stmt> stmtsWhichMayNotCallOtherMethodsWithShadows;
-
     protected final Collection<String> overlappingShadowIDs;
     
     protected final LoopAwareLocalMustAliasAnalysis lmaa;
@@ -223,15 +221,14 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
 
 	/**
 	 * Performs the tracematch-state flow analysis on the given tracematch and unitgraph.
-     * @param initialDisjunct Initial disjunct (functionally copied everywhere)
-     * @param stmtsToAnalyze Statements to consider for this analysis.
+	 * @param initialDisjunct Initial disjunct (functionally copied everywhere)
+	 * @param stmtsToAnalyze Statements to consider for this analysis.
 	 * @param patchingChain 
 	 */
-	public IntraProceduralTMFlowAnalysis(TraceMatch tm, DirectedGraph<Unit> ug, SootMethod container, Map<Local, Stmt> tmLocalDefs, Disjunct initialDisjunct, Set<State> additionalInitialStates, Collection<Stmt> stmtsToAnalyze, Collection<Stmt> stmtsWhichMayNotCallOtherMethodsWithShadows, LoopAwareLocalMustAliasAnalysis lmaa, LocalNotMayAliasAnalysis lmna, boolean abortWhenHittingFinal) {
+	public IntraProceduralTMFlowAnalysis(TraceMatch tm, DirectedGraph<Unit> ug, SootMethod container, Map<Local, Stmt> tmLocalDefs, Disjunct initialDisjunct, Set<State> additionalInitialStates, Collection<Stmt> stmtsToAnalyze, LoopAwareLocalMustAliasAnalysis lmaa, LocalNotMayAliasAnalysis lmna, boolean abortWhenHittingFinal) {
 		super(ug);
         this.container = container;
         this.tmLocalDefs = tmLocalDefs;
-        this.stmtsWhichMayNotCallOtherMethodsWithShadows = stmtsWhichMayNotCallOtherMethodsWithShadows;
         this.lmaa = lmaa;
         this.lmna = lmna;
         this.abortWhenHittingFinal = abortWhenHittingFinal;

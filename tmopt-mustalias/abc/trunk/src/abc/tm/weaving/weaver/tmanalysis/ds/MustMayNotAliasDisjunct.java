@@ -26,6 +26,7 @@ import java.util.Set;
 
 import soot.SootMethod;
 import abc.tm.weaving.aspectinfo.TraceMatch;
+import abc.tm.weaving.matching.SMNode;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.InstanceKey;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.ShadowSideEffectsAnalysis;
 
@@ -52,7 +53,7 @@ public class MustMayNotAliasDisjunct extends Disjunct<InstanceKey> {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Disjunct addBindingsForSymbol(Collection allVariables, Map bindings, String shadowId, boolean sourceStateIsInitial) {
+	public Disjunct addBindingsForSymbol(Collection allVariables, Map bindings, String shadowId, SMNode from) {
 		Disjunct clone = clone();
 		//for each tracematch variable
 		for (String tmVar : (Collection<String>)allVariables) {
@@ -69,7 +70,7 @@ public class MustMayNotAliasDisjunct extends Disjunct<InstanceKey> {
 			if(curBinding==null) {
 			    //if we have no binding, we only generate a new binding if
 			    //either we do a transition out of an initial state or we have shadows with an overlapping binding in other methods			    
-			    if(sourceStateIsInitial || !allShadowsWithOverLappingBindingInSameMethod(tmVar,toBind)) {
+			    if(from.isInitialNode() || !allShadowsWithOverLappingBindingInSameMethod(tmVar,toBind,from)) {
     				//set the new binding
     				clone.varBinding.put(tmVar, toBind);
     				//keep track of that this edge was taken
@@ -90,8 +91,9 @@ public class MustMayNotAliasDisjunct extends Disjunct<InstanceKey> {
 		return clone.intern();
 	}
 
-	protected boolean allShadowsWithOverLappingBindingInSameMethod(String tmVar, InstanceKey toBind) {
-		return ShadowSideEffectsAnalysis.v().allShadowsWithOverLappingBindingInSameMethod(tmVar, toBind.getLocal(), container, tm);
+    //TODO RENAME AND COMMENT
+	protected boolean allShadowsWithOverLappingBindingInSameMethod(String tmVar, InstanceKey toBind, SMNode from) {
+		return ShadowSideEffectsAnalysis.v().allShadowsWithOverLappingBindingInSameMethod(tmVar, toBind.getLocal(), container, tm, from);
 	}
 	
 	/**

@@ -163,7 +163,7 @@ public class Configuration implements Cloneable {
 					//add bindings
 					Constraint newConstraint = oldConstraint.addBindingsForSymbol(
 							allVariables, 
-							transition.getSource().isInitialNode(),
+							transition.getSource(),
 							transition.getTarget(), 
 							bindings, 
 							shadowId

@@ -27,6 +27,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import abc.tm.weaving.matching.SMNode;
+
 import soot.PointsToSet;
 
 /**
@@ -81,12 +83,12 @@ public abstract class Disjunct<A> implements Cloneable {
 	 * @param allVariables the set of all variables bound by the symbol that is read
 	 * @param bindings the bindings of that edge in form of a mapping {@link String} to {@link PointsToSet}
 	 * @param shadowId the shadow-id of the shadow that triggered this edge
-	 * @param sourceStateIsInitial TODO
+	 * @param from TODO
 	 * @return the updated disjunct; this is a fresh instance, 
 	 * the disjuncts of this copy hold the history of the disjuncts of this constraint plus
 	 * the shadowId that is passed in
 	 */
-	public abstract Disjunct addBindingsForSymbol(Collection allVariables, Map<String,A> bindings, String shadowId, boolean sourceStateIsInitial);
+	public abstract Disjunct addBindingsForSymbol(Collection allVariables, Map<String,A> bindings, String shadowId, SMNode from);
 		
 	
 	/**

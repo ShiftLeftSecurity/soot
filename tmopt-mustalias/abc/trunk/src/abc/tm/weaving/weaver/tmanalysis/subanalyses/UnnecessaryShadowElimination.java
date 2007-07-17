@@ -74,8 +74,7 @@ public class UnnecessaryShadowElimination {
         		new MustMayNotAliasDisjunct(g.getBody().getMethod(),tm),
         		new HashSet<State>(),
         		allStmts,
-        		allStmts,
-                localMustAliasAnalysis,
+        		localMustAliasAnalysis,
                 localNotMayAliasAnalysis,
                 false /* do not abort if final state is hit --- we don't care here */
         );
