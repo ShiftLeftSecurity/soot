@@ -97,6 +97,12 @@ public class ShadowMotion {
             return;
         }
         
+        Collection<Stmt> bodyStmts = new HashSet<Stmt>();
+        for (Unit u : g.getBody().getUnits()) {
+            Stmt st = (Stmt)u;
+            bodyStmts.add(st);
+        }
+
         Statistics.v().currAnalysis = ShadowMotion.class;
         Statistics.v().currMethod = g.getBody().getMethod();
         
@@ -107,8 +113,7 @@ public class ShadowMotion {
                 tmLocalsToDefStatements,
                 new MustMayNotAliasDisjunct(g.getBody().getMethod(),tm),
                 new HashSet<State>(),
-                loopStatements,
-                loopStatements,
+                bodyStmts/*loopStatements*/,
                 localMustAliasAnalysis,
                 localNotMayAliasAnalysis,
                 false
