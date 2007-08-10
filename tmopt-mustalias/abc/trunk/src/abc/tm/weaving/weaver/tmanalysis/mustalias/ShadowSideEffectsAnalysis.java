@@ -18,10 +18,8 @@
  */
 package abc.tm.weaving.weaver.tmanalysis.mustalias;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 
 import soot.Local;
@@ -43,8 +41,6 @@ import abc.tm.weaving.weaver.tmanalysis.query.SymbolShadowWithPTS;
  * @author Eric Bodden
  */
 public class ShadowSideEffectsAnalysis  {
-	
-	protected Map<Local,PointsToSet> localToPts = new HashMap<Local, PointsToSet>();
 	
 	/**
 	 * TODO RENAME AND COMMENT
@@ -88,13 +84,8 @@ public class ShadowSideEffectsAnalysis  {
 	}
 
 	protected PointsToSet getPointsToSetOf(Local toBind) {
-		PointsToSet pointsToSet = localToPts.get(toBind);
-		if(pointsToSet==null) {
-			PointsToAnalysis pta = Scene.v().getPointsToAnalysis();
-			pointsToSet = pta.reachingObjects(toBind);
-			localToPts.put(toBind, pointsToSet);
-		}
-		return pointsToSet;
+		PointsToAnalysis pta = Scene.v().getPointsToAnalysis();
+		return pta.reachingObjects(toBind);
 	}
 	
 
