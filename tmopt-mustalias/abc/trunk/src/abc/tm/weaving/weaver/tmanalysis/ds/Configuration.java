@@ -172,7 +172,8 @@ public class Configuration implements Cloneable {
 					if(transition.getTarget().isFinalNode() && !newConstraint.equals(Constraint.FALSE)) {
 						flowAnalysis.hitFinal();
                         if(isSyntheticFinalUnit) {
-                            //early abort, nothing to rescue
+                            //early abort, nothing to rescue because *every* unit reaches this unit
+                        	//by definition
                             flowAnalysis.setStatus(IntraProceduralTMFlowAnalysis.Status.ABORTED_HIT_FINAL_OUTSIDE_METHOD);
                             throw new IntraProceduralTMFlowAnalysis.AbortedException();
                         }
