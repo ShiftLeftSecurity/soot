@@ -29,14 +29,17 @@ import soot.Scene;
 import soot.SootMethod;
 import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.matching.SMNode;
+import abc.tm.weaving.matching.State;
+import abc.tm.weaving.weaver.tmanalysis.query.PathInfoFinder;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroup;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroupRegistry;
 import abc.tm.weaving.weaver.tmanalysis.query.SymbolShadowWithPTS;
+import abc.tm.weaving.weaver.tmanalysis.query.PathInfoFinder.PathInfo;
+import abc.tm.weaving.weaver.tmanalysis.query.PathInfoFinder.StatePredicate;
 
 
 /**
- * IntraproceduralAnalysis: This analysis propagates tracematch
- * automaton states through the method.
+ * Shadow side-effects analyis.
  *
  * @author Eric Bodden
  */
@@ -45,7 +48,7 @@ public class ShadowSideEffectsAnalysis  {
 	/**
 	 * TODO RENAME AND COMMENT
 	 */
-	public boolean allShadowsWithOverLappingBindingInSameMethod(String tmVar, Local toBind, SootMethod container, TraceMatch tm, SMNode from) {
+	public boolean allShadowsWithOverLappingBindingInSameMethod(String tmVar, Local toBind, SootMethod container, TraceMatch tm, final SMNode from) {
 	    if(!ShadowGroupRegistry.v().hasShadowGroupInfo()) {
 	        return false;
 	    }
@@ -71,16 +74,24 @@ public class ShadowSideEffectsAnalysis  {
             }
         }
 		
-		Set<String> variablesBoundByShadows = new HashSet<String>();
-		for (SymbolShadowWithPTS shadow : overlaps) {
-            variablesBoundByShadows.addAll(shadow.getBoundTmFormals());
-        }
+		if(overlaps.isEmpty()) {
+			return true;
+		}
 		
-		if(!variablesBoundByShadows.containsAll(from.boundVars)) {
-		    return true;
-		} else {
-		    return false;
-		}		
+	    Set<PathInfo> pathInfos = new PathInfoFinder(tm, new StatePredicate() {
+
+			public boolean match(State s) {
+				return s==from;
+			}
+	    	
+	    }).getPathInfos();
+	    
+	    for (PathInfo pathInfo : pathInfos) {
+			if(pathInfo.isSatisfiedByShadowSet(overlaps)) {
+				return false;
+			}
+		}
+	    return true;
 	}
 
 	protected PointsToSet getPointsToSetOf(Local toBind) {
