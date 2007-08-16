@@ -361,6 +361,21 @@ public class Constraint implements Cloneable {
 	 */
 	public String toString() {
 		return disjuncts.toString();
+	}
+
+	/**
+	 * Returns <code>true</code> if the given variable binding
+	 * is compatible with the binding of one of the disjuncts
+	 * in this constraint.
+	 * @see Disjunct#compatibleBinding(Map)
+	 */
+	public boolean compatibleBinding(Map varBinding) {
+		for (Disjunct d : disjuncts) {
+			if(d.compatibleBinding(varBinding)) {
+				return true;
+			}
+		}		
+		return false;
 	}	
 	
 }

@@ -102,22 +102,39 @@ public class CannotTriggerFinalElimination {
         Set<ISymbolShadow> shadowsToDisable = new HashSet<ISymbolShadow>(allMethodShadows);
 
         if(status.hitFinal()) {
-            ReachingActiveShadowsAnalysis reachingShadows = new ReachingActiveShadowsAnalysis(g,tm);
+            ReachingActiveShadowsAnalysis reachingShadows = new ReachingActiveShadowsAnalysis(augmentedGraph,tm);
             
-            for (Unit unit : g.getBody().getUnits()) {
+            for (Unit unit : augmentedGraph) {
     
                 //find units whose before-flow is tainted (configurations starting at such units are unreliable)
                 //and units after which a final state was hit (or before that, transitively)
                 Set<Configuration> flowBefore = flowAnalysis.getFlowBefore(unit);
                 Set<Configuration> flowAfter = flowAnalysis.getFlowAfter(unit);
-                boolean triggersFinalOrIsTainted = Configuration.hasTainted(flowBefore) || Configuration.hasHitFinal(flowAfter);
                 
-                if(triggersFinalOrIsTainted) {
+                if(Configuration.hasTainted(flowBefore)) {
                     //shadows that might reach such units have to be kept alive
                     Set<ISymbolShadow> reachingShadowsForUnit = reachingShadows.getFlowAfter(unit);
                     shadowsToDisable.removeAll(reachingShadowsForUnit);
+                } else if(Configuration.hasHitFinal(flowAfter)) {
+                    Set<ISymbolShadow> reachingShadowsForUnit = reachingShadows.getFlowAfter(unit);
+                    for (Configuration configuration : flowAfter) {
+						if(configuration.hasHitFinal()) {
+							for (ISymbolShadow reachingShadow : reachingShadowsForUnit) {
+								//if it is a reaching shadow of the current method
+								if(reachingShadow.getContainer().equals(g.getBody().getMethod())) {
+									//and if it could have contributed to reaching the final state
+									if(configuration.couldHaveReachedFinalStateWithBindings(reachingShadow)) {
+										//keep shadow alive
+					                    shadowsToDisable.remove(reachingShadow);
+									}
+								}
+							}
+						}
+					}
                 }
             }
+        } else {
+        	shadowsToDisable = new HashSet<ISymbolShadow>(allMethodShadows);
         }
         
         for (ISymbolShadow shadow : shadowsToDisable) {

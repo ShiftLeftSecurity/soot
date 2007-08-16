@@ -33,7 +33,6 @@ import abc.tm.weaving.matching.SMEdge;
 import abc.tm.weaving.matching.SMNode;
 import abc.tm.weaving.matching.State;
 import abc.tm.weaving.matching.TMStateMachine;
-import abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.TMFlowAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.util.ISymbolShadow;
 
@@ -171,12 +170,6 @@ public class Configuration implements Cloneable {
 					
 					if(transition.getTarget().isFinalNode() && !newConstraint.equals(Constraint.FALSE)) {
 						flowAnalysis.hitFinal();
-                        if(isSyntheticFinalUnit) {
-                            //early abort, nothing to rescue because *every* unit reaches this unit
-                        	//by definition
-                            flowAnalysis.setStatus(IntraProceduralTMFlowAnalysis.Status.ABORTED_HIT_FINAL_OUTSIDE_METHOD);
-                            throw new IntraProceduralTMFlowAnalysis.AbortedException();
-                        }
 						if(countFinalHits)
 							tmp.numHitFinal++;
 					}
@@ -196,13 +189,6 @@ public class Configuration implements Cloneable {
 		
 		tmp.optimizeStatesWithTrue();
 
-        //clear constraints at final states (for efficiency)
-		for (State s : tmp.stateToConstraint.keySet()) {
-			if(s.isFinalNode()) {
-				tmp.stateToConstraint.put(s, Constraint.FINAL);
-			}
-		}
-		
 		//return an interned version of the result
 		return tmp.intern();
 	}	
@@ -395,11 +381,33 @@ public class Configuration implements Cloneable {
 	
     public static boolean hasHitFinal(Set<Configuration> configurations) {
         for (Configuration configuration : configurations) {
-            if(configuration.numHitFinal>0) {
+            if(configuration.hasHitFinal()) {
                 return true;
             }
         }
         return false;
+    }
+    
+    public boolean hasHitFinal() {
+    	return numHitFinal>0;
+    }
+    
+    /**
+     * Returns <code>true</code> if according to this configuration, the final state
+     * may have been reached with a variable binding compatible to the one of the
+     * given shadow.
+     */
+    public boolean couldHaveReachedFinalStateWithBindings(ISymbolShadow shadow) {
+    	Map varBinding = reMap(shadow.getTmFormalToAdviceLocal());
+    	for (State s : stateToConstraint.keySet()) {
+    		if(s.isFinalNode()) {
+    			Constraint c = stateToConstraint.get(s);
+    			if(c.compatibleBinding(varBinding)) {
+    				return true;
+    			}
+    		}    		
+		}
+    	return false;
     }
 
     /**

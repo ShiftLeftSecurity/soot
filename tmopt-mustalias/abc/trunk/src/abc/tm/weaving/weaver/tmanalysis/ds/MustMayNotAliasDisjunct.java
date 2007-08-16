@@ -165,4 +165,26 @@ public class MustMayNotAliasDisjunct extends Disjunct<InstanceKey> {
 		sb.append(")]");			
 		return sb.toString();
 	}
+
+	/**
+	 * Expects a map from variables ({@link String}s) to {@link InstanceKey}s.
+	 * Returns <code>false</code> if there exists a variable in the binding
+	 * stored in this disjunct and the binding passed in for which both instance keys
+	 * for this variable may not be aliased (and <code>true</code> otherwise).
+	 * @param b a map of bindings ({@link String} to {@link InstanceKey}) 
+	 */
+	@Override
+	public boolean compatibleBinding(Map b) {
+		Map<String,InstanceKey> binding = (Map<String,InstanceKey>)b;
+		for (String v : binding.keySet()) {
+			if(this.varBinding.containsKey(v)) {
+				InstanceKey storedKey = this.varBinding.get(v);
+				InstanceKey argKey = binding.get(v);
+				if(storedKey.mayNotAlias(argKey)) {
+					return false;
+				}
+			}
+		}		
+		return true;
+	}
 }

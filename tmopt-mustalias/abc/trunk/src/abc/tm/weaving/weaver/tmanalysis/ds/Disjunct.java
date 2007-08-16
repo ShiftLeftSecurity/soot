@@ -206,4 +206,11 @@ public abstract class Disjunct<A> implements Cloneable {
 			return false;
 		return true;
 	}
+
+	/**
+	 * Returns <code>true</code>, if the binding passed in is compatible with the one
+	 * in the disjunct, i.e. of the respective variables could potentially point
+	 * to the same objects at runtime.
+	 */
+	public abstract boolean compatibleBinding(Map varBinding);
 }
