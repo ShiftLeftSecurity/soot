@@ -64,16 +64,17 @@ public class InstanceKey {
     
     public boolean mayNotAlias(InstanceKey otherKey) {
         if (owner.equals(otherKey.owner) && stmtAfterAssignStmt!=null && otherKey.stmtAfterAssignStmt!=null) {
-            return lnma.notMayAlias(assignedLocal, stmtAfterAssignStmt, otherKey.assignedLocal, otherKey.stmtAfterAssignStmt);
-        } else {
-            //different methods: get points-to info
-            PointsToAnalysis pta = Scene.v().getPointsToAnalysis();
-            if(pta==null) return false; //no info; hence don't know for sure
-            PointsToSet reachingObjects = pta.reachingObjects(assignedLocal);
-            PointsToSet otherReachingObjects = pta.reachingObjects(otherKey.assignedLocal);
-            //may not alias if we have an empty intersection 
-            return !reachingObjects.hasNonEmptyIntersection(otherReachingObjects);
-        }
+            if(lnma.notMayAlias(assignedLocal, stmtAfterAssignStmt, otherKey.assignedLocal, otherKey.stmtAfterAssignStmt)) {
+            	return true;
+            }
+        } 
+        //different methods or local not-may-alias was not successful: get points-to info
+        PointsToAnalysis pta = Scene.v().getPointsToAnalysis();
+        if(pta==null) return false; //no info; hence don't know for sure
+        PointsToSet reachingObjects = pta.reachingObjects(assignedLocal);
+        PointsToSet otherReachingObjects = pta.reachingObjects(otherKey.assignedLocal);
+        //may not alias if we have an empty intersection 
+        return !reachingObjects.hasNonEmptyIntersection(otherReachingObjects);
     }
     
     public PointsToSet getPointsToSet() {
