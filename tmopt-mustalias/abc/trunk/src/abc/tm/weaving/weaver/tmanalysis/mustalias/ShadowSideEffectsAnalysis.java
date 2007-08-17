@@ -69,7 +69,26 @@ public class ShadowSideEffectsAnalysis  {
 		//exclude all shadows from the given container  and artificial shadows
 		for (Iterator<SymbolShadowWithPTS> shadowIter = overlaps.iterator(); shadowIter.hasNext();) {
 		    SymbolShadowWithPTS shadow = (SymbolShadowWithPTS) shadowIter.next();
-            if(shadow.getContainer().equals(container) || shadow.isArtificial()) {
+		    
+		    /* FIXME We have a problem here:
+		     * Including "shadow.getContainer().equals(container) ||" is actually necessary for precision
+		     * but in general it's unsound. This is a case where things go wrong:
+		     * - one method with create(c,i)
+		     * - one method with update(c) -> current method
+		     * - one method with next(i)
+		     *
+		     * Problem: The update(c) shadow generates a binding (c=c) on the second-last state.
+		     * The variable i is here unbound. The artificial final node would normally propagate
+		     * this disjunct to the final state using the next(i) shadow. However, since we remove
+		     * update(c) from "overlaps", only the create and next shadow remain, not satisfying
+		     * the path info for the second-last state (because the "update" is missing). However,
+		     * if we generally include all shadows from the current method, this is too coarse grain.
+		     * 
+		     * I think we need a somewhat other abstraction.
+		     * 
+		     * (Eric 17/08/07)
+		     */
+            if(/*shadow.getContainer().equals(container) ||*/ shadow.isArtificial()) {
                 shadowIter.remove();
             }
         }
