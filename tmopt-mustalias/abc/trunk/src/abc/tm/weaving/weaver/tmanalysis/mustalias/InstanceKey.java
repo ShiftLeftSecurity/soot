@@ -54,6 +54,9 @@ public class InstanceKey {
         this.hashCode = computeHashCode();
     }
     
+    /**
+     * {@inheritDoc}
+     */
     public boolean mustAlias(InstanceKey otherKey) {
         if(stmtAfterAssignStmt==null || otherKey.stmtAfterAssignStmt==null) {
             //don't know
@@ -62,6 +65,9 @@ public class InstanceKey {
         return lmaa.mustAlias(assignedLocal,stmtAfterAssignStmt,otherKey.assignedLocal,otherKey.stmtAfterAssignStmt);
     }
     
+    /**
+     * {@inheritDoc}
+     */
     public boolean mayNotAlias(InstanceKey otherKey) {
         if (owner.equals(otherKey.owner) && stmtAfterAssignStmt!=null && otherKey.stmtAfterAssignStmt!=null) {
             if(lnma.notMayAlias(assignedLocal, stmtAfterAssignStmt, otherKey.assignedLocal, otherKey.stmtAfterAssignStmt)) {
