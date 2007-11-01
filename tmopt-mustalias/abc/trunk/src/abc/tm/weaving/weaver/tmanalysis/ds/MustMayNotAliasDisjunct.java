@@ -70,20 +70,21 @@ public class MustMayNotAliasDisjunct extends Disjunct<InstanceKey> {
 			if(curBinding==null) {
 			    //if we have no binding, we only generate a new binding if
 			    //either we do a transition out of an initial state or we have shadows with an overlapping binding in other methods			    
-			    if(from.isInitialNode() || !allShadowsWithOverLappingBindingInSameMethod(tmVar,toBind,from)) {
+			    if(from.isInitialNode() || cannotCompleteMatchInRestOfTheProgram(toBind,tmVar)) {
     				//set the new binding
-    				clone.varBinding.put(tmVar, toBind);
+				    //FIXME which positive value do we have to bind here? do we have to bind both, even (at least of they don't must-alias)?
+    				if(toBind.haveLocalInformation()) {
+    					clone.varBinding.put(tmVar, toBind);
+    				}
+    				else {
+    					//just return the clone itself
+    				}
     				//keep track of that this edge was taken
     				//clone.history.add(shadowId);
 			    } else {
-	                /* Optimization: if toBind.haveLocalInformation() is false, it means that we have an instance key from another method.
-	                 * Such instance keys should only propagate existing bindings to new states (potentially a final one). They should not, however,
-	                 * generate new bindings. Hence in the case where no binding exists yet, return FALSE.  
-	                 */             
 			        return FALSE;
 			    }
 			} else if(curBinding.mayNotAlias(toBind)) {
-			    //FIXME which positive value do we have to bind here? do we have to bind both, even (at least of they don't must-alias)?
 				return FALSE;			
 			}
 		}
@@ -91,11 +92,26 @@ public class MustMayNotAliasDisjunct extends Disjunct<InstanceKey> {
 		return clone.intern();
 	}
 
-    //TODO RENAME AND COMMENT
-	protected boolean allShadowsWithOverLappingBindingInSameMethod(String tmVar, InstanceKey toBind, SMNode from) {
-		return ShadowSideEffectsAnalysis.v().allShadowsWithOverLappingBindingInSameMethod(tmVar, toBind.getLocal(), container, tm, from);
+    protected boolean cannotCompleteMatchInRestOfTheProgram(InstanceKey toBind, String tmVar) {
+    	//iterate over all positive and negative bindings
+    	Set<InstanceKey> allBindings = new HashSet<InstanceKey>();
+    	InstanceKey posBinding = varBinding.get(tmVar);
+    	if(posBinding!=null)
+    		allBindings.add(posBinding);
+    	Set<InstanceKey> negBindings = negVarBinding.get(tmVar);
+    	if(negBindings!=null)
+    		allBindings.addAll(negBindings);
+		
+    	for (InstanceKey binding : allBindings) {
+			if(!binding.mayNotAlias(toBind)) {
+				//may alias
+				return false;
+			}
+		}
+		
+		return true;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -115,8 +131,10 @@ public class MustMayNotAliasDisjunct extends Disjunct<InstanceKey> {
 	}
 	
 	protected Disjunct addNegativeBinding(String tmVar, InstanceKey negBinding) {
+		//TODO: is this check still necessary? After all, equality on instance keys is defined via must-alias!
+		
 		//check if we need to add...
-		//we do *not* need to add a mapping v->l is there is alreade a mapping
+		//we do *not* need to add a mapping v->l is there is already a mapping
 		//v->m with mustAlias(l,m)
 		Set<InstanceKey> thisNegBindingsForVariable = negVarBinding.get(tmVar);
 		if(thisNegBindingsForVariable!=null) {
@@ -142,6 +160,7 @@ public class MustMayNotAliasDisjunct extends Disjunct<InstanceKey> {
 
 	
 	protected boolean clashWithNegativeBinding(String tmVar, InstanceKey toBind) {
+		//TODO: can this be speeded up? After all, equality on instance keys is defined via must-alias!
 		Set<InstanceKey> negBindingsForVar = negVarBinding.get(tmVar);
 		if(negBindingsForVar!=null) {
 			for (InstanceKey negBinding : negBindingsForVar) {
