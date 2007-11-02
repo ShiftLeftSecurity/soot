@@ -184,9 +184,10 @@ public class Configuration implements Cloneable {
 		//disjointly merge the constraints of tmp and skip
 		tmp = tmp.getJoinWith(skip);
 		
-        //filter unnecessary negative bindings
-		tmp = tmp.filterNegativeBindings();
+        //filter unnecessary negative bindings by applying the distributive law
+		tmp = tmp.applyDistributiveLaw();
 		
+		//TODO probably not necessary any more
 		tmp.optimizeStatesWithTrue();
 
 		//return an interned version of the result
@@ -232,13 +233,13 @@ public class Configuration implements Cloneable {
 	}
 	
     /**
-     * Calls {@link Constraint#filterNegativeBindings()} on all constraints and returns the result.
+     * Calls {@link Constraint#applyDistributiveLaw()} on all constraints and returns the result.
      */
-    public Configuration filterNegativeBindings() {
+    public Configuration applyDistributiveLaw() {
         Configuration clone = (Configuration) clone();
         for (Iterator stateIter = getStates().iterator(); stateIter.hasNext();) {
             SMNode state = (SMNode) stateIter.next();
-            clone.stateToConstraint.put(state, stateToConstraint.get(state).filterNegativeBindings());
+            clone.stateToConstraint.put(state, stateToConstraint.get(state).applyDistributiveLaw());
         }
         return clone;
     }
@@ -398,16 +399,17 @@ public class Configuration implements Cloneable {
      * given shadow.
      */
     public boolean couldHaveReachedFinalStateWithBindings(ISymbolShadow shadow) {
-    	Map varBinding = reMap(shadow.getTmFormalToAdviceLocal());
-    	for (State s : stateToConstraint.keySet()) {
-    		if(s.isFinalNode()) {
-    			Constraint c = stateToConstraint.get(s);
-    			if(c.compatibleBinding(varBinding)) {
-    				return true;
-    			}
-    		}    		
-		}
-    	return false;
+    	return true;
+//    	Map varBinding = reMap(shadow.getTmFormalToAdviceLocal());
+//    	for (State s : stateToConstraint.keySet()) {
+//    		if(s.isFinalNode()) {
+//    			Constraint c = stateToConstraint.get(s);
+//    			if(c.compatibleBinding(varBinding)) {
+//    				return true;
+//    			}
+//    		}    		
+//		}
+//    	return false;
     }
 
     /**

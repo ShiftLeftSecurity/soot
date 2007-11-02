@@ -21,6 +21,7 @@ package abc.tm.weaving.weaver.tmanalysis.ds;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,7 +29,6 @@ import soot.SootMethod;
 import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.matching.SMNode;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.InstanceKey;
-import abc.tm.weaving.weaver.tmanalysis.mustalias.ShadowSideEffectsAnalysis;
 
 /**
  * A disjuncts making use of must and not-may alias information.
@@ -38,15 +38,15 @@ import abc.tm.weaving.weaver.tmanalysis.mustalias.ShadowSideEffectsAnalysis;
 public class MustMayNotAliasDisjunct extends Disjunct<InstanceKey> {
 	
 
-    private final SootMethod container;
-    private final TraceMatch tm;
-
+//    private final SootMethod container;
+//    private final TraceMatch tm;
+//
     /**
 	 * Constructs a new disjunct.
 	 */
 	public MustMayNotAliasDisjunct(SootMethod container, TraceMatch tm) {
-        this.container = container;
-        this.tm = tm;
+//        this.container = container;
+//        this.tm = tm;
 	}
 	
 	/**
@@ -54,80 +54,104 @@ public class MustMayNotAliasDisjunct extends Disjunct<InstanceKey> {
 	 */
 	@Override
 	public Disjunct addBindingsForSymbol(Collection allVariables, Map bindings, String shadowId, SMNode from) {
-		Disjunct clone = clone();
+		MustMayNotAliasDisjunct clone = clone();
 		//for each tracematch variable
 		for (String tmVar : (Collection<String>)allVariables) {
 			InstanceKey toBind = (InstanceKey) bindings.get(tmVar);
 
-			//clash with negative binding?
-			if(clashWithNegativeBinding(tmVar,toBind)) {
+			/*
+			 * Rule 1: If we want to bind a value x=o1 but we already have a positive binding
+			 *         x=o2, and we know that o1!=o2 by the not-may-alias analysis, then we can
+			 *         safely reduce to FALSE.
+			 */
+			if(notMayAliasedPositiveBinding(tmVar, toBind)) {
 				return FALSE;
 			}
 			
-			//get the current binding
-			InstanceKey curBinding = (InstanceKey) varBinding.get(tmVar);
-			
-			if(curBinding==null) {
-			    //if we have no binding, we only generate a new binding if
-			    //either we do a transition out of an initial state or we have shadows with an overlapping binding in other methods			    
-			    if(from.isInitialNode() || cannotCompleteMatchInRestOfTheProgram(toBind,tmVar)) {
-    				//set the new binding
-				    //FIXME which positive value do we have to bind here? do we have to bind both, even (at least of they don't must-alias)?
-    				if(toBind.haveLocalInformation()) {
-    					clone.varBinding.put(tmVar, toBind);
-    				}
-    				else {
-    					//just return the clone itself
-    				}
-    				//keep track of that this edge was taken
-    				//clone.history.add(shadowId);
-			    } else {
-			        return FALSE;
-			    }
-			} else if(curBinding.mayNotAlias(toBind)) {
-				return FALSE;			
+			/*
+			 * Rule 2: If we want to bind a value x=o1 but we already have a negative binding
+			 *         x=o2, and we know that o1==o2 by the must-alias analysis, then we can
+			 *         safely reduce to FALSE.
+			 */
+			if(mustAliasedNegativeBinding(tmVar, toBind)) {
+				return FALSE;
 			}
+			
+			/*
+			 * Rule 3: If we want to bind a value x=o1 but we already have a positive binding
+			 *         x=o2, and we know that o1==o2 by the must-alias analysis, then we  
+			 *         can just leave the constraint unchanged, because x=o1 && x=o2 is the same as just
+			 *         x=o1.
+			 */
+			if(mustAliasedPositiveBinding(tmVar, toBind)) {
+				continue;
+			}
+			
+			/*
+			 * At this point we know that the positive binding is necessary because it does not clash with any
+			 * of our other constraints and also it is not superfluous (rule 3). Hence, store it.
+			 */
+			clone.addPositiveBinding(tmVar, toBind);
+			
+			/*
+			 * Rule 4: We just stored the positive binding x=o1. Now if there is a negative binding that says
+			 *         x!=o2 and we know that o1!=o2 by our not-may-alias analysis, then we do not need to store that
+			 *         negative binding. This is because x=o1 and o1!=o2 already implies x!=o2. 
+			 */
+			clone.pruneSuperflousNegativeBinding(tmVar,toBind);
 		}
 		
 		return clone.intern();
-	}
-
-    protected boolean cannotCompleteMatchInRestOfTheProgram(InstanceKey toBind, String tmVar) {
-    	//iterate over all positive and negative bindings
-    	Set<InstanceKey> allBindings = new HashSet<InstanceKey>();
-    	InstanceKey posBinding = varBinding.get(tmVar);
-    	if(posBinding!=null)
-    		allBindings.add(posBinding);
-    	Set<InstanceKey> negBindings = negVarBinding.get(tmVar);
-    	if(negBindings!=null)
-    		allBindings.addAll(negBindings);
-		
-    	for (InstanceKey binding : allBindings) {
-			if(!binding.mayNotAlias(toBind)) {
-				//may alias
-				return false;
-			}
-		}
-		
-		return true;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override      
-	protected Disjunct addNegativeBindingsForVariable(String tmVar, InstanceKey newBinding, String shadowId) {
-		InstanceKey curBinding = varBinding.get(tmVar);
-		if(curBinding!=null && curBinding.mustAlias(newBinding)) {
-			return FALSE;
-		} else {
-		    if(newBinding.haveLocalInformation()) {
-		        return addNegativeBinding(tmVar, newBinding);
-		    } else {
-		        //do not need to store negative bindings from other methods
-		        return this;
-		    }
+	protected Disjunct addNegativeBindingsForVariable(String tmVar, InstanceKey toBind, String shadowId) {
+		/*
+		 * Rule 1: If we want to bind a value x!=o1 but we already have a positive binding
+		 *         x=o2, and we know that o1!=o2 by the not-may-alias analysis, then we can
+		 *         just leave the constraint unchanged, as x=o2 and o1!=o2 already implies x!=o1. 
+		 */
+		if(notMayAliasedPositiveBinding(tmVar, toBind)) {
+			return this;
 		}
+		
+		/*
+		 * Rule 2: If we want to bind a value x!=o1 but we already have a negative binding
+		 *         x!=o2, and we know that o1==o2 by the must-alias analysis, then we 
+		 *         can just leave the constraint unchanged, because x!=o1 && x!=o2 is the same
+		 *         as just x=o1 in that case.
+		 */
+		if(mustAliasedNegativeBinding(tmVar, toBind)) {
+			return this;
+		}
+		
+		/*
+		 * Rule 3: If we want to bind a value x!=o1 but we already have a positive binding
+		 *         x=o2, and we know that o1==o2 by the must-alias analysis, then we can
+		 *         safely reduce to FALSE.
+		 */
+		if(mustAliasedPositiveBinding(tmVar, toBind)) {
+			return FALSE;
+		}
+
+		/*
+		 * At this point we know that the negative binding is necessary because it does not clash with any
+		 * of our other constraints and also it is not superfluous (rule 2). Hence, store it.
+		 * 
+		 * HOWEVER: We only need to store negative bindings which originate from within the current methods.
+		 * Other bindings (1) can never lead to clashes, because they can never must-alias a binding (we don't have
+		 * inter-procedural must-alias information), neither do we need it for looking up which shadows contribute to
+		 * reaching a final state.
+		 */
+	    if(toBind.haveLocalInformation()) {
+	    	return addNegativeBinding(tmVar, toBind);
+	    } else {
+	    	//do not need to store negative bindings from other methods
+	    	return this;
+	    }
 	}
 	
 	protected Disjunct addNegativeBinding(String tmVar, InstanceKey negBinding) {
@@ -149,7 +173,7 @@ public class MustMayNotAliasDisjunct extends Disjunct<InstanceKey> {
 		
 		MustMayNotAliasDisjunct clone = (MustMayNotAliasDisjunct) clone();
 		Set<InstanceKey> negBindingsForVariable = clone.negVarBinding.get(tmVar);
-		//initialize if necessary
+		//initialise if necessary
 		if(negBindingsForVariable==null) {
 			negBindingsForVariable = new HashSet<InstanceKey>();
 			clone.negVarBinding.put(tmVar, negBindingsForVariable);
@@ -157,10 +181,54 @@ public class MustMayNotAliasDisjunct extends Disjunct<InstanceKey> {
 		negBindingsForVariable.add(negBinding);
 		return clone.intern();
 	}
-
 	
-	protected boolean clashWithNegativeBinding(String tmVar, InstanceKey toBind) {
-		//TODO: can this be speeded up? After all, equality on instance keys is defined via must-alias!
+	protected void addPositiveBinding(String tmVar, InstanceKey toBind) {
+		Set<InstanceKey> posBindingForVar = posVarBinding.get(tmVar);
+		if(posBindingForVar==null){
+			posBindingForVar = new HashSet<InstanceKey>();
+			posVarBinding.put(tmVar, posBindingForVar);
+		}
+		posBindingForVar.add(toBind);
+	}
+	
+	
+	/**
+	 * Returns <code>true</code> if there is a positive binding stored in this disjunct
+	 * that must-aliases the given binding for the given variable.
+	 */
+	protected boolean mustAliasedPositiveBinding(String tmVar, InstanceKey toBind) {
+		Set<InstanceKey> posBindingsForVar = posVarBinding.get(tmVar);
+		if(posBindingsForVar!=null) {
+			for (InstanceKey posBinding : posBindingsForVar) {
+				if(posBinding.mustAlias(toBind)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Returns <code>true</code> if there is a positive binding stored in this disjunct
+	 * that not-may-aliases the given binding for the given variable.
+	 */
+	protected boolean notMayAliasedPositiveBinding(String tmVar, InstanceKey toBind) {
+		Set<InstanceKey> posBindingsForVar = posVarBinding.get(tmVar);
+		if(posBindingsForVar!=null) {
+			for (InstanceKey posBinding : posBindingsForVar) {
+				if(posBinding.mayNotAlias(toBind)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Returns <code>true</code> if there is a negative binding stored in this disjunct
+	 * that must-aliases the given binding for the given variable.
+	 */
+	protected boolean mustAliasedNegativeBinding(String tmVar, InstanceKey toBind) {
 		Set<InstanceKey> negBindingsForVar = negVarBinding.get(tmVar);
 		if(negBindingsForVar!=null) {
 			for (InstanceKey negBinding : negBindingsForVar) {
@@ -171,6 +239,23 @@ public class MustMayNotAliasDisjunct extends Disjunct<InstanceKey> {
 		}
 		return false;
 	}
+	
+	/**
+	 * Prunes any negative bindings for the variable tmVar that not may-alias the
+	 * positive binding that is passed in for that variable.
+	 * This is because thos enegative bindings are superflous. 
+	 */
+	protected void pruneSuperflousNegativeBinding(String tmVar, InstanceKey toBind) {
+		Set<InstanceKey> negBindingsForVar = negVarBinding.get(tmVar);
+		if(negBindingsForVar!=null) {
+			for (Iterator<InstanceKey> iterator = negBindingsForVar.iterator(); iterator.hasNext();) {
+				InstanceKey negBinding = iterator.next();
+				if(negBinding.mayNotAlias(toBind)) {
+					iterator.remove();
+				}
+			}
+		}
+	}
 
 	/**
 	 * {@inheritDoc}
@@ -178,32 +263,39 @@ public class MustMayNotAliasDisjunct extends Disjunct<InstanceKey> {
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("[pos(");
-        sb.append(varBinding.toString());
+        sb.append(posVarBinding.toString());
 		sb.append(")-neg(");			
         sb.append(negVarBinding.toString());
 		sb.append(")]");			
 		return sb.toString();
 	}
-
+	
 	/**
-	 * Expects a map from variables ({@link String}s) to {@link InstanceKey}s.
-	 * Returns <code>false</code> if there exists a variable in the binding
-	 * stored in this disjunct and the binding passed in for which both instance keys
-	 * for this variable may not be aliased (and <code>true</code> otherwise).
-	 * @param b a map of bindings ({@link String} to {@link InstanceKey}) 
+	 * {@inheritDoc}
 	 */
-	@Override
-	public boolean compatibleBinding(Map b) {
-		Map<String,InstanceKey> binding = (Map<String,InstanceKey>)b;
-		for (String v : binding.keySet()) {
-			if(this.varBinding.containsKey(v)) {
-				InstanceKey storedKey = this.varBinding.get(v);
-				InstanceKey argKey = binding.get(v);
-				if(storedKey.mayNotAlias(argKey)) {
-					return false;
-				}
-			}
-		}		
-		return true;
-	}
+	protected MustMayNotAliasDisjunct clone() {
+		return (MustMayNotAliasDisjunct) super.clone();
+	}	
+
+//	/**
+//	 * Expects a map from variables ({@link String}s) to {@link InstanceKey}s.
+//	 * Returns <code>false</code> if there exists a variable in the binding
+//	 * stored in this disjunct and the binding passed in for which both instance keys
+//	 * for this variable may not be aliased (and <code>true</code> otherwise).
+//	 * @param b a map of bindings ({@link String} to {@link InstanceKey}) 
+//	 */
+//	@Override
+//	public boolean compatibleBinding(Map b) {
+//		Map<String,InstanceKey> binding = (Map<String,InstanceKey>)b;
+//		for (String v : binding.keySet()) {
+//			if(this.posVarBinding.containsKey(v)) {
+//				InstanceKey storedKey = this.posVarBinding.get(v);
+//				InstanceKey argKey = binding.get(v);
+//				if(storedKey.mayNotAlias(argKey)) {
+//					return false;
+//				}
+//			}
+//		}		
+//		return true;
+//	}
 }

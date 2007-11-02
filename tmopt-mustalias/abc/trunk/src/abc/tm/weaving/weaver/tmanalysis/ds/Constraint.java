@@ -30,6 +30,7 @@ import java.util.Set;
 
 import soot.PointsToSet;
 import abc.tm.weaving.matching.SMNode;
+import abc.tm.weaving.weaver.tmanalysis.mustalias.InstanceKey;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.TMFlowAnalysis;
 
 /**
@@ -208,16 +209,16 @@ public class Constraint implements Cloneable {
 	}
 	
     /**
-     * Removes unnecessary negative bindings: If we have one disjunct with x=o, then we can remove
-     * negative bindings x!=o from all disjuncts. This is because x=o subsumes those cases. 
-     * @return the resulting Constraint
+     * Applies a special version of the distributive law for Boolean algebra. In general, this law states (A && B) || (A && C) = A && (B || C).
+     * The special case we are interested in is the one where B is the negation of C. Then it holds that: (A && x=o) || (A && x!=o) = A && (x=o || x!=o) = A.
+     * This is the reduction we perform.
      */
-    public Constraint filterNegativeBindings() {
+    public Constraint applyDistributiveLaw() {
         if(disjuncts.isEmpty()) {
             //nothing to do
             return this;
         }
-        
+
         //deep clone this constraint
         Constraint clone = clone();
         HashSet<Disjunct> clonedDisjuncts = new HashSet<Disjunct>();
@@ -226,26 +227,64 @@ public class Constraint implements Cloneable {
         }
         clone.disjuncts = clonedDisjuncts; 
         
-        //store in list, because following deletions will change hash codes
-        List<Disjunct> list = new LinkedList<Disjunct> (clone.disjuncts);
-        
-        //actual removal
-        for (Disjunct d1 : list) {
-            for (Disjunct d2 : list) {
-                for (Iterator<Map.Entry<String,Set>> entryIter = ((Map<String,Set>)d2.negVarBinding).entrySet().iterator(); entryIter.hasNext();) {
-                    Map.Entry<String,Set> entry = entryIter.next();
-                    String var = entry.getKey();
-                    Set s = entry.getValue();
-                    s.remove(d1.varBinding.get(var));
-                    if(s.isEmpty()) {
-                        entryIter.remove();
-                    }
-                }
-            }
+        HashSet<Disjunct> newDisjuncts = new HashSet<Disjunct>(clone.disjuncts);
+       
+        /*
+         * This loop tries to find a binding superFlousVar=superFlousKey, which appears positive in one
+         * disjunct but negative in a second disjunct. Furthermore, those two disjuncts must be equal except for this binding.
+         * (The equal part represents the "A" in the equations above.) If such a binding is found, superFlousVar etc. is set
+         * and the reduction is performed. We iterate until a fixed point is reached.
+         */
+        while(true) {
+	    	String superFlousVar=null;
+	    	InstanceKey superFlousKey=null;
+	    	Disjunct first=null, second=null;
+	    	
+	    	outer:
+	        for (Disjunct d1 : newDisjuncts) {
+	        	for (Disjunct d2 : newDisjuncts) {        		 
+	            	for (Iterator<Map.Entry<String,Set>> posIter = ((Map<String,Set>)d1.posVarBinding).entrySet().iterator(); posIter.hasNext();) {
+	            		Map.Entry<String,Set> entry = posIter.next();
+	            		String var = entry.getKey();
+	            		Set<InstanceKey> posBindingsD1 = entry.getValue();
+	            		if(posBindingsD1==null) posBindingsD1 = new HashSet<InstanceKey>();
+	            		Set<InstanceKey> negBindingsD2 = (Set<InstanceKey>) d2.negVarBinding.get(var);
+	            		if(negBindingsD2==null) negBindingsD2 = new HashSet<InstanceKey>();
+	            		Set<InstanceKey> intersection = new HashSet<InstanceKey>(posBindingsD1);
+	            		intersection.retainAll(negBindingsD2);
+	            		if(intersection.size()==1) {
+	            			superFlousKey = intersection.iterator().next();
+	            			superFlousVar = var;
+	            			first = d1;
+	            			second = d2;
+	            			break outer;
+	            		}            		
+	            	}
+	            }
+	        }
+	    	
+	    	if(first!=null) {
+	    		assert second!=null;
+	    		assert superFlousKey!=null;
+	    		assert superFlousVar!=null;
+	    		
+	    		newDisjuncts.remove(first);
+	    		newDisjuncts.remove(second);
+	    		Disjunct cloneOfFirst = first.clone();
+	    		Set<InstanceKey> iks = (Set<InstanceKey>) cloneOfFirst.posVarBinding.get(superFlousVar);
+	    		iks.remove(superFlousKey);
+	    		if(iks.isEmpty()) {
+	    			cloneOfFirst.posVarBinding.remove(superFlousVar);
+	    		}
+	    		
+	    		newDisjuncts.add(cloneOfFirst);
+	    	} else {
+	    		break;
+	    	}
         }
-        
+
         //store set with new hash codes
-        clone.disjuncts = new HashSet<Disjunct>(list);
+        clone.disjuncts = new HashSet<Disjunct>(newDisjuncts);
         return clone.intern();
     }
 
@@ -363,19 +402,19 @@ public class Constraint implements Cloneable {
 		return disjuncts.toString();
 	}
 
-	/**
-	 * Returns <code>true</code> if the given variable binding
-	 * is compatible with the binding of one of the disjuncts
-	 * in this constraint.
-	 * @see Disjunct#compatibleBinding(Map)
-	 */
-	public boolean compatibleBinding(Map varBinding) {
-		for (Disjunct d : disjuncts) {
-			if(d.compatibleBinding(varBinding)) {
-				return true;
-			}
-		}		
-		return false;
-	}	
+//	/**
+//	 * Returns <code>true</code> if the given variable binding
+//	 * is compatible with the binding of one of the disjuncts
+//	 * in this constraint.
+//	 * @see Disjunct#compatibleBinding(Map)
+//	 */
+//	public boolean compatibleBinding(Map varBinding) {
+//		for (Disjunct d : disjuncts) {
+//			if(d.compatibleBinding(varBinding)) {
+//				return true;
+//			}
+//		}		
+//		return false;
+//	}	
 	
 }

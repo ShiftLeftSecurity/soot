@@ -63,7 +63,7 @@ public abstract class Disjunct<A> implements Cloneable {
 	/** The unique FALSE disjunct. It holds no mapping and no history. */
 	public static Disjunct FALSE;
 
-	protected HashMap<String,A> varBinding;
+	protected HashMap<String,Set<A>> posVarBinding;
 	protected HashMap<String,Set<A>> negVarBinding;
 	
 	/**
@@ -74,7 +74,7 @@ public abstract class Disjunct<A> implements Cloneable {
 	 * {@link #addNegativeBindingsForSymbol(Collection, Map, String)}.
 	 */
 	protected Disjunct() {
-		this.varBinding = new HashMap<String, A>();
+		this.posVarBinding = new HashMap<String, Set<A>>();
 		this.negVarBinding = new HashMap<String, Set<A>>();
 	}
 	
@@ -141,7 +141,8 @@ public abstract class Disjunct<A> implements Cloneable {
 	protected abstract Disjunct addNegativeBindingsForVariable(String varName, A negBinding, String shadowId);
 	
 	/**
-	 * Interns the disjunct, i.e. returns a (usually) unique equal instance for it.
+	 * Interns the disjunct, i.e. returns a (usually) unique equal ins			clone.posVarBinding = (HashMap) posVarBinding.clone();
+tance for it.
 	 * @return a unique instance that is equal to this 
 	 */
 	protected Disjunct<A> intern() {
@@ -159,7 +160,12 @@ public abstract class Disjunct<A> implements Cloneable {
 	protected Disjunct<A> clone() {		
 		try {
 			Disjunct<A> clone = (Disjunct<A>) super.clone();
-			clone.varBinding = (HashMap) varBinding.clone();
+			//deep clone positive bindings
+			clone.posVarBinding = (HashMap) posVarBinding.clone();
+			for (Map.Entry<String,Set<A>> entry : clone.posVarBinding.entrySet()) {
+				HashSet<A> clonedSet = (HashSet<A>) ((HashSet)entry.getValue()).clone();
+				entry.setValue(clonedSet);
+			}
 			//deep clone negative bindings
 			clone.negVarBinding = (HashMap) negVarBinding.clone();
 			for (Map.Entry<String,Set<A>> entry : clone.negVarBinding.entrySet()) {
@@ -182,7 +188,7 @@ public abstract class Disjunct<A> implements Cloneable {
 		result = prime * result
 				+ ((negVarBinding == null) ? 0 : negVarBinding.hashCode());
 		result = prime * result
-				+ ((varBinding == null) ? 0 : varBinding.hashCode());
+				+ ((posVarBinding == null) ? 0 : posVarBinding.hashCode());
 		return result;
 	}
 
@@ -199,18 +205,18 @@ public abstract class Disjunct<A> implements Cloneable {
 				return false;
 		} else if (!negVarBinding.equals(other.negVarBinding))
 			return false;
-		if (varBinding == null) {
-			if (other.varBinding != null)
+		if (posVarBinding == null) {
+			if (other.posVarBinding != null)
 				return false;
-		} else if (!varBinding.equals(other.varBinding))
+		} else if (!posVarBinding.equals(other.posVarBinding))
 			return false;
 		return true;
 	}
 
-	/**
-	 * Returns <code>true</code>, if the binding passed in is compatible with the one
-	 * in the disjunct, i.e. of the respective variables could potentially point
-	 * to the same objects at runtime.
-	 */
-	public abstract boolean compatibleBinding(Map varBinding);
+//	/**
+//	 * Returns <code>true</code>, if the binding passed in is compatible with the one
+//	 * in the disjunct, i.e. of the respective variables could potentially point
+//	 * to the same objects at runtime.
+//	 */
+//	public abstract boolean compatibleBinding(Map varBinding);
 }
