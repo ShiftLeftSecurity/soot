@@ -23,8 +23,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -340,12 +338,14 @@ public class Constraint implements Cloneable {
 	 * @return a unique instance that is equal to this 
 	 */
 	protected Constraint intern() {
-		Constraint cached = (Constraint) constraintToUniqueConstraint.get(this);
-		if(cached==null) {
-			cached = this;
-			constraintToUniqueConstraint.put(this, this);
-		}
-		return cached;
+//TODO remove		
+//		Constraint cached = (Constraint) constraintToUniqueConstraint.get(this);
+//		if(cached==null) {
+//			cached = this;
+//			constraintToUniqueConstraint.put(this, this);
+//		}
+//		return cached;
+		return this;
 	}
 	
 	/**
@@ -402,6 +402,15 @@ public class Constraint implements Cloneable {
 		return disjuncts.toString();
 	}
 
+	public Collection<String> getCurrentHistory() {
+		Collection<String> res = new HashSet<String>();
+		for (Disjunct d : disjuncts) {
+			res.addAll(d.getCurrentHistory());
+		}
+		return res;
+	}
+	
+	
 //	/**
 //	 * Returns <code>true</code> if the given variable binding
 //	 * is compatible with the binding of one of the disjuncts

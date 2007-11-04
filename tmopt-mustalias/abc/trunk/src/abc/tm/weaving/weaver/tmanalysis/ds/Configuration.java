@@ -89,9 +89,9 @@ public class Configuration implements Cloneable {
 			if(state.isInitialNode() || additionalInitialStates.contains(state))
 				//initial states and such states that we assume as initial always hold TRUE
                 constraint = Constraint.TRUE;
-			else if(state.isFinalNode())
-				//for final states we can assume the memory-efficient FINAL
-				constraint = Constraint.FINAL;
+//			else if(state.isFinalNode())
+//				//for final states we can assume the memory-efficient FINAL
+//				constraint = Constraint.FINAL;
 			else 
 				//default is FALSE
 				constraint = Constraint.FALSE; 
@@ -285,12 +285,14 @@ public class Configuration implements Cloneable {
 	 * @return a unique instance that is equal to this 
 	 */
 	protected Configuration intern() {
-		Configuration cached = (Configuration) configToUniqueConfig.get(this);
-		if(cached==null) {
-			cached = this;
-			configToUniqueConfig.put(this, this);
-		}
-		return cached;
+//TODO remove		
+//		Configuration cached = (Configuration) configToUniqueConfig.get(this);
+//		if(cached==null) {
+//			cached = this;
+//			configToUniqueConfig.put(this, this);
+//		}
+//		return cached;
+		return this;
 	}
 
 	/**
@@ -467,6 +469,24 @@ public class Configuration implements Cloneable {
         }
 		assert this.tm.equals(other.tm);
 		return true;
+	}
+	
+	public Collection<String> getHistoryAtAllStates() {
+		return getHistoryAtStates(false);
+	}
+
+	public Collection<String> getHistoryAtFinalStates() {
+		return getHistoryAtStates(true);
+	}
+
+	protected Collection<String> getHistoryAtStates(boolean onlyAtFinalStates) {
+		Collection<String> res = new HashSet<String>();
+		for (State s : stateToConstraint.keySet()) {
+			if(onlyAtFinalStates && !s.isFinalNode()) continue;
+			Constraint c = stateToConstraint.get(s);
+			res.addAll(c.getCurrentHistory());
+		}
+		return res;
 	}
 
 }

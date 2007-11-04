@@ -20,6 +20,7 @@
 package abc.tm.weaving.weaver.tmanalysis.ds;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -41,12 +42,16 @@ public class MustMayNotAliasDisjunct extends Disjunct<InstanceKey> {
 //    private final SootMethod container;
 //    private final TraceMatch tm;
 //
+	
+	protected HashMap<InstanceKey,String> history;
+
     /**
 	 * Constructs a new disjunct.
 	 */
 	public MustMayNotAliasDisjunct(SootMethod container, TraceMatch tm) {
 //        this.container = container;
 //        this.tm = tm;
+		this.history = new HashMap<InstanceKey, String>();
 	}
 	
 	/**
@@ -91,16 +96,21 @@ public class MustMayNotAliasDisjunct extends Disjunct<InstanceKey> {
 			 * At this point we know that the positive binding is necessary because it does not clash with any
 			 * of our other constraints and also it is not superfluous (rule 3). Hence, store it.
 			 */
-			clone.addPositiveBinding(tmVar, toBind);
+			clone.addPositiveBinding(tmVar, toBind, shadowId);
 			
 			/*
 			 * Rule 4: We just stored the positive binding x=o1. Now if there is a negative binding that says
 			 *         x!=o2 and we know that o1!=o2 by our not-may-alias analysis, then we do not need to store that
 			 *         negative binding. This is because x=o1 and o1!=o2 already implies x!=o2. 
 			 */
-			clone.pruneSuperflousNegativeBinding(tmVar,toBind);
+			clone.pruneSuperfluousNegativeBinding(tmVar,toBind);
 		}
 		
+		if(equals(clone)) {
+			return this;
+		}
+		
+		assert clone.isHistoryConsistent();
 		return clone.intern();
 	}
 
@@ -147,14 +157,16 @@ public class MustMayNotAliasDisjunct extends Disjunct<InstanceKey> {
 		 * reaching a final state.
 		 */
 	    if(toBind.haveLocalInformation()) {
-	    	return addNegativeBinding(tmVar, toBind);
+	    	MustMayNotAliasDisjunct newDisjunct = (MustMayNotAliasDisjunct) addNegativeBinding(tmVar, toBind, shadowId);
+	    	assert newDisjunct.isHistoryConsistent();
+			return newDisjunct;
 	    } else {
 	    	//do not need to store negative bindings from other methods
 	    	return this;
 	    }
 	}
 	
-	protected Disjunct addNegativeBinding(String tmVar, InstanceKey negBinding) {
+	protected Disjunct addNegativeBinding(String tmVar, InstanceKey negBinding, String shadowId) {
 		//TODO: is this check still necessary? After all, equality on instance keys is defined via must-alias!
 		
 		//check if we need to add...
@@ -179,19 +191,27 @@ public class MustMayNotAliasDisjunct extends Disjunct<InstanceKey> {
 			clone.negVarBinding.put(tmVar, negBindingsForVariable);
 		}
 		negBindingsForVariable.add(negBinding);
+		clone.registerShadowIdInHistory(negBinding, shadowId);
 		return clone.intern();
 	}
 	
-	protected void addPositiveBinding(String tmVar, InstanceKey toBind) {
+	protected void addPositiveBinding(String tmVar, InstanceKey toBind, String shadowId) {
 		Set<InstanceKey> posBindingForVar = posVarBinding.get(tmVar);
 		if(posBindingForVar==null){
 			posBindingForVar = new HashSet<InstanceKey>();
 			posVarBinding.put(tmVar, posBindingForVar);
 		}
 		posBindingForVar.add(toBind);
+		if(toBind.haveLocalInformation())
+			registerShadowIdInHistory(toBind,shadowId);
 	}
 	
 	
+	protected void registerShadowIdInHistory(InstanceKey toBind, String shadowId) {
+		assert toBind.haveLocalInformation();
+		history.put(toBind,shadowId);
+	}
+
 	/**
 	 * Returns <code>true</code> if there is a positive binding stored in this disjunct
 	 * that must-aliases the given binding for the given variable.
@@ -243,18 +263,25 @@ public class MustMayNotAliasDisjunct extends Disjunct<InstanceKey> {
 	/**
 	 * Prunes any negative bindings for the variable tmVar that not may-alias the
 	 * positive binding that is passed in for that variable.
-	 * This is because thos enegative bindings are superflous. 
-	 */
-	protected void pruneSuperflousNegativeBinding(String tmVar, InstanceKey toBind) {
+	 * This is because those negative bindings are superfluous. 
+	 */ 
+	protected void pruneSuperfluousNegativeBinding(String tmVar, InstanceKey toBind) {
 		Set<InstanceKey> negBindingsForVar = negVarBinding.get(tmVar);
 		if(negBindingsForVar!=null) {
 			for (Iterator<InstanceKey> iterator = negBindingsForVar.iterator(); iterator.hasNext();) {
 				InstanceKey negBinding = iterator.next();
 				if(negBinding.mayNotAlias(toBind)) {
 					iterator.remove();
+					removeFromShadowHistory(negBinding);
 				}
 			}
 		}
+	}
+
+	protected void removeFromShadowHistory(InstanceKey binding) {
+		assert binding.haveLocalInformation();
+		String removed = history.remove(binding);
+		assert removed!=null;
 	}
 
 	/**
@@ -266,6 +293,8 @@ public class MustMayNotAliasDisjunct extends Disjunct<InstanceKey> {
         sb.append(posVarBinding.toString());
 		sb.append(")-neg(");			
         sb.append(negVarBinding.toString());
+		sb.append(")-hist(");			
+        sb.append(history.values());
 		sb.append(")]");			
 		return sb.toString();
 	}
@@ -274,8 +303,35 @@ public class MustMayNotAliasDisjunct extends Disjunct<InstanceKey> {
 	 * {@inheritDoc}
 	 */
 	protected MustMayNotAliasDisjunct clone() {
-		return (MustMayNotAliasDisjunct) super.clone();
+		MustMayNotAliasDisjunct clone = (MustMayNotAliasDisjunct) super.clone();
+		clone.history = (HashMap<InstanceKey, String>) history.clone();
+		return clone;
 	}	
+	
+	private boolean isHistoryConsistent() {
+		Set<InstanceKey> allLocalKeys = new HashSet<InstanceKey>();
+		for (Map.Entry<String,Set<InstanceKey>> binding : ((Map<String,Set<InstanceKey>>)posVarBinding).entrySet()) {
+			Set<InstanceKey> keys = binding.getValue();
+			for (InstanceKey instanceKey : keys) {
+				if(instanceKey.haveLocalInformation()) {
+					allLocalKeys.add(instanceKey);
+				}
+			}
+		}
+		for (Map.Entry<String,Set<InstanceKey>> binding : ((Map<String,Set<InstanceKey>>)negVarBinding).entrySet()) {
+			Set<InstanceKey> keys = binding.getValue();
+			for (InstanceKey instanceKey : keys) {
+				if(instanceKey.haveLocalInformation()) {
+					allLocalKeys.add(instanceKey);
+				}
+			}
+		}
+		return history.keySet().equals(allLocalKeys);
+	}
+	
+	public Collection<String> getCurrentHistory() {
+		return history.values();
+	}
 
 //	/**
 //	 * Expects a map from variables ({@link String}s) to {@link InstanceKey}s.

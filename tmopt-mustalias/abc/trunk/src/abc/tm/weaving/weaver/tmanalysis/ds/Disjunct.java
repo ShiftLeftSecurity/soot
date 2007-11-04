@@ -146,12 +146,14 @@ tance for it.
 	 * @return a unique instance that is equal to this 
 	 */
 	protected Disjunct<A> intern() {
-		Disjunct<A> cached = (Disjunct) disjunctToUniqueDisjunct.get(this);
-		if(cached==null) {
-			cached = this;
-			disjunctToUniqueDisjunct.put(this, this);
-		}
-		return cached;
+//TODO remove
+//		Disjunct<A> cached = (Disjunct) disjunctToUniqueDisjunct.get(this);
+//		if(cached==null) {
+//			cached = this;
+//			disjunctToUniqueDisjunct.put(this, this);
+//		}
+//		return cached;
+		return this;
 	}	
 	
 	/**
@@ -212,7 +214,9 @@ tance for it.
 			return false;
 		return true;
 	}
-
+	
+	public abstract Collection<String> getCurrentHistory();
+	
 //	/**
 //	 * Returns <code>true</code>, if the binding passed in is compatible with the one
 //	 * in the disjunct, i.e. of the respective variables could potentially point

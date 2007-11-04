@@ -32,7 +32,6 @@ import soot.toolkits.graph.DirectedGraph;
 import soot.toolkits.graph.UnitGraph;
 import abc.tm.weaving.aspectinfo.TraceMatch;
 import abc.tm.weaving.matching.State;
-import abc.tm.weaving.weaver.tmanalysis.ReachingActiveShadowsAnalysis;
 import abc.tm.weaving.weaver.tmanalysis.Statistics;
 import abc.tm.weaving.weaver.tmanalysis.Util;
 import abc.tm.weaving.weaver.tmanalysis.ds.Configuration;
@@ -43,6 +42,7 @@ import abc.tm.weaving.weaver.tmanalysis.mustalias.LoopAwareLocalMustAliasAnalysi
 import abc.tm.weaving.weaver.tmanalysis.mustalias.IntraProceduralTMFlowAnalysis.Status;
 import abc.tm.weaving.weaver.tmanalysis.query.ShadowRegistry;
 import abc.tm.weaving.weaver.tmanalysis.util.ISymbolShadow;
+import abc.tm.weaving.weaver.tmanalysis.util.SymbolShadow;
 
 /**
  * CannotTriggerFinalElimination
@@ -98,47 +98,31 @@ public class CannotTriggerFinalElimination {
             return false;
         }
 
-        //initialize to all shadows in the method
-        Set<ISymbolShadow> shadowsToDisable = new HashSet<ISymbolShadow>(allMethodShadows);
+        //initialise to all shadows in the method
+        Set<String> shadowsToDisable = new HashSet<String>(SymbolShadow.uniqueShadowIDsOf(allMethodShadows));
 
         if(status.hitFinal()) {
-            ReachingActiveShadowsAnalysis reachingShadows = new ReachingActiveShadowsAnalysis(augmentedGraph,tm);
-            
-            for (Unit unit : augmentedGraph) {
-    
-                //find units whose before-flow is tainted (configurations starting at such units are unreliable)
-                //and units after which a final state was hit (or before that, transitively)
+            //ReachingActiveShadowsAnalysis reachingShadows = new ReachingActiveShadowsAnalysis(augmentedGraph,tm);
+
+        	Set<Configuration> allConfigs = new HashSet<Configuration>();
+            for (Unit unit : augmentedGraph) {    
                 Set<Configuration> flowBefore = flowAnalysis.getFlowBefore(unit);
                 Set<Configuration> flowAfter = flowAnalysis.getFlowAfter(unit);
-                
-                if(Configuration.hasTainted(flowBefore)) {
-                    //shadows that might reach such units have to be kept alive
-                    Set<ISymbolShadow> reachingShadowsForUnit = reachingShadows.getFlowAfter(unit);
-                    shadowsToDisable.removeAll(reachingShadowsForUnit);
-                } else if(Configuration.hasHitFinal(flowAfter)) {
-                    Set<ISymbolShadow> reachingShadowsForUnit = reachingShadows.getFlowAfter(unit);
-                    for (Configuration configuration : flowAfter) {
-						if(configuration.hasHitFinal()) {
-							for (ISymbolShadow reachingShadow : reachingShadowsForUnit) {
-								//if it is a reaching shadow of the current method
-								if(reachingShadow.getContainer().equals(g.getBody().getMethod())) {
-									//and if it could have contributed to reaching the final state
-									if(configuration.couldHaveReachedFinalStateWithBindings(reachingShadow)) {
-										//keep shadow alive
-					                    shadowsToDisable.remove(reachingShadow);
-									}
-								}
-							}
-						}
-					}
-                }
+                allConfigs.addAll(flowBefore);
+                allConfigs.addAll(flowAfter);
             }
-        } else {
-        	shadowsToDisable = new HashSet<ISymbolShadow>(allMethodShadows);
-        }
+            
+            for (Configuration configuration : allConfigs) {
+                if(configuration.isTainted()) {
+                	shadowsToDisable.removeAll(configuration.getHistoryAtAllStates());
+                } else if(configuration.hasHitFinal()) {
+                	shadowsToDisable.removeAll(configuration.getHistoryAtFinalStates());
+                }
+			}
+        } 
         
-        for (ISymbolShadow shadow : shadowsToDisable) {
-            ShadowRegistry.v().disableShadow(shadow.getUniqueShadowId());
+        for (String shadowId : shadowsToDisable) {
+            ShadowRegistry.v().disableShadow(shadowId);
         }
 
         Statistics.v().shadowsRemovedCannotTriggerFinal += shadowsToDisable.size();
