@@ -385,6 +385,12 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
             copy(in, out);
         }
         
+        if(mightHaveSideEffects) {
+        	for (Configuration outConf : out) {
+				outConf.taint();
+			}
+        }
+        
         //if visited for the first time
         if(numVisited==1) {
             //...record this after-flow for comparison
