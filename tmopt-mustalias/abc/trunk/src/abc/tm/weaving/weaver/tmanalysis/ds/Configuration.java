@@ -153,7 +153,8 @@ public class Configuration implements Cloneable {
 							allVariables,
 							skipState,
 							bindings,
-							shadowId
+							shadowId,
+							this
 					);
 					
 					/*
