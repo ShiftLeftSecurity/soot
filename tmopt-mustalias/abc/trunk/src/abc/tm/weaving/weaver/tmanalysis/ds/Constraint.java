@@ -97,7 +97,7 @@ public class Constraint implements Cloneable {
 			 * Returns this (FALSE).
 			 */
 			@Override
-			public Constraint addNegativeBindingsForSymbol(Collection allVariables, SMNode state, Map bindings, String shadowId) {
+			public Constraint addNegativeBindingsForSymbol(Collection allVariables, SMNode state, Map bindings, String shadowId, Configuration config) {
 				//FALSE stays FALSE
 				return this;
 			}
@@ -124,7 +124,7 @@ public class Constraint implements Cloneable {
 			 * Returns this (FALSE).
 			 */
 			@Override
-			public Constraint addNegativeBindingsForSymbol(Collection allVariables, SMNode state, Map bindings, String shadowId) {
+			public Constraint addNegativeBindingsForSymbol(Collection allVariables, SMNode state, Map bindings, String shadowId, Configuration config) {
 				//FINAL stays FINAL
 				return this;
 			}
@@ -251,11 +251,17 @@ public class Constraint implements Cloneable {
 	            		Set<InstanceKey> intersection = new HashSet<InstanceKey>(posBindingsD1);
 	            		intersection.retainAll(negBindingsD2);
 	            		if(intersection.size()==1) {
-	            			superFlousKey = intersection.iterator().next();
-	            			superFlousVar = var;
-	            			first = d1;
-	            			second = d2;
-	            			break outer;
+	            			Set<InstanceKey> posBindingsD1rest = new HashSet<InstanceKey>(posBindingsD1);
+	            			posBindingsD1rest.removeAll(intersection);
+	            			Set<InstanceKey> negBindingsD2rest = new HashSet<InstanceKey>(negBindingsD2);
+	            			negBindingsD2rest.removeAll(intersection);
+	            			if(posBindingsD1rest.equals(negBindingsD2rest)) {
+		            			superFlousKey = intersection.iterator().next();
+		            			superFlousVar = var;
+		            			first = d1;
+		            			second = d2;
+		            			break outer;
+	            			}
 	            		}            		
 	            	}
 	            }
@@ -296,16 +302,17 @@ public class Constraint implements Cloneable {
 	 * @param state the state in the state-machine which the skip-loop which is taken is connected to 
 	 * @param bindings the bindings of that skip-edge in form of a mapping {@link String} to {@link PointsToSet}
 	 * @param shadowId the shadow-id of the shadow that triggered this edge
+     * @param configuration the configuration holding this disjunct
 	 * @param analysis the may-flow analysis; used as call-back to register active edges
 	 * @return the updated constraint; this is a fresh instance or {@link #FALSE} 
 	 */
-	public Constraint addNegativeBindingsForSymbol(Collection allVariables, SMNode state, Map bindings, String shadowId) {
+	public Constraint addNegativeBindingsForSymbol(Collection allVariables, SMNode state, Map bindings, String shadowId, Configuration configuration) {
 		HashSet resultDisjuncts = new HashSet();
 		//for each disjunct
 		for (Iterator iter = disjuncts.iterator(); iter.hasNext();) {
 			Disjunct disjunct = (Disjunct) iter.next();
 			
-			resultDisjuncts.addAll(disjunct.addNegativeBindingsForSymbol(allVariables,bindings,shadowId));
+			resultDisjuncts.addAll(disjunct.addNegativeBindingsForSymbol(allVariables,bindings,shadowId, configuration));
 		}
 		
 		//references to FALSE are useless in DNF
@@ -321,6 +328,8 @@ public class Constraint implements Cloneable {
 		}		
 	}
 
+
+	
 	/**
 	 * Constructs and returns a constraint representing <code>this</code>
 	 * <i>or</i> <code>other</code> by adding all disjuncts from other to a clone of this constraint.

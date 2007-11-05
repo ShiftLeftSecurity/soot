@@ -20,16 +20,13 @@
 package abc.tm.weaving.weaver.tmanalysis.ds;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import abc.tm.weaving.matching.SMNode;
-
 import soot.PointsToSet;
+import abc.tm.weaving.matching.SMNode;
 
 /**
  * A disjunct represents a mapping of variables (type {@link String}) to
@@ -100,36 +97,12 @@ public abstract class Disjunct<A> implements Cloneable {
 	 * @param allVariables the set of all variables bound by the symbol that is read
 	 * @param bindings the bindings of that skip-edge in form of a mapping {@link String} to {@link PointsToSet}
 	 * @param shadowId the shadow-id of the shadow that triggered this edge
+	 * @param configuration 
 	 * @param analysis 
 	 * @return the updated constraint; this is a fresh instance or {@link #FALSE} 
 	 */
-	public Set addNegativeBindingsForSymbol(Collection allVariables, Map<String,A> bindings, String shadowId) {		
-		
-		/*
-		 * TODO (Eric)
-		 * when fully implementing negative bindings in the future, take care of the following issue:
-		 * currently it can be the case that references to tags are copied in Soot (e.g. onto traps), which
-		 * might lead to "stuttering"; possible solution: only always "recognize" the first reference to any tag in each method  
-		 */
-		
-		//if there are no variables, there is nothing to do
-		if(allVariables.isEmpty()) {
-			return Collections.EMPTY_SET;
-		}
-		
-		Set resultSet = new HashSet();
-		
-		//for each tracematch variable, add the negative bindings for that variable
-		for (Iterator varIter = allVariables.iterator(); varIter.hasNext();) {
-			String varName = (String) varIter.next();
-
-			//FIXME Here is still something wrong... Should this not be disjoint?
-			resultSet.add( addNegativeBindingsForVariable(varName, bindings.get(varName), shadowId) );
-		}
-		
-		return resultSet;
-	}
-
+	public abstract Set addNegativeBindingsForSymbol(Collection allVariables, Map<String,A> bindings, String shadowId, Configuration configuration);
+	
 	/**
 	 * Currently this just returns a clone of <code>this</code>. We need a must-alias and must--flow analysis
 	 * in order to do anything more clever.
@@ -141,8 +114,7 @@ public abstract class Disjunct<A> implements Cloneable {
 	protected abstract Disjunct addNegativeBindingsForVariable(String varName, A negBinding, String shadowId);
 	
 	/**
-	 * Interns the disjunct, i.e. returns a (usually) unique equal ins			clone.posVarBinding = (HashMap) posVarBinding.clone();
-tance for it.
+	 * Interns the disjunct, i.e. returns a (usually) unique equal instance for it.
 	 * @return a unique instance that is equal to this 
 	 */
 	protected Disjunct<A> intern() {

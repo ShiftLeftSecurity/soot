@@ -20,16 +20,25 @@
 package abc.tm.weaving.weaver.tmanalysis.ds;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import soot.PointsToSet;
 import soot.SootMethod;
 import abc.tm.weaving.aspectinfo.TraceMatch;
+import abc.tm.weaving.matching.SMEdge;
 import abc.tm.weaving.matching.SMNode;
+import abc.tm.weaving.matching.TMStateMachine;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.InstanceKey;
+import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroup;
+import abc.tm.weaving.weaver.tmanalysis.query.ShadowGroupRegistry;
+import abc.tm.weaving.weaver.tmanalysis.query.SymbolShadowWithPTS;
+import abc.tm.weaving.weaver.tmanalysis.util.ISymbolShadow;
 
 /**
  * A disjuncts making use of must and not-may alias information.
@@ -39,18 +48,17 @@ import abc.tm.weaving.weaver.tmanalysis.mustalias.InstanceKey;
 public class MustMayNotAliasDisjunct extends Disjunct<InstanceKey> {
 	
 
-//    private final SootMethod container;
-//    private final TraceMatch tm;
-//
-	
-	protected HashMap<InstanceKey,String> history;
+    private final SootMethod container;
+    private final TraceMatch tm;
+
+    protected HashMap<InstanceKey,String> history;
 
     /**
 	 * Constructs a new disjunct.
 	 */
 	public MustMayNotAliasDisjunct(SootMethod container, TraceMatch tm) {
-//        this.container = container;
-//        this.tm = tm;
+        this.container = container;
+        this.tm = tm;
 		this.history = new HashMap<InstanceKey, String>();
 	}
 	
@@ -113,7 +121,151 @@ public class MustMayNotAliasDisjunct extends Disjunct<InstanceKey> {
 		assert clone.isHistoryConsistent();
 		return clone.intern();
 	}
+	
+	public Set addNegativeBindingsForSymbol(Collection allVariables, Map<String,InstanceKey> bindings, String shadowId, Configuration config) {		
+		
+		/*
+		 * TODO (Eric)
+		 * when fully implementing negative bindings in the future, take care of the following issue:
+		 * currently it can be the case that references to tags are copied in Soot (e.g. onto traps), which
+		 * might lead to "stuttering"; possible solution: only always "recognise" the first reference to any tag in each method  
+		 */
+		
+		//if there are no variables, there is nothing to do
+		if(allVariables.isEmpty()) {
+			return Collections.EMPTY_SET;
+		}
+		
+		Set resultSet = new HashSet();
+		
+		if(bindingIsUnique(bindings,config)) {
+			Disjunct disjunct = this;
+			//for each tracematch variable, add the negative bindings for that variable
+			for (Iterator varIter = allVariables.iterator(); varIter.hasNext();) {
+				String varName = (String) varIter.next();
 
+				disjunct = disjunct.addNegativeBindingsForVariable(varName, bindings.get(varName), shadowId);
+			}
+			resultSet.add(disjunct);
+		} else {
+			//for each tracematch variable, add the negative bindings for that variable
+			for (Iterator varIter = allVariables.iterator(); varIter.hasNext();) {
+				String varName = (String) varIter.next();
+
+				resultSet.add( addNegativeBindingsForVariable(varName, bindings.get(varName), shadowId) );
+			}			
+		}
+
+		
+		return resultSet;
+	}
+
+	private boolean bindingIsUnique(Map<String, InstanceKey> bindings, Configuration config) {
+	    if(!ShadowGroupRegistry.v().hasShadowGroupInfo()) {
+	        return false;
+	    }
+	    
+	    if(bindings.size()<2) {
+	    	return false;
+	    }
+	
+		Set<SymbolShadowWithPTS> overlaps = new HashSet<SymbolShadowWithPTS>();
+
+		Set<ShadowGroup> allShadowGroups = ShadowGroupRegistry.v().getAllShadowGroups();
+		for (ShadowGroup shadowGroup : allShadowGroups) {
+			if(shadowGroup.getTraceMatch().equals(tm)) {
+				boolean hasCompatibleBindings = true;
+				for (String tmVar : bindings.keySet()) {
+			    	InstanceKey toBind = bindings.get(tmVar);
+			    	
+				    if(!toBind.haveLocalInformation()) {
+						//have no precise information on that value
+						return false;
+					}			
+				    
+					PointsToSet toBindPts = toBind.getPointsToSet();
+					
+					if(!shadowGroup.hasCompatibleBinding(tmVar, toBindPts)) {
+						hasCompatibleBindings = false;
+						break;
+					}
+				}
+				if(hasCompatibleBindings) {
+					overlaps.addAll(shadowGroup.getAllShadows());
+				}
+			}
+		}
+		
+		//exclude all artificial shadows
+		for (Iterator<SymbolShadowWithPTS> shadowIter = overlaps.iterator(); shadowIter.hasNext();) {
+		    SymbolShadowWithPTS shadow = (SymbolShadowWithPTS) shadowIter.next();
+            if(shadow.isArtificial()) {
+                shadowIter.remove();
+            }
+        }
+		
+		boolean allShadowsBindingCurrentSymbolInCurrentMethod = true;
+		Set<ISymbolShadow> shadowsBindingCurrentSymbolInCurrentMethod = new HashSet<ISymbolShadow>();
+		for (String tmVar : bindings.keySet()) {
+			Set<String> symbolsThatMayBindCurrentValue = new HashSet<String>();
+			TMStateMachine sm = (TMStateMachine) tm.getStateMachine();
+			//for all edges in the tm state machine
+			for (Iterator<SMEdge> edgeIter = sm.getEdgeIterator(); edgeIter.hasNext();) {
+				SMEdge edge = edgeIter.next();
+				//get the symbol/label of that edge and the variables the edge binds
+				String edgeSymbol = edge.getLabel();
+				assert edgeSymbol != null; //should have no epsilon edges at this point
+				List<String> varsBoundByEdge = tm.getVariableOrder(edgeSymbol);
+				//if the edge may freshly bind the variable we care about...
+				if(varsBoundByEdge.contains(tmVar) &&
+				   !edge.getSource().boundVars.contains(tmVar)) {
+					//add to the set
+					symbolsThatMayBindCurrentValue.add(edgeSymbol);
+				}
+			}			
+			
+			for (ISymbolShadow shadow : overlaps) {
+				//if shadow from different method
+				if(!shadow.getContainer().equals(container)) {
+					//if shadow has symbol that may bind the value we care about
+					allShadowsBindingCurrentSymbolInCurrentMethod = false;
+					break;
+				} else if(symbolsThatMayBindCurrentValue.contains(shadow.getSymbolName())) {
+					shadowsBindingCurrentSymbolInCurrentMethod.add(shadow);
+				}
+			}
+		}
+		
+		if(!allShadowsBindingCurrentSymbolInCurrentMethod) {
+			return false;
+		}
+
+		Map<String,Set<InstanceKey>> tmVarToPossibleInstanceKeys = new HashMap<String, Set<InstanceKey>>();
+		for (ISymbolShadow shadow : shadowsBindingCurrentSymbolInCurrentMethod) {
+			final Map<String,InstanceKey> varToInstanceKey = config.reMap(shadow.getTmFormalToAdviceLocal());
+			for (String tmVar : bindings.keySet()) {
+				InstanceKey keyAtShadow = varToInstanceKey.get(tmVar);
+				Set<InstanceKey> keysForVar = tmVarToPossibleInstanceKeys.get(tmVar);
+				if(keysForVar==null) {
+					keysForVar = new HashSet<InstanceKey>();
+					tmVarToPossibleInstanceKeys.put(tmVar, keysForVar);					
+				}
+				keysForVar.add(keyAtShadow);
+			}
+		}
+		
+		boolean bindingUnique = true;
+		for (String tmVar : bindings.keySet()) {
+			if(tmVarToPossibleInstanceKeys.get(tmVar).size()!=1) {
+				bindingUnique = false;
+			}			
+		}
+		
+		return bindingUnique;
+	}
+
+	
+	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -165,7 +317,7 @@ public class MustMayNotAliasDisjunct extends Disjunct<InstanceKey> {
 	    	return this;
 	    }
 	}
-	
+
 	protected Disjunct addNegativeBinding(String tmVar, InstanceKey negBinding, String shadowId) {
 		//TODO: is this check still necessary? After all, equality on instance keys is defined via must-alias!
 		
