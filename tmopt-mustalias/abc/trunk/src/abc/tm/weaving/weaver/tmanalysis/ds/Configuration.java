@@ -66,9 +66,13 @@ public class Configuration implements Cloneable {
 	protected final TraceMatch tm;
 
 	protected final TMFlowAnalysis flowAnalysis;
+	
+	protected final boolean countFinalHits;
 
-	private final boolean countFinalHits;
-		
+	//TODO should actually be part of a constraint, I guess, but that would mean that we
+	//need multiple different FALSE constraints
+	protected HashSet<String> historyNoVar;   
+
 	/**
 	 * Creates a new configuration holding a mapping for the given states and registering active
 	 * shadows with the given analysis.
@@ -80,6 +84,7 @@ public class Configuration implements Cloneable {
 		stateToConstraint = new HashMap();
 		numHitFinal = 0;
 		isTainted = false;
+		historyNoVar = new HashSet<String>();
 
 		//associate each initial state with a TRUE constraint and all other states with a FALSE constraint
 		Iterator<State> stateIter = tm.getStateMachine().getStateIterator();
@@ -151,6 +156,18 @@ public class Configuration implements Cloneable {
 							shadowId
 					);
 					
+					/*
+					 * If a symbol has no variable binding, its shadow ID will not be stored
+					 * within the changed disjunct. This is because in disjuncts shadow IDs are stored
+					 * with the bindings. Hence, in order to be sound, we store the shadow ID here, if the
+					 * transition changed the constraint. It would actually make more sense to store 
+					 * them on the constraint itself but that would mean that we would need to allow for multiple
+					 * different FALSE constraints.
+					 */
+					if(bindings.isEmpty() && !oldConstraint.equals(newConstraint)) {
+						historyNoVar.add(shadowId);						
+					}
+					
 					//store the result at the original (=target) state
 					skip.stateToConstraint.put(skipState, newConstraint);
 				} else {
@@ -172,6 +189,18 @@ public class Configuration implements Cloneable {
 						flowAnalysis.hitFinal();
 						if(countFinalHits)
 							tmp.numHitFinal++;
+					}
+
+					/*
+					 * If a symbol has no variable binding, its shadow ID will not be stored
+					 * within the changed disjunct. This is because in disjuncts shadow IDs are stored
+					 * with the bindings. Hence, in order to be sound, we store the shadow ID here, if the
+					 * transition changed the constraint. It would actually make more sense to store 
+					 * them on the constraint itself but that would mean that we would need to allow for multiple
+					 * different FALSE constraints.
+					 */
+					if(bindings.isEmpty() && !oldConstraint.equals(newConstraint)) {
+						historyNoVar.add(shadowId);						
 					}
 
 					//put the new constraint on the target state
@@ -422,6 +451,7 @@ public class Configuration implements Cloneable {
 		try {
 			clone = (Configuration) super.clone();
 			clone.stateToConstraint = (HashMap) stateToConstraint.clone();
+			clone.historyNoVar = (HashSet<String>) historyNoVar.clone();
 			return clone;
 		} catch (CloneNotSupportedException e) {
 			throw new RuntimeException(e);
@@ -486,6 +516,7 @@ public class Configuration implements Cloneable {
 			Constraint c = stateToConstraint.get(s);
 			res.addAll(c.getCurrentHistory());
 		}
+		res.addAll(historyNoVar);
 		return res;
 	}
 
