@@ -85,7 +85,7 @@ The most important tasks are:
 	<target name="runtime" depends="settings">
 		<mkdir dir="runtime-src" />
 		<mkdir dir="runtime-classes" />
-		<javac destdir="runtime-classes" debug="true" source="${java.source}">
+		<javac destdir="runtime-classes" debug="true" source="${java.source}" target="${java.source}">
 			<src path="runtime-src" />
 			<src path="${abc.dir}/runtime-src" />
 			<classpath>
@@ -105,7 +105,7 @@ The most important tasks are:
 
 	<target name="testing" depends="settings,abc">
 		<mkdir dir="testing-classes" />
-		<javac destdir="testing-classes" debug="true" source="${java.source}">
+		<javac destdir="testing-classes" debug="true" source="${java.source}" target="${java.source}">
 			<src path="${abc.dir}/testing-src" />
 			<classpath>
 				<pathelement location="${polyglot.loc}" />
@@ -133,7 +133,7 @@ The most important tasks are:
 	
 	<target name="abc" depends="settings">
 		<mkdir dir="classes" />
-		<javac destdir="classes" debug="true" source="${java.source}">
+		<javac destdir="classes" debug="true" source="${java.source}" target="${java.source}">
 			<src path="src" />
 			<src path="${abc.dir}/src" />
 			<src path="${abc.dir}/generated" />
