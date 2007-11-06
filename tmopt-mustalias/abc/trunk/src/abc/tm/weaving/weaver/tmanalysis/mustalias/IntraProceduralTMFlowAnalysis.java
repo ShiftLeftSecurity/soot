@@ -207,7 +207,7 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
     
     protected final static int MAX_NUM_VISITED = 20;
 
-    protected final static int MAX_NUM_CONFIGS = 50;
+    protected final static int MAX_NUM_CONFIGS = 1000;
 
     protected static int MAX_SIZE_CONFIG;
 
