@@ -397,8 +397,10 @@ public class Configuration implements Cloneable {
 		return res;
 	}
 	
-	public void taint() {
-	    this.isTainted = true;
+	public Configuration taint() {
+		Configuration clone = clone(); 
+	    clone.isTainted = true;
+	    return clone;
 	}
 	
     public boolean isTainted() {
