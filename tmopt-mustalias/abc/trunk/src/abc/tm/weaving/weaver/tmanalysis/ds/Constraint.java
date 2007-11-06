@@ -210,6 +210,8 @@ public class Constraint implements Cloneable {
      * Applies a special version of the distributive law for Boolean algebra. In general, this law states (A && B) || (A && C) = A && (B || C).
      * The special case we are interested in is the one where B is the negation of C. Then it holds that: (A && x=o) || (A && x!=o) = A && (x=o || x!=o) = A.
      * This is the reduction we perform.
+     * 
+     * TODO can we extend this to take multiple equal bindings into account: c=c1&&i=i1 || c!=c1&&i!=i1 ?
      */
     public Constraint applyDistributiveLaw() {
         if(disjuncts.isEmpty()) {
@@ -251,11 +253,19 @@ public class Constraint implements Cloneable {
 	            		Set<InstanceKey> intersection = new HashSet<InstanceKey>(posBindingsD1);
 	            		intersection.retainAll(negBindingsD2);
 	            		if(intersection.size()==1) {
-	            			Set<InstanceKey> posBindingsD1rest = new HashSet<InstanceKey>(posBindingsD1);
-	            			posBindingsD1rest.removeAll(intersection);
-	            			Set<InstanceKey> negBindingsD2rest = new HashSet<InstanceKey>(negBindingsD2);
-	            			negBindingsD2rest.removeAll(intersection);
-	            			if(posBindingsD1rest.equals(negBindingsD2rest)) {
+	            			Disjunct d1Copy = d1.clone();
+	            			Set<InstanceKey> posBindD1 = (Set<InstanceKey>) d1Copy.posVarBinding.get(var);	            			
+	            			posBindD1.removeAll(intersection);
+	            			if(posBindD1.isEmpty()) {
+	            				d1Copy.posVarBinding.remove(var);
+	            			}
+	            			Disjunct d2Copy = d2.clone();
+	            			Set<InstanceKey> negBindD2 = (Set<InstanceKey>) d2Copy.negVarBinding.get(var);	            			
+	            			negBindD2.removeAll(intersection);
+	            			if(negBindD2.isEmpty()) {
+	            				d2Copy.negVarBinding.remove(var);
+	            			}
+	            			if(d1Copy.equals(d2Copy)) {
 		            			superFlousKey = intersection.iterator().next();
 		            			superFlousVar = var;
 		            			first = d1;
