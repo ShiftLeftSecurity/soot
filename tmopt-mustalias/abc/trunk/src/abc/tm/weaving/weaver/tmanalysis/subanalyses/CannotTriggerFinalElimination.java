@@ -113,11 +113,8 @@ public class CannotTriggerFinalElimination {
             }
             
             for (Configuration configuration : allConfigs) {
-                if(configuration.isTainted()) {
-                	shadowsToDisable.removeAll(configuration.getHistoryAtAllStates());
-                } else if(configuration.hasHitFinal()) {
-                	shadowsToDisable.removeAll(configuration.getHistoryAtFinalStates());
-                }
+               	shadowsToDisable.removeAll(configuration.getHistoryOfTaintedDisjunctsAtAllStates());
+               	shadowsToDisable.removeAll(configuration.getHistoryAtFinalStates());
 			}
         } 
         

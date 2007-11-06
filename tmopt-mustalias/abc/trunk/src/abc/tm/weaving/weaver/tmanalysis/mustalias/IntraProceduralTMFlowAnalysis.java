@@ -352,9 +352,9 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
                             for (Configuration oldConfig : in) {
                                 Configuration newConfig = oldConfig.doTransition(shadow,isSyntheticFinalUnit);
                                 if(mightHaveSideEffects) {
-                                    newConfig.taint();
+                                    newConfig = newConfig.taintAllDisjuncts();
                                 }
-                                if(!newConfig.equals(oldConfig) || newConfig.isTainted()) {
+                                if(!newConfig.equals(oldConfig) || newConfig.hasTaintedConstraintOrDisjunct()) {
                                     //shadow is not invariant
                                     unnecessaryShadows.remove(shadow);
                                 }
@@ -386,8 +386,10 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
         }
         
         if(mightHaveSideEffects) {
-        	for (Configuration outConf : out) {
-				outConf.taint();
+        	HashSet<Configuration> outCopy = new HashSet<Configuration>(out);
+        	out.clear();
+        	for (Configuration outConf : outCopy) {
+				out.add(outConf.taintAllDisjuncts());
 			}
         }
         

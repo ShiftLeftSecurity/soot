@@ -449,7 +449,9 @@ public class MustMayNotAliasDisjunct extends Disjunct<InstanceKey> {
         sb.append(negVarBinding.toString());
 		sb.append(")-hist(");			
         sb.append(history.values());
-		sb.append(")]");			
+		sb.append(")]");		
+		if(isTainted)
+			sb.append("#");
 		return sb.toString();
 	}
 	
