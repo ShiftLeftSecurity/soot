@@ -225,13 +225,15 @@ public class MustMayNotAliasDisjunct extends Disjunct<InstanceKey> {
 			}			
 			
 			for (ISymbolShadow shadow : overlaps) {
-				//if shadow from different method
-				if(!shadow.getContainer().equals(container)) {
-					//if shadow has symbol that may bind the value we care about
-					allShadowsBindingCurrentSymbolInCurrentMethod = false;
-					break;
-				} else if(symbolsThatMayBindCurrentValue.contains(shadow.getSymbolName())) {
-					shadowsBindingCurrentSymbolInCurrentMethod.add(shadow);
+				if(symbolsThatMayBindCurrentValue.contains(shadow.getSymbolName())) {					
+					//if shadow from different method
+					if(!shadow.getContainer().equals(container)) {
+						//if shadow has symbol that may bind the value we care about
+						allShadowsBindingCurrentSymbolInCurrentMethod = false;
+						break;
+					} else if(symbolsThatMayBindCurrentValue.contains(shadow.getSymbolName())) {
+						shadowsBindingCurrentSymbolInCurrentMethod.add(shadow);
+					}
 				}
 			}
 		}
