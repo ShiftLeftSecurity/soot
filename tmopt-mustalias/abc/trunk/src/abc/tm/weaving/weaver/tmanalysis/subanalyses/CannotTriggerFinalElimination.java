@@ -58,7 +58,7 @@ public class CannotTriggerFinalElimination {
         //get all active shadows in the method
         Set<ISymbolShadow> allMethodShadows = Util.getAllActiveShadows(tm,g.getBody().getUnits());
         
-        //generate an augmented unit graph modeling all possible outgoing executions from the method
+        //generate an augmented unit graph modelling all possible outgoing executions from the method
         DirectedGraph<Unit> augmentedGraph = new FinalConfigsUnitGraph(g,g.getBody().getMethod(),allMethodShadows,tm);
         
         Collection<Stmt> allStmts = new HashSet<Stmt>();
