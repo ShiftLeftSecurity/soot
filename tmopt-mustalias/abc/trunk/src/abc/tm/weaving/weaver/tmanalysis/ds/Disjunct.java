@@ -63,8 +63,6 @@ public abstract class Disjunct<A> implements Cloneable {
 	protected HashMap<String,Set<A>> posVarBinding;
 	protected HashMap<String,Set<A>> negVarBinding;
 	
-	protected boolean isTainted;
-	
 	/**
 	 * Creates a new disjunct with empty bindings and history.
 	 * Only to be called form this class (prototype pattern.) 
@@ -75,7 +73,6 @@ public abstract class Disjunct<A> implements Cloneable {
 	protected Disjunct() {
 		this.posVarBinding = new HashMap<String, Set<A>>();
 		this.negVarBinding = new HashMap<String, Set<A>>();
-		this.isTainted = false;
 	}
 	
 	/**
@@ -162,7 +159,6 @@ public abstract class Disjunct<A> implements Cloneable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + (isTainted ? 1231 : 1237);
 		result = prime * result
 				+ ((negVarBinding == null) ? 0 : negVarBinding.hashCode());
 		result = prime * result
@@ -177,13 +173,7 @@ public abstract class Disjunct<A> implements Cloneable {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Disjunct other = (Disjunct) obj;
-		if (isTainted != other.isTainted)
-			return false;
+		final Disjunct other = (Disjunct) obj;
 		if (negVarBinding == null) {
 			if (other.negVarBinding != null)
 				return false;
@@ -198,16 +188,6 @@ public abstract class Disjunct<A> implements Cloneable {
 	}
 	
 	public abstract Collection<String> getCurrentHistory();
-
-	public Disjunct<A> taint() {
-		Disjunct<A> clone = clone();
-		clone.isTainted = true;
-		return clone;
-	}
-
-	public boolean isTainted() {
-		return isTainted;
-	}
 	
 //	/**
 //	 * Returns <code>true</code>, if the binding passed in is compatible with the one

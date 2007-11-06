@@ -142,7 +142,7 @@ public class ShadowMotion {
             Set<Configuration> flowBefore = flowAnalysis.getFlowBefore(loopStmt);
             //if there is an active shadow at this unit
             if(!Util.getAllActiveShadows(tm, Collections.singleton(loopStmt)).isEmpty()) {
-                if(Configuration.hasTaintedConstraintOrDisjunct(flowBefore)) {
+                if(Configuration.hasTainted(flowBefore)) {
                     System.err.println("Aborting because shadow could have been affected by calls to other methods with shadows.");
                     return;
                 }

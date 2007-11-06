@@ -61,6 +61,8 @@ public class Configuration implements Cloneable {
 	
 	protected int numHitFinal;
 	
+	protected boolean isTainted;
+	
 	protected final TraceMatch tm;
 
 	protected final TMFlowAnalysis flowAnalysis;
@@ -81,6 +83,7 @@ public class Configuration implements Cloneable {
 		this.tm = flowAnalysis.getTracematch();
 		stateToConstraint = new HashMap();
 		numHitFinal = 0;
+		isTainted = false;
 		historyNoVar = new HashSet<String>();
 
 		//associate each initial state with a TRUE constraint and all other states with a FALSE constraint
@@ -163,12 +166,7 @@ public class Configuration implements Cloneable {
 					 * different FALSE constraints.
 					 */
 					if(bindings.isEmpty() && !oldConstraint.equals(newConstraint)) {
-						tmp.historyNoVar.add(shadowId);
-						//if the previous constraint had a tainted disjunct, we now have to taint the entire constraint
-						//(there may not be any disjunct no more to taint)
-						if(oldConstraint.hasTaintedDisjunct()) {
-							newConstraint = newConstraint.taint();
-						}
+						tmp.historyNoVar.add(shadowId);						
 					}
 					
 					//store the result at the original (=target) state
@@ -204,11 +202,6 @@ public class Configuration implements Cloneable {
 					 */
 					if(bindings.isEmpty() && !oldConstraint.equals(newConstraint)) {
 						tmp.historyNoVar.add(shadowId);						
-						//if the previous constraint had a tainted disjunct, we now have to taint the entire constraint
-						//(there may not be any disjunct no more to taint)
-						if(oldConstraint.hasTaintedDisjunct()) {
-							newConstraint.taint();
-						}
 					}
 
 					//put the new constraint on the target state
@@ -248,11 +241,7 @@ public class Configuration implements Cloneable {
 	public void disjointUpdateFor(SMNode state, Constraint constraint) {
 		assert getStates().contains(state);		
 		Constraint currConstraint = (Constraint) stateToConstraint.get(state);		
-		Constraint or = currConstraint.or(constraint);
-		if((constraint.isTainted() || currConstraint.isTainted()) && !or.isTainted()) {
-			or = or.taint();
-		}
-		stateToConstraint.put(state, or);
+		stateToConstraint.put(state, currConstraint.or(constraint));
 	}
 
 	/**
@@ -317,16 +306,8 @@ public class Configuration implements Cloneable {
 		Configuration copy = (Configuration) clone();
 		for (Iterator iter = copy.stateToConstraint.entrySet().iterator(); iter.hasNext();) {
 			Entry entry = (Entry) iter.next();
-			SMNode state = (SMNode) entry.getKey();
-			if(state.isInitialNode())
-				entry.setValue(Constraint.TRUE);
-			else {
-				if(stateToConstraint.get(state).isTainted()) {
-					entry.setValue(Constraint.FALSE.taint());
-				} else {
-					entry.setValue(Constraint.FALSE);
-				}
-			}
+			SMNode state = (SMNode) entry.getKey();			
+			entry.setValue(state.isInitialNode() ? Constraint.TRUE : Constraint.FALSE);
 		}		
 		return copy;
 	}
@@ -410,8 +391,27 @@ public class Configuration implements Cloneable {
 		
 		if(countFinalHits)
 			res += "hit final "+numHitFinal+" times\n";
+        if(isTainted)
+            res += "configuration is tainted\n";
 		
 		return res;
+	}
+	
+	public void taint() {
+	    this.isTainted = true;
+	}
+	
+    public boolean isTainted() {
+        return isTainted;
+    }
+    
+    public static boolean hasTainted(Set<Configuration> configurations) {
+	    for (Configuration configuration : configurations) {
+            if(configuration.isTainted) {
+                return true;
+            }
+        }
+	    return false;
 	}
 	
     public static boolean hasHitFinal(Set<Configuration> configurations) {
@@ -473,6 +473,7 @@ public class Configuration implements Cloneable {
 				+ ((stateToConstraint == null) ? 0 : stateToConstraint
 						.hashCode());
 		result = prime * result + numHitFinal;
+        result = prime * result + (isTainted ? 1 : 0);
 		return result;
 	}
 
@@ -496,24 +497,25 @@ public class Configuration implements Cloneable {
 		if(numHitFinal!=other.numHitFinal) {
 			return false;
 		}
+        if(isTainted!=other.isTainted) {
+            return false;
+        }
 		assert this.tm.equals(other.tm);
 		return true;
 	}
 	
-	public Collection<String> getHistoryOfTaintedDisjunctsAtAllStates() {
-		Collection<String> res = new HashSet<String>();
-		for (State s : stateToConstraint.keySet()) {
-			Constraint c = stateToConstraint.get(s);
-			res.addAll(c.getHistoryOfTaintedDisjuncts());
-		}
-		res.addAll(historyNoVar);
-		return res;
+	public Collection<String> getHistoryAtAllStates() {
+		return getHistoryAtStates(false);
 	}
 
 	public Collection<String> getHistoryAtFinalStates() {
+		return getHistoryAtStates(true);
+	}
+
+	protected Collection<String> getHistoryAtStates(boolean onlyAtFinalStates) {
 		Collection<String> res = new HashSet<String>();
 		for (State s : stateToConstraint.keySet()) {
-			if(!s.isFinalNode()) continue;
+			if(onlyAtFinalStates && !s.isFinalNode()) continue;
 			Constraint c = stateToConstraint.get(s);
 			res.addAll(c.getCurrentHistory());
 		}
@@ -521,33 +523,4 @@ public class Configuration implements Cloneable {
 		return res;
 	}
 
-	public Configuration taintAllDisjuncts() {
-		Configuration clone = clone();
-		for (Map.Entry<State, Constraint> entry : clone.stateToConstraint.entrySet()) {
-			State state = entry.getKey();
-			if(!state.isInitialNode()) {
-				Constraint constraint = entry.getValue();
-				entry.setValue(constraint.taintAllDisjuncts());
-			}
-		}
-		return clone;
-	}
-
-	public boolean hasTaintedConstraintOrDisjunct() {
-		for (State s : stateToConstraint.keySet()) {
-			Constraint c = stateToConstraint.get(s);
-			if(c.isTainted() || c.hasTaintedDisjunct())
-				return true;
-		}
-		return false;
-	}
-	
-	public static boolean hasTaintedConstraintOrDisjunct(Collection<Configuration> configs) {
-		for (Configuration configuration : configs) {
-			if(configuration.hasTaintedConstraintOrDisjunct()) {
-				return true;
-			}
-		}
-		return false;
-	}
 }

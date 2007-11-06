@@ -76,8 +76,6 @@ public class Constraint implements Cloneable {
 	/** The unique true constraint. */
 	public static Constraint TRUE;
 	
-	protected boolean isTainted;
-	
 	/**
 	 * Initialized the prototype constraints TRUE and FALSE. 
 	 * @param falseProtoType the prototype disjunct for {@link Disjunct#FALSE}.
@@ -165,7 +163,6 @@ public class Constraint implements Cloneable {
 	 */
 	private Constraint(HashSet disjuncts) {
 		this.disjuncts = (HashSet) disjuncts.clone();
-		this.isTainted = false;
 	}
 
 	/**
@@ -193,7 +190,7 @@ public class Constraint implements Cloneable {
 			assert newDisjunct!=null;
             
             //FALSE is a marker for "no match"; do not add it as it represents TRUE in the Constraint
-            if(newDisjunct!= Disjunct.FALSE) {            	
+            if(newDisjunct!= Disjunct.FALSE) {
                 resultDisjuncts.add(newDisjunct);
             }
 		}
@@ -386,7 +383,6 @@ public class Constraint implements Cloneable {
 	public int hashCode() {
 		final int PRIME = 31;
 		int result = 1;
-		result = PRIME * result + (isTainted ? 1231 : 1237);
 		result = PRIME * result + ((disjuncts == null) ? 0 : disjuncts.hashCode());
 		return result;
 	}
@@ -405,9 +401,6 @@ public class Constraint implements Cloneable {
 				return false;
 		} else if (!disjuncts.equals(other.disjuncts))
 			return false;
-		if(isTainted!=other.isTainted) {
-			return false;
-		}
 		return true;
 	}
 	
@@ -415,11 +408,7 @@ public class Constraint implements Cloneable {
 	 * {@inheritDoc}
 	 */
 	public String toString() {
-		String string = disjuncts.toString();
-		if(isTainted) {
-			string += "#";
-		}
-		return string;
+		return disjuncts.toString();
 	}
 
 	public Collection<String> getCurrentHistory() {
@@ -429,50 +418,7 @@ public class Constraint implements Cloneable {
 		}
 		return res;
 	}
-
-	public Collection<String> getHistoryOfTaintedDisjuncts() {
-		if(isTainted()) {
-			return getCurrentHistory();
-		}
-		Collection<String> res = new HashSet<String>();
-		for (Disjunct d : disjuncts) {
-			if(d.isTainted()) {
-				res.addAll(d.getCurrentHistory());
-			}
-		}
-		return res;
-	}
-
-	public Constraint taintAllDisjuncts() {
-		Constraint clone = clone();
-		HashSet<Disjunct> copies = new HashSet<Disjunct>();
-		for (Disjunct d : disjuncts) {
-			copies.add(d.taint());
-		}		
-		clone.disjuncts = copies;
-		return clone;
-	}
 	
-	public boolean hasTaintedDisjunct() {
-		if(isTainted)
-			return true;
-		for (Disjunct d : disjuncts) {
-			if(d.isTainted()) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public Constraint taint() {
-		Constraint clone = taintAllDisjuncts();
-		clone.isTainted = true;
-		return clone;
-	}
-	
-	public boolean isTainted() {
-		return isTainted;
-	}
 	
 //	/**
 //	 * Returns <code>true</code> if the given variable binding
