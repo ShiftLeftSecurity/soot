@@ -166,7 +166,7 @@ public class Configuration implements Cloneable {
 					 * different FALSE constraints.
 					 */
 					if(bindings.isEmpty() && !oldConstraint.equals(newConstraint)) {
-						historyNoVar.add(shadowId);						
+						tmp.historyNoVar.add(shadowId);						
 					}
 					
 					//store the result at the original (=target) state
@@ -201,7 +201,7 @@ public class Configuration implements Cloneable {
 					 * different FALSE constraints.
 					 */
 					if(bindings.isEmpty() && !oldConstraint.equals(newConstraint)) {
-						historyNoVar.add(shadowId);						
+						tmp.historyNoVar.add(shadowId);						
 					}
 
 					//put the new constraint on the target state
@@ -248,6 +248,7 @@ public class Configuration implements Cloneable {
 	 * Joins this configuration with the other one and returns the result.
 	 * This implies a disjoint update of all associated constraints and a merge
 	 * of the associated thread edges. 
+	 * The sets {@link #historyNoVar} are joined.
 	 * @param other another configuration 
 	 * @return the joined configuration
 	 */
@@ -259,6 +260,7 @@ public class Configuration implements Cloneable {
 			SMNode state = (SMNode) stateIter.next();
 			clone.disjointUpdateFor(state, other.getConstraintFor(state));
 		}
+		clone.historyNoVar.addAll(other.historyNoVar);
 		return clone;
 	}
 	
