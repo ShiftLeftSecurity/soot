@@ -487,6 +487,31 @@ public class MustMayNotAliasDisjunct extends Disjunct<InstanceKey> {
 		return history.values();
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((history == null) ? 0 : history.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		MustMayNotAliasDisjunct other = (MustMayNotAliasDisjunct) obj;
+		if (history == null) {
+			if (other.history != null)
+				return false;
+		} else if (!history.equals(other.history))
+			return false;
+		return true;
+	}
+
 //	/**
 //	 * Expects a map from variables ({@link String}s) to {@link InstanceKey}s.
 //	 * Returns <code>false</code> if there exists a variable in the binding

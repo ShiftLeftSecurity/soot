@@ -405,7 +405,7 @@ public class Configuration implements Cloneable {
         return isTainted;
     }
     
-    public static boolean hasTainted(Set<Configuration> configurations) {
+    public static boolean hasTainted(Collection<Configuration> configurations) {
 	    for (Configuration configuration : configurations) {
             if(configuration.isTainted) {
                 return true;
@@ -414,7 +414,7 @@ public class Configuration implements Cloneable {
 	    return false;
 	}
 	
-    public static boolean hasHitFinal(Set<Configuration> configurations) {
+    public static boolean hasHitFinal(Collection<Configuration> configurations) {
         for (Configuration configuration : configurations) {
             if(configuration.hasHitFinal()) {
                 return true;
@@ -472,6 +472,10 @@ public class Configuration implements Cloneable {
 				* result
 				+ ((stateToConstraint == null) ? 0 : stateToConstraint
 						.hashCode());
+		result = prime
+				* result
+				+ ((historyNoVar == null) ? 0 : historyNoVar
+						.hashCode());
 		result = prime * result + numHitFinal;
         result = prime * result + (isTainted ? 1 : 0);
 		return result;
@@ -500,6 +504,11 @@ public class Configuration implements Cloneable {
         if(isTainted!=other.isTainted) {
             return false;
         }
+		if (historyNoVar == null) {
+			if (other.historyNoVar != null)
+				return false;
+		} else if (!historyNoVar.equals(other.historyNoVar))
+			return false;
 		assert this.tm.equals(other.tm);
 		return true;
 	}
