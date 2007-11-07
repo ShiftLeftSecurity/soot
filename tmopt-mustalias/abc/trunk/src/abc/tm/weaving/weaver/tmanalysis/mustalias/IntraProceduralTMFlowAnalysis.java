@@ -43,12 +43,11 @@ import soot.MethodOrMethodContext;
 import soot.RefLikeType;
 import soot.SootMethod;
 import soot.Unit;
-import soot.Value;
-import soot.jimple.AssignStmt;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.jimple.toolkits.callgraph.Edge;
 import soot.jimple.toolkits.pointer.LocalNotMayAliasAnalysis;
+import soot.jimple.toolkits.pointer.StrongLocalMustAliasAnalysis;
 import soot.toolkits.graph.DirectedGraph;
 import soot.toolkits.graph.UnitGraph;
 import soot.toolkits.scalar.ForwardFlowAnalysis;
@@ -190,7 +189,7 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
 
     protected final Collection<String> overlappingShadowIDs;
     
-    protected final LoopAwareLocalMustAliasAnalysis lmaa;
+    protected final StrongLocalMustAliasAnalysis lmaa;
 
     protected final LocalNotMayAliasAnalysis lmna;
 
@@ -225,7 +224,7 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
 	 * @param stmtsToAnalyze Statements to consider for this analysis.
 	 * @param patchingChain 
 	 */
-	public IntraProceduralTMFlowAnalysis(TraceMatch tm, DirectedGraph<Unit> ug, SootMethod container, Map<Local, Stmt> tmLocalDefs, Disjunct initialDisjunct, Set<State> additionalInitialStates, Collection<Stmt> stmtsToAnalyze, LoopAwareLocalMustAliasAnalysis lmaa, LocalNotMayAliasAnalysis lmna, boolean abortWhenHittingFinal) {
+	public IntraProceduralTMFlowAnalysis(TraceMatch tm, DirectedGraph<Unit> ug, SootMethod container, Map<Local, Stmt> tmLocalDefs, Disjunct initialDisjunct, Set<State> additionalInitialStates, Collection<Stmt> stmtsToAnalyze, StrongLocalMustAliasAnalysis lmaa, LocalNotMayAliasAnalysis lmna, boolean abortWhenHittingFinal) {
 		super(ug);
         this.container = container;
         this.tmLocalDefs = tmLocalDefs;
@@ -291,8 +290,6 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
 				
 		this.status.countForStatistics();
 		
-		//un-invalidate instance keys again
-		lmaa.reset();
 		//clear caches
 		Disjunct.reset();
 		Constraint.reset();
@@ -333,9 +330,6 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
                 //if we are visiting the synthetic final unit of cannot-reach-final and we have already propagated through it
                 //as often as the longest path info, we can ignore further iterations, as they will never hit the final state
 
-                //update must-alias info
-                updateMustAlias(stmt,numVisited);
-    
                 //if we care about the shadow and it has a tag...
                 if(stmt.hasTag(SymbolShadowTag.NAME)) {
     
@@ -400,27 +394,6 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
         }
     }
 	
-	/**
-     * @param stmt
-	 * @param numVisited 
-     */
-    private void updateMustAlias(Stmt stmt, int numVisited) {
-        if(numVisited==2) {
-            if(stmt instanceof AssignStmt) {
-                AssignStmt assignStmt = (AssignStmt) stmt;
-                Value leftOp = assignStmt.getLeftOp();
-                Value rightOp = assignStmt.getRightOp();
-                if(leftOp instanceof Local && !(rightOp instanceof Local)) {
-                    Local local = (Local) leftOp;
-                    if(local.getType() instanceof RefLikeType) {
-                        Unit succ = graph.getSuccsOf(stmt).get(0);
-                        lmaa.invalidateInstanceKeyFor(local, succ);
-                    }
-                }
-            }
-        }
-    }
-
     protected boolean mightHaveSideEffects(Stmt s) {
         Collection<ISymbolShadow> shadows = transitivelyCalledShadows(s);
         filterNewDacapoRun(shadows);
