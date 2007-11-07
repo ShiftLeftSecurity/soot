@@ -380,7 +380,7 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
         }
         
         //if visited for the first time
-        if(numVisited==2) {
+        if(numVisited==1) {
             //...record this after-flow for comparison
             stmtToFirstAfterFlow.put(stmt, new HashSet<Configuration>(out));
         }
