@@ -27,8 +27,8 @@ import java.util.Map;
 import java.util.Set;
 
 import soot.PointsToSet;
+import soot.jimple.toolkits.pointer.InstanceKey;
 import abc.tm.weaving.matching.SMNode;
-import abc.tm.weaving.weaver.tmanalysis.mustalias.InstanceKey;
 import abc.tm.weaving.weaver.tmanalysis.mustalias.TMFlowAnalysis;
 
 /**
