@@ -134,10 +134,6 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
                 methodsWithShadows.add(m);
             }
 
-            //FIXME do this properly (re-tag)
-            //do not apply to methods where shadow motion was already applied (because we do not get the tags right yet)
-            methodsWithShadows.removeAll(ShadowMotion.getAffectedMethods());
-            
             for (SootMethod m : methodsWithShadows) {
                 if(Util.getAllActiveShadows(tm, m.getActiveBody().getUnits()).isEmpty()) return; //no active shadows any more
                 
