@@ -52,7 +52,6 @@ import abc.tm.weaving.weaver.tmanalysis.query.SymbolShadowWithPTS;
 import abc.tm.weaving.weaver.tmanalysis.stages.TMShadowTagger.SymbolShadowTag;
 import abc.tm.weaving.weaver.tmanalysis.subanalyses.CannotTriggerFinalElimination;
 import abc.tm.weaving.weaver.tmanalysis.subanalyses.ShadowMotion;
-import abc.tm.weaving.weaver.tmanalysis.subanalyses.UnnecessaryShadowElimination;
 import abc.tm.weaving.weaver.tmanalysis.util.ISymbolShadow;
 import abc.tm.weaving.weaver.tmanalysis.util.ShadowsPerTMSplitter;
 
@@ -146,21 +145,13 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 
                 boolean allRemoved = false;
                 
-                if(Debug.v().useUnnecessaryShadow) {
-                    allRemoved = UnnecessaryShadowElimination.apply(tm, g, tmLocalsToDefStatements, localMustAliasAnalysis, localNotMayAliasAnalysis);
+                if(Debug.v().useCannotTriggerFinal) {
+                    allRemoved = CannotTriggerFinalElimination.apply(tm, g, tmLocalsToDefStatements, localMustAliasAnalysis, localNotMayAliasAnalysis);
                 }
-                
-                if(onlyUnnecessaryShadowElimination) continue;
-                
-                if(!allRemoved) {
-                    if(Debug.v().useCannotTriggerFinal) {
-                        allRemoved = CannotTriggerFinalElimination.apply(tm, g, tmLocalsToDefStatements, localMustAliasAnalysis, localNotMayAliasAnalysis);
-                    }
 
-                    if(!allRemoved) {
-                        if(Debug.v().useShadowMotion) {
-                            ShadowMotion.apply(tm, g, tmLocalsToDefStatements, localMustAliasAnalysis, localNotMayAliasAnalysis);
-                        }
+                if(!allRemoved) {
+                    if(Debug.v().useShadowMotion) {
+                        ShadowMotion.apply(tm, g, tmLocalsToDefStatements, localMustAliasAnalysis, localNotMayAliasAnalysis);
                     }
                 }
 

@@ -194,9 +194,6 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
 
     protected final LocalMustNotAliasAnalysis lmna;
 
-    /* An unnecessary shadow does not change any of its known input configurations. */
-    protected final Set<ISymbolShadow> unnecessaryShadows;
-
     protected final SootMethod container;
 
     protected final Map<Local, Stmt> tmLocalDefs;
@@ -259,8 +256,6 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
         //also initialize invariantStatements to the set of all statements with a shadow
 		Set<ISymbolShadow> allShadowsForTM = Util.getAllActiveShadows(tm, stmtsToAnalyze);
         
-        this.unnecessaryShadows = new HashSet<ISymbolShadow>(allShadowsForTM);
-
         if(ShadowGroupRegistry.v().hasShadowGroupInfo()) {
             //store all IDs of shadows in those groups
             this.overlappingShadowIDs = Util.sameShadowGroup(allShadowsForTM);
@@ -349,10 +344,6 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
                                 if(mightHaveSideEffects) {
                                     newConfig = newConfig.taint();
                                 }
-                                if(!newConfig.equals(oldConfig) || newConfig.isTainted()) {
-                                    //shadow is not invariant
-                                    unnecessaryShadows.remove(shadow);
-                                }
                                 out.add(newConfig);
     
                                 int numNewConfigs = out.size();
@@ -389,7 +380,7 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
         }
         
         //if visited for the first time
-        if(numVisited==1) {
+        if(numVisited==2) {
             //...record this after-flow for comparison
             stmtToFirstAfterFlow.put(stmt, new HashSet<Configuration>(out));
         }
@@ -588,13 +579,6 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
         }
     }
 
-    /**
-     * Returns the set of shadows that never changed any configuration during the analysis.
-     */
-    public Collection<ISymbolShadow> getUnnecessaryShadows() {
-        return new HashSet<ISymbolShadow>(unnecessaryShadows); 
-    }
-    
     /**
      * Determines all statements that are in scope but for which it is guaranteed that
      * one loop iteration suffices to reach the fixed point.
