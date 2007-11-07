@@ -195,12 +195,17 @@ public class ShadowMotion {
     			if(reboundPred!=pred) {
     				initPositions.add((Stmt) reboundPred);
     			} else {
-    				System.out.println("WARNING: Could not find a statement suitable to place initialization code. Not optimizing loop.");
+    				System.out.println("WARNING: Could not find a statement suitable to place initialization code. Not optimizing loop. (1)");
     				return;
     			}
     		}
         }
 
+        if(initPositions.isEmpty()) {
+			System.out.println("WARNING: Could not find a statement suitable to place initialization code. Not optimizing loop. (2)");
+			return;
+        }
+        
         for (ISymbolShadow shadow : shadowsbeforeLoopExit) {
             Statistics.v().shadowsOnlyExecuteOnce++;
             System.err.println("Executing shadow once: "+shadow.getUniqueShadowId());
