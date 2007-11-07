@@ -34,7 +34,7 @@ import soot.SootMethod;
 import soot.Unit;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.annotation.logic.Loop;
-import soot.jimple.toolkits.pointer.LocalNotMayAliasAnalysis;
+import soot.jimple.toolkits.pointer.LocalMustNotAliasAnalysis;
 import soot.jimple.toolkits.pointer.StrongLocalMustAliasAnalysis;
 import soot.toolkits.graph.LoopNestTree;
 import soot.toolkits.graph.UnitGraph;
@@ -66,7 +66,7 @@ public class ShadowMotion {
 
     private static Collection<SootMethod> affectedMethods = new HashSet<SootMethod>();
 
-    public static void apply(TraceMatch tm, UnitGraph g, Map<Local, Stmt> tmLocalsToDefStatements, StrongLocalMustAliasAnalysis localMustAliasAnalysis, LocalNotMayAliasAnalysis localNotMayAliasAnalysis) {
+    public static void apply(TraceMatch tm, UnitGraph g, Map<Local, Stmt> tmLocalsToDefStatements, StrongLocalMustAliasAnalysis localMustAliasAnalysis, LocalMustNotAliasAnalysis localNotMayAliasAnalysis) {
         System.err.println("Loop optimization...");
 
         //build a loop nest tree
@@ -85,7 +85,7 @@ public class ShadowMotion {
         }
     }
 
-    public static void optimizeLoop(TraceMatch tm, UnitGraph g, Map<Local, Stmt> tmLocalsToDefStatements, StrongLocalMustAliasAnalysis localMustAliasAnalysis, LocalNotMayAliasAnalysis localNotMayAliasAnalysis,
+    public static void optimizeLoop(TraceMatch tm, UnitGraph g, Map<Local, Stmt> tmLocalsToDefStatements, StrongLocalMustAliasAnalysis localMustAliasAnalysis, LocalMustNotAliasAnalysis localNotMayAliasAnalysis,
             Loop loop) {
         System.err.println("Optimizing loop...");
         

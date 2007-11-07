@@ -46,7 +46,8 @@ import soot.Unit;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.jimple.toolkits.callgraph.Edge;
-import soot.jimple.toolkits.pointer.LocalNotMayAliasAnalysis;
+import soot.jimple.toolkits.pointer.InstanceKey;
+import soot.jimple.toolkits.pointer.LocalMustNotAliasAnalysis;
 import soot.jimple.toolkits.pointer.StrongLocalMustAliasAnalysis;
 import soot.toolkits.graph.DirectedGraph;
 import soot.toolkits.graph.UnitGraph;
@@ -191,7 +192,7 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
     
     protected final StrongLocalMustAliasAnalysis lmaa;
 
-    protected final LocalNotMayAliasAnalysis lmna;
+    protected final LocalMustNotAliasAnalysis lmna;
 
     /* An unnecessary shadow does not change any of its known input configurations. */
     protected final Set<ISymbolShadow> unnecessaryShadows;
@@ -224,7 +225,7 @@ public class IntraProceduralTMFlowAnalysis extends ForwardFlowAnalysis<Unit,Set<
 	 * @param stmtsToAnalyze Statements to consider for this analysis.
 	 * @param patchingChain 
 	 */
-	public IntraProceduralTMFlowAnalysis(TraceMatch tm, DirectedGraph<Unit> ug, SootMethod container, Map<Local, Stmt> tmLocalDefs, Disjunct initialDisjunct, Set<State> additionalInitialStates, Collection<Stmt> stmtsToAnalyze, StrongLocalMustAliasAnalysis lmaa, LocalNotMayAliasAnalysis lmna, boolean abortWhenHittingFinal) {
+	public IntraProceduralTMFlowAnalysis(TraceMatch tm, DirectedGraph<Unit> ug, SootMethod container, Map<Local, Stmt> tmLocalDefs, Disjunct initialDisjunct, Set<State> additionalInitialStates, Collection<Stmt> stmtsToAnalyze, StrongLocalMustAliasAnalysis lmaa, LocalMustNotAliasAnalysis lmna, boolean abortWhenHittingFinal) {
 		super(ug);
         this.container = container;
         this.tmLocalDefs = tmLocalDefs;

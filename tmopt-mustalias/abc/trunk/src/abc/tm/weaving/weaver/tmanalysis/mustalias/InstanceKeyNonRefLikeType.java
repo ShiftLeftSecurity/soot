@@ -23,8 +23,9 @@ import soot.PointsToSet;
 import soot.SootMethod;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.pointer.FullObjectSet;
+import soot.jimple.toolkits.pointer.InstanceKey;
 import soot.jimple.toolkits.pointer.LocalMustAliasAnalysis;
-import soot.jimple.toolkits.pointer.LocalNotMayAliasAnalysis;
+import soot.jimple.toolkits.pointer.LocalMustNotAliasAnalysis;
 
 /**
  * InstanceKeyNonRefLikeType
@@ -36,7 +37,7 @@ public class InstanceKeyNonRefLikeType extends InstanceKey {
 
     public InstanceKeyNonRefLikeType(Local assignedLocal,
             Stmt stmtAfterAssignStmt, SootMethod owner,
-            LocalMustAliasAnalysis lmaa, LocalNotMayAliasAnalysis lnma) {
+            LocalMustAliasAnalysis lmaa, LocalMustNotAliasAnalysis lnma) {
         super(assignedLocal, stmtAfterAssignStmt, owner, lmaa, lnma);
     }
     

@@ -27,7 +27,7 @@ import soot.Local;
 import soot.SootMethod;
 import soot.Unit;
 import soot.jimple.Stmt;
-import soot.jimple.toolkits.pointer.LocalNotMayAliasAnalysis;
+import soot.jimple.toolkits.pointer.LocalMustNotAliasAnalysis;
 import soot.jimple.toolkits.pointer.StrongLocalMustAliasAnalysis;
 import soot.toolkits.graph.UnitGraph;
 import abc.tm.weaving.aspectinfo.TraceMatch;
@@ -48,7 +48,7 @@ import abc.tm.weaving.weaver.tmanalysis.util.ISymbolShadow;
  */
 public class UnnecessaryShadowElimination {
     
-    public static boolean apply(TraceMatch tm, UnitGraph g, Map<Local, Stmt> tmLocalsToDefStatements, StrongLocalMustAliasAnalysis localMustAliasAnalysis, LocalNotMayAliasAnalysis localNotMayAliasAnalysis) {
+    public static boolean apply(TraceMatch tm, UnitGraph g, Map<Local, Stmt> tmLocalsToDefStatements, StrongLocalMustAliasAnalysis localMustAliasAnalysis, LocalMustNotAliasAnalysis localNotMayAliasAnalysis) {
         System.err.println("Unnecessary shadow elimination...");
 
         SootMethod m = g.getBody().getMethod();

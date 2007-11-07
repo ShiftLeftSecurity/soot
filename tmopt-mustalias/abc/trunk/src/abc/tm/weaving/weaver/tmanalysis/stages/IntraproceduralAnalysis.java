@@ -36,7 +36,7 @@ import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.jimple.toolkits.callgraph.CallGraphBuilder;
 import soot.jimple.toolkits.callgraph.Edge;
 import soot.jimple.toolkits.pointer.DumbPointerAnalysis;
-import soot.jimple.toolkits.pointer.LocalNotMayAliasAnalysis;
+import soot.jimple.toolkits.pointer.LocalMustNotAliasAnalysis;
 import soot.jimple.toolkits.pointer.StrongLocalMustAliasAnalysis;
 import soot.toolkits.graph.ExceptionalUnitGraph;
 import abc.main.Debug;
@@ -145,7 +145,7 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
                 
                 ExceptionalUnitGraph g = new ExceptionalUnitGraph(m.retrieveActiveBody());
     			StrongLocalMustAliasAnalysis localMustAliasAnalysis = new StrongLocalMustAliasAnalysis(g);
-				LocalNotMayAliasAnalysis localNotMayAliasAnalysis = new LocalNotMayAliasAnalysis(g);
+				LocalMustNotAliasAnalysis localNotMayAliasAnalysis = new LocalMustNotAliasAnalysis(g);
                 Map<Local,Stmt> tmLocalsToDefStatements = findTmLocalDefinitions(g,tm);
 
                 boolean allRemoved = false;
