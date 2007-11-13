@@ -93,7 +93,7 @@ public class IntraproceduralAnalysis extends AbstractAnalysisStage {
 		for(i=0;i<5;i++) {
 	        oneIteration();
 	        ShadowGroupRegistry.v().pruneShadowGroupsWhichHaveBecomeIncomplete();
-	        if(!ShadowRegistry.v().wasAnyResidueChanged()) {
+	        if(!ShadowRegistry.v().wasShadowDisabled()) {
 	            break;
 	        }
 		}
