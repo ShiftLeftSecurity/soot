@@ -168,6 +168,24 @@ public class MustMayNotAliasDisjunct extends Disjunct<InstanceKey> {
 	    if(bindings.size()<2) {
 	    	return false;
 	    }
+	    
+		//quick check : do not need to compute anything more expensive
+	    //if any bound value does not provide must-alias information 
+	    for (Map.Entry<String, InstanceKey> entry : bindings.entrySet()) {
+	    	InstanceKey toBind = entry.getValue();
+	    	
+		    if(!toBind.haveLocalInformation()) {
+				//have no precise information on that value
+				return false;
+			}			
+		    
+		    if(!toBind.isOfReferenceType()) {
+				//have no precise information on that value
+		    	return false;
+		    }
+
+		}
+	    
 	
 		Set<SymbolShadowWithPTS> overlaps = new HashSet<SymbolShadowWithPTS>();
 

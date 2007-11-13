@@ -73,4 +73,7 @@ public class InstanceKeyNonRefLikeType extends InstanceKey {
         return "NonRefLikeType";
     }
     
+    public boolean isOfReferenceType() {
+    	return false;
+    }    
 }
