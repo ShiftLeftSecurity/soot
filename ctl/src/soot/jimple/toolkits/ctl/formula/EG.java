@@ -6,6 +6,7 @@ import soot.jimple.toolkits.ctl.FilteredDirectedGraph;
 import soot.tagkit.Host;
 import soot.toolkits.graph.DirectedGraph;
 import soot.toolkits.graph.StronglyConnectedComponents;
+import soot.toolkits.graph.StronglyConnectedComponentsFast;
 
 public class EG extends UnaryFormula {
 	
@@ -40,15 +41,14 @@ public class EG extends UnaryFormula {
 		//filter the unit graph so that it only contains nodes at which "child" holds
 		FilteredDirectedGraph<N> filtered = new FilteredDirectedGraph<N>(g,child);
 		//compute this graph's SCCs
-		StronglyConnectedComponents sccAnalysis = new StronglyConnectedComponents(filtered);
-		List<List> sccs = sccAnalysis.getComponents();
+		StronglyConnectedComponentsFast<N> sccAnalysis = new StronglyConnectedComponentsFast<N>(filtered);
+		List<List<N>> sccs = sccAnalysis.getTrueComponents();
 		//label the nodes in all real SCCs with "this"
-		for (List scc : sccs) {
+		for (List<N> scc : sccs) {
 			if(scc.size()>1) {
-				for (N n : (List<N>)scc) {
+				for (N n : scc) {
 					addFormula(this, n);
-				}
-				
+				}				
 			}
 		}
 	}
