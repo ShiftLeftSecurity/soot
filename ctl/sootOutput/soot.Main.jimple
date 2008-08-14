@@ -1,0 +1,7 @@
+transformation(Local x) {
+	pred def: x = ??;
+	pred use: return x;
+	
+    at def: (def && AX !E(true U use));
+	transform def {}
+}

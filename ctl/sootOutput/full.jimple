@@ -1,0 +1,34 @@
+transformation(Local x) {
+	pred def: x = ??;
+	pred use: ? = staticinvoke <?: ? ?(?)>(x);
+	
+    at def: (def && AX !E(true U use));
+	transform def {}
+}
+
+transformation(Local x, Constant c) {
+	pred def_x: x = v;
+	pred def_v: v = ?;
+	pred def_v_c: v = c;
+	
+	at def_x: formula;
+	
+	transform def_x {
+		x = c;
+	}
+}
+
+transformation(Local x, Expr e) {
+	pred target: nothing;
+	pred source: x = e;
+	pred use_x: ? = staticinvoke <?: ? ?(?)>(x);
+	
+	at target: formula;
+	at source: formula;
+	
+	transform source {
+	}
+	
+	transform target {
+	}
+}
