@@ -1,6 +1,6 @@
 transformation(Local x) {
 	pred def: x = ??;
-	pred use: return x;
+	pred use: ? = staticinvoke <?: ? ?(?)>(x);
 	
     at def: (def && AX !E(true U use));
 	transform def {}
