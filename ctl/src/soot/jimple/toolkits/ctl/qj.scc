@@ -173,7 +173,7 @@ Tokens
   integer_constant = (dec_constant | hex_constant | oct_constant) 'L'?;
   float_constant = ((dec_constant '.' dec_constant) (('e'|'E') ('+'|'-')? dec_constant)? ('f'|'F')?)  | ('#' (('-'? 'Infinity') | 'NaN') ('f' | 'F')? ) ; 
   string_constant = '"' string_char* '"';
-  
+    
 Ignored Tokens
   ignored;
 
@@ -333,6 +333,8 @@ class_name_list =
     {lookupswitch} lookupswitch l_paren immediate r_paren l_brace case_stmt+ r_brace semicolon |
     {identity}     local_name colon_equals at_identifier type semicolon |
     {identity_no_type}  local_name colon_equals at_identifier semicolon |
+    {iidentity}     local_name colon_equals identifier type semicolon |
+    {iidentity_no_type}  local_name colon_equals identifier semicolon |
     {assign}       variable equals expression semicolon |
     {if}           if bool_expr goto_stmt |
     {goto}         goto_stmt |

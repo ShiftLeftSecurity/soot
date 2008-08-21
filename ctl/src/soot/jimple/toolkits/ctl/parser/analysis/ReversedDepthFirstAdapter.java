@@ -58,7 +58,60 @@ public class ReversedDepthFirstAdapter extends AnalysisAdapter
                 e.apply(this);
             }
         }
+        {
+            List<PPredDecl> copy = new ArrayList<PPredDecl>(node.getPredDecl());
+            Collections.reverse(copy);
+            for(PPredDecl e : copy)
+            {
+                e.apply(this);
+            }
+        }
         outAFile(node);
+    }
+
+    public void inAPredDecl(APredDecl node)
+    {
+        defaultIn(node);
+    }
+
+    public void outAPredDecl(APredDecl node)
+    {
+        defaultOut(node);
+    }
+
+    @Override
+    public void caseAPredDecl(APredDecl node)
+    {
+        inAPredDecl(node);
+        if(node.getStatement() != null)
+        {
+            node.getStatement().apply(this);
+        }
+        if(node.getColon() != null)
+        {
+            node.getColon().apply(this);
+        }
+        if(node.getRParen() != null)
+        {
+            node.getRParen().apply(this);
+        }
+        if(node.getFormalList() != null)
+        {
+            node.getFormalList().apply(this);
+        }
+        if(node.getLParen() != null)
+        {
+            node.getLParen().apply(this);
+        }
+        if(node.getIdentifier() != null)
+        {
+            node.getIdentifier().apply(this);
+        }
+        if(node.getPred() != null)
+        {
+            node.getPred().apply(this);
+        }
+        outAPredDecl(node);
     }
 
     public void inAGroundReduction(AGroundReduction node)
@@ -2456,6 +2509,76 @@ public class ReversedDepthFirstAdapter extends AnalysisAdapter
             node.getLocalName().apply(this);
         }
         outAIdentityNoTypeStatement(node);
+    }
+
+    public void inAIidentityStatement(AIidentityStatement node)
+    {
+        defaultIn(node);
+    }
+
+    public void outAIidentityStatement(AIidentityStatement node)
+    {
+        defaultOut(node);
+    }
+
+    @Override
+    public void caseAIidentityStatement(AIidentityStatement node)
+    {
+        inAIidentityStatement(node);
+        if(node.getSemicolon() != null)
+        {
+            node.getSemicolon().apply(this);
+        }
+        if(node.getType() != null)
+        {
+            node.getType().apply(this);
+        }
+        if(node.getIdentifier() != null)
+        {
+            node.getIdentifier().apply(this);
+        }
+        if(node.getColonEquals() != null)
+        {
+            node.getColonEquals().apply(this);
+        }
+        if(node.getLocalName() != null)
+        {
+            node.getLocalName().apply(this);
+        }
+        outAIidentityStatement(node);
+    }
+
+    public void inAIidentityNoTypeStatement(AIidentityNoTypeStatement node)
+    {
+        defaultIn(node);
+    }
+
+    public void outAIidentityNoTypeStatement(AIidentityNoTypeStatement node)
+    {
+        defaultOut(node);
+    }
+
+    @Override
+    public void caseAIidentityNoTypeStatement(AIidentityNoTypeStatement node)
+    {
+        inAIidentityNoTypeStatement(node);
+        if(node.getSemicolon() != null)
+        {
+            node.getSemicolon().apply(this);
+        }
+        if(node.getIdentifier() != null)
+        {
+            node.getIdentifier().apply(this);
+        }
+        if(node.getColonEquals() != null)
+        {
+            node.getColonEquals().apply(this);
+        }
+        if(node.getLocalName() != null)
+        {
+            node.getLocalName().apply(this);
+        }
+        outAIidentityNoTypeStatement(node);
     }
 
     public void inAAssignStatement(AAssignStatement node)

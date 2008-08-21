@@ -1,3 +1,11 @@
+Predicates:
+
+EnterMonitor(Immediate i) -> entermonitor i;
+ExitMonitor(Immediate i) : exitmonitor i;
+identity(Local l, IdentityRef r) : l := r;
+
+Transformations:
+
 transformation(Local x) {
 	pred def: x = ??;
 	pred use: ? = staticinvoke <?: ? ?(?)>(x);

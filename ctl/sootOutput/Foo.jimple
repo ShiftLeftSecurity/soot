@@ -1,0 +1,42 @@
+public class Foo extends java.lang.Object
+{
+
+    private void foo()
+    {
+        Foo this;
+        java.lang.Throwable $r0;
+
+        this := @this: Foo;
+        entermonitor this;
+
+     label0:
+        exitmonitor this;
+
+     label1:
+        goto label5;
+
+     label2:
+        $r0 := @caughtexception;
+
+     label3:
+        exitmonitor this;
+
+     label4:
+        throw $r0;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label0 to label1 with label2;
+        catch java.lang.Throwable from label3 to label4 with label2;
+    }
+
+    public void <init>()
+    {
+        Foo this;
+
+        this := @this: Foo;
+        specialinvoke this.<java.lang.Object: void <init>()>();
+        return;
+    }
+}

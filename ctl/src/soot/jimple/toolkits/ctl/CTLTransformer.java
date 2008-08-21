@@ -1,16 +1,22 @@
 package soot.jimple.toolkits.ctl;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.io.PushbackReader;
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Scanner;
+import java.util.regex.Pattern;
 
 import soot.Body;
 import soot.BodyTransformer;
@@ -18,34 +24,23 @@ import soot.G;
 import soot.Transformer;
 import soot.Unit;
 import soot.Singletons.Global;
-import soot.jimple.toolkits.ctl.parser.analysis.DepthFirstAdapter;
-import soot.jimple.toolkits.ctl.parser.lexer.Lexer;
-import soot.jimple.toolkits.ctl.parser.lexer.LexerException;
-import soot.jimple.toolkits.ctl.parser.node.AFile;
-import soot.jimple.toolkits.ctl.parser.node.AFileBody;
-import soot.jimple.toolkits.ctl.parser.node.AFormal;
-import soot.jimple.toolkits.ctl.parser.node.AFormalsReduction;
-import soot.jimple.toolkits.ctl.parser.node.AGroundReduction;
-import soot.jimple.toolkits.ctl.parser.node.AMultiFormalList;
-import soot.jimple.toolkits.ctl.parser.node.APredicate;
-import soot.jimple.toolkits.ctl.parser.node.ASingleFormalList;
-import soot.jimple.toolkits.ctl.parser.node.PFormal;
-import soot.jimple.toolkits.ctl.parser.node.PFormalList;
-import soot.jimple.toolkits.ctl.parser.node.PMember;
-import soot.jimple.toolkits.ctl.parser.node.PReduction;
-import soot.jimple.toolkits.ctl.parser.node.PStatement;
-import soot.jimple.toolkits.ctl.parser.node.Start;
-import soot.jimple.toolkits.ctl.parser.parser.Parser;
-import soot.jimple.toolkits.ctl.parser.parser.ParserException;
+import soot.jimple.toolkits.ctl.formula.EG;
+import soot.jimple.toolkits.ctl.formula.Proposition;
+import soot.jimple.toolkits.ctl.predsparser.analysis.DepthFirstAdapter;
+import soot.jimple.toolkits.ctl.predsparser.lexer.Lexer;
+import soot.jimple.toolkits.ctl.predsparser.lexer.LexerException;
+import soot.jimple.toolkits.ctl.predsparser.node.AFormal;
+import soot.jimple.toolkits.ctl.predsparser.node.AFormalsPred;
+import soot.jimple.toolkits.ctl.predsparser.node.AGroundPred;
+import soot.jimple.toolkits.ctl.predsparser.node.AMultiFormalList;
+import soot.jimple.toolkits.ctl.predsparser.node.ASingleFormalList;
+import soot.jimple.toolkits.ctl.predsparser.node.Start;
+import soot.jimple.toolkits.ctl.predsparser.parser.Parser;
+import soot.jimple.toolkits.ctl.predsparser.parser.ParserException;
 import soot.options.Options;
 import soot.tagkit.Host;
 import soot.toolkits.graph.ExceptionalUnitGraph;
 import soot.util.EscapedReader;
-import soot.jimple.toolkits.ctl.formula.EG;
-import soot.jimple.toolkits.ctl.formula.EU;
-import soot.jimple.toolkits.ctl.formula.EX;
-import soot.jimple.toolkits.ctl.formula.IFormula;
-import soot.jimple.toolkits.ctl.formula.Proposition;
 
 public class CTLTransformer extends BodyTransformer {
 
@@ -60,25 +55,47 @@ public class CTLTransformer extends BodyTransformer {
 			File trFile = new File(fileName);
 			Parser p;
 			try {
-				p = new Parser(new Lexer(
-	                  new PushbackReader(new EscapedReader(new BufferedReader(
-	                          new InputStreamReader(new FileInputStream(trFile)))), 1024)));
+				BufferedReader in = new BufferedReader(
+				          new InputStreamReader(new FileInputStream(trFile)));
 				
-				Start tree = p.parse();
-				process(tree);
+				String line;
+				while((line=in.readLine())!=null) {
+					String trimmed = line.trim().replaceAll(" ", "");
+					if(trimmed.equals("Transformations:")) break;
+					else if(trimmed.equals("Predicates:")) continue;
+					else if(trimmed.equals("")) continue;
+					
+					Scanner s = new Scanner(line).useDelimiter("[\\(\\) :]");
+					try {
+						String NAME = "[a-zA-Z]+";
+						String name = s.next(NAME);
+						s.skip("\\(");
+						Pattern formalPat = Pattern.compile(NAME+" "+NAME);
+						List<Formal> formals = new ArrayList<Formal>();
+						while(s.hasNext(formalPat)) {
+							String formal = s.next(formalPat);
+							String[] typeAndName = formal.split(" ");
+							formals.add(new Formal(typeAndName[0],typeAndName[1]));
+							if(s.hasNext(","))
+								s.skip(",");
+						}
+						s.skip("\\)[ ]*:");						
+						System.err.println(s.next(".*"));
+					} catch(NoSuchElementException e) {
+						System.err.println(e);
+					}
+				}
 				
 			} catch (FileNotFoundException e) {
 				throw new RuntimeException("Could not find file "+trFile.getAbsolutePath(),e);
-			} catch (ParserException e) {
-				e.printStackTrace();
-			} catch (LexerException e) {
-				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
 	}
 	
+	protected List<Predicate> preds = new ArrayList<Predicate>();
+
 	protected List<Transformation> trans = new ArrayList<Transformation>();
 	
 	private void process(Start tree) {		
@@ -87,43 +104,43 @@ public class CTLTransformer extends BodyTransformer {
 			List<Formal> formals;
 			
 			@Override
-			public void caseAGroundReduction(AGroundReduction node) {
-				formals = new ArrayList<Formal>();
-				super.caseAGroundReduction(node);
+			public void caseAGroundPred(AGroundPred node) {
+				preds.add(new Predicate(node.getIdentifier().getText().trim(),Collections.<Formal>emptyList(),node.getAny().getText().trim()));
+				super.caseAGroundPred(node);
 			}
 			
-			public void caseAFormalsReduction(AFormalsReduction r) {
-				formals = new ArrayList<Formal>();
-				super.caseAFormalsReduction(r);
-			};
+			@Override
+			public void caseAFormalsPred(AFormalsPred node) {
+				preds.add(new Predicate(node.getIdentifier().getText().trim(),formals,node.getAny().getText().trim()));
+				super.caseAFormalsPred(node);
+			}
 			
 			@Override
 			public void caseAMultiFormalList(AMultiFormalList l) {
 				AFormal formal = (AFormal) l.getFormal();
-				formals.add(new Formal(formal.getIdentifier().getText(), formal.getJimpleType().toString()));
+				formals.add(new Formal(formal.getIdentifier().getText().trim(), formal.getMetaType().getText().trim()));
 				super.caseAMultiFormalList(l);
 			}
 			
 			@Override
 			public void caseASingleFormalList(ASingleFormalList l) {
 				AFormal formal = (AFormal) l.getFormal();
-				formals.add(new Formal(formal.getIdentifier().getText(), formal.getJimpleType().toString()));
+				formals.add(new Formal(formal.getIdentifier().getText().trim(), formal.getMetaType().getText().trim()));
 				super.caseASingleFormalList(l);
 			}
 			
-			@Override
-			public void caseAPredicate(APredicate p) {
-				PStatement stmt = p.getStatement();
-				Transformation tr = new Transformation(formals, new Predicate(formals, stmt.toString()));
-				trans.add(tr);
-				super.caseAPredicate(p);
-			}
 		});
 	}
 
 	@Override
 	protected void internalTransform(Body b, String phaseName, Map options) {
 		init();
+		
+		for (Predicate p : preds) {
+			for (Unit u : b.getUnits()) {
+				p.holdsIn(u);
+			}
+		}
 		
 		ExceptionalUnitGraph g = new ExceptionalUnitGraph(b);
 		for(Transformation t: trans) {

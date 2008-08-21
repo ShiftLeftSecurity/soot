@@ -1,0 +1,503 @@
+public class soot.Main extends java.lang.Object
+{
+    public final java.lang.String versionString;
+    private java.util.Date start;
+    private java.util.Date finish;
+    public java.lang.String[] cmdLineArgs;
+
+    public void <init>(soot.Singletons$Global)
+    {
+        soot.Main r0;
+        soot.Singletons$Global r1;
+        java.lang.String[] $r2;
+
+        r0 := @this: soot.Main;
+        r1 := @parameter0: soot.Singletons$Global;
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+        r0.<soot.Main: java.lang.String versionString> = "2.3.0";
+        $r2 = newarray (java.lang.String)[0];
+        r0.<soot.Main: java.lang.String[] cmdLineArgs> = $r2;
+        return;
+    }
+
+    public static soot.Main v()
+    {
+        soot.G $r0;
+        soot.Main $r1;
+
+        $r0 = staticinvoke <soot.G: soot.G v()>();
+        $r1 = virtualinvoke $r0.<soot.G: soot.Main soot_Main()>();
+        return $r1;
+    }
+
+    private void printVersion()
+    {
+        soot.Main r0;
+        soot.G $r1, $r3, $r5, $r7, $r9, $r11, $r13, $r15, $r17, $r19, $r21, $r23, $r25, $r27, $r29, $r31, $r33;
+        java.io.PrintStream $r2, $r4, $r6, $r8, $r10, $r12, $r14, $r16, $r18, $r20, $r22, $r24, $r26, $r28, $r30, $r32, $r34;
+
+        r0 := @this: soot.Main;
+        $r1 = staticinvoke <soot.G: soot.G v()>();
+        $r2 = $r1.<soot.G: java.io.PrintStream out>;
+        virtualinvoke $r2.<java.io.PrintStream: void println(java.lang.String)>("Soot version 2.3.0");
+        $r3 = staticinvoke <soot.G: soot.G v()>();
+        $r4 = $r3.<soot.G: java.io.PrintStream out>;
+        virtualinvoke $r4.<java.io.PrintStream: void println(java.lang.String)>("Copyright (C) 1997-2008 Raja Vallee-Rai and others.");
+        $r5 = staticinvoke <soot.G: soot.G v()>();
+        $r6 = $r5.<soot.G: java.io.PrintStream out>;
+        virtualinvoke $r6.<java.io.PrintStream: void println(java.lang.String)>("All rights reserved.");
+        $r7 = staticinvoke <soot.G: soot.G v()>();
+        $r8 = $r7.<soot.G: java.io.PrintStream out>;
+        virtualinvoke $r8.<java.io.PrintStream: void println(java.lang.String)>("");
+        $r9 = staticinvoke <soot.G: soot.G v()>();
+        $r10 = $r9.<soot.G: java.io.PrintStream out>;
+        virtualinvoke $r10.<java.io.PrintStream: void println(java.lang.String)>("Contributions are copyright (C) 1997-2008 by their respective contributors.");
+        $r11 = staticinvoke <soot.G: soot.G v()>();
+        $r12 = $r11.<soot.G: java.io.PrintStream out>;
+        virtualinvoke $r12.<java.io.PrintStream: void println(java.lang.String)>("See the file \'credits\' for a list of contributors.");
+        $r13 = staticinvoke <soot.G: soot.G v()>();
+        $r14 = $r13.<soot.G: java.io.PrintStream out>;
+        virtualinvoke $r14.<java.io.PrintStream: void println(java.lang.String)>("See individual source files for details.");
+        $r15 = staticinvoke <soot.G: soot.G v()>();
+        $r16 = $r15.<soot.G: java.io.PrintStream out>;
+        virtualinvoke $r16.<java.io.PrintStream: void println(java.lang.String)>("");
+        $r17 = staticinvoke <soot.G: soot.G v()>();
+        $r18 = $r17.<soot.G: java.io.PrintStream out>;
+        virtualinvoke $r18.<java.io.PrintStream: void println(java.lang.String)>("Soot comes with ABSOLUTELY NO WARRANTY.  Soot is free software,");
+        $r19 = staticinvoke <soot.G: soot.G v()>();
+        $r20 = $r19.<soot.G: java.io.PrintStream out>;
+        virtualinvoke $r20.<java.io.PrintStream: void println(java.lang.String)>("and you are welcome to redistribute it under certain conditions.");
+        $r21 = staticinvoke <soot.G: soot.G v()>();
+        $r22 = $r21.<soot.G: java.io.PrintStream out>;
+        virtualinvoke $r22.<java.io.PrintStream: void println(java.lang.String)>("See the accompanying file \'COPYING-LESSER.txt\' for details.");
+        $r23 = staticinvoke <soot.G: soot.G v()>();
+        $r24 = $r23.<soot.G: java.io.PrintStream out>;
+        virtualinvoke $r24.<java.io.PrintStream: void println()>();
+        $r25 = staticinvoke <soot.G: soot.G v()>();
+        $r26 = $r25.<soot.G: java.io.PrintStream out>;
+        virtualinvoke $r26.<java.io.PrintStream: void println(java.lang.String)>("Visit the Soot website:");
+        $r27 = staticinvoke <soot.G: soot.G v()>();
+        $r28 = $r27.<soot.G: java.io.PrintStream out>;
+        virtualinvoke $r28.<java.io.PrintStream: void println(java.lang.String)>("  http://www.sable.mcgill.ca/soot/");
+        $r29 = staticinvoke <soot.G: soot.G v()>();
+        $r30 = $r29.<soot.G: java.io.PrintStream out>;
+        virtualinvoke $r30.<java.io.PrintStream: void println()>();
+        $r31 = staticinvoke <soot.G: soot.G v()>();
+        $r32 = $r31.<soot.G: java.io.PrintStream out>;
+        virtualinvoke $r32.<java.io.PrintStream: void println(java.lang.String)>("For a list of command line options, enter:");
+        $r33 = staticinvoke <soot.G: soot.G v()>();
+        $r34 = $r33.<soot.G: java.io.PrintStream out>;
+        virtualinvoke $r34.<java.io.PrintStream: void println(java.lang.String)>("  java soot.Main --help");
+        return;
+    }
+
+    private void processCmdLine(java.lang.String[])
+    {
+        soot.Main r0;
+        java.lang.String[] r1;
+        soot.options.Options $r2, $r12, $r15, $r17, $r18, $r21, $r24, $r27, $r30, $r32, $r39, $r42;
+        java.util.Iterator r3, r5, r34;
+        soot.Pack r4;
+        soot.Transform r6;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8;
+        soot.CompilationDeathException $r7, $r23, $r29, $r41, $r43;
+        soot.PackManager $r8, $r9;
+        java.util.Collection $r10;
+        java.lang.Object $r11, $r14, $r35;
+        java.lang.String $r13, $r16, $r22, $r28, r36, $r40;
+        soot.G $r19, $r25, $r37;
+        java.io.PrintStream $r20, $r26, $r38;
+        java.util.List $r31, $r33;
+        int $i0;
+
+        r0 := @this: soot.Main;
+        r1 := @parameter0: java.lang.String[];
+        $r2 = staticinvoke <soot.options.Options: soot.options.Options v()>();
+        $z0 = virtualinvoke $r2.<soot.options.Options: boolean parse(java.lang.String[])>(r1);
+        if $z0 != 0 goto label0;
+
+        $r7 = new soot.CompilationDeathException;
+        specialinvoke $r7.<soot.CompilationDeathException: void <init>(int,java.lang.String)>(0, "Option parse error");
+        throw $r7;
+
+     label0:
+        $r8 = staticinvoke <soot.PackManager: soot.PackManager v()>();
+        $z1 = virtualinvoke $r8.<soot.PackManager: boolean onlyStandardPacks()>();
+        if $z1 == 0 goto label5;
+
+        $r9 = staticinvoke <soot.PackManager: soot.PackManager v()>();
+        $r10 = virtualinvoke $r9.<soot.PackManager: java.util.Collection allPacks()>();
+        r3 = interfaceinvoke $r10.<java.util.Collection: java.util.Iterator iterator()>();
+        goto label4;
+
+     label1:
+        $r11 = interfaceinvoke r3.<java.util.Iterator: java.lang.Object next()>();
+        r4 = (soot.Pack) $r11;
+        $r12 = staticinvoke <soot.options.Options: soot.options.Options v()>();
+        $r13 = virtualinvoke r4.<soot.Pack: java.lang.String getPhaseName()>();
+        virtualinvoke $r12.<soot.options.Options: void warnForeignPhase(java.lang.String)>($r13);
+        r5 = virtualinvoke r4.<soot.Pack: java.util.Iterator iterator()>();
+        goto label3;
+
+     label2:
+        $r14 = interfaceinvoke r5.<java.util.Iterator: java.lang.Object next()>();
+        r6 = (soot.Transform) $r14;
+        $r15 = staticinvoke <soot.options.Options: soot.options.Options v()>();
+        $r16 = virtualinvoke r6.<soot.Transform: java.lang.String getPhaseName()>();
+        virtualinvoke $r15.<soot.options.Options: void warnForeignPhase(java.lang.String)>($r16);
+
+     label3:
+        $z2 = interfaceinvoke r5.<java.util.Iterator: boolean hasNext()>();
+        if $z2 != 0 goto label2;
+
+     label4:
+        $z3 = interfaceinvoke r3.<java.util.Iterator: boolean hasNext()>();
+        if $z3 != 0 goto label1;
+
+     label5:
+        $r17 = staticinvoke <soot.options.Options: soot.options.Options v()>();
+        virtualinvoke $r17.<soot.options.Options: void warnNonexistentPhase()>();
+        $r18 = staticinvoke <soot.options.Options: soot.options.Options v()>();
+        $z4 = virtualinvoke $r18.<soot.options.Options: boolean help()>();
+        if $z4 == 0 goto label6;
+
+        $r19 = staticinvoke <soot.G: soot.G v()>();
+        $r20 = $r19.<soot.G: java.io.PrintStream out>;
+        $r21 = staticinvoke <soot.options.Options: soot.options.Options v()>();
+        $r22 = virtualinvoke $r21.<soot.options.Options: java.lang.String getUsage()>();
+        virtualinvoke $r20.<java.io.PrintStream: void println(java.lang.String)>($r22);
+        $r23 = new soot.CompilationDeathException;
+        specialinvoke $r23.<soot.CompilationDeathException: void <init>(int)>(1);
+        throw $r23;
+
+     label6:
+        $r24 = staticinvoke <soot.options.Options: soot.options.Options v()>();
+        $z5 = virtualinvoke $r24.<soot.options.Options: boolean phase_list()>();
+        if $z5 == 0 goto label7;
+
+        $r25 = staticinvoke <soot.G: soot.G v()>();
+        $r26 = $r25.<soot.G: java.io.PrintStream out>;
+        $r27 = staticinvoke <soot.options.Options: soot.options.Options v()>();
+        $r28 = virtualinvoke $r27.<soot.options.Options: java.lang.String getPhaseList()>();
+        virtualinvoke $r26.<java.io.PrintStream: void println(java.lang.String)>($r28);
+        $r29 = new soot.CompilationDeathException;
+        specialinvoke $r29.<soot.CompilationDeathException: void <init>(int)>(1);
+        throw $r29;
+
+     label7:
+        $r30 = staticinvoke <soot.options.Options: soot.options.Options v()>();
+        $r31 = virtualinvoke $r30.<soot.options.Options: java.util.List phase_help()>();
+        $z6 = interfaceinvoke $r31.<java.util.List: boolean isEmpty()>();
+        if $z6 != 0 goto label10;
+
+        $r32 = staticinvoke <soot.options.Options: soot.options.Options v()>();
+        $r33 = virtualinvoke $r32.<soot.options.Options: java.util.List phase_help()>();
+        r34 = interfaceinvoke $r33.<java.util.List: java.util.Iterator iterator()>();
+        goto label9;
+
+     label8:
+        $r35 = interfaceinvoke r34.<java.util.Iterator: java.lang.Object next()>();
+        r36 = (java.lang.String) $r35;
+        $r37 = staticinvoke <soot.G: soot.G v()>();
+        $r38 = $r37.<soot.G: java.io.PrintStream out>;
+        $r39 = staticinvoke <soot.options.Options: soot.options.Options v()>();
+        $r40 = virtualinvoke $r39.<soot.options.Options: java.lang.String getPhaseHelp(java.lang.String)>(r36);
+        virtualinvoke $r38.<java.io.PrintStream: void println(java.lang.String)>($r40);
+
+     label9:
+        $z7 = interfaceinvoke r34.<java.util.Iterator: boolean hasNext()>();
+        if $z7 != 0 goto label8;
+
+        $r41 = new soot.CompilationDeathException;
+        specialinvoke $r41.<soot.CompilationDeathException: void <init>(int)>(1);
+        throw $r41;
+
+     label10:
+        $i0 = lengthof r1;
+        if $i0 == 0 goto label11;
+
+        $r42 = staticinvoke <soot.options.Options: soot.options.Options v()>();
+        $z8 = virtualinvoke $r42.<soot.options.Options: boolean version()>();
+        if $z8 == 0 goto label12;
+
+     label11:
+        specialinvoke r0.<soot.Main: void printVersion()>();
+        $r43 = new soot.CompilationDeathException;
+        specialinvoke $r43.<soot.CompilationDeathException: void <init>(int)>(1);
+        throw $r43;
+
+     label12:
+        specialinvoke r0.<soot.Main: void postCmdLineCheck()>();
+        return;
+    }
+
+    private void exitCompilation(int)
+    {
+        soot.Main r0;
+        int i0;
+
+        r0 := @this: soot.Main;
+        i0 := @parameter0: int;
+        specialinvoke r0.<soot.Main: void exitCompilation(int,java.lang.String)>(i0, "");
+        return;
+    }
+
+    private void exitCompilation(int, java.lang.String)
+    {
+        soot.Main r0;
+        int i0;
+        java.lang.String r1, $r6;
+        java.lang.StringBuilder $r2, $r5;
+        soot.G $r3;
+        java.io.PrintStream $r4;
+
+        r0 := @this: soot.Main;
+        i0 := @parameter0: int;
+        r1 := @parameter1: java.lang.String;
+        if i0 != 0 goto label0;
+
+        $r3 = staticinvoke <soot.G: soot.G v()>();
+        $r4 = $r3.<soot.G: java.io.PrintStream out>;
+        $r2 = new java.lang.StringBuilder;
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>(java.lang.String)>("compilation failed: ");
+        $r5 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+        virtualinvoke $r4.<java.io.PrintStream: void println(java.lang.String)>($r6);
+
+     label0:
+        return;
+    }
+
+    private void postCmdLineCheck()
+    {
+        soot.Main r0;
+        soot.options.Options $r1, $r3;
+        java.util.LinkedList $r2;
+        boolean $z0, $z1;
+        java.util.List $r4;
+        soot.CompilationDeathException $r5;
+
+        r0 := @this: soot.Main;
+        $r1 = staticinvoke <soot.options.Options: soot.options.Options v()>();
+        $r2 = virtualinvoke $r1.<soot.options.Options: java.util.LinkedList classes()>();
+        $z0 = virtualinvoke $r2.<java.util.LinkedList: boolean isEmpty()>();
+        if $z0 == 0 goto label0;
+
+        $r3 = staticinvoke <soot.options.Options: soot.options.Options v()>();
+        $r4 = virtualinvoke $r3.<soot.options.Options: java.util.List process_dir()>();
+        $z1 = interfaceinvoke $r4.<java.util.List: boolean isEmpty()>();
+        if $z1 == 0 goto label0;
+
+        $r5 = new soot.CompilationDeathException;
+        specialinvoke $r5.<soot.CompilationDeathException: void <init>(int,java.lang.String)>(0, "No input classes specified!");
+        throw $r5;
+
+     label0:
+        return;
+    }
+
+    public static void main(java.lang.String[])
+    {
+        java.lang.String[] r0;
+        soot.Main $r1;
+        java.lang.OutOfMemoryError r2, $r3;
+        soot.G $r4, $r6, $r8;
+        java.io.PrintStream $r5, $r7, $r9;
+
+        r0 := @parameter0: java.lang.String[];
+
+     label0:
+        $r1 = staticinvoke <soot.Main: soot.Main v()>();
+        virtualinvoke $r1.<soot.Main: int run(java.lang.String[])>(r0);
+
+     label1:
+        goto label3;
+
+     label2:
+        $r3 := @caughtexception;
+        r2 = $r3;
+        $r4 = staticinvoke <soot.G: soot.G v()>();
+        $r5 = $r4.<soot.G: java.io.PrintStream out>;
+        virtualinvoke $r5.<java.io.PrintStream: void println(java.lang.String)>("Soot has run out of the memory allocated to it by the Java VM.");
+        $r6 = staticinvoke <soot.G: soot.G v()>();
+        $r7 = $r6.<soot.G: java.io.PrintStream out>;
+        virtualinvoke $r7.<java.io.PrintStream: void println(java.lang.String)>("To allocate more memory to Soot, use the -Xmx switch to Java.");
+        $r8 = staticinvoke <soot.G: soot.G v()>();
+        $r9 = $r8.<soot.G: java.io.PrintStream out>;
+        virtualinvoke $r9.<java.io.PrintStream: void println(java.lang.String)>("For example (for 400MB): java -Xmx400m soot.Main ...");
+        throw r2;
+
+     label3:
+        return;
+
+        catch java.lang.OutOfMemoryError from label0 to label1 with label2;
+    }
+
+    public int run(java.lang.String[])
+    {
+        soot.Main r0;
+        java.lang.String[] r1, $r9;
+        java.io.FileOutputStream r2, $r18;
+        java.io.PrintWriter r3, $r19;
+        java.util.Iterator r4;
+        soot.toolkits.astmetrics.ClassData r5;
+        java.util.Date $r6, $r13, $r39, $r43, $r46, $r47;
+        soot.Timers $r7, $r30, $r33, $r36;
+        soot.Timer $r8, $r31, $r37;
+        soot.G $r10, $r21, $r40, $r48;
+        java.io.PrintStream $r11, $r41, $r49;
+        java.lang.StringBuilder $r12, $r14, $r42, $r44, $r50, $r51, $r52, $r53, $r54;
+        java.lang.String $r15, $r24, $r38, $r45, $r55;
+        soot.Scene $r16;
+        soot.options.Options $r17, $r32;
+        boolean $z0, $z1, $z2;
+        java.io.OutputStreamWriter $r20;
+        java.util.ArrayList $r22;
+        java.lang.Object $r23;
+        java.io.IOException $r25, r26;
+        soot.CompilationDeathException $r27, $r34, r35;
+        soot.PackManager $r28, $r29;
+        int $i0, $i1;
+        long $l2, $l3, l4, $l5, $l6, $l7;
+
+        r0 := @this: soot.Main;
+        r1 := @parameter0: java.lang.String[];
+        r0.<soot.Main: java.lang.String[] cmdLineArgs> = r1;
+        $r6 = new java.util.Date;
+        specialinvoke $r6.<java.util.Date: void <init>()>();
+        r0.<soot.Main: java.util.Date start> = $r6;
+
+     label0:
+        $r7 = staticinvoke <soot.Timers: soot.Timers v()>();
+        $r8 = $r7.<soot.Timers: soot.Timer totalTimer>;
+        virtualinvoke $r8.<soot.Timer: void start()>();
+        $r9 = r0.<soot.Main: java.lang.String[] cmdLineArgs>;
+        specialinvoke r0.<soot.Main: void processCmdLine(java.lang.String[])>($r9);
+        $r10 = staticinvoke <soot.G: soot.G v()>();
+        $r11 = $r10.<soot.G: java.io.PrintStream out>;
+        $r12 = new java.lang.StringBuilder;
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>(java.lang.String)>("Soot started on ");
+        $r13 = r0.<soot.Main: java.util.Date start>;
+        $r14 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r13);
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+        virtualinvoke $r11.<java.io.PrintStream: void println(java.lang.String)>($r15);
+        $r16 = staticinvoke <soot.Scene: soot.Scene v()>();
+        virtualinvoke $r16.<soot.Scene: void loadNecessaryClasses()>();
+        $r17 = staticinvoke <soot.options.Options: soot.options.Options v()>();
+        $z0 = virtualinvoke $r17.<soot.options.Options: boolean ast_metrics()>();
+        if $z0 == 0 goto label8;
+
+     label1:
+        $r18 = new java.io.FileOutputStream;
+        specialinvoke $r18.<java.io.FileOutputStream: void <init>(java.lang.String)>("../astMetrics.xml");
+        r2 = $r18;
+        $r19 = new java.io.PrintWriter;
+        $r20 = new java.io.OutputStreamWriter;
+        specialinvoke $r20.<java.io.OutputStreamWriter: void <init>(java.io.OutputStream)>(r2);
+        specialinvoke $r19.<java.io.PrintWriter: void <init>(java.io.Writer)>($r20);
+        r3 = $r19;
+        virtualinvoke r3.<java.io.PrintWriter: void println(java.lang.String)>("<?xml version=\'1.0\'?>");
+        virtualinvoke r3.<java.io.PrintWriter: void println(java.lang.String)>("<ASTMetrics>");
+        $r21 = staticinvoke <soot.G: soot.G v()>();
+        $r22 = $r21.<soot.G: java.util.ArrayList ASTMetricsData>;
+        r4 = virtualinvoke $r22.<java.util.ArrayList: java.util.Iterator iterator()>();
+        goto label3;
+
+     label2:
+        $r23 = interfaceinvoke r4.<java.util.Iterator: java.lang.Object next()>();
+        r5 = (soot.toolkits.astmetrics.ClassData) $r23;
+        $r24 = virtualinvoke r5.<soot.toolkits.astmetrics.ClassData: java.lang.String toString()>();
+        virtualinvoke r3.<java.io.PrintWriter: void println(java.lang.String)>($r24);
+
+     label3:
+        $z1 = interfaceinvoke r4.<java.util.Iterator: boolean hasNext()>();
+        if $z1 != 0 goto label2;
+
+        virtualinvoke r3.<java.io.PrintWriter: void println(java.lang.String)>("</ASTMetrics>");
+        virtualinvoke r3.<java.io.PrintWriter: void flush()>();
+        virtualinvoke r2.<java.io.OutputStream: void close()>();
+
+     label4:
+        goto label6;
+
+     label5:
+        $r25 := @caughtexception;
+        r26 = $r25;
+        $r27 = new soot.CompilationDeathException;
+        specialinvoke $r27.<soot.CompilationDeathException: void <init>(java.lang.String)>("Cannot output file astMetrics");
+        throw $r27;
+
+     label6:
+        specialinvoke r0.<soot.Main: void exitCompilation(int)>(1);
+
+     label7:
+        return 1;
+
+     label8:
+        $r28 = staticinvoke <soot.PackManager: soot.PackManager v()>();
+        virtualinvoke $r28.<soot.PackManager: void runPacks()>();
+        $r29 = staticinvoke <soot.PackManager: soot.PackManager v()>();
+        virtualinvoke $r29.<soot.PackManager: void writeOutput()>();
+        $r30 = staticinvoke <soot.Timers: soot.Timers v()>();
+        $r31 = $r30.<soot.Timers: soot.Timer totalTimer>;
+        virtualinvoke $r31.<soot.Timer: void end()>();
+        $r32 = staticinvoke <soot.options.Options: soot.options.Options v()>();
+        $z2 = virtualinvoke $r32.<soot.options.Options: boolean time()>();
+        if $z2 == 0 goto label11;
+
+        $r33 = staticinvoke <soot.Timers: soot.Timers v()>();
+        virtualinvoke $r33.<soot.Timers: void printProfilingInformation()>();
+
+     label9:
+        goto label11;
+
+     label10:
+        $r34 := @caughtexception;
+        r35 = $r34;
+        $r36 = staticinvoke <soot.Timers: soot.Timers v()>();
+        $r37 = $r36.<soot.Timers: soot.Timer totalTimer>;
+        virtualinvoke $r37.<soot.Timer: void end()>();
+        $i0 = virtualinvoke r35.<soot.CompilationDeathException: int getStatus()>();
+        $r38 = virtualinvoke r35.<soot.CompilationDeathException: java.lang.String getMessage()>();
+        specialinvoke r0.<soot.Main: void exitCompilation(int,java.lang.String)>($i0, $r38);
+        $i1 = virtualinvoke r35.<soot.CompilationDeathException: int getStatus()>();
+        return $i1;
+
+     label11:
+        $r39 = new java.util.Date;
+        specialinvoke $r39.<java.util.Date: void <init>()>();
+        r0.<soot.Main: java.util.Date finish> = $r39;
+        $r40 = staticinvoke <soot.G: soot.G v()>();
+        $r41 = $r40.<soot.G: java.io.PrintStream out>;
+        $r42 = new java.lang.StringBuilder;
+        specialinvoke $r42.<java.lang.StringBuilder: void <init>(java.lang.String)>("Soot finished on ");
+        $r43 = r0.<soot.Main: java.util.Date finish>;
+        $r44 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r43);
+        $r45 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.String toString()>();
+        virtualinvoke $r41.<java.io.PrintStream: void println(java.lang.String)>($r45);
+        $r46 = r0.<soot.Main: java.util.Date finish>;
+        $l2 = virtualinvoke $r46.<java.util.Date: long getTime()>();
+        $r47 = r0.<soot.Main: java.util.Date start>;
+        $l3 = virtualinvoke $r47.<java.util.Date: long getTime()>();
+        l4 = $l2 - $l3;
+        $r48 = staticinvoke <soot.G: soot.G v()>();
+        $r49 = $r48.<soot.G: java.io.PrintStream out>;
+        $r50 = new java.lang.StringBuilder;
+        specialinvoke $r50.<java.lang.StringBuilder: void <init>(java.lang.String)>("Soot has run for ");
+        $l5 = l4 / 60000L;
+        $r51 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l5);
+        $r52 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" min. ");
+        $l6 = l4 % 60000L;
+        $l7 = $l6 / 1000L;
+        $r53 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l7);
+        $r54 = virtualinvoke $r53.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" sec.");
+        $r55 = virtualinvoke $r54.<java.lang.StringBuilder: java.lang.String toString()>();
+        virtualinvoke $r49.<java.io.PrintStream: void println(java.lang.String)>($r55);
+        specialinvoke r0.<soot.Main: void exitCompilation(int)>(1);
+        return 1;
+
+        catch java.io.IOException from label1 to label4 with label5;
+        catch soot.CompilationDeathException from label0 to label7 with label10;
+        catch soot.CompilationDeathException from label8 to label9 with label10;
+    }
+}

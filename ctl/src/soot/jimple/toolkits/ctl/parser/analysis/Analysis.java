@@ -13,6 +13,7 @@ public interface Analysis extends Switch
 
     void caseStart(Start node);
     void caseAFile(AFile node);
+    void caseAPredDecl(APredDecl node);
     void caseAGroundReduction(AGroundReduction node);
     void caseAFormalsReduction(AFormalsReduction node);
     void caseARedBody(ARedBody node);
@@ -102,6 +103,8 @@ public interface Analysis extends Switch
     void caseALookupswitchStatement(ALookupswitchStatement node);
     void caseAIdentityStatement(AIdentityStatement node);
     void caseAIdentityNoTypeStatement(AIdentityNoTypeStatement node);
+    void caseAIidentityStatement(AIidentityStatement node);
+    void caseAIidentityNoTypeStatement(AIidentityNoTypeStatement node);
     void caseAAssignStatement(AAssignStatement node);
     void caseAIfStatement(AIfStatement node);
     void caseAGotoStatement(AGotoStatement node);

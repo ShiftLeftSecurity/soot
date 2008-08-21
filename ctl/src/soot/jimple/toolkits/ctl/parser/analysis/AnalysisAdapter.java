@@ -74,6 +74,11 @@ public class AnalysisAdapter implements Analysis
         defaultCase(node);
     }
 
+    public void caseAPredDecl(APredDecl node)
+    {
+        defaultCase(node);
+    }
+
     public void caseAGroundReduction(AGroundReduction node)
     {
         defaultCase(node);
@@ -515,6 +520,16 @@ public class AnalysisAdapter implements Analysis
     }
 
     public void caseAIdentityNoTypeStatement(AIdentityNoTypeStatement node)
+    {
+        defaultCase(node);
+    }
+
+    public void caseAIidentityStatement(AIidentityStatement node)
+    {
+        defaultCase(node);
+    }
+
+    public void caseAIidentityNoTypeStatement(AIidentityNoTypeStatement node)
     {
         defaultCase(node);
     }

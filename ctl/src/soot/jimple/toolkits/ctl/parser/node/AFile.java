@@ -8,6 +8,7 @@ import soot.jimple.toolkits.ctl.parser.analysis.*;
 @SuppressWarnings("nls")
 public final class AFile extends PFile
 {
+    private final LinkedList<PPredDecl> _predDecl_ = new LinkedList<PPredDecl>();
     private final LinkedList<PReduction> _reduction_ = new LinkedList<PReduction>();
 
     public AFile()
@@ -16,9 +17,12 @@ public final class AFile extends PFile
     }
 
     public AFile(
+        @SuppressWarnings("hiding") List<PPredDecl> _predDecl_,
         @SuppressWarnings("hiding") List<PReduction> _reduction_)
     {
         // Constructor
+        setPredDecl(_predDecl_);
+
         setReduction(_reduction_);
 
     }
@@ -27,12 +31,33 @@ public final class AFile extends PFile
     public Object clone()
     {
         return new AFile(
+            cloneList(this._predDecl_),
             cloneList(this._reduction_));
     }
 
     public void apply(Switch sw)
     {
         ((Analysis) sw).caseAFile(this);
+    }
+
+    public LinkedList<PPredDecl> getPredDecl()
+    {
+        return this._predDecl_;
+    }
+
+    public void setPredDecl(List<PPredDecl> list)
+    {
+        this._predDecl_.clear();
+        this._predDecl_.addAll(list);
+        for(PPredDecl e : list)
+        {
+            if(e.parent() != null)
+            {
+                e.parent().removeChild(e);
+            }
+
+            e.parent(this);
+        }
     }
 
     public LinkedList<PReduction> getReduction()
@@ -59,6 +84,7 @@ public final class AFile extends PFile
     public String toString()
     {
         return ""
+            + toString(this._predDecl_)
             + toString(this._reduction_);
     }
 
@@ -66,6 +92,11 @@ public final class AFile extends PFile
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
+        if(this._predDecl_.remove(child))
+        {
+            return;
+        }
+
         if(this._reduction_.remove(child))
         {
             return;
@@ -78,6 +109,24 @@ public final class AFile extends PFile
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
+        for(ListIterator<PPredDecl> i = this._predDecl_.listIterator(); i.hasNext();)
+        {
+            if(i.next() == oldChild)
+            {
+                if(newChild != null)
+                {
+                    i.set((PPredDecl) newChild);
+                    newChild.parent(this);
+                    oldChild.parent(null);
+                    return;
+                }
+
+                i.remove();
+                oldChild.parent(null);
+                return;
+            }
+        }
+
         for(ListIterator<PReduction> i = this._reduction_.listIterator(); i.hasNext();)
         {
             if(i.next() == oldChild)

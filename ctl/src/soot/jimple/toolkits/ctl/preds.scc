@@ -1,0 +1,75 @@
+Package soot.jimple.toolkits.ctl.predsparser;
+
+Helpers
+  all = [0 .. 0xffff];
+
+  dec_digit = ['0' .. '9'];
+  dec_nonzero = ['1' .. '9'];
+  dec_constant = dec_digit+;
+
+  hex_digit = dec_digit | ['a' .. 'f'] | ['A' .. 'F'];
+  hex_constant = '0' ('x' | 'X') hex_digit+;
+
+	
+  oct_digit = ['0' .. '7'];
+  oct_constant = '0' oct_digit+;
+	
+  quote = ''';
+
+  escapable_char = '\' | ' ' | quote | '.' | '#' | '"' | 'n' | 't' | 'r' | 'b' | 'f';
+  escape_code = 'u' hex_digit hex_digit hex_digit hex_digit;
+  escape_char = '\' (escapable_char | escape_code);  
+
+  not_cr_lf = [all - [10 + 13]];
+  not_star = [all - '*'];
+  not_star_slash = [not_star - '/'];
+  not_cr_lf_arr = [not_cr_lf - '#'];
+
+  alpha_char = ['a' .. 'z'] | ['A' .. 'Z']; 
+  
+  simple_id_char = alpha_char | dec_digit | '_' | '$' | '?' | '??';   
+
+  first_id_char = alpha_char | '_' | '$' | '?' | '??';
+  
+  quotable_char = [not_cr_lf - '''];
+
+  // string_char = [not_cr_lf - '"'];
+
+  // escapes and any char except '\' (92) or '"' (34). 
+  string_char = escape_char | [0 .. 33] | [35 .. 91] | [93 ..127] ;  
+
+  line_comment = '//' not_cr_lf*;
+  long_comment = '/*' not_star* '*'+ (not_star_slash not_star* '*'+)* '/';
+
+  blank = (' ' | 9 | 13 | 10)+;  
+  ignored_helper = (blank | line_comment | long_comment)+;
+ 
+Tokens
+  l_paren = '(';  
+  r_paren = ')';
+  arr = '#';
+  comma = ',';
+
+  meta_type = 'Local' | 'Immediate' | 'IdentityRef' | 'Value' | 'Constant';    
+
+  identifier = (first_id_char | escape_char) (simple_id_char | escape_char)*;
+
+  ignored = ignored_helper;
+
+  any = not_cr_lf_arr+;
+  
+    
+Ignored Tokens
+  ignored;
+
+Productions
+  file = pred+;
+  
+  pred = 
+  	{formals} identifier l_paren formal_list r_paren arr any |
+  	{ground} identifier l_paren r_paren arr any; 
+  
+  formal = meta_type identifier;
+  formal_list =
+    {single} formal |
+    {multi}  formal comma formal_list;   
