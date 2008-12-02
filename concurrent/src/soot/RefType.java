@@ -60,7 +60,7 @@ public class RefType extends RefLikeType implements Comparable
      *  @param className The name of the class used to parametrize the created RefType.
      *  @return a RefType for the given class name.
      */
-    public static RefType v(String className)
+    public synchronized static RefType v(String className)
     {
         if(Scene.v().containsType(className)) {
         	return Scene.v().getRefType( className );

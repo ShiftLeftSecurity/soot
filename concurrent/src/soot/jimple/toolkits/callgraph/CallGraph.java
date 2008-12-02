@@ -29,12 +29,12 @@ import java.util.*;
  */
 public class CallGraph
 { 
-    protected Set<Edge> edges = new HashSet<Edge>();
+    protected Set<Edge> edges = Collections.synchronizedSet(new HashSet<Edge>());
     protected ChunkedQueue<Edge> stream = new ChunkedQueue<Edge>();
     protected QueueReader<Edge> reader = stream.reader();
-    protected Map<MethodOrMethodContext,Edge> srcMethodToEdge = new HashMap<MethodOrMethodContext, Edge>();
-    protected Map<Unit, Edge> srcUnitToEdge = new HashMap<Unit, Edge>();
-    protected Map<MethodOrMethodContext, Edge> tgtToEdge = new HashMap<MethodOrMethodContext, Edge>();
+    protected Map<MethodOrMethodContext,Edge> srcMethodToEdge = Collections.synchronizedMap(new HashMap<MethodOrMethodContext, Edge>());
+    protected Map<Unit, Edge> srcUnitToEdge = Collections.synchronizedMap(new HashMap<Unit, Edge>());
+    protected Map<MethodOrMethodContext, Edge> tgtToEdge = Collections.synchronizedMap(new HashMap<MethodOrMethodContext, Edge>());
     protected Edge dummy = new Edge( null, null, null, Kind.INVALID );
 
     /** Used to add an edge to the call graph. Returns true iff the edge was

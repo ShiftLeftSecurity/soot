@@ -22,6 +22,9 @@ import soot.jimple.spark.sets.*;
 import soot.jimple.spark.pag.*;
 import soot.jimple.toolkits.callgraph.*;
 import soot.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import soot.util.queue.*;
 
@@ -52,7 +55,11 @@ public class OnFlyCallGraph {
         callEdges = cm.callGraph().listener();
     }
     public void build() {
-        ofcgb.processReachables();
+	ExecutorService pool = Executors.newFixedThreadPool(4);
+        ofcgb.processReachables(pool);
+	pool.shutdown();
+	try { while (!pool.awaitTermination(50L, TimeUnit.SECONDS)) ; }
+	catch (InterruptedException e) {}
         processReachables();
         processCallEdges();
     }

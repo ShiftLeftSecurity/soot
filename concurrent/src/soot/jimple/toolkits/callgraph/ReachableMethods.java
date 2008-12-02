@@ -61,7 +61,7 @@ public class ReachableMethods
     }
     /** Causes the QueueReader objects to be filled up with any methods
      * that have become reachable since the last call. */
-    public void update() {
+    public synchronized void update() {
         while(edgeSource.hasNext()) {
             Edge e = (Edge) edgeSource.next();
             if( set.contains( e.getSrc() ) ) addMethod( e.getTgt() );
@@ -82,6 +82,8 @@ public class ReachableMethods
     /** Returns a QueueReader object which will contain ONLY NEW methods
      * which will be found to be reachable, but not those that have already
      * been found to be reachable.
+     *
+     * As it turns out, no one calls this. -PL
      */
     public QueueReader<MethodOrMethodContext> newListener() {
         return reachables.reader();

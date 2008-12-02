@@ -39,15 +39,18 @@ public final class ChunkedQueue<E>
         index = 0;
     }
     /** Add an object to the queue. */
-	public void add( E o ) {
-        if( o == null ) o = (E)NULL_CONST;
-        if( index == LENGTH - 1 ) {
-            Object[] temp = new Object[LENGTH];
-            q[index] = temp;
-            q = temp;
-            index = 0;
-        }
-        q[index++] = o;
+    public void add( E o ) {
+	synchronized(q) {
+	    System.err.println(o);
+	    if( o == null ) o = (E)NULL_CONST;
+	    if( index == LENGTH - 1 ) {
+		Object[] temp = new Object[LENGTH];
+		q[index] = temp;
+		q = temp;
+		index = 0;
+	    }
+	    q[index++] = o;
+	}
     }
     /** Create reader which will read objects from the queue. */
     public QueueReader<E> reader() {

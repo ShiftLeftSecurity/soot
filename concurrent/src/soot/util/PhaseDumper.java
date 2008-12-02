@@ -94,7 +94,11 @@ public class PhaseDumper {
 	    return phaseName;
 	}
     }
-    private final PhaseStack phaseStack = new PhaseStack(); 
+    private final ThreadLocal<PhaseStack> phaseStack = new ThreadLocal() {
+	    protected synchronized Object initialValue() {
+		return new PhaseStack(); 
+	    } };
+
     final static String allWildcard = "ALL";
 
 
@@ -280,7 +284,7 @@ public class PhaseDumper {
      * @param phaseName the name of the phase that has just started.
      */
     public void dumpBefore(Body b, String phaseName) {
-	phaseStack.push(phaseName);
+	phaseStack.get().push(phaseName);
 	if (isBodyDumpingPhase(phaseName)) {
 		deleteOldGraphFiles(b, phaseName);
 		dumpBody(b, phaseName + ".in");
@@ -301,7 +305,7 @@ public class PhaseDumper {
      * match the <code>PhaseDumper</code>'s record of the current phase.
      */
     public void dumpAfter(Body b, String phaseName) {
-	String poppedPhaseName = phaseStack.pop();
+	String poppedPhaseName = phaseStack.get().pop();
 	if (poppedPhaseName != phaseName) {
 	    throw new IllegalArgumentException("dumpAfter(" + phaseName + 
 					       ") when poppedPhaseName == " +
@@ -323,7 +327,7 @@ public class PhaseDumper {
      * @param phaseName the name of the phase that has just started.
      */
     public void dumpBefore(String phaseName) {
-	phaseStack.push(phaseName);
+	phaseStack.get().push(phaseName);
 	if (isBodyDumpingPhase(phaseName)) {
 	    dumpAllBodies(phaseName + ".in", true);
 	}
@@ -341,7 +345,7 @@ public class PhaseDumper {
      * match the <code>PhaseDumper</code>'s record of the current phase.
      */
     public void dumpAfter(String phaseName) {
-	String poppedPhaseName = phaseStack.pop();
+	String poppedPhaseName = phaseStack.get().pop();
 	if (poppedPhaseName != phaseName) {
 	    throw new IllegalArgumentException("dumpAfter(" + phaseName + 
 					       ") when poppedPhaseName == " +
@@ -367,7 +371,7 @@ public class PhaseDumper {
 	}
 	try {
 	    alreadyDumping = true;
-	    String phaseName = phaseStack.currentPhase();
+	    String phaseName = phaseStack.get().currentPhase();
 	    if (isCFGDumpingPhase(phaseName)) { 
 		try {
 		    String outputFile = nextGraphFileName(b, phaseName + "-" + 
@@ -401,7 +405,7 @@ public class PhaseDumper {
 	}
 	try {
 	    alreadyDumping = true;
-	    String phaseName = phaseStack.currentPhase();
+	    String phaseName = phaseStack.get().currentPhase();
 	    if (isCFGDumpingPhase(phaseName)) {
 		try {
 		    String outputFile = nextGraphFileName(g.getBody(), 

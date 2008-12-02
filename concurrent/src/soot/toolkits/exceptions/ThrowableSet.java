@@ -95,7 +95,7 @@ public final class ThrowableSet {
 	 * Map from {@link Integer}s representing set size to all
 	 * <code>ThrowableSet</code>s of that size.
 	 */
-	private final Map<Integer, List> sizeToSets = new HashMap<Integer, List>();
+	private final Map<Integer, List> sizeToSets = Collections.synchronizedMap(new HashMap<Integer, List>());
 
 	/**
 	 * <code>ThrowableSet</code> containing no exception classes.

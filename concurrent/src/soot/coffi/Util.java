@@ -43,21 +43,19 @@ public class Util
     public static Util v() { return G.v().soot_coffi_Util(); }
 
 
-    Map classNameToAbbreviation;
-    Set markedClasses;
-    LinkedList classesToResolve;
-
-    int activeOriginalIndex = -1;
-    cp_info[] activeConstantPool = null;
-    LocalVariableTable_attribute activeVariableTable;
-    LocalVariableTypeTable_attribute activeVariableTypeTable;
-    boolean useFaithfulNaming = false;
-    boolean isLocalStore = false;  // global variable used 
-    boolean isWideLocalStore = false;
+    ThreadLocal<Integer> activeOriginalIndex = new ThreadLocal<Integer>() { protected synchronized Integer initialValue() { return -1; } };
+    ThreadLocal<cp_info[]> activeConstantPool = new ThreadLocal<cp_info[]>();
+    ThreadLocal<LocalVariableTable_attribute> activeVariableTable = new ThreadLocal<LocalVariableTable_attribute>();
+    ThreadLocal<LocalVariableTypeTable_attribute> activeVariableTypeTable = new ThreadLocal<LocalVariableTypeTable_attribute>();
+    private boolean useFaithfulNaming = false;
     public void setFaithfulNaming(boolean v)
     {
         useFaithfulNaming = v;
-    }    
+    }
+    public boolean useFaithfulNaming()
+    {
+	return useFaithfulNaming;
+    }
 
     public void resolveFromClassFile(SootClass aClass, InputStream is, List references)
     {
@@ -414,8 +412,6 @@ public class Util
         return types[types.length - 1];
     }
 
-    private final ArrayList<Type> conversionTypes = new ArrayList<Type>();
-    
     /*
     private Map cache = new HashMap();
     public Type[] jimpleTypesOfFieldOrMethodDescriptor(String descriptor)
@@ -524,12 +520,14 @@ public class Util
     }
 */
 
-
+    // racy access
     private final Map<String, Type[]> cache = new HashMap<String, Type[]>();
     public Type[] jimpleTypesOfFieldOrMethodDescriptor(String descriptor)
     {
         Type[] ret = cache.get(descriptor);
         if( ret != null ) return ret;
+
+	ArrayList<Type> conversionTypes = new ArrayList<Type>();
         char[] d = descriptor.toCharArray();
         int p = 0;
         conversionTypes.clear();
@@ -696,11 +694,6 @@ swtch:
             return easyNames[justifiedIndex];
     }
 
-    void setClassNameToAbbreviation(Map map)
-    {
-        classNameToAbbreviation = map;
-    }
-
     Local getLocalForStackOp(JimpleBody listBody, TypeStack typeStack,
         int index)
     {
@@ -809,27 +802,27 @@ swtch:
         }
     }
 
-    Local getLocalForIndex(JimpleBody listBody, int index)
+    Local getLocalForIndex(JimpleBody listBody, int index, boolean isLocalStore, boolean isWideLocalStore)
     {
         String name = null;
         String debug_type = null;
         boolean assignedName = false;
         if(useFaithfulNaming && activeVariableTable != null)
         {
-            if(activeOriginalIndex != -1)
+            if(activeOriginalIndex.get() != -1)
             {
 
 	      // Feng asks: why this is necessary? it does wrong thing
 	      //            for searching local variable names.
 	      // It is going to be verified with plam.
                 if(isLocalStore)
-                    activeOriginalIndex++;
+                    activeOriginalIndex.set(activeOriginalIndex.get()+1);
                 if(isWideLocalStore)
-                    activeOriginalIndex++;
+                    activeOriginalIndex.set(activeOriginalIndex.get()+1);
 
-                name = activeVariableTable.getLocalVariableName(activeConstantPool, index, activeOriginalIndex);
-                if (activeVariableTypeTable != null){
-               debug_type = activeVariableTypeTable.getLocalVariableType(activeConstantPool, index, activeOriginalIndex);
+                name = activeVariableTable.get().getLocalVariableName(activeConstantPool.get(), index, activeOriginalIndex.get());
+                if (activeVariableTypeTable.get() != null){
+		    debug_type = activeVariableTypeTable.get().getLocalVariableType(activeConstantPool.get(), index, activeOriginalIndex.get());
                if (debug_type != null){
                }
                 }

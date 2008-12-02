@@ -22,6 +22,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import soot.EntryPoints;
 import soot.G;
@@ -79,9 +82,14 @@ public final class CallGraphBuilder
         ofcgb = new OnFlyCallGraphBuilder( cm, reachables, true );
     }
     public void build() {
+	ExecutorService pool;
         QueueReader worklist = reachables.listener();
         while(true) {
-            ofcgb.processReachables();
+	    pool = Executors.newFixedThreadPool(4);
+            ofcgb.processReachables(pool);
+	    pool.shutdown();
+	    try { while (!pool.awaitTermination(50L, TimeUnit.SECONDS)) ; }
+	    catch (InterruptedException e) {}
             reachables.update();
             if( !worklist.hasNext() ) break;
             MethodOrMethodContext momc = (MethodOrMethodContext) worklist.next();

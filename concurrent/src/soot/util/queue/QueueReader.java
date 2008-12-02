@@ -40,28 +40,41 @@ public class QueueReader<E> implements java.util.Iterator<E>
      * there are none. */
     @SuppressWarnings("unchecked")
 	public final E next() {
-        if( q[index] == null ) throw new NoSuchElementException();
-        if( index == q.length - 1 ) {
-            q = (E[]) q[index];
-            index = 0;
-            if( q[index] == null ) throw new NoSuchElementException();
-        }
-        E ret = q[index];
-        if( ret == ChunkedQueue.NULL_CONST ) ret = null;
-        index++;
-        return ret;
+	synchronized(q) {
+	    if( q[index] == null ) throw new NoSuchElementException();
+	    if( index == q.length - 1 ) {
+		q = (E[]) q[index];
+		index = 0;
+		if( q[index] == null ) throw new NoSuchElementException();
+	    }
+	    E ret = q[index];
+	    if( ret == ChunkedQueue.NULL_CONST ) ret = null;
+	    index++;
+	    return ret;
+	}
     }
 
     /** Returns true iff there is currently another object in the queue. */
     @SuppressWarnings("unchecked")
 	public final boolean hasNext() {
-        if (q[index] == null) return false;
-        if (index == q.length - 1) {
-            q = (E[]) q[index];
-            index = 0;
-            if (q[index] == null) return false;
-        }
-        return true;
+	synchronized(q) {
+	    if (q[index] == null) return false;
+	    if (index == q.length - 1) {
+		q = (E[]) q[index];
+		index = 0;
+		if (q[index] == null) return false;
+	    }
+	    return true;
+	}
+    }
+
+    public final E poll() {
+	synchronized(q) {
+	    if (hasNext()) 
+		return next();
+	    else
+		return null;
+	}
     }
 
     public final void remove() {

@@ -24,6 +24,7 @@ import soot.jimple.*;
 import java.util.*;
 import soot.util.*;
 import soot.util.queue.*;
+import java.util.concurrent.*;
 
 /** Models the call graph.
  * @author Ondrej Lhotak
@@ -32,7 +33,7 @@ public final class OnFlyCallGraphBuilder
 { 
     /** context-insensitive stuff */
     private final CallGraph cicg = new CallGraph();
-    private final HashSet<SootMethod> analyzedMethods = new HashSet<SootMethod>();
+    private final Set<SootMethod> analyzedMethods = Collections.synchronizedSet(new HashSet<SootMethod>());
 
     private final LargeNumberedMap receiverToSites = new LargeNumberedMap( Scene.v().getLocalNumberer() ); // Local -> List(VirtualCallSite)
     private final LargeNumberedMap methodToReceivers = new LargeNumberedMap( Scene.v().getMethodNumberer() ); // SootMethod -> List(Local)
@@ -48,7 +49,7 @@ public final class OnFlyCallGraphBuilder
 
     /** context-sensitive stuff */
     private ReachableMethods rm;
-    private QueueReader worklist;
+    private QueueReader<MethodOrMethodContext> worklist;
 
     private ContextManager cm;
 
@@ -69,18 +70,31 @@ public final class OnFlyCallGraphBuilder
         this( cm, rm );
         this.appOnly = appOnly;
     }
-    public void processReachables() {
-        while(true) {
-            if( !worklist.hasNext() ) {
-                rm.update();
-                if( !worklist.hasNext() ) break;
-            }
-            MethodOrMethodContext momc = (MethodOrMethodContext) worklist.next();
-            SootMethod m = momc.method();
-            if( appOnly && !m.getDeclaringClass().isApplicationClass() ) continue;
-            if( analyzedMethods.add( m ) ) processNewMethod( m );
-            processNewMethodContext( momc );
-        }
+
+    private class ProcessMethod implements Runnable {
+	private MethodOrMethodContext momc;
+
+	public ProcessMethod(MethodOrMethodContext momc) {
+	    this.momc = momc; 
+	}
+
+	public void run() {
+	    SootMethod m = momc.method();
+	    if( appOnly && !m.getDeclaringClass().isApplicationClass() ) 
+		return;
+	    if( analyzedMethods.add( m ) ) processNewMethod( m );
+	    processNewMethodContext( momc );
+	}
+    }
+
+    public void processReachables(ExecutorService pool) {
+	while (worklist.hasNext()) {
+	    MethodOrMethodContext momc = worklist.poll();
+	    if (momc != null)
+		pool.execute(new ProcessMethod(momc));
+	    // non-concurrent alternative: 
+		// new ProcessMethod(momc).run();
+	}
     }
     public boolean wantTypes( Local receiver ) {
         return receiverToSites.get(receiver) != null;
@@ -166,10 +180,10 @@ public final class OnFlyCallGraphBuilder
             InstanceInvokeExpr iie, NumberedString subSig, Kind kind ) {
         List<VirtualCallSite> sites = (List<VirtualCallSite>) receiverToSites.get(receiver);
         if (sites == null) {
-            receiverToSites.put(receiver, sites = new ArrayList<VirtualCallSite>());
+            receiverToSites.put(receiver, sites = Collections.synchronizedList(new ArrayList<VirtualCallSite>()));
             List<Local> receivers = (List<Local>) methodToReceivers.get(m);
             if( receivers == null )
-                methodToReceivers.put(m, receivers = new ArrayList<Local>());
+                methodToReceivers.put(m, receivers = Collections.synchronizedList(new ArrayList<Local>()));
             receivers.add(receiver);
         }
         sites.add(new VirtualCallSite(s, m, iie, subSig, kind));
@@ -216,7 +230,7 @@ public final class OnFlyCallGraphBuilder
         }
     }
     
-    private void getImplicitTargets( SootMethod source ) {
+    private synchronized void getImplicitTargets( SootMethod source ) {
         List<Local> stringConstants = (List<Local>) methodToStringConstants.get(source);
         if( stringConstants == null )
             methodToStringConstants.put(source, stringConstants = new ArrayList<Local>());

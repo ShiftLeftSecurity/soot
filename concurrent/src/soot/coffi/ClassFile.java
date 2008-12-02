@@ -168,7 +168,7 @@ public class ClassFile {
 	return (constant_pool[this_class].toString(constant_pool));
     }
 
-    public boolean loadClassFile(InputStream is) 
+    public synchronized boolean loadClassFile(InputStream is) 
     {
       InputStream f = null;
       InputStream classFileStream;

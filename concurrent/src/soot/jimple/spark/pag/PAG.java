@@ -41,7 +41,7 @@ public class PAG implements PointsToAnalysis {
     public PAG( final SparkOptions opts ) {
         this.opts = opts;
         if( opts.add_tags() ) {
-            nodeToTag = new HashMap<Node, Tag>();
+            nodeToTag = Collections.synchronizedMap(new HashMap<Node, Tag>());
         }
         typeManager = new TypeManager(this);
         if( !opts.ignore_types() ) {

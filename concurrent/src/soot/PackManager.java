@@ -352,7 +352,7 @@ public class PackManager {
     public void coffiMetrics() {
       int tV = 0, tE = 0, hM = 0;
       double aM = 0;
-      HashMap<SootMethod, int[]> hashVem = soot.coffi.CFG.methodsToVEM;
+      Map<SootMethod, int[]> hashVem = soot.coffi.CFG.methodsToVEM;
       Iterator<SootMethod> it = hashVem.keySet().iterator();
       while (it.hasNext()) {
         int vem[] = hashVem.get(it.next());
@@ -945,23 +945,23 @@ public class PackManager {
     }
 
     private void retrieveAllBodies() {
-        Iterator clIt = reachableClasses();
-        while( clIt.hasNext() ) {
-            SootClass cl = (SootClass) clIt.next();
-            Iterator methodIt = cl.methodIterator();
-            while (methodIt.hasNext()) {
-                SootMethod m = (SootMethod) methodIt.next();
-                if(DEBUG && cl.isApplicationClass()){                	
-                	if(m.getExceptions().size()!=0)
-                		System.out.println("PackManager printing out from within retrieveAllBodies exceptions for method "+m.toString()+" " + m.getExceptions().toString());
-                	else
-                		System.out.println("in retrieveAllBodies......Currently Method "+ m.toString() +" has no exceptions ");
-                }
-
-                if( m.isConcrete() ) {
-                    m.retrieveActiveBody();
-                }
-            }
-        }
+	Iterator clIt = reachableClasses();
+	while ( clIt.hasNext() ) {
+	    SootClass cl = (SootClass) clIt.next();
+	    Iterator methodIt = cl.methodIterator();
+	    while (methodIt.hasNext()) {
+		SootMethod m = (SootMethod) methodIt.next();
+		if(DEBUG && cl.isApplicationClass()){                	
+		    if(m.getExceptions().size()!=0)
+			System.out.println("PackManager printing out from within retrieveAllBodies exceptions for method "+m.toString()+" " + m.getExceptions().toString());
+		    else
+			System.out.println("in retrieveAllBodies......Currently Method "+ m.toString() +" has no exceptions ");
+		}
+		
+		if( m.isConcrete() ) {
+		    m.retrieveActiveBody();
+		}
+	    }
+	}
     }
 }

@@ -315,7 +315,7 @@ public class SootMethod
      * Please call setApplicationClass() on the relevant class.
      */
 
-    public Body retrieveActiveBody() {
+    public synchronized Body retrieveActiveBody() {
         declaringClass.checkLevel(SootClass.BODIES);
         if (declaringClass.isPhantomClass())
             throw new RuntimeException(
