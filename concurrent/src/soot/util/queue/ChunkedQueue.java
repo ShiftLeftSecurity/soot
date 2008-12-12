@@ -41,7 +41,6 @@ public final class ChunkedQueue<E>
     /** Add an object to the queue. */
     public void add( E o ) {
 	synchronized(q) {
-	    System.err.println(o);
 	    if( o == null ) o = (E)NULL_CONST;
 	    if( index == LENGTH - 1 ) {
 		Object[] temp = new Object[LENGTH];

@@ -21,6 +21,7 @@ package soot.jimple.toolkits.callgraph;
 import soot.*;
 import soot.util.queue.*;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /** Represents the edges in a call graph. This class is meant to act as
  * only a container of edges; code for various call graph builders should
@@ -32,9 +33,9 @@ public class CallGraph
     protected Set<Edge> edges = Collections.synchronizedSet(new HashSet<Edge>());
     protected ChunkedQueue<Edge> stream = new ChunkedQueue<Edge>();
     protected QueueReader<Edge> reader = stream.reader();
-    protected Map<MethodOrMethodContext,Edge> srcMethodToEdge = Collections.synchronizedMap(new HashMap<MethodOrMethodContext, Edge>());
-    protected Map<Unit, Edge> srcUnitToEdge = Collections.synchronizedMap(new HashMap<Unit, Edge>());
-    protected Map<MethodOrMethodContext, Edge> tgtToEdge = Collections.synchronizedMap(new HashMap<MethodOrMethodContext, Edge>());
+    protected Map<MethodOrMethodContext,Edge> srcMethodToEdge = new ConcurrentHashMap<MethodOrMethodContext, Edge>();
+    protected Map<Unit, Edge> srcUnitToEdge = new ConcurrentHashMap<Unit, Edge>();
+    protected Map<MethodOrMethodContext, Edge> tgtToEdge = new ConcurrentHashMap<MethodOrMethodContext, Edge>();
     protected Edge dummy = new Edge( null, null, null, Kind.INVALID );
 
     /** Used to add an edge to the call graph. Returns true iff the edge was
@@ -44,9 +45,10 @@ public class CallGraph
         stream.add( e );
         Edge position = null;
 
-        position = srcUnitToEdge.get( e.srcUnit() );
+        position = e.srcUnit() != null ? srcUnitToEdge.get( e.srcUnit() ) : null;
         if( position == null ) {
-            srcUnitToEdge.put( e.srcUnit(), e );
+	    if (e.srcUnit() != null)
+		srcUnitToEdge.put( e.srcUnit(), e );
             position = dummy;
         }
         e.insertAfterByUnit( position );
@@ -72,19 +74,19 @@ public class CallGraph
         if( !edges.remove( e ) ) return false;
         e.remove();
 
-        if( srcUnitToEdge.get(e.srcUnit()) == e ) {
+        if( e.srcUnit() != null && srcUnitToEdge.get(e.srcUnit()) == e ) {
             if( e.nextByUnit().srcUnit() == e.srcUnit() ) {
                 srcUnitToEdge.put(e.srcUnit(), e.nextByUnit() );
             } else {
-                srcUnitToEdge.put(e.srcUnit(), null);
+                srcUnitToEdge.remove(e.srcUnit());
             }
         }
 
-        if( srcMethodToEdge.get(e.getSrc()) == e ) {
+        if( e.srcUnit() != null && srcMethodToEdge.get(e.getSrc()) == e ) {
             if( e.nextBySrc().getSrc() == e.getSrc() ) {
                 srcMethodToEdge.put(e.getSrc(), e.nextBySrc() );
             } else {
-                srcMethodToEdge.put(e.getSrc(), null);
+                srcMethodToEdge.remove(e.getSrc());
             }
         }
 
@@ -92,7 +94,7 @@ public class CallGraph
             if( e.nextByTgt().getTgt() == e.getTgt() ) {
                 tgtToEdge.put(e.getTgt(), e.nextByTgt() );
             } else {
-                tgtToEdge.put(e.getTgt(), null);
+                tgtToEdge.remove(e.getTgt());
             }
         }
 

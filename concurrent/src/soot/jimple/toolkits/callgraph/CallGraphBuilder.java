@@ -85,11 +85,7 @@ public final class CallGraphBuilder
 	ExecutorService pool;
         QueueReader worklist = reachables.listener();
         while(true) {
-	    pool = Executors.newFixedThreadPool(4);
-            ofcgb.processReachables(pool);
-	    pool.shutdown();
-	    try { while (!pool.awaitTermination(50L, TimeUnit.SECONDS)) ; }
-	    catch (InterruptedException e) {}
+            ofcgb.processReachables();
             reachables.update();
             if( !worklist.hasNext() ) break;
             MethodOrMethodContext momc = (MethodOrMethodContext) worklist.next();

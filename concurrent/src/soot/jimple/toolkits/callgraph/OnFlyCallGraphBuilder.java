@@ -56,6 +56,7 @@ public final class OnFlyCallGraphBuilder
     private final ChunkedQueue targetsQueue = new ChunkedQueue();
     private final QueueReader targets = targetsQueue.reader();
 
+    private final ConcurrentLinkedQueue<MethodOrMethodContext> momcToReprocessQ = new ConcurrentLinkedQueue<MethodOrMethodContext>();
 
     public OnFlyCallGraphBuilder( ContextManager cm, ReachableMethods rm ) {
         this.cm = cm;
@@ -84,16 +85,40 @@ public final class OnFlyCallGraphBuilder
 		return;
 	    if( analyzedMethods.add( m ) ) processNewMethod( m );
 	    processNewMethodContext( momc );
+
+	    /*if (!analyzedMethods.contains(m)) {
+		m.retrieveActiveBody();
+		getImplicitTargets( m );
+		}*/
+
+	    /*momcToReprocessQ.add(momc);*/
 	}
     }
 
-    public void processReachables(ExecutorService pool) {
+    public void processReachables() {
 	while (worklist.hasNext()) {
-	    MethodOrMethodContext momc = worklist.poll();
-	    if (momc != null)
-		pool.execute(new ProcessMethod(momc));
-	    // non-concurrent alternative: 
-		// new ProcessMethod(momc).run();
+	    ExecutorService pool = Executors.newFixedThreadPool(4);
+	    while (worklist.hasNext()) {
+		MethodOrMethodContext momc = worklist.poll();
+		if (momc != null)
+		    // pool.execute(new ProcessMethod(momc));
+		// non-concurrent alternative: 
+		 new ProcessMethod(momc).run();
+	    }
+	    pool.shutdown();
+	    try { while (!pool.awaitTermination(50L, TimeUnit.SECONDS)) ; }
+	    catch (InterruptedException e) {}
+	    
+	    while (!momcToReprocessQ.isEmpty()) {
+		MethodOrMethodContext momc = momcToReprocessQ.poll();
+		if (momc == null) break;
+
+		SootMethod m = momc.method();
+		if( appOnly && !m.getDeclaringClass().isApplicationClass() ) 
+		    continue;
+		if( analyzedMethods.add( m ) ) processNewMethod( m );
+		processNewMethodContext( momc );
+	    }
 	}
     }
     public boolean wantTypes( Local receiver ) {

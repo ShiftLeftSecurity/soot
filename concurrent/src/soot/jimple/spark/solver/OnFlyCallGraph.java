@@ -22,6 +22,7 @@ import soot.jimple.spark.sets.*;
 import soot.jimple.spark.pag.*;
 import soot.jimple.toolkits.callgraph.*;
 import soot.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -55,23 +56,52 @@ public class OnFlyCallGraph {
         callEdges = cm.callGraph().listener();
     }
     public void build() {
-	ExecutorService pool = Executors.newFixedThreadPool(4);
-        ofcgb.processReachables(pool);
-	pool.shutdown();
-	try { while (!pool.awaitTermination(50L, TimeUnit.SECONDS)) ; }
-	catch (InterruptedException e) {}
+        ofcgb.processReachables();
         processReachables();
         processCallEdges();
     }
+    private ConcurrentLinkedQueue<MethodOrMethodContext> momcToReprocessQ = new ConcurrentLinkedQueue<MethodOrMethodContext>();
     private void processReachables() {
         reachableMethods.update();
+	ExecutorService pool = Executors.newFixedThreadPool(4);
         while(reachablesReader.hasNext()) {
             MethodOrMethodContext m = (MethodOrMethodContext) reachablesReader.next();
-            MethodPAG mpag = MethodPAG.v( pag, m.method() );
-            mpag.build();
-            mpag.addToPAG(m.context());
+	    ProcessMethodPAG pm = new ProcessMethodPAG(m);
+	    pool.execute(pm);
         }
+	pool.shutdown();
+	try { while (!pool.awaitTermination(50L, TimeUnit.SECONDS)) ; }
+	catch (InterruptedException e) {}
+
+	while (!momcToReprocessQ.isEmpty()) {
+	    MethodOrMethodContext m = momcToReprocessQ.poll();
+	    if (m == null) break;
+
+	    MethodPAG mpag = MethodPAG.v( pag, m.method() );
+	    mpag.build();
+	    mpag.addToPAG(m.context());
+	}
+
+	if (reachablesReader.hasNext()) throw new RuntimeException("need loop");
     }
+
+    private java.util.Set s = java.util.Collections.synchronizedSet(new java.util.HashSet());
+    private class ProcessMethodPAG implements Runnable {
+	private MethodOrMethodContext m;
+	public ProcessMethodPAG(MethodOrMethodContext m) {
+	    this.m = m;
+	}
+
+	public void run() {
+	    SootMethod mm = (SootMethod) m.method();
+	    if (mm.isConcrete())
+		mm.retrieveActiveBody();
+	    if (s.contains(mm)) throw new RuntimeException(mm.toString());
+	    s.add(mm);
+	    momcToReprocessQ.add(m);
+	}
+    }
+
     private void processCallEdges() {
         while(callEdges.hasNext()) {
             Edge e = (Edge) callEdges.next();
