@@ -41,6 +41,8 @@ import java.io.*;
 
 public class BafBody extends Body
 {
+    private JimpleToBafContext context;
+    
     public Object clone()
     {
         Body b = new BafBody(getMethod());
@@ -51,6 +53,10 @@ public class BafBody extends Body
     BafBody(SootMethod m)
     {
         super(m);
+    }
+
+    public JimpleToBafContext getJimpleToBafContext() {
+	return context;
     }
 
     public BafBody(Body body, Map options)
@@ -70,7 +76,7 @@ public class BafBody extends Body
 
         jimpleBody.validate();
                
-        JimpleToBafContext context = new JimpleToBafContext(jimpleBody.getLocalCount());
+        context = new JimpleToBafContext(jimpleBody.getLocalCount());
            
         // Convert all locals
         {

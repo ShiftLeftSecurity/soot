@@ -28,6 +28,7 @@
 
 
 package soot.baf;
+import soot.baf.internal.*;
 import soot.options.*;
 import soot.tagkit.*;
 import soot.*;
@@ -36,6 +37,7 @@ import soot.toolkits.graph.*;
 import soot.util.*;
 import java.util.*;
 import java.io.*;
+import spmt.*;
 
 public class JasminClass
 {
@@ -60,7 +62,7 @@ public class JasminClass
 
     Map blockToStackHeight = new HashMap(); // maps a block to the stack height upon entering it
     Map blockToLogicalStackHeight = new HashMap(); // maps a block to the logical stack height upon entering it
-    
+    Map instToAfterInBeforeOutStackHeight = new HashMap(); // the stack height after popping and before pushing
 
     String slashify(String s)
     {
@@ -639,7 +641,81 @@ public class JasminClass
 	    Iterator it =  body.getTags().iterator();
 	    while(it.hasNext()) {
 		Tag t = (Tag) it.next();
+
 		if(t instanceof JasminAttribute) {
+		    
+		    // fix up comparisons against locals in return value use expressions
+		    if (t.getName().equals("org.sablevm.ReturnValueUseTable")) {
+			Iterator unitBoxIt = ((CodeAttribute) t).getUnitBoxes().iterator();
+			while (unitBoxIt.hasNext()) {
+			    ReturnValueUseTag r = (ReturnValueUseTag) ((UnitBox) unitBoxIt.next()).getUnit().getTag("ReturnValueUseTag");
+			    if (r.isConsumed() && !r.isAccurate()) {
+				Iterator otherTagIt = r.getOtherTagIt();
+				while (otherTagIt.hasNext()) {
+				    OtherTag rOther = (OtherTag) otherTagIt.next();
+				    Inst lastInst = null;
+				    Iterator instIt = instList.iterator();
+				    while (instIt.hasNext()) {
+					Inst i = (Inst) instIt.next();
+					if (i.hasTag("OtherTag")) {
+					    OtherTag iOther = (OtherTag) i.getTag("OtherTag");
+					    if (rOther == iOther) {
+						lastInst = i;
+					    }
+					}
+				    }
+				    Local jimpleLocal = rOther.getJimpleLocal();
+				    Local bafLocal = body.getJimpleToBafContext().getBafLocalOfJimpleLocal(jimpleLocal);
+				    //				    Integer slotInteger = (Integer) localToSlot.get(bafLocal);
+				    Integer slotInteger = (Integer) localToSlot.get(jimpleLocal);
+				    if (slotInteger != null) {
+					int slot = slotInteger.intValue();
+
+					// parameter local
+					if (lastInst == null) {
+					    if (slot > (argCountOf(method) - 1)) {
+						throw new RuntimeException
+						    ("slot: " + slot + "argCount: " + argCountOf(method));
+					    }
+					}
+
+					// non-parameter local
+					else {
+					    if (slot <= (argCountOf(method) - 1)) {
+						throw new RuntimeException
+						    ("slot: " + slot + "argCount: " + argCountOf(method));
+					    }
+
+					    if (!(lastInst instanceof BStoreInst)) {
+						throw new RuntimeException
+						    ("expecting BStoreInst and found: "+lastInst);
+					    }
+					}
+					    
+					rOther.setIsLocal(true);
+					rOther.setPosition(slot);
+				    }
+
+				    // otherwise stack-only value
+				    else {
+					if (lastInst == null) {
+					    throw new RuntimeException
+						("no instruction with OtherTag and no local slot either!");
+					}
+					
+					if (lastInst instanceof BStoreInst) {
+					    throw new RuntimeException
+						("not expecting BStoreInst!\nBafLocal: "+bafLocal+"\nJimpleLocal: "+jimpleLocal+"\ninst: "+lastInst+"\nlocalToSlot: "+localToSlot);
+					}
+
+					rOther.setIsStackValue(true);
+					rOther.setPosition(((Integer) instToAfterInBeforeOutStackHeight.get(lastInst)).intValue());
+				    }
+				}
+			    }
+			}
+		    }
+
 		    emit(".code_attribute " + t.getName() +" \"" + ((JasminAttribute) t).getJasminValue(instToLabel) +"\"");
 		}		
 	    }
@@ -2139,6 +2215,8 @@ public class JasminClass
                                        + "\n" +  aBlock.getBody().getMethod()                                       
                                        );
           }
+
+	  instToAfterInBeforeOutStackHeight.put(nInst, new Integer(blockHeight));
           
           blockHeight += nInst.getOutMachineCount();
           if( blockHeight > maxStackHeight) {
