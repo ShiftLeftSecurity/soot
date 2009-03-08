@@ -1,0 +1,24 @@
+## Location of Polyglot classes jar file
+polyglot.jar=${user.home}/spmt/pkgs/polyglot-1.2.0.jar
+
+## Location of Jasmin classes jar file
+jasmin.jar=${user.home}/spmt/pkgs/jasminclasses-sable-1.2.7.jar
+
+## Location of Eclipse installation.
+## This should have a directory called plugins in it.
+eclipse.loc=/usr/share/eclipse
+
+## Version of Soot for tagging tarballs.
+soot.version=2.1.0-custom
+
+## Location in which to generate Soot release tarballs.
+release.loc=/tmp
+
+## Location of JFlex classes jar file
+jflex.jar=${user.home}/JFlex.jar
+
+## URL for Java API documentation, for resolving things like
+## {@link Iterator} when generating documentation from 
+## javadoc comments.
+javaapi.url=http://java.sun.com/j2se/1.4.2/docs/api/
+
