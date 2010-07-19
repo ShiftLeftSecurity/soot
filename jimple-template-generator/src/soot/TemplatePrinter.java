@@ -21,6 +21,11 @@ package soot;
 
 import java.io.PrintWriter;
 
+import soot.dava.internal.AST.ASTTryNode.container;
+import soot.jimple.Jimple;
+import soot.jimple.Stmt;
+import soot.util.Chain;
+
 public class TemplatePrinter {
     
 	private PrintWriter out;
@@ -53,6 +58,39 @@ public class TemplatePrinter {
 		
 		//close main method
 		closeMethod();
+		
+		int i = 0;
+		for(SootMethod m: c.getMethods()) {
+			
+			newMethod("createMethod"+i);
+			
+			if(!m.hasActiveBody()) continue;
+			
+			Body b = m.getActiveBody();
+			
+			indent();
+			
+			println("Chain<Local> locals = b.getLocals();");
+			for(Local l: b.getLocals()) {
+				
+				//TODO properly treat primitive types
+				println("locals.add(Jimple.v().newLocal("+l.getName()+", RefType.v(\""+l.getType()+"\")));");
+				
+			}
+			
+			println("Chain<Unit> unit = b.getUnits();");
+			StmtTemplatePrinter sw = new StmtTemplatePrinter(this);
+			for(Unit u: b.getUnits()) {
+				
+				u.apply(sw);
+				
+			}
+			
+			unindent();
+			closeMethod();
+			
+			i++;
+		}
 	
 		//close class
 		println("}");
@@ -68,22 +106,22 @@ public class TemplatePrinter {
 		println("public void "+name+"() {");
 	}
 	
-	private void println(String s) {
+	public void println(String s) {
 		print(s); print("\n");
 	}
 
-	private void print(String s) {
+	public void print(String s) {
 		for(int i=0; i<indentationLevel; i++) {
 			out.print("  ");
 		}
 		out.print(s);
 	}
 	
-	private void indent() {
+	public void indent() {
 		indentationLevel++;
 	}
 
-	private void unindent() {
+	public void unindent() {
 		indentationLevel--;
 	}
 }
