@@ -23,6 +23,9 @@ import java.io.PrintWriter;
 
 public class TemplatePrinter {
     
+	private PrintWriter out;
+	private int indentationLevel = 0;
+
 	public TemplatePrinter(Singletons.Global g) {
     }
 	
@@ -32,8 +35,55 @@ public class TemplatePrinter {
 
     //see also class soot.Printer!
 	public void printTo(SootClass c, PrintWriter out) {
-		out.println("Scene.v().");
-		Printer.v().printTo(c, out);
+		this.out = out;
+		
+		printTo(c);
 	}
 
+	private void printTo(SootClass c) {
+		String templateClassName = c.getName().replace('.', '_')+"_Maker";
+		
+		//open class
+		print("public class ");
+		print(templateClassName);
+		println(" {");
+
+		//open main method
+		newMethod("main");
+		
+		//close main method
+		closeMethod();
+	
+		//close class
+		println("}");
+	}
+
+	private void closeMethod() {
+		println("}");
+		unindent();
+	}
+
+	private void newMethod(String name) {
+		indent();
+		println("public void "+name+"() {");
+	}
+	
+	private void println(String s) {
+		print(s); print("\n");
+	}
+
+	private void print(String s) {
+		for(int i=0; i<indentationLevel; i++) {
+			out.print("  ");
+		}
+		out.print(s);
+	}
+	
+	private void indent() {
+		indentationLevel++;
+	}
+
+	private void unindent() {
+		indentationLevel--;
+	}
 }
