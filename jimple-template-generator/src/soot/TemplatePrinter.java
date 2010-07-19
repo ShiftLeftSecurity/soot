@@ -23,6 +23,7 @@ import java.io.PrintWriter;
 
 import soot.dava.internal.AST.ASTTryNode.container;
 import soot.jimple.Jimple;
+import soot.jimple.JimpleBody;
 import soot.jimple.Stmt;
 import soot.util.Chain;
 
@@ -48,13 +49,30 @@ public class TemplatePrinter {
 	private void printTo(SootClass c) {
 		String templateClassName = c.getName().replace('.', '_')+"_Maker";
 		
+		//imports
+		println("import soot.*;");
+		println("import soot.jimple.*;");
+		println("import soot.util.*;");
+		println("");
+		
 		//open class
 		print("public class ");
 		print(templateClassName);
 		println(" {");
 
 		//open main method
-		newMethod("main");
+		indent();
+		println("public void create() {");
+		indent();
+		
+		println("SootClass c = new SootClass(\""+c.getName()+"\");");
+		println("c.setApplicationClass();");
+		//todo modifiers, extends etc.
+		println("Scene.v().addClass(c);");
+		
+		for(int i=0; i<c.getMethodCount(); i++) {
+			println("createMethod"+i+"(c);");
+		}
 		
 		//close main method
 		closeMethod();
@@ -64,21 +82,24 @@ public class TemplatePrinter {
 			
 			newMethod("createMethod"+i);
 			
+			//TODO modifiers, types
+			println("SootMethod m = new SootMethod(\""+m.getName()+"\",null,null);");
+			println("Body b = Jimple.v().newBody(m);");
+			println("m.setActiveBody(b);");
+			
 			if(!m.hasActiveBody()) continue;
 			
 			Body b = m.getActiveBody();
-			
-			indent();
 			
 			println("Chain<Local> locals = b.getLocals();");
 			for(Local l: b.getLocals()) {
 				
 				//TODO properly treat primitive types
-				println("locals.add(Jimple.v().newLocal("+l.getName()+", RefType.v(\""+l.getType()+"\")));");
+				println("locals.add(Jimple.v().newLocal(\""+l.getName()+"\", RefType.v(\""+l.getType()+"\")));");
 				
 			}
 			
-			println("Chain<Unit> unit = b.getUnits();");
+			println("Chain<Unit> units = b.getUnits();");
 			StmtTemplatePrinter sw = new StmtTemplatePrinter(this);
 			for(Unit u: b.getUnits()) {
 				
@@ -86,7 +107,6 @@ public class TemplatePrinter {
 				
 			}
 			
-			unindent();
 			closeMethod();
 			
 			i++;
@@ -97,13 +117,16 @@ public class TemplatePrinter {
 	}
 
 	private void closeMethod() {
+		unindent();
 		println("}");
 		unindent();
+		println("");
 	}
 
 	private void newMethod(String name) {
 		indent();
-		println("public void "+name+"() {");
+		println("public void "+name+"(SootClass c) {");
+		indent();
 	}
 	
 	public void println(String s) {
