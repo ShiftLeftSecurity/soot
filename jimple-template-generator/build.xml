@@ -9,7 +9,7 @@
         />
     </target>
 
-    <target name="compile" depends="settings,sablecc,jastadd,copypeephole,settings,singletons,options">
+    <target name="compile" depends="settings,sablecc,copypeephole,settings,singletons,options">
     	<mkdir dir="classes"/>
         <javac
             destdir="classes"
@@ -88,6 +88,7 @@
     	</uptodate>
     </target>
 
+	<!--
     <target name="jastadd" depends="determine-jastadd-uptodate,settings" unless="jastadd.uptodate" if="jastaddfrontend.loc">
     	<ant antfile="${jastaddfrontend.loc}/build.xml" target="gen" inheritall="false"/>
     	<mkdir dir="generated/jastadd"/>
@@ -98,7 +99,7 @@
     	    <fileset dir="${jastaddfrontend.loc}/beaver" includes="**/*.java"/>
     	</copy>
     </target>
-
+-->
     <target name="javadoc">
         <javadoc
             classpath="classes:${polyglot.jar}:${jasmin.jar}"
