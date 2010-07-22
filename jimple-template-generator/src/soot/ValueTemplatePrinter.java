@@ -618,8 +618,8 @@ public class ValueTemplatePrinter implements JimpleValueSwitch {
 		size.apply(this);
 
 		Type type= v.getType();
-		setVariableName("type");
-		type.apply(this);
+		ttp.setVariableName("type");
+		type.apply(ttp);
 		
 		p.println("Value "+oldName+" = Jimple.v().newNewArrayExpr(type, size);");
 		varName = oldName;
@@ -724,7 +724,7 @@ public class ValueTemplatePrinter implements JimpleValueSwitch {
 		
 		Type paramType= v.getType();
 		setVariableName("paramType");
-		paramType.apply(this);
+		paramType.apply(ttp);
 		
 		int number = v.getIndex();
 		p.println("int number=" + number+ ";");
@@ -746,7 +746,7 @@ public class ValueTemplatePrinter implements JimpleValueSwitch {
 		
 		RefType type= (RefType)v.getType();
 		setVariableName("type");
-		type.apply(this);
+		type.apply(ttp);
 		
 		p.println("Value "+oldName+" = Jimple.v().newThisRef(type);");
 		varName = oldName;
@@ -761,7 +761,7 @@ public class ValueTemplatePrinter implements JimpleValueSwitch {
 		
 		Type type= l.getType();
 		setVariableName("type");
-		type.apply(this);
+		type.apply(ttp);
 		
 		p.println("Value "+oldName+" = Jimple.v().newLocal(name, t);");
 		varName = oldName;

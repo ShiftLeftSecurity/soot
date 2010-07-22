@@ -2,7 +2,7 @@ package soot;
 
 import soot.jimple.Jimple;
 
-public class TypeTemplatePrinter implements ITypeSwitch {
+public class TypeTemplatePrinter extends TypeSwitch {
 
 	private String varName;
 	private final TemplatePrinter p;
