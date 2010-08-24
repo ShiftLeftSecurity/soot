@@ -2271,6 +2271,14 @@ public class CFG {
             break;
          }
 
+         //INSERTED for invoke dynamic CFG.processFlow
+         case ByteCode.INVOKEDYNAMIC:
+         {
+        	 Instruction_Invokedynamic id = (Instruction_Invokedynamic)ins;
+        	 int args = cp_info.countParams(constant_pool, id.arg_i); 
+        	 break;
+         }
+         
          case ByteCode.INVOKEVIRTUAL:
          {
             Instruction_Invokevirtual iv = (Instruction_Invokevirtual)ins;
@@ -4271,7 +4279,99 @@ public class CFG {
             break;
          }
 
+         //INSERTED for invokedynamic CFG.generateJimple
+         case ByteCode.INVOKEDYNAMIC:
+         {
+        	 Instruction_Invokedynamic is = (Instruction_Invokedynamic)ins;
+        	 args = cp_info.countParams(constant_pool,is.arg_i);
 
+        	 SootMethodRef methodRef = null;
+
+        	 CONSTANT_NameAndType_info nameAndTypeInfo = (CONSTANT_NameAndType_info) constant_pool[is.arg_i];
+        	 
+        	 //System.out.println(nameAndTypeInfo.name_index)
+        	 
+        	 //CONSTANT_Methodref_info methodInfo =
+        	 //	 (CONSTANT_Methodref_info) constant_pool[nameAndTypeInfo.descriptor_index];
+
+        	 //CONSTANT_Class_info c =
+        	 //	 (CONSTANT_Class_info) constant_pool[methodInfo.class_index];
+
+        	 
+        	 
+        	 String className = ((CONSTANT_Utf8_info) (constant_pool[nameAndTypeInfo.name_index])).convert();
+        	 className = className.replace('/', '.');
+
+        	 //CONSTANT_NameAndType_info i =
+        	 //	 (CONSTANT_NameAndType_info) constant_pool[methodInfo.name_and_type_index];
+
+        	 String methodName = ((CONSTANT_Utf8_info) (constant_pool[nameAndTypeInfo.name_index])).convert();
+        	 String methodDescriptor = ((CONSTANT_Utf8_info) (constant_pool[nameAndTypeInfo.descriptor_index])).
+        	 convert();
+
+        	 if (className.charAt(0) == '[')
+        		 className = "java.lang.Object";
+
+        	 //causes runtime exception 
+        	 //because the dynamically created type the method is bound to can not be found
+        	 // in teh example test case this would be the class hail
+        	 //SootClass bclass = cm.getSootClass(className);
+        	 SootClass bclass = cm.getSootClass("java.dyn.MethodHandle");
+        	 
+        	 List parameterTypes;
+        	 Type returnType;
+
+        	 // Generate parameters & returnType & parameterTypes
+        	 {
+        		 Type[] types = Util.v().jimpleTypesOfFieldOrMethodDescriptor(methodDescriptor);
+
+        		 parameterTypes = new ArrayList();
+
+        		 for(int k = 0; k < types.length - 1; k++)
+        		 {
+        			 parameterTypes.add(types[k]);
+        		 }
+
+        		 returnType = types[types.length - 1];
+        	 }
+        	 //we assume the method is static...
+        	 methodRef = Scene.v().makeMethodRef(bclass, methodName, parameterTypes, returnType, true);
+
+        	 // build Vector of parameters
+        	 params = new Value[args];
+        	 for (int j=args-1;j>=0;j--)
+        	 {
+        		 /* G.v().out.println("BeforeTypeStack");
+                 typeStack.print(G.v().out);
+
+                 G.v().out.println("AfterTypeStack");
+                 postTypeStack.print(G.v().out);
+        		  */
+
+        		 params[j] = Util.v().getLocalForStackOp(listBody, typeStack, typeStack.topIndex());
+
+        		 if(typeSize(typeStack.top()) == 2)
+        		 {
+        			 typeStack = typeStack.pop();
+        			 typeStack = typeStack.pop();
+        		 }
+        		 else
+        			 typeStack = typeStack.pop();
+        	 }
+
+        	 rvalue = Jimple.v().newDynamicInvokeExpr(methodRef, Arrays.asList(params));
+
+        	 if(!returnType.equals(VoidType.v()))
+        	 {
+        		 stmt = Jimple.v().newAssignStmt(Util.v().getLocalForStackOp(listBody, postTypeStack,
+        				 postTypeStack.topIndex()),rvalue);
+        	 }
+        	 else
+        		 stmt = Jimple.v().newInvokeStmt(rvalue);
+
+        	 break;
+         }  	 
+ 
          case ByteCode.INVOKEVIRTUAL:
          {
             Instruction_Invokevirtual iv = (Instruction_Invokevirtual)ins;
@@ -4285,7 +4385,7 @@ public class CFG {
             CONSTANT_Class_info c =
                 (CONSTANT_Class_info) constant_pool[methodInfo.class_index];
 
-             String className = ((CONSTANT_Utf8_info) (constant_pool[c.name_index])).convert();
+            String className = ((CONSTANT_Utf8_info) (constant_pool[c.name_index])).convert();
                 className = className.replace('/', '.');
 
             CONSTANT_NameAndType_info i =

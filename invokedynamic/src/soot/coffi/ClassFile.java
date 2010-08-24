@@ -1219,6 +1219,9 @@ public class ClassFile {
             G.v().out.println("Unknown instruction in \"" + m.toName(constant_pool) +
                                "\" at offset " + j);
             G.v().out.println(" bytecode = " + (((int)(inst.code))&0xff));
+         //INSERTED for informational reasons
+         } else {
+        	 G.v().out.println("Instruction: " + inst.name);
          }
          // G.v().out.println("before: " + j);
          j = inst.nextOffset(j);
@@ -1227,13 +1230,12 @@ public class ClassFile {
          if ( head==null ) 
 	     head = inst;
          else
-	 { 	     
-	     tail.next = inst;
-	     inst.prev = tail;
-	 }
+		 { 	     
+		     tail.next = inst;
+		     inst.prev = tail;
+		 }
          tail = inst;
       }
-
       // bytecode converted into instructions, now build pointers
       bc.build(head);
 
@@ -1264,7 +1266,7 @@ public class ClassFile {
 	      }
 	  }
       }
-
+  
       return head;
    }
 

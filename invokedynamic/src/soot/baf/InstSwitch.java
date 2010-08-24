@@ -29,6 +29,7 @@
 
 package soot.baf;
 
+import soot.baf.internal.BDynamicInvokeInst;
 import soot.util.*;
 
 public interface InstSwitch extends Switch
@@ -66,6 +67,7 @@ public interface InstSwitch extends Switch
     public void caseInstanceCastInst(InstanceCastInst i);
     public void caseInstanceOfInst(InstanceOfInst i);
     public void casePrimitiveCastInst(PrimitiveCastInst i);
+	public void caseDynamicInvokeInst(DynamicInvokeInst i);
     public void caseStaticInvokeInst(StaticInvokeInst i);
     public void caseVirtualInvokeInst(VirtualInvokeInst i);
     public void caseInterfaceInvokeInst(InterfaceInvokeInst i);

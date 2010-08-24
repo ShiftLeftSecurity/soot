@@ -81,15 +81,13 @@ public class CoffiMethodSource implements MethodSource
         if(coffiMethod.cfg == null)
         {
             if(Options.v().verbose())
-                G.v().out.println("[" + m.getName() +
+            	G.v().out.println("[" + m.getName() +
                     "]     Building Coffi CFG...");
 
              new soot.coffi.CFG(coffiMethod);
-             
              // if just computing metrics, we don't need to actually return body
              if (soot.jbco.Main.metrics) return null;
          }
-
          if(Options.v().verbose())
              G.v().out.println("[" + m.getName() +
                     "]     Producing naive Jimple...");

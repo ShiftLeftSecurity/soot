@@ -299,6 +299,12 @@ public class Baf
         return new BNewMultiArrayInst(opType, dimensions);
     }
 
+    //INSERTED Baf.java
+    public DynamicInvokeInst newDynamicInvokeInst(SootMethodRef methodRef)
+    {
+    	return new BDynamicInvokeInst(methodRef);
+    }
+    
     public StaticInvokeInst newStaticInvokeInst(SootMethodRef methodRef)
     {
         return new BStaticInvokeInst(methodRef);

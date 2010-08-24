@@ -1435,6 +1435,15 @@ public class JasminClass extends AbstractJasminClass
                 emit(i.toString());
             }
 
+            //INSERTED JasminClass.java
+            public void caseDynamicInvokeInst(DynamicInvokeInst i)
+            {
+                SootMethodRef m = i.getMethodRef();
+                emit("invokedynamic " + slashify(m.declaringClass().getName()) + "/" +
+                    m.name() + jasminDescriptorOf(m));
+            }
+            
+            
             public void caseStaticInvokeInst(StaticInvokeInst i)
             {
                 SootMethodRef m = i.getMethodRef();

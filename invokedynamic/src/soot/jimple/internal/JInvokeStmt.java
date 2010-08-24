@@ -89,7 +89,10 @@ public class JInvokeStmt extends AbstractStmt implements InvokeStmt
     public List getUseBoxes()
     {
         List list = new ArrayList();
-
+        
+        //if (invokeExprBox.getValue().getUseBoxes() == null) 
+        //	System.out.println("Valuebox is null");
+        //else
         list.addAll(invokeExprBox.getValue().getUseBoxes());
         list.add(invokeExprBox);
 
