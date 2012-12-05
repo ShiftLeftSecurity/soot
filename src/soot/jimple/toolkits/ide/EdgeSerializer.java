@@ -12,6 +12,7 @@ import soot.SootMethod;
 import soot.Unit;
 import soot.tagkit.Host;
 import soot.tagkit.LineNumberTag;
+import soot.tagkit.SourceLnPosTag;
 
 public class EdgeSerializer<D, V> extends NewEdgeSerializer<soot.SootMethod, D, soot.Unit, V> {
 
@@ -25,6 +26,10 @@ public class EdgeSerializer<D, V> extends NewEdgeSerializer<soot.SootMethod, D, 
 	}
 
 	private int getCol(Host h) {
+		SourceLnPosTag tag = (SourceLnPosTag) h.getTag("SourceLnPosTag");
+		if(tag!=null) {
+			return tag.startPos();
+		}
 		return -1;
 	}
 
@@ -41,6 +46,10 @@ public class EdgeSerializer<D, V> extends NewEdgeSerializer<soot.SootMethod, D, 
 	}
 	
 	private int getLine(Unit u) {
+		SourceLnPosTag tag = (SourceLnPosTag) u.getTag("SourceLnPosTag");
+		if(tag!=null) {
+			return tag.startLn();
+		}
 		LineNumberTag lnTag = (LineNumberTag) u.getTag("LineNumberTag");
 		if(lnTag!=null) {
 			return lnTag.getLineNumber(); 
