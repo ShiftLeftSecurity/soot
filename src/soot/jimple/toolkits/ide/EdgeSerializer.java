@@ -11,7 +11,6 @@ import soot.Body;
 import soot.PatchingChain;
 import soot.SootMethod;
 import soot.Unit;
-import soot.tagkit.Host;
 import soot.tagkit.LineNumberTag;
 import soot.tagkit.SourceLnPosTag;
 
