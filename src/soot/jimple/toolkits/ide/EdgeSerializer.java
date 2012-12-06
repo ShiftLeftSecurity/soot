@@ -5,6 +5,7 @@ import heros.debugsupport.NewEdgeSerializer;
 import heros.debugsupport.SerializableEdgeData;
 
 import java.io.ObjectOutputStream;
+import java.util.NoSuchElementException;
 
 import soot.Body;
 import soot.PatchingChain;
@@ -25,22 +26,48 @@ public class EdgeSerializer<D, V> extends NewEdgeSerializer<soot.SootMethod, D, 
 		return new SerializableEdgeData(method.getDeclaringClass().getName(), getLine(method), getCol(method), getLine(target), getCol(target), f.toString());
 	}
 
-	private int getCol(Host h) {
-		SourceLnPosTag tag = (SourceLnPosTag) h.getTag("SourceLnPosTag");
+	private int getCol(SootMethod m) {
+		if(m.hasActiveBody()) {
+			Body b = m.getActiveBody();
+			PatchingChain<Unit> units = b.getUnits();
+			Unit u = units.getFirst();
+			int col = getCol(u);
+			while(col<0) {
+				try{
+					u = units.getSuccOf(u);
+					col = getCol(u);
+				} catch(NoSuchElementException e) {
+					break;
+				}
+			}
+			return col;
+		}
+		return -1;
+	}
+	
+	private int getCol(Unit u) {
+		SourceLnPosTag tag = (SourceLnPosTag) u.getTag("SourceLnPosTag");
 		if(tag!=null) {
 			return tag.startPos();
 		}
 		return -1;
 	}
 
-	private int getLine(SootMethod h) {
-		if(h.hasActiveBody()) {
-			Body b = h.getActiveBody();
+	private int getLine(SootMethod m) {
+		if(m.hasActiveBody()) {
+			Body b = m.getActiveBody();
 			PatchingChain<Unit> units = b.getUnits();
-			Unit first = units.getFirst();
-			if(first!=null) {
-				return getLine(first);
-			}
+			Unit u = units.getFirst();
+			int line = getLine(u);
+			while(line<0) {
+				try{
+					u = units.getSuccOf(u);
+					line = getLine(u);
+				} catch(NoSuchElementException e) {
+					break;
+				}
+			}		
+			return line;
 		}
 		return -1;
 	}
