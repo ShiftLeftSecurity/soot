@@ -1,5 +1,7 @@
 package soot.jimple.toolkits.ide;
 
+import static heros.debugsupport.SerializableEdgeData.EdgeKind.EDGE_FUNCTION;
+import static heros.debugsupport.SerializableEdgeData.EdgeKind.JUMP_FUNCTION;
 import heros.EdgeFunction;
 import heros.debugsupport.NewEdgeSerializer;
 import heros.debugsupport.SerializableEdgeData;
@@ -22,7 +24,12 @@ public class EdgeSerializer<D, V> extends NewEdgeSerializer<soot.SootMethod, D, 
 
 	@Override
 	public SerializableEdgeData serializeJumpFunction(SootMethod method, D sourceVal,Unit target, D targetVal, EdgeFunction<V> f) {
-		return new SerializableEdgeData(method.getDeclaringClass().getName(), getLine(method), getCol(method), getLine(target), getCol(target), f.toString());
+		return new SerializableEdgeData(JUMP_FUNCTION, method.getDeclaringClass().getName(), getLine(method), getCol(method), getLine(target), getCol(target), f.toString());
+	}
+
+	@Override
+	public SerializableEdgeData serializeEdgeFunction(SootMethod sourceMethod, Unit source, D sourceVal, Unit target, D targetVal) {
+		return new SerializableEdgeData(EDGE_FUNCTION, sourceMethod.getDeclaringClass().getName(), getLine(source), getCol(source), getLine(target), getCol(target), "");
 	}
 
 	private int getCol(SootMethod m) {
