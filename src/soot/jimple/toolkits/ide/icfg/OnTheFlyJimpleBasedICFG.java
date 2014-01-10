@@ -23,6 +23,7 @@ import soot.Scene;
 import soot.SceneTransformer;
 import soot.SootClass;
 import soot.SootMethod;
+import soot.SootResolver;
 import soot.SourceLocator;
 import soot.Transform;
 import soot.Unit;
@@ -120,7 +121,7 @@ public class OnTheFlyJimpleBasedICFG extends AbstractJimpleBasedICFG {
 	
 	protected Body initForMethod(SootMethod m) {
 		Body b = null;
-		if(m.isConcrete()) {
+		if(!m.isAbstract() && !m.isNative()) {
 			SootClass declaringClass = m.getDeclaringClass();
 			ensureClassHasBodies(declaringClass);
 			b = m.retrieveActiveBody();
@@ -138,8 +139,10 @@ public class OnTheFlyJimpleBasedICFG extends AbstractJimpleBasedICFG {
 	}
 
 	private void ensureClassHasBodies(SootClass cl) {
-		if(cl.resolvingLevel()<SootClass.BODIES)
-			Scene.v().forceResolve(cl.getName(), SootClass.BODIES);
+		if(cl.resolvingLevel()<SootClass.BODIES) {
+			SootResolver.v().reResolve(cl,SootClass.BODIES);
+			cl.setApplicationClass();
+		}
 	}
 	
 	@Override
