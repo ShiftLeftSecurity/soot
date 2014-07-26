@@ -1505,7 +1505,8 @@ final class JimpleSource implements MethodSource {
 						// we can ignore it
 				}
 				else
-					throw new RuntimeException("Unknown instruction type: " + type);
+					throw new RuntimeException("Unknown instruction type: " + type+"\n"
+							+ "see http://asm.ow2.org/asm50/javadoc/user/constant-values.html#org.objectweb.asm.tree.AbstractInsnNode.FIELD_INSN");
 			} while ((insn = insn.getNext()) != null);
 		} while (!worklist.isEmpty());
 		conversionWorklist = null;
@@ -1638,11 +1639,7 @@ final class JimpleSource implements MethodSource {
 		for (TryCatchBlockNode tc : tryCatchBlocks)
 			trapHandlers.put(tc.handler, Jimple.v().newStmtBox(null));
 		/* convert instructions */
-		try {
-			convert();
-		} catch (Throwable t) {
-			throw new RuntimeException("Failed to convert " + m, t);
-		}
+		convert();
 		
 		/* build body (add units, locals, traps, etc.) */
 		emitLocals();
