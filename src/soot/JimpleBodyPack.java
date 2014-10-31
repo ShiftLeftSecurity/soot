@@ -78,6 +78,7 @@ public class JimpleBodyPack extends BodyPack
         PackManager.v().getTransform( "jb.lp" ).apply( b );
         PackManager.v().getTransform( "jb.ne" ).apply( b );
         PackManager.v().getTransform( "jb.uce" ).apply( b );
+        PackManager.v().getTransform( "jb.idi" ).apply( b );
                     
         if(Options.v().time())
             Timers.v().stmtCount += b.getUnits().size();

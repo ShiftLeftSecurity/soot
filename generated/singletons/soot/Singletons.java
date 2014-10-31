@@ -953,4 +953,10 @@ public class Singletons {
         return instance_soot_jimple_toolkits_typing_fast_BottomType;
     }
 
+    private soot.jimple.toolkits.invoke.InvokeDynamicForLambdaInliner instance_soot_jimple_toolkits_invoke_InvokeDynamicInliner;
+    public soot.jimple.toolkits.invoke.InvokeDynamicForLambdaInliner soot_jimple_toolkits_invoke_InvokeDynamicInliner() {
+        if( instance_soot_jimple_toolkits_invoke_InvokeDynamicInliner == null ) instance_soot_jimple_toolkits_invoke_InvokeDynamicInliner = new soot.jimple.toolkits.invoke.InvokeDynamicForLambdaInliner( g );
+        return instance_soot_jimple_toolkits_invoke_InvokeDynamicInliner;
+    }
+
 }

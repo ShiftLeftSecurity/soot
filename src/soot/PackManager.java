@@ -83,6 +83,7 @@ import soot.jimple.toolkits.base.RenameDuplicatedClasses;
 import soot.jimple.toolkits.callgraph.CHATransformer;
 import soot.jimple.toolkits.callgraph.CallGraphPack;
 import soot.jimple.toolkits.callgraph.UnreachableMethodTransformer;
+import soot.jimple.toolkits.invoke.InvokeDynamicForLambdaInliner;
 import soot.jimple.toolkits.invoke.StaticInliner;
 import soot.jimple.toolkits.invoke.StaticMethodBinder;
 import soot.jimple.toolkits.pointer.CastCheckEliminatorDumper;
@@ -158,6 +159,7 @@ public class PackManager {
             p.add(new Transform("jb.lp", LocalPacker.v()));
             p.add(new Transform("jb.ne", NopEliminator.v()));
             p.add(new Transform("jb.uce", UnreachableCodeEliminator.v()));
+            p.add(new Transform("jb.idi", InvokeDynamicForLambdaInliner.v()));
         }
 
         // Java to Jimple - Jimple body creation
