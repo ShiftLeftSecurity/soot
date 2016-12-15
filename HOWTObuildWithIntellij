@@ -1,0 +1,10 @@
+In order to build the SOOT library perform the following steps:
+1. Clone our internal SOOT repository from git@github.com:ShiftLeftSecurity/soot.git.
+2. Start Intellij, choose "import project" and select "pom.xml" located in SOOTs to level directory.
+   Click "Next" "Next" "Finish".
+3. In Intellij go to "File->Project Structure" and select "Artifacts" on the left.
+4. Select "+" on the top of the "Project Structure" windows, than click "Jars->From Modules with Dependencies".
+5. Select "+->Directory Content" under the "Output Layout" category and select the "src" directory of SOOT.
+6. Click "OK" to close the window
+7. Click "Build->Build Artifacts" and "soot:jar->Build".
+8. Get your fresh soot.jar from out/artifacts/soot_jar/soot.jar.
