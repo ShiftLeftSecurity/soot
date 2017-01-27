@@ -30,7 +30,7 @@ public class SimpleExtendedLocalDefsTest {
   public void buildClassFile() throws IOException, InterruptedException {
     String[] command = {"bash", "-c", "javac -g tests/soot/toolkits/scalar/ExtendedLocalDefsTestCode.java"};
     new ProcessBuilder().inheritIO().command(command).start();
-    // Shit we need to sleep here to wait for the output file.
+    // We need to sleep here to wait for the output file.
     // Otherwise the test run on old class files.
     sleep(500);
   }
