@@ -472,7 +472,7 @@ public class SimpleExtendedLocalDefs implements ExtendedLocalDefs {
 
 		Arrays.fill(unitList, emptyList());
 
-		//boolean omitSSA = mode == FlowAnalysisMode.OmitSSA;
+		boolean omitSSA = mode == FlowAnalysisMode.OmitSSA;
 		boolean doFlowAnalsis = false;
 
 		int units = 0;
@@ -487,11 +487,11 @@ public class SimpleExtendedLocalDefs implements ExtendedLocalDefs {
 					switch (unitList[lno].size()) {
 					case 0:
 						unitList[lno] = singletonList(unit);
-						//if (omitSSA)
-						//	units++;
+						if (omitSSA)
+							units++;
 						break;
 					case 1:
-						//if (!omitSSA)
+						if (!omitSSA)
 							units++;
 						unitList[lno] = new ArrayList<Unit>(unitList[lno]);
 						doFlowAnalsis = true;
@@ -506,7 +506,7 @@ public class SimpleExtendedLocalDefs implements ExtendedLocalDefs {
 		}
 
 		if (doFlowAnalsis && mode != FlowAnalysisMode.FlowInsensitive) {
-			def = new FlowAssignment(graph, trackables, unitList, units, false);
+			def = new FlowAssignment(graph, trackables, unitList, units, omitSSA);
 		} else {
 			def = new StaticSingleAssignment(trackables, unitList);
 		}
