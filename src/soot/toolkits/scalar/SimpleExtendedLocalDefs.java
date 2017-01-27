@@ -408,16 +408,12 @@ public class SimpleExtendedLocalDefs implements ExtendedLocalDefs {
 	}
 
 	public SimpleExtendedLocalDefs(UnitGraph graph, FlowAnalysisMode mode) {
-		this(graph, graph.getBody().getLocals(), mode);
+		this(graph, getTrackables(graph), mode);
 	}
 
-	SimpleExtendedLocalDefs(UnitGraph graph, Collection<Local> locals,
+	SimpleExtendedLocalDefs(UnitGraph graph, Collection<Object> trackables,
                             FlowAnalysisMode mode) {
-		this(graph, locals.toArray(new Local[locals.size()]), mode);
-	}
-
-	SimpleExtendedLocalDefs(UnitGraph graph, Local[] locals, boolean omitSSA) {
-		this(graph, locals, omitSSA ? FlowAnalysisMode.OmitSSA : FlowAnalysisMode.Automatic);
+		this(graph, trackables.toArray(new Object[trackables.size()]), mode);
 	}
 
 	/**
@@ -438,20 +434,10 @@ public class SimpleExtendedLocalDefs implements ExtendedLocalDefs {
 		 */
 		FlowInsensitive
 	}
-	
-	SimpleExtendedLocalDefs(UnitGraph graph, Local[] locals, FlowAnalysisMode mode) {
+
+	SimpleExtendedLocalDefs(UnitGraph graph, Object[] trackables, FlowAnalysisMode mode) {
 		if (Options.v().time())
 			Timers.v().defsTimer.start();
-
-		List<Object> fieldRefs = getFieldRefs(graph);
-		Object[] trackables = new Object[locals.length + fieldRefs.size()];
-		int pos;
-		for (pos = 0; pos < locals.length; pos++) {
-			trackables[pos] = locals[pos];
-		}
-		for (Iterator<Object> instanceFieldRefIter = fieldRefs.iterator(); pos < trackables.length; pos++) {
-			trackables[pos] = instanceFieldRefIter.next();
-		}
 
 		int number = 0;
 		for (Object object : trackables) {
@@ -466,7 +452,7 @@ public class SimpleExtendedLocalDefs implements ExtendedLocalDefs {
 	}
 
 	private void init(DirectedGraph<Unit> graph, Object[] trackables, FlowAnalysisMode mode) {
-	  	// Stores for each local in which units it is defined.
+	  	// Stores for each trackable in which units it is defined.
 		@SuppressWarnings("unchecked")
 		List<Unit>[] unitList = (List<Unit>[]) new List[trackables.length];
 
@@ -532,8 +518,15 @@ public class SimpleExtendedLocalDefs implements ExtendedLocalDefs {
 		return def.getDefsOf(local);
 	}
 
-	private List<Object> getFieldRefs(UnitGraph graph) {
-		List<Object> instanceFieldRefs = new LinkedList<>();
+	static private Collection<Object> getTrackables(UnitGraph graph) {
+		Collection<Object> trackables = new LinkedList<>();
+		trackables.addAll(graph.getBody().getLocals());
+		trackables.addAll(getFieldRefs(graph));
+		return trackables;
+	}
+
+	private static Collection<Object> getFieldRefs(UnitGraph graph) {
+		Collection<Object> instanceFieldRefs = new LinkedList<>();
 		for (ValueBox valueBox : graph.getBody().getDefBoxes())
 		{
 			if (valueBox.getValue() instanceof FieldRef) {
