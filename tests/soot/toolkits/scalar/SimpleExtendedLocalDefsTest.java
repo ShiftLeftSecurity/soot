@@ -2,21 +2,17 @@ package soot.toolkits.scalar;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.testng.annotations.BeforeClass;
 import soot.Body;
 import soot.BodyTransformer;
 import soot.Local;
 import soot.Main;
 import soot.PackManager;
 import soot.SootField;
-import soot.SootFieldRef;
 import soot.Transform;
 import soot.Unit;
 import soot.Value;
 import soot.ValueBox;
-import soot.jimple.FieldRef;
 import soot.jimple.InstanceFieldRef;
-import soot.jimple.StaticFieldRef;
 import soot.options.Options;
 import soot.toolkits.graph.ExceptionalUnitGraph;
 import soot.toolkits.graph.UnitGraph;
@@ -28,7 +24,7 @@ import java.util.Map;
 
 import static java.lang.Thread.sleep;
 
-public class ExtendedLocalDefsTest {
+public class SimpleExtendedLocalDefsTest {
   @Before
   public void buildClassFile() throws IOException, InterruptedException {
     String[] command = {"bash", "-c", "javac -g tests/soot/toolkits/scalar/ExtendedLocalDefsTestCode.java"};
@@ -45,7 +41,7 @@ public class ExtendedLocalDefsTest {
             protected void internalTransform(Body b, String phaseName, Map<String, String> options) {
               if (b.getMethod().getName().equals("testMethod")) {
                 UnitGraph graph = new ExceptionalUnitGraph(b);
-                ExtendedLocalDefs localDefs = new ExtendedLocalDefs(graph);
+                SimpleExtendedLocalDefs localDefs = new SimpleExtendedLocalDefs(graph);
 
                 for (Unit unit : b.getUnits()) {
                   for (ValueBox valueBox : unit.getUseBoxes()) {
