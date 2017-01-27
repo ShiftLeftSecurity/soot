@@ -25,29 +25,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import soot.IdentityUnit;
 import soot.Local;
-import soot.SootField;
-import soot.SootFieldRef;
 import soot.Timers;
 import soot.Trap;
-import soot.Type;
 import soot.Unit;
-import soot.UnitPrinter;
 import soot.Value;
 import soot.ValueBox;
-import soot.baf.Inst;
+import soot.jimple.FieldRef;
 import soot.jimple.InstanceFieldRef;
-import soot.jimple.toolkits.infoflow.FakeJimpleLocal;
 import soot.options.Options;
 import soot.toolkits.graph.DirectedGraph;
 import soot.toolkits.graph.ExceptionalGraph;
@@ -67,27 +59,41 @@ public class ExtendedLocalDefs implements GeneralDefs {
 
 		@Override
 		public int hashCode() {
-			if(object instanceof InstanceFieldRef) {
-				InstanceFieldRef fieldRef = (InstanceFieldRef) object;
-				return fieldRef.getBase().hashCode() + fieldRef.getField().hashCode();
+  		  	if (object instanceof FieldRef) {
+  		  		FieldRef fieldRef = (FieldRef) object;
+  		  		int hashCode = fieldRef.getField().hashCode();
+
+				if(object instanceof InstanceFieldRef) {
+					InstanceFieldRef instanceFieldRef = (InstanceFieldRef) object;
+					hashCode += instanceFieldRef.getBase().hashCode();
+				}
+				return hashCode;
 			}
 			return object.hashCode();
 		}
 
 		@Override
 		public boolean equals(Object other) {
-  			if (other instanceof ObjectWrapper) {
-  			  	ObjectWrapper otherWrapper = (ObjectWrapper)other;
-				if (object instanceof InstanceFieldRef && otherWrapper.object instanceof InstanceFieldRef) {
-					InstanceFieldRef fieldRef = (InstanceFieldRef) object;
-					InstanceFieldRef otherFieldRef = (InstanceFieldRef) otherWrapper.object;
-					return fieldRef.getBase().equals(otherFieldRef.getBase())
-							&& fieldRef.getField().equals(otherFieldRef.getField());
+			if (other instanceof ObjectWrapper) {
+				ObjectWrapper otherWrapper = (ObjectWrapper) other;
+				if (object.getClass() == otherWrapper.object.getClass() &&
+						object instanceof FieldRef) {
+					boolean equal;
+					FieldRef fieldRef = (FieldRef) object;
+					FieldRef otherFieldRef = (FieldRef) otherWrapper.object;
+					equal = fieldRef.getField().equals(otherFieldRef.getField());
+
+					if (equal && object instanceof InstanceFieldRef) {
+						InstanceFieldRef instanceFieldRef= (InstanceFieldRef) object;
+						InstanceFieldRef otherIntanceFieldRef = (InstanceFieldRef) otherWrapper.object;
+						equal = instanceFieldRef.getBase().equals(otherIntanceFieldRef.getBase());
+					}
+					return equal;
 				}
 				return object.equals(otherWrapper.object);
 			}
 			else {
-  				return false;
+				return false;
 			}
 		}
 
@@ -343,7 +349,7 @@ public class ExtendedLocalDefs implements GeneralDefs {
 	}
 
 	private static boolean isOfTrackedType(Value v) {
-		return v instanceof Local || v instanceof InstanceFieldRef;
+		return v instanceof Local || v instanceof FieldRef;
 	}
 
 	private GeneralDefs def;
@@ -393,13 +399,13 @@ public class ExtendedLocalDefs implements GeneralDefs {
 		if (Options.v().time())
 			Timers.v().defsTimer.start();
 
-		List<Object> instanceFieldRefs = getInstanceFieldRefs(graph);
-		Object[] trackables = new Object[locals.length + instanceFieldRefs.size()];
+		List<Object> fieldRefs = getFieldRefs(graph);
+		Object[] trackables = new Object[locals.length + fieldRefs.size()];
 		int pos;
 		for (pos = 0; pos < locals.length; pos++) {
 			trackables[pos] = locals[pos];
 		}
-		for (Iterator<Object> instanceFieldRefIter = instanceFieldRefs.iterator(); pos < trackables.length; pos++) {
+		for (Iterator<Object> instanceFieldRefIter = fieldRefs.iterator(); pos < trackables.length; pos++) {
 			trackables[pos] = instanceFieldRefIter.next();
 		}
 
@@ -472,15 +478,13 @@ public class ExtendedLocalDefs implements GeneralDefs {
 		return def.getDefsOf(object);
 	}
 
-	private List<Object> getInstanceFieldRefs(UnitGraph graph) {
+	private List<Object> getFieldRefs(UnitGraph graph) {
 		List<Object> instanceFieldRefs = new LinkedList<>();
 		for (ValueBox valueBox : graph.getBody().getDefBoxes())
 		{
-			if (valueBox.getValue() instanceof InstanceFieldRef) {
-				InstanceFieldRef instanceFieldRef = (InstanceFieldRef) valueBox.getValue();
-				if (instanceFieldRef.getBase() instanceof Local) {
-					instanceFieldRefs.add(instanceFieldRef);
-				}
+			if (valueBox.getValue() instanceof FieldRef) {
+				FieldRef fieldRef = (FieldRef) valueBox.getValue();
+				instanceFieldRefs.add(fieldRef);
 			}
 		}
 		return instanceFieldRefs;
