@@ -59,44 +59,55 @@ public class ExtendedLocalDefs implements GeneralDefs {
 
 		@Override
 		public int hashCode() {
-  		  	if (object instanceof FieldRef) {
-  		  		FieldRef fieldRef = (FieldRef) object;
-  		  		int hashCode = fieldRef.getField().hashCode();
+  		  	int hashCode = hashCode(object, 0);
+  		  	return hashCode;
+		}
 
-				if(object instanceof InstanceFieldRef) {
-					InstanceFieldRef instanceFieldRef = (InstanceFieldRef) object;
-					hashCode += instanceFieldRef.getBase().hashCode();
+		private static int hashCode(Object object, int currentHashCode) {
+			int hashCode = currentHashCode;
+			if (object instanceof FieldRef) {
+				FieldRef fieldRef = (FieldRef) object;
+				hashCode += fieldRef.getField().hashCode();
+				if(fieldRef instanceof InstanceFieldRef) {
+					hashCode = hashCode(((InstanceFieldRef) fieldRef).getBase(), hashCode);
 				}
-				return hashCode;
 			}
-			return object.hashCode();
+			else {
+				hashCode += object.hashCode();
+			}
+			return hashCode;
 		}
 
 		@Override
 		public boolean equals(Object other) {
 			if (other instanceof ObjectWrapper) {
 				ObjectWrapper otherWrapper = (ObjectWrapper) other;
-				if (object.getClass() == otherWrapper.object.getClass() &&
-						object instanceof FieldRef) {
-					boolean equal;
-					FieldRef fieldRef = (FieldRef) object;
-					FieldRef otherFieldRef = (FieldRef) otherWrapper.object;
-					equal = fieldRef.getField().equals(otherFieldRef.getField());
-
-					if (equal && object instanceof InstanceFieldRef) {
-						InstanceFieldRef instanceFieldRef= (InstanceFieldRef) object;
-						InstanceFieldRef otherIntanceFieldRef = (InstanceFieldRef) otherWrapper.object;
-						equal = instanceFieldRef.getBase().equals(otherIntanceFieldRef.getBase());
-					}
-					return equal;
-				}
-				return object.equals(otherWrapper.object);
+				return equals(object, otherWrapper.object);
 			}
 			else {
 				return false;
 			}
 		}
 
+		private static boolean equals(Object unwrappedObject1, Object unwrappedObject2) {
+			boolean equal;
+			if (unwrappedObject1.getClass() == unwrappedObject2.getClass() &&
+					unwrappedObject1 instanceof FieldRef) {
+				FieldRef fieldRef1 = (FieldRef) unwrappedObject1;
+				FieldRef fieldRef2 = (FieldRef) unwrappedObject2;
+				equal = fieldRef1.getField().equals(fieldRef2.getField());
+
+				if (equal && unwrappedObject1 instanceof InstanceFieldRef) {
+					InstanceFieldRef instanceFieldRef1 = (InstanceFieldRef) unwrappedObject1;
+					InstanceFieldRef instanceFieldRef2 = (InstanceFieldRef) unwrappedObject2;
+					equal = equals(instanceFieldRef1.getBase(), instanceFieldRef2.getBase());
+				}
+			}
+			else {
+				equal = unwrappedObject1.equals(unwrappedObject2);
+			}
+			return equal;
+		}
 	}
 	static private class StaticSingleAssignment implements GeneralDefs {
 		final Map<ObjectWrapper, List<Unit>> result;
