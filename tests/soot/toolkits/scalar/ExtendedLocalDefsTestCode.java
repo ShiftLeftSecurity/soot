@@ -13,6 +13,7 @@ public class ExtendedLocalDefsTestCode {
       base.member = i;
       System.out.println(base.member);
     }
+    staticBase.member = 3;
     System.out.println(staticBase.member);
     return base.member;
   }

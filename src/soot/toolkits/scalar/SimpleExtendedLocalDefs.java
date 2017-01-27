@@ -47,7 +47,7 @@ import soot.toolkits.graph.ExceptionalGraph.ExceptionDest;
 import soot.toolkits.graph.UnitGraph;
 
 /**
- * Analysis that provides an implementation of the LocalDefs interface.
+ * Analysis that provides an implementation of the ExtendedLocalDefs interface.
  */
 public class SimpleExtendedLocalDefs implements ExtendedLocalDefs {
   	static class ObjectWrapper {
@@ -126,8 +126,7 @@ public class SimpleExtendedLocalDefs implements ExtendedLocalDefs {
 			}
 		}
 
-		@Override
-		public List<Unit> getDefsOfAt(Object object, Unit s) {
+		private List<Unit> getDefsOfAt(Object object, Unit s) {
 			List<Unit> lst = result.get(new ObjectWrapper(object));
 			if (lst == null)
 				return emptyList();
@@ -136,11 +135,29 @@ public class SimpleExtendedLocalDefs implements ExtendedLocalDefs {
 			return lst;
 		}
 
-		@Override
-		public List<Unit> getDefsOf(Object object) {
+		private List<Unit> getDefsOf(Object object) {
 			return getDefsOfAt(object, null);
 		}
 
+		@Override
+		public List<Unit> getDefsOfAt(FieldRef fieldRef, Unit s) {
+			return getDefsOfAt((Object)fieldRef, s);
+		}
+
+		@Override
+		public List<Unit> getDefsOf(FieldRef fieldRef) {
+			return getDefsOf((Object)fieldRef);
+		}
+
+		@Override
+		public List<Unit> getDefsOfAt(Local local, Unit s) {
+			return getDefsOfAt((Object)local, s);
+		}
+
+		@Override
+		public List<Unit> getDefsOf(Local local) {
+			return getDefsOf((Object)local);
+		}
 	}
 
 	static private class FlowAssignment extends
@@ -238,25 +255,6 @@ public class SimpleExtendedLocalDefs implements ExtendedLocalDefs {
 		}
 
 		@Override
-		public List<Unit> getDefsOfAt(Object object, Unit s) {
-			Integer lno = trackables.get(new ObjectWrapper(object));
-			if (lno == null)
-				return emptyList();
-
-			int from = localRange[lno];
-			int to = localRange[lno + 1];
-			assert from <= to;
-
-			if (from == to) {
-				assert unitList[lno].size() == 1;
-				// both singletonList is immutable
-				return unitList[lno];
-			}
-
-			return getFlowBefore(s).asList(from, to);
-		}
-
-		@Override
 		protected boolean omissible(Unit u) {
 			// avoids temporary creation of iterators (more like micro-tuning)
 			if (u.getDefBoxes().isEmpty())
@@ -346,8 +344,24 @@ public class SimpleExtendedLocalDefs implements ExtendedLocalDefs {
 			throw new UnsupportedOperationException("should never be called");
 		}
 
-		@Override
-		public List<Unit> getDefsOf(Object object) {
+		private List<Unit> getDefsOfAt(Object object, Unit s) {
+			Integer lno = trackables.get(new ObjectWrapper(object));
+			if (lno == null)
+				return emptyList();
+
+			int from = localRange[lno];
+			int to = localRange[lno + 1];
+			assert from <= to;
+
+			if (from == to) {
+				assert unitList[lno].size() == 1;
+				// both singletonList is immutable
+				return unitList[lno];
+			}
+
+			return getFlowBefore(s).asList(from, to);
+		}
+		private List<Unit> getDefsOf(Object object) {
 			List<Unit> defs = new ArrayList<Unit>();
 			for (Unit u : graph) {
 				List<Unit> defsOf = getDefsOfAt(object, u);
@@ -356,7 +370,26 @@ public class SimpleExtendedLocalDefs implements ExtendedLocalDefs {
 			}
 			return defs;
 		}
-		
+
+		@Override
+		public List<Unit> getDefsOfAt(FieldRef fieldRef, Unit s) {
+			return getDefsOfAt((Object)fieldRef, s);
+		}
+
+		@Override
+		public List<Unit> getDefsOf(FieldRef fieldRef) {
+			return getDefsOf((Object)fieldRef);
+		}
+
+		@Override
+		public List<Unit> getDefsOfAt(Local local, Unit s) {
+			return getDefsOfAt((Object)local, s);
+		}
+
+		@Override
+		public List<Unit> getDefsOf(Local local) {
+			return getDefsOf((Object)local);
+		}
 	}
 
 	private static boolean isOfTrackedType(Value v) {
@@ -480,13 +513,23 @@ public class SimpleExtendedLocalDefs implements ExtendedLocalDefs {
 	}
 
 	@Override
-	public List<Unit> getDefsOfAt(Object object, Unit s) {
-		return def.getDefsOfAt(object, s);
+	public List<Unit> getDefsOfAt(FieldRef fieldRef, Unit s) {
+		return def.getDefsOfAt(fieldRef, s);
 	}
 
 	@Override
-	public List<Unit> getDefsOf(Object object) {
-		return def.getDefsOf(object);
+	public List<Unit> getDefsOf(FieldRef fieldRef) {
+		return def.getDefsOf(fieldRef);
+	}
+
+	@Override
+	public List<Unit> getDefsOfAt(Local local, Unit s) {
+		return def.getDefsOfAt(local, s);
+	}
+
+	@Override
+	public List<Unit> getDefsOf(Local local) {
+		return def.getDefsOf(local);
 	}
 
 	private List<Object> getFieldRefs(UnitGraph graph) {

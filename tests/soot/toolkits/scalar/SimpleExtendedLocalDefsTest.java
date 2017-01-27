@@ -12,6 +12,7 @@ import soot.Transform;
 import soot.Unit;
 import soot.Value;
 import soot.ValueBox;
+import soot.jimple.FieldRef;
 import soot.jimple.InstanceFieldRef;
 import soot.options.Options;
 import soot.toolkits.graph.ExceptionalUnitGraph;
@@ -46,9 +47,14 @@ public class SimpleExtendedLocalDefsTest {
                 for (Unit unit : b.getUnits()) {
                   for (ValueBox valueBox : unit.getUseBoxes()) {
                     Value value = valueBox.getValue();
-                    if (value instanceof Local || value instanceof InstanceFieldRef) {
+                    if (value instanceof Local || value instanceof FieldRef) {
                       System.out.println(unit.toString() + ": " + value);
-                      System.out.println(localDefs.getDefsOfAt(value, unit));
+                      if (value instanceof Local) {
+                        System.out.println(localDefs.getDefsOfAt((Local)value, unit));
+                      }
+                      else if (value instanceof FieldRef) {
+                        System.out.println(localDefs.getDefsOfAt((FieldRef) value, unit));
+                      }
                     }
                     if (value instanceof SootField) {
                       //System.out.println(value);
