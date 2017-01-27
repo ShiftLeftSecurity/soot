@@ -90,7 +90,7 @@ public class SimpleExtendedLocalDefs implements ExtendedLocalDefs {
 
 		private static boolean equals(Object unwrappedObject1, Object unwrappedObject2) {
 			boolean equal;
-			if (unwrappedObject1.getClass() == unwrappedObject2.getClass() &&
+			if (unwrappedObject1.getClass().equals(unwrappedObject2.getClass()) &&
 					unwrappedObject1 instanceof FieldRef) {
 				FieldRef fieldRef1 = (FieldRef) unwrappedObject1;
 				FieldRef fieldRef2 = (FieldRef) unwrappedObject2;
