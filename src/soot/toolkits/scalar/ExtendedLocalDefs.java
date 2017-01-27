@@ -45,6 +45,7 @@ import soot.Unit;
 import soot.UnitPrinter;
 import soot.Value;
 import soot.ValueBox;
+import soot.baf.Inst;
 import soot.jimple.InstanceFieldRef;
 import soot.jimple.toolkits.infoflow.FakeJimpleLocal;
 import soot.options.Options;
@@ -52,35 +53,65 @@ import soot.toolkits.graph.DirectedGraph;
 import soot.toolkits.graph.ExceptionalGraph;
 import soot.toolkits.graph.ExceptionalGraph.ExceptionDest;
 import soot.toolkits.graph.UnitGraph;
-import soot.util.Chain;
-import soot.util.HashChain;
-import soot.util.Switch;
-import sun.security.jca.GetInstance;
 
 /**
  * Analysis that provides an implementation of the LocalDefs interface.
  */
-public class ExtendedLocalDefs implements LocalDefs {
-	static private class StaticSingleAssignment implements LocalDefs {
-		final Map<Local, List<Unit>> result;
+public class ExtendedLocalDefs implements GeneralDefs {
+  	static class ObjectWrapper {
+  		private final Object object;
 
-		StaticSingleAssignment(Local[] locals, List<Unit>[] unitList) {
-			assert locals.length == unitList.length;
+  		ObjectWrapper(Object object) {
+  			this.object = object;
+		}
 
-			final int N = locals.length;
-			result = new HashMap<Local, List<Unit>>((N * 3) / 2 + 7);
+		@Override
+		public int hashCode() {
+			if(object instanceof InstanceFieldRef) {
+				InstanceFieldRef fieldRef = (InstanceFieldRef) object;
+				return fieldRef.getBase().hashCode() + fieldRef.getField().hashCode();
+			}
+			return object.hashCode();
+		}
+
+		@Override
+		public boolean equals(Object other) {
+  			if (other instanceof ObjectWrapper) {
+  			  	ObjectWrapper otherWrapper = (ObjectWrapper)other;
+				if (object instanceof InstanceFieldRef && otherWrapper.object instanceof InstanceFieldRef) {
+					InstanceFieldRef fieldRef = (InstanceFieldRef) object;
+					InstanceFieldRef otherFieldRef = (InstanceFieldRef) otherWrapper.object;
+					return fieldRef.getBase().equals(otherFieldRef.getBase())
+							&& fieldRef.getField().equals(otherFieldRef.getField());
+				}
+				return object.equals(otherWrapper.object);
+			}
+			else {
+  				return false;
+			}
+		}
+
+	}
+	static private class StaticSingleAssignment implements GeneralDefs {
+		final Map<ObjectWrapper, List<Unit>> result;
+
+		StaticSingleAssignment(Object[] trackables, List<Unit>[] unitList) {
+			assert trackables.length == unitList.length;
+
+			final int N = trackables.length;
+			result = new HashMap<>((N * 3) / 2 + 7);
 
 			for (int i = 0; i < N; i++) {
 				if (unitList[i].isEmpty())
 					continue;
 				assert unitList[i].size() == 1;
-				result.put(locals[i], unitList[i]);
+				result.put(new ObjectWrapper(trackables[i]), unitList[i]);
 			}
 		}
 
 		@Override
-		public List<Unit> getDefsOfAt(Local l, Unit s) {
-			List<Unit> lst = result.get(l);
+		public List<Unit> getDefsOfAt(Object object, Unit s) {
+			List<Unit> lst = result.get(new ObjectWrapper(object));
 			if (lst == null)
 				return emptyList();
 
@@ -89,15 +120,15 @@ public class ExtendedLocalDefs implements LocalDefs {
 		}
 
 		@Override
-		public List<Unit> getDefsOf(Local l) {
-			return getDefsOfAt(l, null);
+		public List<Unit> getDefsOf(Object object) {
+			return getDefsOfAt(object, null);
 		}
 
 	}
 
 	static private class FlowAssignment extends
 			ForwardFlowAnalysis<Unit, FlowAssignment.FlowBitSet> implements
-			LocalDefs {
+			GeneralDefs {
 		class FlowBitSet extends BitSet {
 			private static final long serialVersionUID = -8348696077189400377L;
 
@@ -146,34 +177,31 @@ public class ExtendedLocalDefs implements LocalDefs {
 			}
 		}
 
-		final Map<Local, Integer> locals;
+		final Map<ObjectWrapper, Integer> trackables;
 		final List<Unit>[] unitList;
 		final int[] localRange;
 		final Unit[] universe;
 
 		private Map<Unit, Integer> indexOfUnit;
-		private final Map<Local, Integer> numberHash;
 
-		FlowAssignment(DirectedGraph<Unit> graph, Local[] locals,
-				List<Unit>[] unitList, int units, boolean omitSSA,
-					   HashMap<Local, Integer> numberHash) {
+		FlowAssignment(DirectedGraph<Unit> graph, Object[] trackables,
+				List<Unit>[] unitList, int units, boolean omitSSA) {
 			super(graph);
 
-			final int N = locals.length;
+			final int N = trackables.length;
 
-			this.locals = new HashMap<Local, Integer>((N * 3) / 2 + 7);
+			this.trackables = new HashMap<>((N * 3) / 2 + 7);
 			this.unitList = unitList;
 
 			universe = new Unit[units];
 			indexOfUnit = new HashMap<Unit, Integer>(units);
-			this.numberHash = numberHash;
 
 			localRange = new int[N + 1];
 			for (int j = 0, i = 0; i < N; localRange[++i] = j) {
 				if (unitList[i].isEmpty())
 					continue;
 
-				this.locals.put(locals[i], i);
+				this.trackables.put(new ObjectWrapper(trackables[i]), i);
 
 				if (unitList[i].size() >= 2) {
 					for (Unit u : unitList[i]) {
@@ -193,8 +221,8 @@ public class ExtendedLocalDefs implements LocalDefs {
 		}
 
 		@Override
-		public List<Unit> getDefsOfAt(Local l, Unit s) {
-			Integer lno = locals.get(l);
+		public List<Unit> getDefsOfAt(Object object, Unit s) {
+			Integer lno = trackables.get(new ObjectWrapper(object));
 			if (lno == null)
 				return emptyList();
 
@@ -219,7 +247,7 @@ public class ExtendedLocalDefs implements LocalDefs {
 			for (ValueBox vb : u.getDefBoxes()) {
 				Value v = vb.getValue();
 				if (isOfTrackedType(v)) {
-					int lno = numberHash.get(v);
+					int lno = trackables.get(new ObjectWrapper(v));
 					return (localRange[lno] == localRange[lno + 1]);
 				}
 			}
@@ -257,7 +285,7 @@ public class ExtendedLocalDefs implements LocalDefs {
 			for (ValueBox vb : unit.getDefBoxes()) {
 				Value v = vb.getValue();
 				if (isOfTrackedType(v)) {
-					int lno = numberHash.get(v);
+					int lno = trackables.get(new ObjectWrapper(v));
 
 					int from = localRange[lno];
 					int to = localRange[1 + lno];
@@ -302,10 +330,10 @@ public class ExtendedLocalDefs implements LocalDefs {
 		}
 
 		@Override
-		public List<Unit> getDefsOf(Local l) {
+		public List<Unit> getDefsOf(Object object) {
 			List<Unit> defs = new ArrayList<Unit>();
 			for (Unit u : graph) {
-				List<Unit> defsOf = getDefsOfAt(l, u);
+				List<Unit> defsOf = getDefsOfAt(object, u);
 				if (defsOf != null)
 					defs.addAll(defsOf);
 			}
@@ -318,97 +346,8 @@ public class ExtendedLocalDefs implements LocalDefs {
 		return v instanceof Local || v instanceof InstanceFieldRef;
 	}
 
-	class FakeLocal implements Local {
-		private Local base;
-		private SootFieldRef fieldRef;
-		private String name;
-		private Type type;
-
-		private int number;
-
-		FakeLocal(Local base, SootFieldRef fieldRef) {
-			this.base = base;
-			this.fieldRef = fieldRef;
-			name = base.getName() + "." + fieldRef.name();
-		}
-
-		private FakeLocal(Local base, SootFieldRef fieldRef, String name, Type type) {
-			this.base = base;
-			this.fieldRef = fieldRef;
-			this.name = name;
-			this.type = type;
-		}
-
-		@Override
-		public void setNumber(int number) {
-			this.number = number;
-		}
-
-		@Override
-		public int getNumber() {
-			return number;
-		}
-
-		@Override
-		public void apply(Switch sw) {
-			// TODO
-		}
-
-		@Override
-		public boolean equivTo(Object o) {
-			if (o instanceof FakeLocal) {
-				FakeLocal other = (FakeLocal)o;
-				return other.base.equivTo(base) && other.fieldRef.equals(fieldRef);
-			}
-			else {
-				return false;
-			}
-		}
-
-		@Override
-		public int equivHashCode() {
-			return base.hashCode() + fieldRef.hashCode();
-		}
-
-		@Override
-		public String getName() {
-			return name;
-		}
-
-		@Override
-		public void setName(String name) {
-		    this.name = name;
-		}
-
-		@Override
-		public void setType(Type t) {
-			this.type = t;
-		}
-
-		@Override
-		public List<ValueBox> getUseBoxes() {
-			return Collections.emptyList();
-		}
-
-		@Override
-		public Type getType() {
-		  	return type;
-		}
-
-		@Override
-		public Object clone() {
-			return new FakeLocal(base, fieldRef, name, type);
-		}
-
-		@Override
-		public void toString(UnitPrinter up) {
-			up.local(base);
-			up.fieldRef(fieldRef);
-		}
-	}
-
-	private LocalDefs def;
-	private HashMap<Local, Integer> numberHash = new HashMap<>();
+	private GeneralDefs def;
+	private HashMap<ObjectWrapper, Integer> numberHash = new HashMap<>();
 
 	/**
 	 * 
@@ -454,33 +393,32 @@ public class ExtendedLocalDefs implements LocalDefs {
 		if (Options.v().time())
 			Timers.v().defsTimer.start();
 
-		Chain<Local> fakeLocals = getInstanceFieldRefs(graph);
-		Local[] localsClone = locals;
-		locals = new Local[locals.length + fakeLocals.size()];
+		List<Object> instanceFieldRefs = getInstanceFieldRefs(graph);
+		Object[] trackables = new Object[locals.length + instanceFieldRefs.size()];
 		int pos;
-		for (pos = 0; pos < localsClone.length; pos++) {
-			locals[pos] = localsClone[pos];
+		for (pos = 0; pos < locals.length; pos++) {
+			trackables[pos] = locals[pos];
 		}
-		for (Iterator<Local> fakeLocalIter = fakeLocals.iterator(); pos < locals.length; pos++) {
-			locals[pos] = fakeLocalIter.next();
+		for (Iterator<Object> instanceFieldRefIter = instanceFieldRefs.iterator(); pos < trackables.length; pos++) {
+			trackables[pos] = instanceFieldRefIter.next();
 		}
 
 		int number = 0;
-		for (Local local : locals) {
-			numberHash.put(local, number);
+		for (Object object : trackables) {
+			numberHash.put(new ObjectWrapper(object), number);
 			number++;
 		}
 
-		init(graph, locals, mode);
+		init(graph, trackables, mode);
 
 		if (Options.v().time())
 			Timers.v().defsTimer.end();
 	}
 
-	private void init(DirectedGraph<Unit> graph, Local[] locals, FlowAnalysisMode mode) {
+	private void init(DirectedGraph<Unit> graph, Object[] trackables, FlowAnalysisMode mode) {
 	  	// Stores for each local in which units it is defined.
 		@SuppressWarnings("unchecked")
-		List<Unit>[] unitList = (List<Unit>[]) new List[locals.length];
+		List<Unit>[] unitList = (List<Unit>[]) new List[trackables.length];
 
 		Arrays.fill(unitList, emptyList());
 
@@ -494,7 +432,7 @@ public class ExtendedLocalDefs implements LocalDefs {
 			for (ValueBox box : unit.getDefBoxes()) {
 				Value v = box.getValue();
 				if (isOfTrackedType(v)) {
-					int lno = numberHash.get(v);
+					int lno = numberHash.get(new ObjectWrapper(v));
 
 					switch (unitList[lno].size()) {
 					case 0:
@@ -518,35 +456,32 @@ public class ExtendedLocalDefs implements LocalDefs {
 		}
 
 		if (doFlowAnalsis && mode != FlowAnalysisMode.FlowInsensitive) {
-			def = new FlowAssignment(graph, locals, unitList, units, false, numberHash);
+			def = new FlowAssignment(graph, trackables, unitList, units, false);
 		} else {
-			def = new StaticSingleAssignment(locals, unitList);
+			def = new StaticSingleAssignment(trackables, unitList);
 		}
 	}
 
 	@Override
-	public List<Unit> getDefsOfAt(Local l, Unit s) {
-		return def.getDefsOfAt(l, s);
+	public List<Unit> getDefsOfAt(Object object, Unit s) {
+		return def.getDefsOfAt(object, s);
 	}
 
 	@Override
-	public List<Unit> getDefsOf(Local l) {
-		return def.getDefsOf(l);
+	public List<Unit> getDefsOf(Object object) {
+		return def.getDefsOf(object);
 	}
 
-	private Chain<Local> getInstanceFieldRefs(UnitGraph graph) {
-		Chain<Local> instanceFieldRefs = new HashChain<>();
+	private List<Object> getInstanceFieldRefs(UnitGraph graph) {
+		List<Object> instanceFieldRefs = new LinkedList<>();
 		for (ValueBox valueBox : graph.getBody().getDefBoxes())
 		{
 			if (valueBox.getValue() instanceof InstanceFieldRef) {
 				InstanceFieldRef instanceFieldRef = (InstanceFieldRef) valueBox.getValue();
 				if (instanceFieldRef.getBase() instanceof Local) {
-					Local base = (Local) instanceFieldRef.getBase();
-					instanceFieldRefs.add(
-							new FakeLocal(base, instanceFieldRef.getFieldRef()));
+					instanceFieldRefs.add(instanceFieldRef);
 				}
 			}
-			valueBox.getValue();
 		}
 		return instanceFieldRefs;
 	}
