@@ -1,6 +1,6 @@
 //package soot.toolkits.scalar;
 
-public class ExtendedLocalDefsTestCode {
+public class ExtendedSimpleLocalDefsTestCode {
   static class Base {
     int member;
   }
