@@ -48,7 +48,7 @@ import soot.toolkits.graph.UnitGraph;
 /**
  * Analysis that provides an implementation of the ExtendedLocalDefs interface.
  */
-public class SimpleExtendedLocalDefs implements ExtendedLocalDefs {
+public class ExtendedSimpleLocalDefs implements ExtendedLocalDefs {
   	static class ObjectWrapper {
   		private final Object object;
 
@@ -402,15 +402,15 @@ public class SimpleExtendedLocalDefs implements ExtendedLocalDefs {
 	 * 
 	 * @param graph
 	 */
-	public SimpleExtendedLocalDefs(UnitGraph graph) {
+	public ExtendedSimpleLocalDefs(UnitGraph graph) {
 		this(graph, FlowAnalysisMode.Automatic);
 	}
 
-	public SimpleExtendedLocalDefs(UnitGraph graph, FlowAnalysisMode mode) {
+	public ExtendedSimpleLocalDefs(UnitGraph graph, FlowAnalysisMode mode) {
 		this(graph, getTrackables(graph), mode);
 	}
 
-	SimpleExtendedLocalDefs(UnitGraph graph, Collection<Object> trackables,
+	ExtendedSimpleLocalDefs(UnitGraph graph, Collection<Object> trackables,
                             FlowAnalysisMode mode) {
 		this(graph, trackables.toArray(new Object[trackables.size()]), mode);
 	}
@@ -434,7 +434,7 @@ public class SimpleExtendedLocalDefs implements ExtendedLocalDefs {
 		FlowInsensitive
 	}
 
-	SimpleExtendedLocalDefs(UnitGraph graph, Object[] trackables, FlowAnalysisMode mode) {
+	ExtendedSimpleLocalDefs(UnitGraph graph, Object[] trackables, FlowAnalysisMode mode) {
 		if (Options.v().time())
 			Timers.v().defsTimer.start();
 
