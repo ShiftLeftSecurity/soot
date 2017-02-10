@@ -5,7 +5,7 @@
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>ca.mcgill.sable</groupId>
-  <artifactId>soot</artifactId>
+  <artifactId>soot-shiftleft</artifactId>
   
   <name>Soot</name>
   <version>2016-07-27</version>
