@@ -1,7 +1,10 @@
 <?xml version="1.0"?>
 
 <project xmlns:ivy="antlib:org.apache.ivy.ant" default="compile" name="Soot Build File">
-    <property file="ant.settings"/>
+
+  <groupId>soot</groupId>
+
+  <property file="ant.settings"/>
 
     <property name="ivy.install.version" value="2.1.0-rc2" />
     <condition property="ivy.home" value="${env.IVY_HOME}">
