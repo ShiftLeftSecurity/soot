@@ -362,4 +362,17 @@
 		</repository>
 	</repositories>
 
+	<distributionManagement>
+		<repository>
+			<id>shiftleft-artifactory</id>
+			<name>shiftleft releases</name>
+			<url>https://shiftleft.jfrog.io/shiftleft/libs-release-local</url>
+		</repository>
+		<snapshotRepository>
+			<id>shiftleft-artifactory</id>
+			<name>shiftleft releases</name>
+			<url>https://shiftleft.jfrog.io/shiftleft/libs-snapshot-local</url>
+		</snapshotRepository>
+	</distributionManagement>
+
 </project>
