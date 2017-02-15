@@ -152,10 +152,14 @@ public class AugEvalFunction implements IEvalFunction
 					r = t;
 				else if (t.getSootClass().isPhantom() || r.getSootClass().isPhantom())
 					r = throwableType;
-				else
+				else {
 					/* In theory, we could have multiple exception types 
 					pointing here. The JLS requires the exception parameter be a *subclass* of Throwable, so we do not need to worry about multiple inheritance. */
 					r = BytecodeHierarchy.lcsc(r, t, throwableType);
+					if (r == null) {
+						r = Scene.v().getRefType("java.lang.Throwable");
+					}
+				}
 			}
 			
 			if ( r == null )
