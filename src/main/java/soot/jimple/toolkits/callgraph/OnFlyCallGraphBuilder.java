@@ -201,7 +201,7 @@ public final class OnFlyCallGraphBuilder {
 		this.rm = rm;
 		worklist = rm.listener();
 		options = new CGOptions(PhaseOptions.v().getPhaseOptions("cg"));
-		if (!options.verbose()) {
+		if (options.verbose()) {
 			G.v().out.println(
 					"[Call Graph] For information on where the call graph may be incomplete, use the verbose option to the cg phase.");
 		}

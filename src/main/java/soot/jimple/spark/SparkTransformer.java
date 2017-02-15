@@ -83,14 +83,14 @@ public class SparkTransformer extends SceneTransformer
         final PAG pag = b.setup( opts );
         b.build();
         Date endBuild = new Date();
-        reportTime( "Pointer Assignment Graph", startBuild, endBuild );
+        reportTime( "Pointer Assignment Graph", startBuild, endBuild, opts);
         if( opts.force_gc() ) doGC();
 
         // Build type masks
         Date startTM = new Date();
         pag.getTypeManager().makeTypeMask();
         Date endTM = new Date();
-        reportTime( "Type masks", startTM, endTM );
+        reportTime( "Type masks", startTM, endTM, opts );
         if( opts.force_gc() ) doGC();
 
         if( opts.verbose() ) {
@@ -115,7 +115,7 @@ public class SparkTransformer extends SceneTransformer
             pag.cleanUpMerges();
         }
         Date endSimplify = new Date();
-        reportTime( "Pointer Graph simplified", startSimplify, endSimplify );
+        reportTime( "Pointer Graph simplified", startSimplify, endSimplify, opts);
         if( opts.force_gc() ) doGC();
 
         // Dump pag
@@ -152,8 +152,8 @@ public class SparkTransformer extends SceneTransformer
 
         if( propagator[0] != null ) propagator[0].propagate();
         Date endProp = new Date();
-        reportTime( "Propagation", startProp, endProp );
-        reportTime( "Solution found", startSimplify, endProp );
+        reportTime( "Propagation", startProp, endProp, opts);
+        reportTime( "Solution found", startSimplify, endProp, opts);
 
         if( opts.force_gc() ) doGC();
         
@@ -195,7 +195,7 @@ public class SparkTransformer extends SceneTransformer
         		Date startOnDemand = new Date();
         		PointsToAnalysis onDemandAnalysis = DemandCSPointsTo.makeWithBudget(opts.traversal(), opts.passes(), opts.lazy_pts());
         		Date endOndemand = new Date();
-        		reportTime( "Initialized on-demand refinement-based context-sensitive analysis", startOnDemand, endOndemand );
+        		reportTime( "Initialized on-demand refinement-based context-sensitive analysis", startOnDemand, endOndemand, opts);
         		Scene.v().setPointsToAnalysis(onDemandAnalysis);
         }
     }
@@ -241,9 +241,11 @@ public class SparkTransformer extends SceneTransformer
             }
         }
     }
-    protected static void reportTime( String desc, Date start, Date end ) {
-        long time = end.getTime()-start.getTime();
-        G.v().out.println( "[Spark] "+desc+" in "+time/1000+"."+(time/100)%10+" seconds." );
+    protected static void reportTime( String desc, Date start, Date end, SparkOptions opts) {
+    	if (opts.verbose()) {
+            long time = end.getTime() - start.getTime();
+            G.v().out.println("[Spark] " + desc + " in " + time / 1000 + "." + (time / 100) % 10 + " seconds.");
+        }
     }
     protected static void doGC() {
         // Do 5 times because the garbage collector doesn't seem to always collect
