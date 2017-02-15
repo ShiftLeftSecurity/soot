@@ -57,6 +57,7 @@ import soot.jimple.spark.solver.PropWorklist;
 import soot.jimple.spark.solver.Propagator;
 import soot.jimple.spark.solver.SCCCollapser;
 import soot.jimple.toolkits.callgraph.CallGraphBuilder;
+import soot.options.Options;
 import soot.options.SparkOptions;
 import soot.tagkit.Host;
 import soot.tagkit.StringTag;
@@ -242,8 +243,10 @@ public class SparkTransformer extends SceneTransformer
         }
     }
     protected static void reportTime( String desc, Date start, Date end ) {
-        long time = end.getTime()-start.getTime();
-        G.v().out.println( "[Spark] "+desc+" in "+time/1000+"."+(time/100)%10+" seconds." );
+    	if (Options.v().verbose()) {
+            long time = end.getTime() - start.getTime();
+            G.v().out.println("[Spark] " + desc + " in " + time / 1000 + "." + (time / 100) % 10 + " seconds.");
+        }
     }
     protected static void doGC() {
         // Do 5 times because the garbage collector doesn't seem to always collect
