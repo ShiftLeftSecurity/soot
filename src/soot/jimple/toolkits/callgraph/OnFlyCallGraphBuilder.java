@@ -502,10 +502,7 @@ public final class OnFlyCallGraphBuilder
         this.rm = rm;
         worklist = rm.listener();
         options = new CGOptions( PhaseOptions.v().getPhaseOptions("cg") );
-        if( !options.verbose() ) {
-            G.v().out.println( "[Call Graph] For information on where the call graph may be incomplete, use the verbose option to the cg phase." );
-        }
-        
+
         if(options.reflection_log()==null || options.reflection_log().length()==0) {
         	if(options.types_for_invoke() && new SparkOptions(PhaseOptions.v().getPhaseOptions("cg.spark")).enabled()) {
         		reflectionModel = new TypeBasedReflectionModel();
