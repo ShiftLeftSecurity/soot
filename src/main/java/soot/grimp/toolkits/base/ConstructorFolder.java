@@ -116,9 +116,10 @@ public class ConstructorFolder extends BodyTransformer
                 continue;
               InvokeStmt is = (InvokeStmt)use;
               if (!(is.getInvokeExpr() instanceof SpecialInvokeExpr) ||
-                  lhs != ((SpecialInvokeExpr)is.getInvokeExpr()).getBase())
+                  lhs != ((SpecialInvokeExpr)is.getInvokeExpr()).getBase() ||
+                      !is.getInvokeExpr().getMethod().getName().equals("<init>"))
                 continue;
-              
+
               SpecialInvokeExpr oldInvoke = 
                 ((SpecialInvokeExpr)is.getInvokeExpr());
               LinkedList invokeArgs = new LinkedList();
