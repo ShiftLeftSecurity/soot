@@ -1457,6 +1457,9 @@ final class AsmMethodSource implements MethodSource {
 		StackFrame frame = getFrame(insn);
 		Operand opr = dword ? popDual() : pop();
 		Local local = getLocal(insn.var);
+		if (opr.stack != null) {
+			opr.stack.setName(local.getName());
+		}
 		if (!units.containsKey(insn)) {
 			DefinitionStmt as = Jimple.v().newAssignStmt(local, opr.stackOrValue());
 			opr.addBox(as.getRightOpBox());
