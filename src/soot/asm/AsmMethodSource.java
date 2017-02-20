@@ -1265,11 +1265,14 @@ final class AsmMethodSource implements MethodSource {
 			while (nrArgs-- != 0) {
 				parameterTypes.add(types[nrArgs]);
 				args[nrArgs] = popImmediate(types[nrArgs]);
-				methodArgs.add(args[nrArgs].stackOrValue());				
+				methodArgs.add(args[nrArgs].stackOrValue());
 			}
-			if (methodArgs.size() > 1)
-				Collections.reverse(methodArgs);	// Call stack is FIFO, Jimple is linear
-			
+			if (methodArgs.size() > 1) {
+				Collections.reverse(methodArgs);    // Call stack is FIFO, Jimple is linear
+				Collections.reverse(parameterTypes);
+			}
+
+
 			returnType = types[types.length - 1];
 			
 			// we always model invokeDynamic method refs as static method references
@@ -1279,7 +1282,7 @@ final class AsmMethodSource implements MethodSource {
 			DynamicInvokeExpr indy = Jimple.v().newDynamicInvokeExpr(bsmMethodRef,
 					bsmMethodArgs, methodRef, insn.bsm.getTag(), methodArgs);
 			
-			for (int i = 0; i < args.length - 1; i++) {
+			for (int i = 0; i < args.length; i++) {
 				boxes[i] = indy.getArgBox(i);
 				args[i].addBox(boxes[i]);
 			}
