@@ -179,9 +179,9 @@ final class AsmMethodSource implements MethodSource {
 	// The subindex array is a mapping from local variable index to subindex.
   // The subindex ennummerates the distinct instances of unnamed local variables.
 	private final int subindex[];
-  // LocalVarIndex -> runningIndex -> LocalPair
+	// LocalVarIndex -> insnNumber -> LocalPair
 	private final ArrayList<NavigableMap<Integer, LocalPair>> localsMapping;
- 	private final Map<AbstractInsnNode, Integer> insnNodeToRunningIndex = new HashMap<>();
+ 	private final Map<AbstractInsnNode, Integer> insnNodeToInsnNumber = new HashMap<>();
 
 	private final List<TryCatchBlockNode> tryCatchBlocks;
 	
@@ -213,7 +213,7 @@ final class AsmMethodSource implements MethodSource {
 	private Local getLocal(int idx, AbstractInsnNode insn) {
 		if (idx >= maxLocals)
 			throw new IllegalArgumentException("Invalid local index: " + idx);
-		return getLocal(idx, insnNodeToRunningIndex.get(insn));
+		return getLocal(idx, insnNodeToInsnNumber.get(insn));
 	}
 
 	private Local getLocal(int idx, int runningInsnIdx) {
@@ -1874,8 +1874,8 @@ final class AsmMethodSource implements MethodSource {
 	}
 
 	private void createLocalsAndMappings(InsnList insns, List<LocalVariableNode> localVars) {
-		MultiMap<LabelNode, LocalPair> startMap = new HashMultiMap<>();
-		MultiMap<LabelNode, LocalPair> endMap = new HashMultiMap<>();
+		MultiMap<LabelNode, LocalPair> localsStartingAtLabel = new HashMultiMap<>();
+		MultiMap<LabelNode, LocalPair> localsEndingAtLabel = new HashMultiMap<>();
 		for (LocalVariableNode localVar: localVars) {
 			LocalPair local = new LocalPair();
 			local.asm = localVar;
@@ -1885,49 +1885,49 @@ final class AsmMethodSource implements MethodSource {
 				local.soot = Jimple.v().newLocal(localVar.name, UnknownType.v());
 				this.locals.put(localVar.name, localVar.index, local.soot);
 			}
-			startMap.put(localVar.start, local);
-			endMap.put(localVar.end, local);
+			localsStartingAtLabel.put(localVar.start, local);
+			localsEndingAtLabel.put(localVar.end, local);
 		}
 
 		initLocalsMapping();
 
-		initialInsnSweep(insns, startMap, endMap);
+		initialInsnSweep(insns, localsStartingAtLabel, localsEndingAtLabel);
 	}
 
-	// Fills insnNodeToRunningIndexnd localsMapping.
+	// Fills insnNodeToInsnNumbernd localsMapping.
 	private void initialInsnSweep(InsnList insns,
-																MultiMap<LabelNode, LocalPair> startMap,
-																MultiMap<LabelNode, LocalPair> endMap) {
-		int runningIndex = 0;
+																MultiMap<LabelNode, LocalPair> localsStartingAtLabel,
+																MultiMap<LabelNode, LocalPair> localsEndingAtLabel) {
+		int insnNumber = 0;
 		for (AbstractInsnNode insn = insns.getFirst(); insn != null; insn = insn.getNext()) {
-			insnNodeToRunningIndex.put(insn, runningIndex);
+			insnNodeToInsnNumber.put(insn, insnNumber);
 			if (insn.getType() == LABEL) {
 
 				LabelNode label = (LabelNode) insn;
-				for (LocalPair local : endMap.get(label)) {
+				for (LocalPair local : localsEndingAtLabel.get(label)) {
 					// We just add a placeholder here which gets inner values only if it is used.
 					LocalPair unnamedLocal = new LocalPair();
-					localsMapping.get(local.asm.index).put(runningIndex, unnamedLocal);
+					localsMapping.get(local.asm.index).put(insnNumber, unnamedLocal);
 				}
-				Set<LocalPair> localsToBeSet = startMap.get(label);
+				Set<LocalPair> localsToBeSet = localsStartingAtLabel.get(label);
 				if (localsToBeSet.size() > 0) {
-					int startInsnIndex = Math.max(0, runningIndex - 1);
-					for (LocalPair local : startMap.get(label)) {
+					int startInsnIndex = Math.max(0, insnNumber - 1);
+					for (LocalPair local : localsStartingAtLabel.get(label)) {
 						localsMapping.get(local.asm.index).put(startInsnIndex, local);
 					}
 				}
 			}
-			runningIndex++;
+			insnNumber++;
 		}
 	}
 
 	private void initLocalsMapping() {
 		for (int idx = 0; idx < maxLocals; idx++) {
-			NavigableMap<Integer, LocalPair> runningInsnIdxToLocalMap = new TreeMap<>();
-			localsMapping.add(runningInsnIdxToLocalMap);
+			NavigableMap<Integer, LocalPair> insnNumberToLocal = new TreeMap<>();
+			localsMapping.add(insnNumberToLocal);
 			// We just add a placeholder here which gets inner values only if it is used.
 			LocalPair unnamedLocal = new LocalPair();
-			runningInsnIdxToLocalMap.put(0, unnamedLocal);
+			insnNumberToLocal.put(0, unnamedLocal);
 		}
 	}
 
