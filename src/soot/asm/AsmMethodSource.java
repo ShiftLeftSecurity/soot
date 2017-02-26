@@ -36,18 +36,7 @@ import static org.objectweb.asm.tree.AbstractInsnNode.TABLESWITCH_INSN;
 import static org.objectweb.asm.tree.AbstractInsnNode.TYPE_INSN;
 import static org.objectweb.asm.tree.AbstractInsnNode.VAR_INSN;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -143,6 +132,8 @@ import soot.options.Options;
 import soot.tagkit.LineNumberTag;
 import soot.tagkit.Tag;
 import soot.util.Chain;
+import soot.util.HashMultiMap;
+import soot.util.MultiMap;
 
 /**
  * Generates Jimple bodies from bytecode.
@@ -150,12 +141,16 @@ import soot.util.Chain;
  * @author Aaloan Miftah
  */
 final class AsmMethodSource implements MethodSource {
+	static private class LocalPair {
+		LocalVariableNode asm;
+		Local soot;
+	}
 	
 	private static final Operand DWORD_DUMMY = new Operand(null, null);
 	
 	/* -state fields- */
-	private int nextLocal;
-	private Map<Integer, Local> locals;
+	private int nextStackLocal = 0;
+	private Table<String, Integer, Local> locals = HashBasedTable.create();
 	private Multimap<LabelNode, UnitBox> labels;
 	private Map<AbstractInsnNode, Unit> units;
 	private ArrayList<Operand> stack;
@@ -167,13 +162,19 @@ final class AsmMethodSource implements MethodSource {
 	private final int maxLocals;
 	private final InsnList instructions;
 	private final List<LocalVariableNode> localVars;
+	// The subindex array is a mapping from local variable index to subindex.
+	// The subindex ennummerates the distinct instances of unnamed local variables.
+	private final int subindex[];
+	// LocalVarIndex -> insnNumber -> LocalPair
+	private final ArrayList<NavigableMap<Integer, LocalPair>> localsMapping;
+	private final Map<AbstractInsnNode, Integer> insnNodeToInsnNumber = new HashMap<>();
 	private final List<TryCatchBlockNode> tryCatchBlocks;
-	
+
 	private final Set<LabelNode> inlineExceptionLabels = new HashSet<LabelNode>();
 	private final Map<LabelNode, Unit> inlineExceptionHandlers = new HashMap<LabelNode, Unit>();
 	
 	private final CastAndReturnInliner castAndReturnInliner = new CastAndReturnInliner();
-	
+
 	AsmMethodSource(int maxLocals, InsnList insns,
 			List<LocalVariableNode> localVars,
 			List<TryCatchBlockNode> tryCatchBlocks) {
@@ -181,8 +182,10 @@ final class AsmMethodSource implements MethodSource {
 		this.instructions = insns;
 		this.localVars = localVars;
 		this.tryCatchBlocks = tryCatchBlocks;
+		this.localsMapping = new ArrayList<>(maxLocals);
+		this.subindex = new int[maxLocals];
+
 	}
-	
 	private StackFrame getFrame(AbstractInsnNode insn) {
 		StackFrame frame = frames.get(insn);
 		if (frame == null) {
@@ -191,32 +194,27 @@ final class AsmMethodSource implements MethodSource {
 		}
 		return frame;
 	}
-	
-	private Local getLocal(int idx) {
+
+	private Local getLocal(int idx, AbstractInsnNode insn) {
 		if (idx >= maxLocals)
 			throw new IllegalArgumentException("Invalid local index: " + idx);
-		Integer i = idx;
-		Local l = locals.get(i);
-		if (l == null) {
-			String name;
-			if (localVars != null) {
-				name = null;
-				for (LocalVariableNode lvn : localVars) {
-					if (lvn.index == idx) {
-						name = lvn.name;
-						break;
-					}
-				}
-				/* normally for try-catch blocks */
-				if (name == null)
-					name = "l" + idx;
-			} else {
-				name = "l" + idx;
-			}
-			l = Jimple.v().newLocal(name, UnknownType.v());
-			locals.put(i, l);
+
+		return getLocal(idx, insnNodeToInsnNumber.get(insn));
+	}
+
+	private Local getLocal(int idx, int runningInsnIdx) {
+		if (idx >= maxLocals)
+			throw new IllegalArgumentException("Invalid local index: " + idx);
+
+		LocalPair local = null;
+		local = localsMapping.get(idx).floorEntry(runningInsnIdx).getValue();
+		if (local.soot == null) {
+			local.soot = Jimple.v().newLocal("l" + idx + "_" + subindex[idx]++, UnknownType.v());
+			assert locals.get(local.soot.getName(), idx) == null;
+			locals.put(local.soot.getName(), idx, local.soot);
 		}
-		return l;
+
+		return local.soot;
 	}
 	
 	private void push(Operand opr) {
@@ -353,9 +351,9 @@ final class AsmMethodSource implements MethodSource {
 	}
 	
 	Local newStackLocal() {
-		Integer idx = nextLocal++;
+		Integer idx = nextStackLocal++;
 		Local l = Jimple.v().newLocal("$stack" + idx, UnknownType.v());
-		locals.put(idx, l);
+		locals.put(l.getName(), -1, l);
 		return l;
 	}
 	
@@ -500,7 +498,7 @@ final class AsmMethodSource implements MethodSource {
 	}
 	
 	private void convertIincInsn(IincInsnNode insn) {
-		Local local = getLocal(insn.var);
+		Local local = getLocal(insn.var, insn);
 		assignReadOps(local);
 		if (!units.containsKey(insn)) {
 			AddExpr add = Jimple.v().newAddExpr(local, IntConstant.v(insn.incr));
@@ -1440,7 +1438,7 @@ final class AsmMethodSource implements MethodSource {
 		Operand[] out = frame.out();
 		Operand opr;
 		if (out == null) {
-			opr = new Operand(insn, getLocal(insn.var));
+			opr = new Operand(insn, getLocal(insn.var, insn));
 			frame.out(opr);
 		} else {
 			opr = out[0];
@@ -1456,7 +1454,8 @@ final class AsmMethodSource implements MethodSource {
 		boolean dword = op == LSTORE || op == DSTORE;
 		StackFrame frame = getFrame(insn);
 		Operand opr = dword ? popDual() : pop();
-		Local local = getLocal(insn.var);
+
+		Local local = getLocal(insn.var, insn);
 		if (opr.stack != null) {
 			opr.stack.setName(local.getName());
 		}
@@ -1481,7 +1480,7 @@ final class AsmMethodSource implements MethodSource {
 		} else if (op == RET) {
 			/* we handle it, even thought it should be removed */
 			if (!units.containsKey(insn))
-				setUnit(insn, Jimple.v().newRetStmt(getLocal(insn.var)));
+				setUnit(insn, Jimple.v().newRetStmt(getLocal(insn.var, insn)));
 		} else {
 			throw new AssertionError("Unknown var op: " + op);
 		}
@@ -1518,11 +1517,11 @@ final class AsmMethodSource implements MethodSource {
 		}
 		push(opr);
 	}
-	
+
 	private void convertLine(LineNumberNode ln) {
 		lastLineNumber = ln.line;
 	}
-	
+
 	/* Conversion */
 	
 	private final class Edge {
@@ -1723,14 +1722,14 @@ final class AsmMethodSource implements MethodSource {
 		Collection<Unit> jbu = jb.getUnits();
 		int iloc = 0;
 		if (!m.isStatic()) {
-			Local l = getLocal(iloc++);
+			Local l = getLocal(iloc++, 0);
 			jbu.add(Jimple.v().newIdentityStmt(l,
 					Jimple.v().newThisRef(m.getDeclaringClass().getType())));
 		}
 		int nrp = 0;
 		for (Object ot : m.getParameterTypes()) {
 			Type t = (Type) ot;
-			Local l = getLocal(iloc);
+			Local l = getLocal(iloc, 0);
 			jbu.add(Jimple.v().newIdentityStmt(l,
 					Jimple.v().newParameterRef(t, nrp++)));
 			if (AsmUtil.isDWord(t))
@@ -1864,19 +1863,77 @@ final class AsmMethodSource implements MethodSource {
 		return null;
 	}
 
+	private void createLocalsAndMappings(InsnList insns, List<LocalVariableNode> localVars) {
+		MultiMap<LabelNode, LocalPair> localsStartingAtLabel = new HashMultiMap<>();
+		MultiMap<LabelNode, LocalPair> localsEndingAtLabel = new HashMultiMap<>();
+		for (LocalVariableNode localVar: localVars) {
+			LocalPair local = new LocalPair();
+			local.asm = localVar;
+
+			local.soot = locals.get(localVar.name, localVar.index);
+			if (local.soot == null) {
+				local.soot = Jimple.v().newLocal(localVar.name, UnknownType.v());
+				this.locals.put(localVar.name, localVar.index, local.soot);
+			}
+			localsStartingAtLabel.put(localVar.start, local);
+			localsEndingAtLabel.put(localVar.end, local);
+		}
+
+		initLocalsMapping();
+
+		initialInsnSweep(insns, localsStartingAtLabel, localsEndingAtLabel);
+	}
+
+	// Fills insnNodeToRunningIndexnd localsMapping.
+	private void initialInsnSweep(InsnList insns,
+								  MultiMap<LabelNode, LocalPair> localsStartingAtLabel,
+								  MultiMap<LabelNode, LocalPair> localsEndingAtLabel) {
+		int insnNumber = 0;
+		for (AbstractInsnNode insn = insns.getFirst(); insn != null; insn = insn.getNext()) {
+			insnNodeToInsnNumber.put(insn, insnNumber);
+			if (insn.getType() == LABEL) {
+
+				LabelNode label = (LabelNode) insn;
+				for (LocalPair local : localsEndingAtLabel.get(label)) {
+					// We just add a placeholder here which gets inner values only if it is used.
+					LocalPair unnamedLocal = new LocalPair();
+					localsMapping.get(local.asm.index).put(insnNumber, unnamedLocal);
+				}
+				Set<LocalPair> localsToBeSet = localsStartingAtLabel.get(label);
+				if (localsToBeSet.size() > 0) {
+					int startInsnIndex = Math.max(0, insnNumber - 1);
+					for (LocalPair local : localsStartingAtLabel.get(label)) {
+						localsMapping.get(local.asm.index).put(startInsnIndex, local);
+					}
+				}
+			}
+			insnNumber++;
+		}
+	}
+
+	private void initLocalsMapping() {
+		for (int idx = 0; idx < maxLocals; idx++) {
+			NavigableMap<Integer, LocalPair> insnNumberToLocal = new TreeMap<>();
+			localsMapping.add(insnNumberToLocal);
+			// We just add a placeholder here which gets inner values only if it is used.
+			LocalPair unnamedLocal = new LocalPair();
+			insnNumberToLocal.put(0, unnamedLocal);
+		}
+	}
+
+
 	public Body getBody(SootMethod m, String phaseName) {
 		if (!m.isConcrete())
 			return null;
 		JimpleBody jb = Jimple.v().newBody(m);
 		/* initialize */
 		int nrInsn = instructions.size();
-		nextLocal = maxLocals;
-		locals = new HashMap<Integer, Local>(maxLocals + (maxLocals / 2));
 		labels = ArrayListMultimap.create(4, 1);
 		units = new HashMap<AbstractInsnNode, Unit>(nrInsn);
 		frames = new HashMap<AbstractInsnNode, StackFrame>(nrInsn);
 		trapHandlers = ArrayListMultimap.create(tryCatchBlocks.size(),1);
 		body = jb;
+		createLocalsAndMappings(instructions, localVars);
 		/* retrieve all trap handlers */
 		for (TryCatchBlockNode tc : tryCatchBlocks)
 			trapHandlers.put(tc.handler, Jimple.v().newStmtBox(null));
