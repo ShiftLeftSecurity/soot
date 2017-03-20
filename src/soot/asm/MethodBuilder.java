@@ -19,15 +19,15 @@
 package soot.asm;
 
 import org.objectweb.asm.*;
+import org.objectweb.asm.Attribute;
 import org.objectweb.asm.commons.JSRInlinerAdapter;
 
 import soot.*;
 import soot.Type;
-import soot.tagkit.AnnotationConstants;
-import soot.tagkit.AnnotationDefaultTag;
-import soot.tagkit.AnnotationTag;
-import soot.tagkit.VisibilityAnnotationTag;
-import soot.tagkit.VisibilityParameterAnnotationTag;
+import soot.tagkit.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Soot method builder.
@@ -39,6 +39,7 @@ class MethodBuilder extends JSRInlinerAdapter {
 	private TagBuilder tb;
 	private VisibilityAnnotationTag[] visibleParamAnnotations;
 	private VisibilityAnnotationTag[] invisibleParamAnnotations;
+	private Map<String, LocalSignatureTag> localSignatures;
 	private final SootMethod method;
 	private final SootClassBuilder scb;
 	
@@ -75,6 +76,17 @@ class MethodBuilder extends JSRInlinerAdapter {
 	@Override
 	public void visitAttribute(Attribute attr) {
 		getTagBuilder().visitAttribute(attr);
+	}
+
+	@Override
+	public void visitLocalVariable(String name, String desc, String signature, Label start, Label end, int index) {
+		super.visitLocalVariable(name, desc, signature, start, end, index);
+		if (signature != null) {
+			if (localSignatures == null) {
+				localSignatures = new HashMap<>();
+			}
+			localSignatures.put(name, new LocalSignatureTag(signature, name));
+		}
 	}
 	
 	@Override
@@ -196,6 +208,12 @@ class MethodBuilder extends JSRInlinerAdapter {
 		if (method.isConcrete()) {
 			method.setSource(new AsmMethodSource(maxLocals, instructions,
 					localVariables, tryCatchBlocks));
+		}
+
+		if (localSignatures != null) {
+			LocalSignaturesTag localSignaturesTag = new LocalSignaturesTag(localSignatures.size());
+			localSignaturesTag.addSignatures(localSignatures);
+			method.addTag(localSignaturesTag);
 		}
 	}
 }
