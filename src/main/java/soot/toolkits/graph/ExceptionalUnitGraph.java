@@ -921,4 +921,8 @@ public class ExceptionalUnitGraph extends UnitGraph implements
 
 		return buf.toString();
 	}
+
+	public Map<Unit, Collection<ExceptionDest>> getUnitToExceptionDests() {
+		return unitToExceptionDests;
+	}
 }
