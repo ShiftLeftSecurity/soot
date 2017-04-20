@@ -1718,7 +1718,10 @@ public class Scene // extends AbstractHost
 	/** Create an unresolved reference to a method. */
 	public SootMethodRef makeMethodRef(SootClass declaringClass, String name, List<Type> parameterTypes,
 			Type returnType, boolean isStatic) {
-		return new SootMethodRefImpl(declaringClass, name, parameterTypes, returnType, isStatic);
+		SootMethodRef sootMethodRef =
+						new SootMethodRefImpl(declaringClass, name, parameterTypes, returnType, isStatic);
+		sootMethodRef.resolve();
+		return sootMethodRef;
 	}
 
 	/** Create an unresolved reference to a constructor. */
