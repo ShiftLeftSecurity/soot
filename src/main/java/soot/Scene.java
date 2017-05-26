@@ -1731,7 +1731,9 @@ public class Scene // extends AbstractHost
 
 	/** Create an unresolved reference to a field. */
 	public SootFieldRef makeFieldRef(SootClass declaringClass, String name, Type type, boolean isStatic) {
-		return new AbstractSootFieldRef(declaringClass, name, type, isStatic);
+		AbstractSootFieldRef sootFieldRef = new AbstractSootFieldRef(declaringClass, name, type, isStatic);
+		sootFieldRef.resolve();
+		return sootFieldRef;
 	}
 
 	/**
