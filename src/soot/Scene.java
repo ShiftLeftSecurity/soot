@@ -1717,7 +1717,9 @@ public class Scene  //extends AbstractHost
             String name,
             Type type,
             boolean isStatic) {
-        return new AbstractSootFieldRef(declaringClass, name, type, isStatic);
+    	AbstractSootFieldRef sootFieldRef = new AbstractSootFieldRef(declaringClass, name, type, isStatic);
+    	sootFieldRef.resolve();
+    	return sootFieldRef;
     }
     /** Returns the list of SootClasses that have been resolved at least to 
      * the level specified. */
