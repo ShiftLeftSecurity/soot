@@ -1312,7 +1312,7 @@ final class AsmMethodSource implements MethodSource {
 				oprs = new Operand[nrArgs + 1];
 			if (oprs != null) {
 				while (nrArgs-- != 0) {
-					oprs[nrArgs] = pop(types.get(types.size() - nrArgs - 1));
+					oprs[nrArgs] = pop(types.get(nrArgs));
 				}
 				if (!expr.getMethodRef().isStatic())
 					oprs[oprs.length - 1] = pop();
