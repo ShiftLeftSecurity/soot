@@ -50,6 +50,6 @@ node {
 }
 
 def notifyFailed() {
-  slackSend (channel: '#codescience', color: '#FF0000', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+  slackSend (channel: '#team-code-science', color: '#FF0000', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
   emailext body: 'Build URL: $BUILD_URL (to view full results, click on "Console Output")', attachLog: true, recipientProviders: [[$class: 'CulpritsRecipientProvider']], subject: 'Action Required: Jenkins $JOB_NAME #$BUILD_NUMBER FAILED', to: 'builds-notify-code-science@shiftleft.io'
 }
