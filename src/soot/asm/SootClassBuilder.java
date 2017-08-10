@@ -37,16 +37,7 @@ import soot.SootClass;
 import soot.SootField;
 import soot.SootMethod;
 import soot.SootResolver;
-import soot.tagkit.DoubleConstantValueTag;
-import soot.tagkit.EnclosingMethodTag;
-import soot.tagkit.FloatConstantValueTag;
-import soot.tagkit.InnerClassTag;
-import soot.tagkit.IntegerConstantValueTag;
-import soot.tagkit.LongConstantValueTag;
-import soot.tagkit.SignatureTag;
-import soot.tagkit.SourceFileTag;
-import soot.tagkit.StringConstantValueTag;
-import soot.tagkit.Tag;
+import soot.tagkit.*;
 
 /**
  * Constructs a Soot class from a visited class.
@@ -163,6 +154,7 @@ class SootClassBuilder extends ClassVisitor {
 		SootMethod method = new SootMethod(name,
 				sigTypes, sigTypes.remove(sigTypes.size() - 1),
 				access, thrownExceptions);
+		method.addTag(new MethodDescriptorTag(desc));
 		if (signature != null)
 			method.addTag(new SignatureTag(signature));
 		klass.addMethod(method);
