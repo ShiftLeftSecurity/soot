@@ -1718,12 +1718,15 @@ public class Scene // extends AbstractHost
 	/** Create an unresolved reference to a method. */
 	public SootMethodRef makeMethodRef(SootClass declaringClass, String name, List<Type> parameterTypes,
 			Type returnType, boolean isStatic) {
+		return makeMethodRef(declaringClass, name, parameterTypes, returnType, isStatic, null);
+	}
+	public SootMethodRef makeMethodRef(SootClass declaringClass, String name,	List<Type> parameterTypes,
+		Type returnType, boolean isStatic, String binarySignature) {
 		SootMethodRef sootMethodRef =
-						new SootMethodRefImpl(declaringClass, name, parameterTypes, returnType, isStatic);
+			new SootMethodRefImpl(declaringClass, name, parameterTypes, returnType, isStatic, binarySignature);
 		sootMethodRef.resolve();
 		return sootMethodRef;
 	}
-
 	/** Create an unresolved reference to a constructor. */
 	public SootMethodRef makeConstructorRef(SootClass declaringClass, List<Type> parameterTypes) {
 		return makeMethodRef(declaringClass, SootMethod.constructorName, parameterTypes, VoidType.v(), false);
@@ -1843,8 +1846,13 @@ public class Scene // extends AbstractHost
 	}
 
 	public SootMethod makeSootMethod(String name, List<Type> parameterTypes, Type returnType, int modifiers,
-			List<SootClass> thrownExceptions) {
+																	 List<SootClass> thrownExceptions) {
 		return new SootMethod(name, parameterTypes, returnType, modifiers, thrownExceptions);
+	}
+
+	public SootMethod makeSootMethod(String name, List<Type> parameterTypes, Type returnType, int modifiers,
+			List<SootClass> thrownExceptions, String descr) {
+		return new SootMethod(name, parameterTypes, returnType, modifiers, thrownExceptions, descr);
 	}
 
 	public SootField makeSootField(String name, Type type, int modifiers) {

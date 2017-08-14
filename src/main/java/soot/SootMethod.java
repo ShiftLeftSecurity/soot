@@ -89,6 +89,7 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
 	/** Tells this method how to find out where its body lives. */
 	protected volatile MethodSource ms;
 
+	private String methodDescriptor;
 	/**
 	 * Uses methodSource to retrieve the method body in question; does not set
 	 * it to be the active body.
@@ -162,16 +163,40 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
 		this(name, parameterTypes, returnType, modifiers, Collections.<SootClass>emptyList());
 	}
 
+	/** Constructs a SootMethod with the given name, parameter types, return type, modifiers and binarySignature. */
+	public SootMethod(
+	        String name,
+	        List<Type> parameterTypes,
+	        Type returnType,
+	        int modifiers,
+	        String methodDescriptor) {
+		this(name, parameterTypes, returnType, modifiers, Collections.<SootClass>emptyList(), methodDescriptor);
+	}
+
 	/**
 	 * Constructs a SootMethod with the given name, parameter types, return
 	 * type, and list of thrown exceptions.
 	 */
 	public SootMethod(String name, List<Type> parameterTypes, Type returnType, int modifiers,
 			List<SootClass> thrownExceptions) {
+		this(name, parameterTypes, returnType, modifiers, thrownExceptions, null);
+	}
+
+	/**
+	 * Constructs a SootMethod with the given name, parameter types, return type,
+	 * list of thrown exceptions and binarySignature. */
+	public SootMethod(
+            String name,
+            List<Type> parameterTypes,
+            Type returnType,
+            int modifiers,
+            List<SootClass> thrownExceptions,
+            String methodDescriptor) {
 		this.name = name;
 
 		if (parameterTypes != null && !parameterTypes.isEmpty())
 			this.parameterTypes = parameterTypes.toArray(new Type[parameterTypes.size()]);
+		this.methodDescriptor = methodDescriptor;
 
 		this.returnType = returnType;
 		this.modifiers = modifiers;
@@ -908,7 +933,11 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
 
 	public SootMethodRef makeRef() {
 		return Scene.v().makeMethodRef(declaringClass, name,
-				parameterTypes == null ? null : Arrays.asList(parameterTypes), returnType, isStatic());
+				parameterTypes == null ? null : Arrays.asList(parameterTypes), returnType, isStatic(), methodDescriptor);
+	}
+
+	public String getMethodDescriptor() {
+		return methodDescriptor;
 	}
 
 	@Override

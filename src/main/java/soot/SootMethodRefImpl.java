@@ -47,32 +47,36 @@ public class SootMethodRefImpl implements SootMethodRef {
 
 	public SootMethodRefImpl(SootClass declaringClass, String name, List<Type> parameterTypes, Type returnType,
 			boolean isStatic) {
-		this.declaringClass = declaringClass;
-		this.name = name;
-
-		if (parameterTypes == null)
-			this.parameterTypes = null;
-		else {
-			List<Type> l = new ArrayList<Type>();
-			l.addAll(parameterTypes);
-			this.parameterTypes = Collections.unmodifiableList(l);
-		}
-
-		this.returnType = returnType;
-		this.isStatic = isStatic;
-		if (declaringClass == null)
-			throw new RuntimeException("Attempt to create SootMethodRef with null class");
-		if (name == null)
-			throw new RuntimeException("Attempt to create SootMethodRef with null name");
-		if (returnType == null)
-			throw new RuntimeException("Attempt to create SootMethodRef with null returnType");
+		this(declaringClass, name, parameterTypes, returnType, isStatic, null);
 	}
 
-	private final SootClass declaringClass;
-	private final String name;
-	protected List<Type> parameterTypes;
-	private final Type returnType;
-	private final boolean isStatic;
+	public SootMethodRefImpl(
+			SootClass declaringClass,
+			String name,
+			List<Type> parameterTypes,
+			Type returnType,
+			boolean isStatic,
+			String methodDescriptor) {
+		this.declaringClass = declaringClass;
+		this.name = name;
+		List<Type> l = new ArrayList<Type>();
+		l.addAll(parameterTypes);
+		this.parameterTypes = Collections.unmodifiableList(l);
+		this.returnType = returnType;
+		this.isStatic = isStatic;
+		this.methodDescriptor = methodDescriptor;
+		if( declaringClass == null ) throw new RuntimeException( "Attempt to create SootMethodRef with null class" );
+		if( name == null ) throw new RuntimeException( "Attempt to create SootMethodRef with null name" );
+		if( parameterTypes == null ) throw new RuntimeException( "Attempt to create SootMethodRef with null parameterTypes" );
+		if( returnType == null ) throw new RuntimeException( "Attempt to create SootMethodRef with null returnType" );
+	}
+
+	final private SootClass declaringClass;
+	final private String name;
+	final private List<Type> parameterTypes;
+	final private Type returnType;
+	final private boolean isStatic;
+	final private String methodDescriptor;
 
 	private NumberedString subsig;
 
@@ -151,6 +155,11 @@ public class SootMethodRefImpl implements SootMethodRef {
 		return tryResolve(null);
 	}
 
+	@Override
+	public String getMethodDescriptor() {
+		return methodDescriptor;
+	}
+
 	private SootMethod checkStatic(SootMethod ret) {
 		if (ret.isStatic() != isStatic()) {
 			if (Options.v().wrong_staticness() != Options.wrong_staticness_ignore
@@ -173,7 +182,7 @@ public class SootMethodRefImpl implements SootMethodRef {
 			if (sm != null)
 				return checkStatic(sm);
 			if (Scene.v().allowsPhantomRefs()) {
-				SootMethod m = new SootMethod(name, parameterTypes, returnType, isStatic() ? Modifier.STATIC : 0);
+				SootMethod m = new SootMethod(name, parameterTypes, returnType, isStatic() ? Modifier.STATIC : 0, methodDescriptor);
 				m.setPhantom(true);
 				m = declaringClass.getOrAddMethod(m);
 				return checkStatic(m);

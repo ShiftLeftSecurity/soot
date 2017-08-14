@@ -1165,7 +1165,7 @@ final class AsmMethodSource implements MethodSource {
 			List<Type> sigTypes = AsmUtil.toJimpleDesc(insn.desc);
 			returnType = sigTypes.remove(sigTypes.size() - 1);
 			SootMethodRef ref =
-					Scene.v().makeMethodRef(cls, insn.name, sigTypes, returnType, !instance);
+					Scene.v().makeMethodRef(cls, insn.name, sigTypes, returnType, !instance, insn.desc);
 			int nrArgs = sigTypes.size();
 			final Operand[] args;
 			List<Value> argList = Collections.emptyList();
@@ -1286,7 +1286,8 @@ final class AsmMethodSource implements MethodSource {
 			
 			// we always model invokeDynamic method refs as static method references
 			// of methods on the type SootClass.INVOKEDYNAMIC_DUMMY_CLASS_NAME
-			SootMethodRef methodRef = Scene.v().makeMethodRef(bclass, insn.name, parameterTypes, returnType, true);		
+			SootMethodRef methodRef =
+							Scene.v().makeMethodRef(bclass, insn.name, parameterTypes, returnType, true, insn.desc);
 			
 			DynamicInvokeExpr indy = Jimple.v().newDynamicInvokeExpr(bsmMethodRef,
 					bsmMethodArgs, methodRef, insn.bsm.getTag(), methodArgs);
@@ -1339,7 +1340,8 @@ final class AsmMethodSource implements MethodSource {
 		List<Type> bsmSigTypes = AsmUtil.toJimpleDesc(methodHandle.getDesc());
 		Type returnType = bsmSigTypes.remove(bsmSigTypes.size() - 1);
 		boolean isStatic =  methodHandle.getTag() == H_INVOKESTATIC;
-		return Scene.v().makeMethodRef(bsmCls, methodHandle.getName(), bsmSigTypes, returnType, isStatic);
+		return Scene.v().makeMethodRef(bsmCls, methodHandle.getName(), bsmSigTypes,
+						returnType, isStatic, methodHandle.getDesc());
 	}
 
 	private void convertMultiANewArrayInsn(MultiANewArrayInsnNode insn) {

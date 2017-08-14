@@ -160,8 +160,9 @@ class SootClassBuilder extends ClassVisitor {
 		List<soot.Type> sigTypes = AsmUtil.toJimpleDesc(desc);
 		for (soot.Type type : sigTypes)
 			addDep(type);
-		SootMethod method = Scene.v().makeSootMethod(name, sigTypes, sigTypes.remove(sigTypes.size() - 1), access,
-				thrownExceptions);
+		SootMethod method =
+						Scene.v().makeSootMethod(name, sigTypes, sigTypes.remove(sigTypes.size() - 1),
+										access, thrownExceptions, desc);
 		if (signature != null)
 			method.addTag(new SignatureTag(signature));
 		method = klass.getOrAddMethod(method);
