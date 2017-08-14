@@ -64,5 +64,7 @@ public interface SootMethodRef {
      * otherwise
      */
     public SootMethod tryResolve();
-    
+
+    public String getMethodDescriptor();
+
 }
