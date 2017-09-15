@@ -1696,11 +1696,21 @@ public class Scene  //extends AbstractHost
             List<Type> parameterTypes,
             Type returnType,
             boolean isStatic ) {
-        SootMethodRef sootMethodRef =
-				new SootMethodRefImpl(declaringClass, name, parameterTypes, returnType, isStatic);
-        sootMethodRef.resolve();
-        return sootMethodRef;
+		return makeMethodRef(declaringClass, name, parameterTypes, returnType, isStatic, null);
     }
+
+	public SootMethodRef makeMethodRef(
+			SootClass declaringClass,
+			String name,
+			List<Type> parameterTypes,
+			Type returnType,
+			boolean isStatic,
+			String binarySignature) {
+		SootMethodRef sootMethodRef =
+				new SootMethodRefImpl(declaringClass, name, parameterTypes, returnType, isStatic, binarySignature);
+		sootMethodRef.resolve();
+		return sootMethodRef;
+	}
 
     /** Create an unresolved reference to a constructor. */
     public SootMethodRef makeConstructorRef( 

@@ -161,8 +161,7 @@ class SootClassBuilder extends ClassVisitor {
 		for (soot.Type type : sigTypes)
 			addDep(type);
 		SootMethod method = new SootMethod(name,
-				sigTypes, sigTypes.remove(sigTypes.size() - 1),
-				access, thrownExceptions);
+				sigTypes, sigTypes.remove(sigTypes.size() - 1), access, thrownExceptions, desc);
 		if (signature != null)
 			method.addTag(new SignatureTag(signature));
 		klass.addMethod(method);

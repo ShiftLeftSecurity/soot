@@ -82,6 +82,8 @@ public class SootMethod
     /** Tells this method how to find out where its body lives. */
     protected MethodSource ms;
 
+    private String methodDescriptor;
+
     /** Uses methodSource to retrieve the method body in question; does not set it
      * to be the active body.
      *
@@ -121,6 +123,16 @@ public class SootMethod
         this(name, parameterTypes, returnType, modifiers, Collections.<SootClass>emptyList());
     }
 
+    /** Constructs a SootMethod with the given name, parameter types, return type, modifiers and binarySignature. */
+    public SootMethod(
+            String name,
+            List<Type> parameterTypes,
+            Type returnType,
+            int modifiers,
+            String methodDescriptor) {
+        this(name, parameterTypes, returnType, modifiers, Collections.<SootClass>emptyList(), methodDescriptor);
+    }
+
     /** Constructs a SootMethod with the given name, parameter types, return type, 
       * and list of thrown exceptions. */
     public SootMethod(
@@ -129,10 +141,23 @@ public class SootMethod
         Type returnType,
         int modifiers,
         List<SootClass> thrownExceptions) {
+        this(name, parameterTypes, returnType, modifiers, thrownExceptions, null);
+    }
+
+    /** Constructs a SootMethod with the given name, parameter types, return type,
+     * list of thrown exceptions and binarySignature. */
+    public SootMethod(
+            String name,
+            List<Type> parameterTypes,
+            Type returnType,
+            int modifiers,
+            List<SootClass> thrownExceptions,
+            String methodDescriptor) {
         this.name = name;
         this.parameterTypes = new ArrayList<Type>();
         this.parameterTypes.addAll(parameterTypes);
         this.parameterTypes = Collections.unmodifiableList(this.parameterTypes);
+        this.methodDescriptor = methodDescriptor;
 
         this.returnType = returnType;
         this.modifiers = modifiers;
@@ -148,9 +173,9 @@ public class SootMethod
         }
         Scene.v().getMethodNumberer().add(this);
         subsignature =
-            Scene.v().getSubSigNumberer().findOrAdd(getSubSignature());
-        
-        
+                Scene.v().getSubSigNumberer().findOrAdd(getSubSignature());
+
+
     }
 
     /** Returns the name of this method. */
@@ -837,7 +862,11 @@ public class SootMethod
     public SootMethod method() { return this; }
     public Context context() { return null; }
     public SootMethodRef makeRef() {
-        return Scene.v().makeMethodRef( declaringClass, name, parameterTypes, returnType, isStatic() );
+        return Scene.v().makeMethodRef( declaringClass, name, parameterTypes, returnType, isStatic(), methodDescriptor);
+    }
+
+    public String getMethodDescriptor() {
+        return methodDescriptor;
     }
     
     @Override
