@@ -174,7 +174,8 @@ class SootMethodRefImpl implements SootMethodRef {
         }
 		if(Scene.v().allowsPhantomRefs())
 		{
-			SootMethod m = new SootMethod(name, parameterTypes, returnType, isStatic()?Modifier.STATIC:0);
+			SootMethod m =
+					new SootMethod(name, parameterTypes, returnType, isStatic()?Modifier.STATIC:0, methodDescriptor);
 			m.setPhantom(true);
 			m = declaringClass.getOrAddMethod(m);
 			return checkStatic(m);
