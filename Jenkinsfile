@@ -22,10 +22,10 @@ node {
       		}     	    
     	}
         stage('SLpublisher') {
-            //step([
-            //    $class: 'SLUploader',
-            //    diagnostics: true
-            //])
+            step([
+                $class: 'SLUploader',
+                diagnostics: true
+            ])
         }
     	stage('archiveBuild') {
       		archiveArtifacts 'target/soot*.jar'  
