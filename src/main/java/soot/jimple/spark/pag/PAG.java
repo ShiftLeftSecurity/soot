@@ -708,7 +708,12 @@ public class PAG implements PointsToAnalysis {
 				Scene.v().getLocalNumberer().add(val);
 			LocalVarNode ret = localToNodeMap.get(val);
 			if (ret == null) {
-				localToNodeMap.put((Local) value, ret = new LocalVarNode(this, value, type, method));
+				try {
+					localToNodeMap.put((Local) value, ret = new LocalVarNode(this, value, type, method));
+				} catch (Throwable exception) {
+					throw new RuntimeException("Unable to create LocalVarNode for method " + method.getName() +
+									" in class " + method.getDeclaringClass().getName(), exception);
+				}
 				addNodeTag(ret, method);
 			} else if (!(ret.getType().equals(type))) {
 				throw new RuntimeException(
@@ -718,7 +723,13 @@ public class PAG implements PointsToAnalysis {
 		}
 		LocalVarNode ret = valToLocalVarNode.get(value);
 		if (ret == null) {
-			valToLocalVarNode.put(value, ret = new LocalVarNode(this, value, type, method));
+			try {
+				valToLocalVarNode.put(value, ret = new LocalVarNode(this, value, type, method));
+			} catch (Throwable exception) {
+				throw new RuntimeException("Unable to create LocalVarNode for method " + method.getName() +
+								" in class " + method.getDeclaringClass().getName(), exception);
+			}
+
 			addNodeTag(ret, method);
 		} else if (!(ret.getType().equals(type))) {
 			throw new RuntimeException("Value " + value + " of type " + type + " previously had type " + ret.getType());
@@ -763,7 +774,12 @@ public class PAG implements PointsToAnalysis {
 	public ContextVarNode makeContextVarNode(LocalVarNode base, Context context) {
 		ContextVarNode ret = base.context(context);
 		if (ret == null) {
-			ret = new ContextVarNode(this, base, context);
+			try {
+				ret = new ContextVarNode(this, base, context);
+			} catch (Throwable exception) {
+				throw new RuntimeException("Unable to create ContextVarNode for method " + base.method.getName() +
+								" in class " +  base.method.getDeclaringClass().getName(), exception);
+			}
 			addNodeTag(ret, base.getMethod());
 		}
 		return ret;
