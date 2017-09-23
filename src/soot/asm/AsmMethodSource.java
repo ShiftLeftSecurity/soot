@@ -1897,11 +1897,13 @@ final class AsmMethodSource implements MethodSource {
 			if (insn.getType() == LABEL) {
 
 				LabelNode label = (LabelNode) insn;
+				/*
 				for (LocalPair local : localsEndingAtLabel.get(label)) {
 					// We just add a placeholder here which gets inner values only if it is used.
 					LocalPair unnamedLocal = new LocalPair();
 					localsMapping.get(local.asm.index).put(insnNumber, unnamedLocal);
 				}
+				*/
 				Set<LocalPair> localsToBeSet = localsStartingAtLabel.get(label);
 				if (localsToBeSet.size() > 0) {
 					int startInsnIndex = Math.max(0, insnNumber - 1);
