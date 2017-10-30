@@ -307,8 +307,8 @@ public class FastHierarchy {
 	 * interface.
 	 */
 	protected boolean canStoreClass(SootClass child, SootClass parent) {
-		parent.checkLevel(SootClass.HIERARCHY);
-		child.checkLevel(SootClass.HIERARCHY);
+		SootResolver.v().resolveClass(parent.getName(), SootClass.HIERARCHY);
+		SootResolver.v().resolveClass(child.getName(), SootClass.HIERARCHY);
 		Interval parentInterval = classToInterval.get(parent);
 		Interval childInterval = classToInterval.get(child);
 		if (parentInterval != null && childInterval != null) {
