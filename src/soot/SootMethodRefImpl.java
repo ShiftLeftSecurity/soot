@@ -143,44 +143,52 @@ class SootMethodRefImpl implements SootMethodRef {
     }
     
     private SootMethod tryResolve(StringBuffer trace) {
-    	if(declaringClass.getName().equals("java.dyn.InvokeDynamic")) {
-    		throw new IllegalStateException("Cannot resolve invokedynamic method references at compile time!");
-    	}
-        SootClass cl = declaringClass;
-        while(true) {
-            if(trace != null) trace.append(
-                    "Looking in "+cl+" which has methods "+cl.getMethods()+"\n" );
-            SootMethod sm = cl.getMethodUnsafe(getSubSignature());
-            if( sm != null )
-                return checkStatic(sm);
-            if( cl.hasSuperclass() ) cl = cl.getSuperclass();
-            else break;
-        }
-        cl = declaringClass;
-        while(true) {
-            LinkedList<SootClass> queue = new LinkedList<SootClass>();
-            queue.addAll( cl.getInterfaces() );
-            while( !queue.isEmpty() ) {
-                SootClass iface = queue.removeFirst();
-                if(trace != null) trace.append(
-                        "Looking in "+iface+" which has methods "+iface.getMethods()+"\n" );
-                SootMethod sm = iface.getMethodUnsafe(getSubSignature());
-                if( sm != null )
-                    return checkStatic(sm);
-                queue.addAll( iface.getInterfaces() );
-            }
-            if( cl.hasSuperclass() ) cl = cl.getSuperclass();
-            else break;
-        }
-		if(Scene.v().allowsPhantomRefs())
-		{
+    	try {
+			if (declaringClass.getName().equals("java.dyn.InvokeDynamic")) {
+				throw new IllegalStateException("Cannot resolve invokedynamic method references at compile time!");
+			}
+			SootClass cl = declaringClass;
+			while (true) {
+				if (trace != null) trace.append(
+						"Looking in " + cl + " which has methods " + cl.getMethods() + "\n");
+				SootMethod sm = cl.getMethodUnsafe(getSubSignature());
+				if (sm != null)
+					return checkStatic(sm);
+				if (cl.hasSuperclass()) cl = cl.getSuperclass();
+				else break;
+			}
+			cl = declaringClass;
+			while (true) {
+				LinkedList<SootClass> queue = new LinkedList<SootClass>();
+				queue.addAll(cl.getInterfaces());
+				while (!queue.isEmpty()) {
+					SootClass iface = queue.removeFirst();
+					if (trace != null) trace.append(
+							"Looking in " + iface + " which has methods " + iface.getMethods() + "\n");
+					SootMethod sm = iface.getMethodUnsafe(getSubSignature());
+					if (sm != null)
+						return checkStatic(sm);
+					queue.addAll(iface.getInterfaces());
+				}
+				if (cl.hasSuperclass()) cl = cl.getSuperclass();
+				else break;
+			}
+			if (Scene.v().allowsPhantomRefs()) {
+				SootMethod m =
+						new SootMethod(name, parameterTypes, returnType, isStatic() ? Modifier.STATIC : 0, methodDescriptor);
+				m.setPhantom(true);
+				m = declaringClass.getOrAddMethod(m);
+				return checkStatic(m);
+			}
+		} catch (ResolutionFailedException exception){
 			SootMethod m =
-					new SootMethod(name, parameterTypes, returnType, isStatic()?Modifier.STATIC:0, methodDescriptor);
+					new SootMethod(name + "_STATIC_RESOLVE_ERROR", parameterTypes, returnType, isStatic() ? Modifier.STATIC : 0, methodDescriptor);
 			m.setPhantom(true);
 			m = declaringClass.getOrAddMethod(m);
 			return checkStatic(m);
 		}
         return null;
+
     }
     
     private SootMethod resolve(StringBuffer trace) {
