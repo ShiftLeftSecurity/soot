@@ -171,6 +171,18 @@ public class SootMethodRefImpl implements SootMethodRef {
 	}
 
 	private SootMethod tryResolve(StringBuffer trace) {
+		try {
+			return tryResolve0(trace);
+		} catch (ResolutionFailedException exception){
+			SootMethod m = new SootMethod(name + "_STATIC_RESOLVE_ERROR", parameterTypes, returnType,
+							isStatic() ? Modifier.STATIC : 0, methodDescriptor);
+			m.setPhantom(true);
+			m = declaringClass.getOrAddMethod(m);
+			return checkStatic(m);
+		}
+	}
+
+	private SootMethod tryResolve0(StringBuffer trace) {
 		if (declaringClass.getName().equals("java.dyn.InvokeDynamic")) {
 			throw new IllegalStateException("Cannot resolve invokedynamic method references at compile time!");
 		}
