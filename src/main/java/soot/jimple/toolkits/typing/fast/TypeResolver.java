@@ -246,7 +246,7 @@ public class TypeResolver
 					must by typed with concrete Jimple types, and never [0..1],
 					[0..127] or [0..32767]. */
 					vold = jimple.newLocal("tmp", t);
-					vold.setName("tmp$" + System.identityHashCode(vold));
+					vold.setName("$tmp" + System.identityHashCode(vold));
 					this.tg.set(vold, t);
 					this.jb.getLocals().add(vold);
 					Unit u = Util.findFirstNonIdentityUnit(jb, stmt);
@@ -257,7 +257,7 @@ public class TypeResolver
 					vold = (Local)op;
 				
 				Local vnew = jimple.newLocal("tmp", useType);
-				vnew.setName("tmp$" + System.identityHashCode(vnew));
+				vnew.setName("$tmp" + System.identityHashCode(vnew));
 				this.tg.set(vnew, useType);
 				this.jb.getLocals().add(vnew);
 				Unit u = Util.findFirstNonIdentityUnit(jb, stmt);
@@ -619,7 +619,7 @@ public class TypeResolver
 								{
 									Local newlocal = jimple.newLocal(
 										"tmp", null);
-									newlocal.setName("tmp$" + System.identityHashCode(newlocal));
+									newlocal.setName("$tmp" + System.identityHashCode(newlocal));
 									this.jb.getLocals().add(newlocal);
 									
 									special.setBase(newlocal);
