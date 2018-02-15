@@ -21,12 +21,6 @@ node {
          	    sh "mvn clean test deploy"
       		}     	    
     	}
-        stage('SLpublisher') {
-            step([
-                $class: 'SLUploader',
-                diagnostics: true
-            ])
-        }
     	stage('archiveBuild') {
       		archiveArtifacts 'target/soot*.jar'  
     	}
