@@ -1588,7 +1588,13 @@ final class AsmMethodSource implements MethodSource {
 	
 	private void convert() {
 		ArrayDeque<Edge> worklist = new ArrayDeque<Edge>();
-		for (LabelNode ln : trapHandlers.keySet()) {
+
+		List<LabelNode> traps = new ArrayList<>();
+		for (TryCatchBlockNode node: tryCatchBlocks) {
+			traps.add(node.handler);
+		}
+
+		for (LabelNode ln : traps) {
 			if (checkInlineExceptionHandler(ln))
 				handleInlineExceptionHandler(ln, worklist);
 			else
@@ -1740,6 +1746,7 @@ final class AsmMethodSource implements MethodSource {
 			else
 				iloc++;
 		}
+
 		for (Local l : locals.values()){
 			jbl.add(l);
 		}
@@ -1953,7 +1960,7 @@ final class AsmMethodSource implements MethodSource {
 		emitLocals();
 		emitTraps();
 		emitUnits();
-		
+
 		/* clean up */
 		locals = null;
 		labels = null;
