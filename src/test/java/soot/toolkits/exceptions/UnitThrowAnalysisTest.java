@@ -50,6 +50,7 @@ import soot.jimple.ThrowStmt;
 import soot.jimple.VirtualInvokeExpr;
 import soot.toolkits.exceptions.ExceptionTestUtility.ExceptionHashSet;
 
+@Ignore("disabled")
 public class UnitThrowAnalysisTest {
 
 	static {
