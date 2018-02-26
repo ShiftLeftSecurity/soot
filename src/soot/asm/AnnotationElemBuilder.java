@@ -46,7 +46,7 @@ abstract class AnnotationElemBuilder extends AnnotationVisitor {
 	protected final ArrayList<AnnotationElem> elems;
 	
 	AnnotationElemBuilder(int expected) {
-		super(Opcodes.ASM5);
+		super(Opcodes.ASM6);
 		this.elems = new ArrayList<AnnotationElem>(expected);
 	}
 	

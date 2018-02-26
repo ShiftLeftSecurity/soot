@@ -45,7 +45,7 @@ class MethodBuilder extends JSRInlinerAdapter {
 	
 	MethodBuilder(SootMethod method, SootClassBuilder scb,
 			String desc, String[] ex) {
-		super(Opcodes.ASM5, null, method.getModifiers(),
+		super(Opcodes.ASM6, null, method.getModifiers(),
 				method.getName(), desc, null, ex);
 		this.method = method;
 		this.scb = scb;
