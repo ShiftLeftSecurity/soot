@@ -1863,12 +1863,26 @@ final class AsmMethodSource implements MethodSource {
 	}
 
 	private IdentityStmt getIdentityRefFromContrainer(UnitContainer u) {
-		for (Unit uu : ((UnitContainer) u).units) {
-			if (uu instanceof IdentityStmt) {
-				return (IdentityStmt) uu;
+	  	ArrayList<UnitContainer> worklist = new ArrayList<>();
+
+	  	worklist.add(u);
+
+	  	while (!worklist.isEmpty()) {
+	  		UnitContainer next = worklist.remove(worklist.size() - 1);
+
+	  		Unit children[] = next.units;
+	  		if (children[0] instanceof IdentityStmt) {
+	  			return (IdentityStmt) children[0];
+			} else {
+	  			List<UnitContainer> nestedContainers = new ArrayList<>();
+	  			for (Unit child: children) {
+	  				if (child instanceof UnitContainer) {
+						nestedContainers.add((UnitContainer) child);
+					}
+				}
+				Collections.reverse(nestedContainers);
+	  			worklist.addAll(nestedContainers);
 			}
-			else if (uu instanceof UnitContainer)
-				return getIdentityRefFromContrainer((UnitContainer) uu);
 		}
 		return null;
 	}
