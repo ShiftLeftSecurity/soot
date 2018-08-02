@@ -978,7 +978,7 @@ public class PackManager {
             if (produceJimple) {
                 Body body = m.retrieveActiveBody();
                 //Change
-                //CopyPropagator.v().transform(body);
+                CopyPropagator.v().transform(body);
                 ConditionalBranchFolder.v().transform(body);
                 UnreachableCodeEliminator.v().transform(body);
                 DeadAssignmentEliminator.v().transform(body);
