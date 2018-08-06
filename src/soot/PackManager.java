@@ -978,7 +978,8 @@ public class PackManager {
             if (produceJimple) {
                 Body body = m.retrieveActiveBody();
                 //Change
-                CopyPropagator.v().transform(body);
+                Map<String, String> options = PhaseOptions.v().getPhaseOptions( "jb.cp" );
+                CopyPropagator.v().transform(body, "jb.cp", options);
                 ConditionalBranchFolder.v().transform(body);
                 UnreachableCodeEliminator.v().transform(body);
                 DeadAssignmentEliminator.v().transform(body);
