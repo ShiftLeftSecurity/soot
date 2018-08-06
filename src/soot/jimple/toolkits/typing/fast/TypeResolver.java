@@ -156,6 +156,16 @@ public class TypeResolver
 		
 		int[] castCount = new int[1];
 		Typing tg = this.minCasts(sigma, bh, castCount);
+		/*
+		ML: We want to avoid creating useless temporary variables
+			in the split_new method by spliting up the initial local
+			variable assignments. This creates overhead and more
+			importantly creates alias to the same object which
+			complicates later analysis.
+			This is because the way in which the split is implemented,
+			the <init> method is "executed" on the new introduced
+			tmp local variable, whereas following code works on the
+			original local.
 		if ( castCount[0] != 0 )
 		{
 			this.split_new();
@@ -163,6 +173,7 @@ public class TypeResolver
 				new Typing(this.jb.getLocals()), ef, bh);
 			tg = this.minCasts(sigma, bh, castCount);
 		}
+		*/
 		this.insertCasts(tg, bh, false);
 		
 		for ( Local v : this.jb.getLocals() )
