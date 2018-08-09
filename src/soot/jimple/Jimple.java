@@ -606,6 +606,13 @@ public class Jimple {
 	}
 
 	/**
+	 * Constructs a Local with the given name, type and the locals index number.
+	 */
+	public Local newLocal(String name, Type t, int index) {
+		return new JimpleLocal(name, t, index);
+	}
+
+	/**
 	 * Constructs a new JTrap for the given exception on the given Stmt range
 	 * with the given Stmt handler.
 	 */

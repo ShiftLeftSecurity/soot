@@ -35,11 +35,21 @@ import java.util.*;
 public class JimpleLocal implements Local, ConvertToBaf {
 	String name;
 	Type type;
+	int index;
 
 	/** Constructs a JimpleLocal of the given name and type. */
 	public JimpleLocal(String name, Type type) {
 		setName(name);
 		setType(type);
+		setIndex(-1);
+		Scene.v().getLocalNumberer().add(this);
+	}
+
+	/** Constructs a JimpleLocal of the given name, type and index number. */
+	public JimpleLocal(String name, Type type, int index) {
+		setName(name);
+		setType(type);
+		setIndex(index);
 		Scene.v().getLocalNumberer().add(this);
 	}
 
@@ -62,7 +72,7 @@ public class JimpleLocal implements Local, ConvertToBaf {
 	/** Returns a clone of the current JimpleLocal. */
 	public Object clone() {
 		// do not intern the name again
-		JimpleLocal local = new JimpleLocal(null, type);
+		JimpleLocal local = new JimpleLocal(null, type, index);
 		local.name = name;
 		return local;
 	}
@@ -85,6 +95,14 @@ public class JimpleLocal implements Local, ConvertToBaf {
 	/** Sets the type of this local. */
 	public void setType(Type t) {
 		this.type = t;
+	}
+
+	public int getIndex() {
+		return index;
+	}
+
+	public void setIndex(int index) {
+		this.index = index;
 	}
 
 	public String toString() {

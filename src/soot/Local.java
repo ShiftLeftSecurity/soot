@@ -42,4 +42,15 @@ public interface Local extends Value, Numberable, Immediate
 
     /** Sets the type of the current variable. */
     public void setType(Type t);
+
+    /**
+     * ML: This is the index of the local when refernced
+     * in byte code instructions.
+     * This field was added to be able to decide whether a
+     * local was captured into a lambda or not. If a lambda
+     * capture e.g. 2 locals, they have the indices 0 and 1.
+     */
+    public int getIndex();
+
+    public void setIndex(int index);
 }

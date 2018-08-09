@@ -209,7 +209,8 @@ final class AsmMethodSource implements MethodSource {
 		LocalPair local = null;
 		local = localsMapping.get(idx).floorEntry(runningInsnIdx).getValue();
 		if (local.soot == null) {
-			local.soot = Jimple.v().newLocal("l" + idx + "_" + subindex[idx]++, UnknownType.v());
+			local.soot =
+					Jimple.v().newLocal("l" + idx + "_" + subindex[idx]++, UnknownType.v(), idx);
 			assert locals.get(local.soot.getName(), idx) == null;
 			locals.put(local.soot.getName(), idx, local.soot);
 		}
@@ -1882,7 +1883,7 @@ final class AsmMethodSource implements MethodSource {
 
 			local.soot = locals.get(localVar.name, localVar.index);
 			if (local.soot == null) {
-				local.soot = Jimple.v().newLocal(localVar.name, UnknownType.v());
+				local.soot = Jimple.v().newLocal(localVar.name, UnknownType.v(), localVar.index);
 				this.locals.put(localVar.name, localVar.index, local.soot);
 			}
 			localsStartingAtLabel.put(localVar.start, local);

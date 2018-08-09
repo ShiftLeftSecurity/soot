@@ -39,6 +39,7 @@ public class BafLocal implements Local
 {
     String name;
     Type type;
+    int index;
 
     int fixedHashCode;
     boolean isHashCodeChosen;
@@ -48,6 +49,7 @@ public class BafLocal implements Local
     {
         this.name = name;
         this.type = t;
+        this.index = -1;
     }
 
     /* JimpleLocals are *NOT* equivalent to Baf Locals! */
@@ -69,6 +71,7 @@ public class BafLocal implements Local
     {
         BafLocal baf = new BafLocal(name, type);
         baf.originalLocal = originalLocal;
+        baf.index = index;
         return baf;
     }
     
@@ -102,6 +105,16 @@ public class BafLocal implements Local
     public void setType(Type t)
     {
         this.type = t;
+    }
+
+    @Override
+    public int getIndex() {
+        return index;
+    }
+
+    @Override
+    public void setIndex(int index) {
+        this.index = index;
     }
 
     @Override
