@@ -27,6 +27,8 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -313,7 +315,14 @@ public class SourceLocator
 			if (files == null) {
 				files = new File[1];
 				files[0] = file;
-			}
+			} else {
+			  Arrays.sort(files, new Comparator<File>() {
+                @Override
+                public int compare(File file1, File file2) {
+                  return file1.getName().compareTo(file2.getName());
+                }
+              });
+            }
 
 			for (File element : files) {
 				if (element.isDirectory()) {
