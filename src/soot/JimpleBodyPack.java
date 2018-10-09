@@ -59,12 +59,13 @@ public class JimpleBodyPack extends BodyPack
         // locals for not creating disconnected islands of useless assignments
         // that afterwards mess up type assignment.
         PackManager.v().getTransform( "jb.uce" ).apply( b );
-		
+
+        PackManager.v().getTransform( "jb.a" ).apply( b );
+
         PackManager.v().getTransform( "jb.ls" ).apply( b );
 
         if(Options.v().time()) Timers.v().splitTimer.end();
 
-        PackManager.v().getTransform( "jb.a" ).apply( b );
         PackManager.v().getTransform( "jb.ule" ).apply( b );
 
         if(Options.v().time()) Timers.v().assignTimer.start();
@@ -78,7 +79,7 @@ public class JimpleBodyPack extends BodyPack
             PackManager.v().getTransform( "jb.ulp" ).apply( b );
         }
         PackManager.v().getTransform( "jb.lns" ).apply( b );		// LocalNameStandardizer
-        PackManager.v().getTransform( "jb.cp" ).apply( b );			// CopyPropagator
+        //PackManager.v().getTransform( "jb.cp" ).apply( b );			// CopyPropagator
         PackManager.v().getTransform( "jb.dae" ).apply( b );		// DeadAssignmentElimintaor
         PackManager.v().getTransform( "jb.cp-ule" ).apply( b );		// UnusedLocalEliminator
         PackManager.v().getTransform( "jb.lp" ).apply( b );			// LocalPacker
