@@ -35,11 +35,13 @@ import soot.CharType;
 import soot.IntType;
 import soot.IntegerType;
 import soot.Local;
+import soot.NullType;
 import soot.PatchingChain;
 import soot.RefType;
 import soot.ShortType;
 import soot.Type;
 import soot.Unit;
+import soot.UnknownType;
 import soot.Value;
 import soot.jimple.ArrayRef;
 import soot.jimple.AssignStmt;
@@ -499,12 +501,22 @@ public class TypeResolver
 						of assignments where there is supertyping between array
 						types, which is only for arrays of reference types and
 						multidimensional arrays. */
-						if ( !(t_ instanceof RefType
-							|| t_ instanceof ArrayType) )
+						/* ML: But we if we know nothing about the left hand side
+						we want to take the information of the right hand side.
+						The only scenario where we encountered this is so far is:
+						int[] array = null;
+						if (array != null) {
+							array[someIndex] = someValue;
+						}
+						As you see this code does not really make sense but we
+						still dont want to crash.
+						 */
+						if (!( t_ instanceof RefType || t_ instanceof ArrayType
+							|| told instanceof NullType || told instanceof UnknownType))
 						{
 							continue;
 						}
-							
+
 						t_ = t_.makeArrayType();
 					}
 					
