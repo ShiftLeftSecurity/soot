@@ -530,17 +530,6 @@ public class ExceptionalUnitGraph extends UnitGraph implements
 				if (dest.getTrap() != null) {
 					Unit catcher = dest.getTrap().getHandlerUnit();
 					RefType trapsType = dest.getTrap().getException().getType();
-					if (predThrowables == null
-							|| predThrowables.catchableAs(trapsType)) {
-						// Add edges from the thrower's predecessors to the
-						// catcher.
-						if (thrower == entryPoint) {
-							trapsThatAreHeads.add(catcher);
-						}
-						for (Unit pred : throwersPreds) {
-							addEdge(unitToSuccs, unitToPreds, pred, catcher);
-						}
-					}
 					if (alwaysAddSelfEdges
 							|| (selfThrowables != null && selfThrowables
 									.catchableAs(trapsType))) {
