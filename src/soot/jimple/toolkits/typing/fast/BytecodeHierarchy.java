@@ -58,7 +58,7 @@ public class BytecodeHierarchy implements IHierarchy
 	end of a different path from root to Object. */
 	private static Collection<AncestryTreeNode> buildAncestryTree(RefType root)
 	{
-		if (root.getSootClass().isPhantom())
+		if (!root.hasSootClass() || root.getSootClass().isPhantom())
 			return Collections.emptyList();
 		
 		LinkedList<AncestryTreeNode> leafs = new LinkedList<AncestryTreeNode>();
