@@ -117,7 +117,13 @@ public final class CallGraphBuilder {
 					for (Iterator<Type> typeIt = p2set.possibleTypes()
 							.iterator(); typeIt.hasNext();) {
 						final Type type = typeIt.next();
-						ofcgb.addType(receiver, momc.context(), type, null);
+						try {
+							ofcgb.addType(receiver, momc.context(), type, null);
+						} catch (Exception exception) {
+							if (!exception.getMessage().startsWith("This operation requires resolving level HIERARCHY")) {
+								throw exception;
+							}
+						}
 					}
 				}
 			List<Local> bases = ofcgb.methodToInvokeArgs().get(momc.method());
