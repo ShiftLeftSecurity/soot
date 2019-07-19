@@ -180,7 +180,7 @@ class SootMethodRefImpl implements SootMethodRef {
 				m = declaringClass.getOrAddMethod(m);
 				return checkStatic(m);
 			}
-		} catch (ResolutionFailedException exception){
+		} catch (RuntimeException exception){
 			SootMethod m =
 					new SootMethod(name + "_STATIC_RESOLVE_ERROR", parameterTypes, returnType, isStatic() ? Modifier.STATIC : 0, methodDescriptor);
 			m.setPhantom(true);
