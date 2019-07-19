@@ -421,7 +421,18 @@ public class TypeResolver
 		UseChecker uc = new UseChecker(this.jb);
 		CastInsertionUseVisitor uv
 			= new CastInsertionUseVisitor(countOnly, this.jb, tg, h);
-		uc.check(tg, uv);
+		/**
+		 * ML: We do not want any extra cast introduced.
+		 * 	   While in theory this enables us to have
+		 * 	   better call graphs right away, it also
+		 * 	   introduces aliases which make data flow
+		 * 	   tracking in general more complicated.
+		 * 	   So we choose to have less aliases and let
+		 * 	   the integrated call resolver figure out
+		 * 	   the call graph which we anyway need
+		 * 	   as functionality for other languages.
+		 */
+		//uc.check(tg, uv);
 		return uv.getCount();
 	}
 	
