@@ -644,7 +644,7 @@ public class SootClass extends AbstractHost implements Numberable {
 	}
 
 	synchronized SootMethod getOrAddMethod(SootMethod m) {
-		checkLevel(SIGNATURES);
+		//checkLevel(SIGNATURES);
 		if (m.isDeclared())
 			throw new RuntimeException("already declared: " + m.getName());
 		SootMethod old = subSigToMethods.get(m.getNumberedSubSignature());
