@@ -125,6 +125,19 @@ public class UseChecker extends AbstractStmtSwitch
 
 	private void handleInvokeExpr(InvokeExpr ie, Stmt stmt)
 	{
+		/**
+		 * ML: We do not want this kind of casts introduced.
+		 * 	   While in theory this enables us to have
+		 * 	   better call graphs right away, it also
+		 * 	   introduces aliases which make data flow
+		 * 	   tracking in general more complicated.
+		 * 	   So we choose to have less aliases and let
+		 * 	   the integrated call resolver figure out
+		 * 	   the call graph which we anyway need
+		 * 	   as functionality for other languages.
+         */
+
+		 /*
 		SootMethodRef m = ie.getMethodRef();
 
 		if ( ie instanceof InstanceInvokeExpr )
@@ -137,6 +150,7 @@ public class UseChecker extends AbstractStmtSwitch
 		for ( int i = 0; i < ie.getArgCount(); i++ )
 			ie.setArg(i, this.uv.visit(
 				ie.getArg(i), m.parameterType(i), stmt));
+		 */
 	}
 
 	private void handleBinopExpr(BinopExpr be, Stmt stmt, Type tlhs)
