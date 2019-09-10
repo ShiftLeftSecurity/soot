@@ -1706,10 +1706,7 @@ public class Scene  //extends AbstractHost
 			Type returnType,
 			boolean isStatic,
 			String binarySignature) {
-		SootMethodRef sootMethodRef =
-				new SootMethodRefImpl(declaringClass, name, parameterTypes, returnType, isStatic, binarySignature);
-		sootMethodRef.resolve();
-		return sootMethodRef;
+		return new SootMethodRefImpl(declaringClass, name, parameterTypes, returnType, isStatic, binarySignature);
 	}
 
     /** Create an unresolved reference to a constructor. */
