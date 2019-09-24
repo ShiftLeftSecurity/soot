@@ -1052,6 +1052,17 @@ public final class OnFlyCallGraphBuilder
         if( m.isNative() || m.isPhantom() ) {
             return;
         }
+
+        // Workaround for weird cases, when there is no body attached to the method, since
+        // the declaring class is an interface. This excludes the special case of static initializers,
+        // which we still want to process.
+        SootClass clazz = m.getDeclaringClass();
+        if (!m.isStaticInitializer() && m.isAbstract() && clazz != null && clazz.isInterface()) {
+            // Won't find the body anyway
+            System.out.println("Dropping for " + clazz.getName() + " and method " + m.getName());
+            return;
+        }
+
         Body b = m.retrieveActiveBody();
         getImplicitTargets( m );
         findReceivers(m, b);
