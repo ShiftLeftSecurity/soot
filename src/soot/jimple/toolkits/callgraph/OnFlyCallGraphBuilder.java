@@ -1058,8 +1058,6 @@ public final class OnFlyCallGraphBuilder
         // which we still want to process.
         SootClass clazz = m.getDeclaringClass();
         if (!m.isStaticInitializer() && m.isAbstract() && clazz != null && clazz.isInterface()) {
-            // Won't find the body anyway
-            System.out.println("Dropping for " + clazz.getName() + " and method " + m.getName());
             return;
         }
 
