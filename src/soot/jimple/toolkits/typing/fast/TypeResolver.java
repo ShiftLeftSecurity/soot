@@ -130,8 +130,12 @@ public class TypeResolver
 				if ( op instanceof Local )
 					this.addDepend((Local)op, assignmentIdx);
 			}
-			else if ( rhs instanceof ArrayRef )
-				this.addDepend((Local)((ArrayRef)rhs).getBase(), assignmentIdx);
+			else if ( rhs instanceof ArrayRef ) {
+				Value base = ((ArrayRef)rhs).getBase();
+				if (base instanceof Local) {
+					this.addDepend((Local)base, assignmentIdx);
+				}
+			}
 		}
 	}
 	

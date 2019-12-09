@@ -268,49 +268,52 @@ public class UseChecker extends AbstractStmtSwitch
 		else if ( rhs instanceof ArrayRef )
 		{
 			ArrayRef aref = (ArrayRef) rhs;
-			Local base = (Local) aref.getBase();
+			if (aref.getBase() instanceof Local) {
+				Local base = (Local) aref.getBase();
 
-			//try to force Type integrity
-			ArrayType at;
-			Type et = null;
-			if (this.tg.get(base) instanceof ArrayType)
-				at = (ArrayType)this.tg.get(base);
-			else {
-				Type bt = this.tg.get(base);
-				at = bt.makeArrayType();
-				
-				// If we have a type of java.lang.Object and access it like an object,
-				// this could lead to any kind of object, so we have to look at the uses.
-				// For some fixed type T, we assume that we can fix the array to T[].
-				if (bt instanceof RefType) {
-					RefType rt = (RefType) bt;
-					if (rt.getSootClass().getName().equals("java.lang.Object")
-							|| rt.getSootClass().getName().equals("java.io.Serializable")
-							|| rt.getSootClass().getName().equals("java.lang.Cloneable")) {
-						if (defs == null) {
-					        defs = LocalDefs.Factory.newLocalDefs(jb);
-							uses = LocalUses.Factory.newLocalUses(jb, defs);
-						}
-						
-						outer: for (UnitValueBoxPair usePair : uses.getUsesOf(stmt)) {
-							Stmt useStmt = (Stmt) usePair.getUnit();
-							if (useStmt.containsInvokeExpr())
-								for (int i = 0; i < useStmt.getInvokeExpr().getArgCount(); i++)
-									if (useStmt.getInvokeExpr().getArg(i) == usePair.getValueBox().getValue()) {
-										et = useStmt.getInvokeExpr().getMethod().getParameterType(i);
-										at = et.makeArrayType();
-										break outer;
-									}
+				//try to force Type integrity
+				ArrayType at;
+				Type et = null;
+				if (this.tg.get(base) instanceof ArrayType)
+					at = (ArrayType) this.tg.get(base);
+				else {
+					Type bt = this.tg.get(base);
+					at = bt.makeArrayType();
+
+					// If we have a type of java.lang.Object and access it like an object,
+					// this could lead to any kind of object, so we have to look at the uses.
+					// For some fixed type T, we assume that we can fix the array to T[].
+					if (bt instanceof RefType) {
+						RefType rt = (RefType) bt;
+						if (rt.getSootClass().getName().equals("java.lang.Object")
+								|| rt.getSootClass().getName().equals("java.io.Serializable")
+								|| rt.getSootClass().getName().equals("java.lang.Cloneable")) {
+							if (defs == null) {
+								defs = LocalDefs.Factory.newLocalDefs(jb);
+								uses = LocalUses.Factory.newLocalUses(jb, defs);
+							}
+
+							outer:
+							for (UnitValueBoxPair usePair : uses.getUsesOf(stmt)) {
+								Stmt useStmt = (Stmt) usePair.getUnit();
+								if (useStmt.containsInvokeExpr())
+									for (int i = 0; i < useStmt.getInvokeExpr().getArgCount(); i++)
+										if (useStmt.getInvokeExpr().getArg(i) == usePair.getValueBox().getValue()) {
+											et = useStmt.getInvokeExpr().getMethod().getParameterType(i);
+											at = et.makeArrayType();
+											break outer;
+										}
+							}
 						}
 					}
 				}
+				Type trhs = ((ArrayType) at).getElementType();
+
+				this.handleArrayRef(aref, stmt);
+
+				aref.setBase((Local) this.uv.visit(aref.getBase(), at, stmt));
+				stmt.setRightOp(this.uv.visit(rhs, trhs, stmt));
 			}
-			Type trhs = ((ArrayType)at).getElementType();
-
-			this.handleArrayRef(aref, stmt);
-
-			aref.setBase((Local) this.uv.visit(aref.getBase(), at, stmt));
-			stmt.setRightOp(this.uv.visit(rhs, trhs, stmt));
 		}
 		else if ( rhs instanceof InstanceFieldRef )
 		{
