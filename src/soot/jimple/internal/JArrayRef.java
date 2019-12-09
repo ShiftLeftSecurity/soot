@@ -44,7 +44,7 @@ public class JArrayRef implements ArrayRef, ConvertToBaf
 
     public JArrayRef(Value base, Value index)
     {
-        this(Jimple.v().newLocalBox(base),
+        this(base instanceof Immediate ? Jimple.v().newImmediateBox(base): Jimple.v().newLocalBox(base),
              Jimple.v().newImmediateBox(index));
     }
 
