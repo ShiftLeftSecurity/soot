@@ -41,13 +41,20 @@ public class JVirtualInvokeExpr extends AbstractVirtualInvokeExpr
 
         //Check that the method's class is resolved enough
         methodRef.declaringClass().checkLevelIgnoreResolving(SootClass.HIERARCHY);
+        // ML: I removed this check because we sometimes end up with contradicting class
+        // files where one class file uses invokevirtual on interface classes.
+        // Since we do not want to distinguish between virtual and interface calls in the
+        // CPG, we skip the check and hope that SOOT does choke on this unmatched assumption
+        // later on during program execution.
         //now check if the class is valid
+        /*
         if(methodRef.declaringClass().isInterface()) {
             SootClass sc = methodRef.declaringClass();
             String path = sc.hasTag("SourceFileTag")? ((SourceFileTag)sc.getTag("SourceFileTag")).getAbsolutePath() : "uknown";
             throw new RuntimeException("Trying to create virtual invoke expression for interface type ("+
                     methodRef.declaringClass().getName()+" in file "+path+"). Use JInterfaceInvokeExpr instead!");
         }
+         */
 
         for(int i = 0; i < args.size(); i++)
             this.argBoxes[i] = Jimple.v().newImmediateBox(args.get(i));
