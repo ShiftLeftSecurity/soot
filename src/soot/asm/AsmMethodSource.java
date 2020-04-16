@@ -1982,7 +1982,9 @@ final class AsmMethodSource implements MethodSource {
 		try {
 	        PackManager.v().getPack("jb").apply(jb);
 		} catch (Throwable t) {
-			throw new RuntimeException("Failed to apply jb to " + m, t);
+			Body fakeBody = Jimple.v().newBody(m);
+			fakeBody.getUnits().add(Jimple.v().newNopStmt());
+			return fakeBody;
 		}
 		
  		return jb;
