@@ -18,6 +18,7 @@
  */
 
 package soot.jimple.toolkits.callgraph;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -105,14 +106,26 @@ public class CallGraph implements Iterable<Edge>
      */
     public boolean swapEdgesOutOf(Stmt out, Stmt in) {
     	boolean hasSwapped = false;
-    	for (QueueReader<Edge> edgeRdr = listener(); edgeRdr.hasNext(); ) {
-    		Edge e = edgeRdr.next();
-    		if (e.srcUnit() == out) {
-    			removeEdge(e);
-    			addEdge(new Edge(e.getSrc(), in, e.getTgt()));
-    			hasSwapped = true;
-    		}
-    	}
+        Edge e = srcUnitToEdge.get(out);
+        if (e != null) {
+            ArrayList<MethodOrMethodContext> targets = new ArrayList<>();
+            Edge currentEdge = e;
+            while (currentEdge.kind() != Kind.INVALID) {
+                targets.add(currentEdge.getTgt());
+                currentEdge = currentEdge.nextByUnit();
+            }
+
+            removeEdge(e);
+
+            Iterator<MethodOrMethodContext> targetsIt = targets.iterator();
+            Edge newEdge = new Edge(e.getSrc(), in, targetsIt.next());
+            while (targetsIt.hasNext()) {
+                Edge nextNewEdge = new Edge(e.getSrc(), in, targetsIt.next());
+                newEdge.insertAfterByUnit(nextNewEdge);
+            }
+            addEdge(newEdge);
+            hasSwapped = true;
+        }
     	return hasSwapped;
     }
     
