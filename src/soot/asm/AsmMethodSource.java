@@ -38,6 +38,7 @@ import static org.objectweb.asm.tree.AbstractInsnNode.VAR_INSN;
 
 import java.util.*;
 
+import org.apache.tools.ant.taskdefs.Get;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;
@@ -91,6 +92,8 @@ import soot.UnknownType;
 import soot.Value;
 import soot.ValueBox;
 import soot.VoidType;
+import soot.asm.function.Function;
+import soot.asm.function.FunctionOnUnitApplier;
 import soot.coffi.Util;
 import soot.jimple.AddExpr;
 import soot.jimple.ArrayRef;
@@ -1776,34 +1779,13 @@ final class AsmMethodSource implements MethodSource {
 	}
 	
 	private void emitUnits(Unit u) {
-		if (u instanceof UnitContainer) {
-			ArrayDeque<Unit> worklist = new ArrayDeque<>();
-			// The set is here only for the case there are loops in the unit container which
-			// would be a bug. But with SOOT you never know.
-			HashSet<Unit> alreadyProcessedUnits = new HashSet<>();
-			worklist.addFirst(u);
-
-			while (!worklist.isEmpty()) {
-				Unit currentUnit = worklist.removeFirst();
-				if (alreadyProcessedUnits.contains(currentUnit)) {
-					continue;
-				}
-
-				alreadyProcessedUnits.add(currentUnit);
-
-				if (currentUnit instanceof UnitContainer) {
-					Unit units[] = ((UnitContainer) currentUnit).units;
-					// To maintain ordering we need to add in reverse.
-					for (int i = units.length - 1; i >=0; i--) {
-						worklist.addFirst(units[i]);
-					}
-				} else {
-					body.getUnits().add(currentUnit);
-				}
+		FunctionOnUnitApplier.process(u, new Function<Unit, Boolean> (){
+			@Override
+			public Boolean apply(Unit unit) {
+				body.getUnits().add(unit);
+				return true;
 			}
-		} else {
-			body.getUnits().add(u);
-		}
+		});
 	}
 	
 	private void emitUnits() {
@@ -1885,15 +1867,23 @@ final class AsmMethodSource implements MethodSource {
 		}
 	}
 
-	private IdentityStmt getIdentityRefFromContrainer(UnitContainer u) {
-		for (Unit uu : ((UnitContainer) u).units) {
-			if (uu instanceof IdentityStmt) {
-				return (IdentityStmt) uu;
+	private static class GetIdentityRefFromContainerFunction implements Function<Unit, Boolean> {
+		public IdentityStmt firstIdentityStmt = null;
+		@Override
+		public Boolean apply(Unit unit) {
+			if (unit instanceof IdentityStmt) {
+				firstIdentityStmt = (IdentityStmt) unit;
+				return false;
+			} else {
+				return (unit instanceof UnitContainer);
 			}
-			else if (uu instanceof UnitContainer)
-				return getIdentityRefFromContrainer((UnitContainer) uu);
 		}
-		return null;
+	}
+
+	private IdentityStmt getIdentityRefFromContrainer(UnitContainer u) {
+		GetIdentityRefFromContainerFunction func = new GetIdentityRefFromContainerFunction();
+		FunctionOnUnitApplier.process(u, func);
+		return func.firstIdentityStmt;
 	}
 
 	private void createLocalsAndMappings(InsnList insns, List<LocalVariableNode> localVars) {

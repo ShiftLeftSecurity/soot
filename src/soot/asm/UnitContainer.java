@@ -34,9 +34,9 @@ import soot.util.Switch;
  * @author Aaloan Miftah
  */
 @SuppressWarnings("serial")
-class UnitContainer implements Unit {
+public class UnitContainer implements Unit {
 	
-	final Unit[] units;
+	public final Unit[] units;
 	
 	UnitContainer(Unit... units) {
 		this.units = units;
