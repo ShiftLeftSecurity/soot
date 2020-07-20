@@ -1256,7 +1256,8 @@ final class AsmMethodSource implements MethodSource {
 			SootClass bclass = Scene.v().getSootClass(SootClass.INVOKEDYNAMIC_DUMMY_CLASS_NAME);
 			
 			// Generate parameters & returnType & parameterTypes
-			Type[] types = Util.v().jimpleTypesOfFieldOrMethodDescriptor(insn.desc);
+			Util util = new Util();
+			Type[] types = util.jimpleTypesOfFieldOrMethodDescriptor(insn.desc);
 			List<Type> parameterTypes = new ArrayList<Type>(types.length);
 			List<Value> methodArgs = new ArrayList<Value>(types.length);
 
