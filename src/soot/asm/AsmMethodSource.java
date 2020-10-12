@@ -1465,7 +1465,7 @@ final class AsmMethodSource implements MethodSource {
 
 		Local local = getLocal(insn.var, insn);
 		if (opr.stack != null) {
-			opr.stack.setName(local.getName());
+			opr.stack = local;
 		}
 		if (!units.containsKey(insn)) {
 			DefinitionStmt as = Jimple.v().newAssignStmt(local, opr.stackOrValue());
