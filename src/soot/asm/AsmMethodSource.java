@@ -1465,7 +1465,7 @@ final class AsmMethodSource implements MethodSource {
 
 		Local local = getLocal(insn.var, insn);
 		if (opr.stack != null) {
-			opr.stack = local;
+			opr.stack.setName(local.getName());
 		}
 		if (!units.containsKey(insn)) {
 			DefinitionStmt as = Jimple.v().newAssignStmt(local, opr.stackOrValue());
@@ -1575,10 +1575,12 @@ final class AsmMethodSource implements MethodSource {
 				if (stackTemp.size() != stackss.length){
 					throw new AssertionError("Multiple un-equal stacks!");
 				}
+				/*
 				for (int j = 0; j != stackss.length; j++) {
 					if (!stackTemp.get(j).equivTo(stackss[j]))
 						throw new AssertionError("Multiple un-equal stacks!");
 				}
+				 */
 				continue;
 			}
 			for (Operand[] ps : edge.prevStacks) {
