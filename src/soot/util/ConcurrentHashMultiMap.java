@@ -88,8 +88,7 @@ public class ConcurrentHashMultiMap<K,V> extends AbstractMultiMap<K, V> {
     
     @Override
     public boolean putAll( K key, Set<V> values ) {
-        if (values.isEmpty()) return false;
-        
+
         Map<V,V> set = findSet( key );
         boolean ok = false;
         for (V v : values)
