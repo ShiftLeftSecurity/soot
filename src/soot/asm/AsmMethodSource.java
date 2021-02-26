@@ -1583,6 +1583,22 @@ final class AsmMethodSource implements MethodSource {
 				 */
 				continue;
 			}
+			// ML:
+			// Commented out to not run into state explosion.
+			// I am pretty sure that this code was intended to keep
+			// the method conversion going until a steady state for
+			// the stacks is reached.
+			// This kind of loop is expected as it seems to mimic
+			// the JVM class loader type checking done before Java 7
+			// which also did a propagation until steady state was
+			// reached. But since code here works on the actual
+			// values and not just the types, this can lead to
+			// the mentioned stack state explosion.
+			// All of this seems to have been done to also validate
+			// the class files while converting them.
+			// We dont need that. We trust the class files to be
+			// valid.
+			/*
 			for (Operand[] ps : edge.prevStacks) {
 				if (Arrays.equals(ps, stackss))
 					continue tgt_loop;
@@ -1590,6 +1606,7 @@ final class AsmMethodSource implements MethodSource {
 			edge.stack = new ArrayList<Operand>(stack);
 			edge.prevStacks.add(stackss);
 			conversionWorklist.add(edge);
+			 */
 		} while (i <= lastIdx && (tgt = tgts.get(i++)) != null);
 	}
 	
