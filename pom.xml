@@ -8,7 +8,7 @@
   <artifactId>soot-shiftleft</artifactId>
   
   <name>Soot</name>
-  <version>0.2.29-SNAPSHOT</version>
+  <version>0.2.29</version>
   <description>A Java Optimization Framework</description>
 
   <properties>
@@ -76,17 +76,17 @@
     <dependency>
       <groupId>org.ow2.asm</groupId>
       <artifactId>asm</artifactId>
-      <version>9.0</version>
+      <version>9.2</version>
     </dependency>
     <dependency>
       <groupId>org.ow2.asm</groupId>
       <artifactId>asm-commons</artifactId>
-      <version>9.0</version>
+      <version>9.2</version>
     </dependency>
     <dependency>
       <groupId>org.ow2.asm</groupId>
       <artifactId>asm-util</artifactId>
-      <version>9.0</version>
+      <version>9.2</version>
     </dependency>
     <dependency>
       <groupId>org.javassist</groupId>
