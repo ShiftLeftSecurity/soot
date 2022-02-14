@@ -3,7 +3,7 @@ properties([disableConcurrentBuilds(), pipelineTriggers([pollSCM('H/3 * * * *')]
 
 env.REPO_NAME="github.com/ShiftLeftSecurity/soot"
 
-node {
+node('ubuntu-ci') {
 	try {
 	    stage('cleanDir') {
             	try {
