@@ -8,7 +8,7 @@
   <artifactId>soot-shiftleft</artifactId>
   
   <name>Soot</name>
-  <version>0.2.32-SNAPSHOT</version>
+  <version>0.2.32</version>
   <description>A Java Optimization Framework</description>
 
   <properties>
@@ -137,10 +137,11 @@
     </dependency>
 
     <!-- Uploaded to nexus.bedatadriven.com from libs/AXMLPrinter2.jar -->
+    <!-- this artifact has a wild history: https://github.com/ShiftLeftSecurity/itsupport/issues/1619 -->
     <dependency>
       <groupId>ca.mcgill.sable</groupId>
       <artifactId>axmlprinter2</artifactId>
-      <version>2016-07-27</version>
+      <version>2016-07-27-patched</version>
     </dependency>
     
     <!-- Testing dependencies -->
