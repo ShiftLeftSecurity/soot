@@ -46,11 +46,14 @@ public class JInterfaceInvokeExpr extends AbstractInterfaceInvokeExpr
         //CheckLevel returns without doing anything because we can be not 'done' resolving
         methodRef.declaringClass().checkLevelIgnoreResolving(SootClass.HIERARCHY);
         //now check if the class is valid
-        if(!methodRef.declaringClass().isInterface() && !methodRef.declaringClass().isPhantom()) {
-        	throw new RuntimeException("Trying to create interface invoke expression for non-interface type: " +
-        			methodRef.declaringClass() +
-        			" Use JVirtualInvokeExpr or JSpecialInvokeExpr instead!");
-        }
+
+        // ML: We dont check because some customers cannot get their jars strait. Luckily
+        // this does not seem to trigger followup problems.
+        //if(!methodRef.declaringClass().isInterface() && !methodRef.declaringClass().isPhantom()) {
+        //	throw new RuntimeException("Trying to create interface invoke expression for non-interface type: " +
+        //			methodRef.declaringClass() +
+        //			" Use JVirtualInvokeExpr or JSpecialInvokeExpr instead!");
+        //}
 
         for(int i = 0; i < args.size(); i++)
             this.argBoxes[i] = Jimple.v().newImmediateBox(args.get(i));
