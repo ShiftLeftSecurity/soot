@@ -329,24 +329,18 @@ public class Program extends ASTNode<ASTNode> implements Cloneable {
       ArrayList classPaths = new ArrayList();
       ArrayList sourcePaths = new ArrayList();
       
-      String[] bootclasspaths;
-      if(options().hasValueForOption("-bootclasspath"))
-        bootclasspaths = options().getValueForOption("-bootclasspath").split(File.pathSeparator);
-      else
-        bootclasspaths = System.getProperty("sun.boot.class.path").split(File.pathSeparator);
-      for(int i = 0; i < bootclasspaths.length; i++) {
-        classPaths.add(bootclasspaths[i]);
-        //System.err.println("Adding classpath " + bootclasspaths[i]);
+      if(options().hasValueForOption("-bootclasspath")) {
+        String[] bootclasspaths = options().getValueForOption("-bootclasspath").split(File.pathSeparator);
+        for(int i = 0; i < bootclasspaths.length; i++) {
+          classPaths.add(bootclasspaths[i]);
+        }
       }
-      
-      String[] extdirs;
-      if(options().hasValueForOption("-extdirs"))
-        extdirs = options().getValueForOption("-extdirs").split(File.pathSeparator);
-      else
-        extdirs = System.getProperty("java.ext.dirs").split(File.pathSeparator);
-      for(int i = 0; i < extdirs.length; i++) {
-        classPaths.add(extdirs[i]);
-        //System.err.println("Adding classpath " + extdirs[i]);
+
+      if(options().hasValueForOption("-extdirs")) {
+        String[] extdirs = options().getValueForOption("-extdirs").split(File.pathSeparator);
+        for(int i = 0; i < extdirs.length; i++) {
+          classPaths.add(extdirs[i]);
+        }
       }
 
       String[] userClasses = null;
