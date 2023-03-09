@@ -1053,11 +1053,10 @@ public final class OnFlyCallGraphBuilder
             return;
         }
 
-        // Workaround for weird cases, when there is no body attached to the method, since
-        // the declaring class is an interface. This excludes the special case of static initializers,
-        // which we still want to process.
+        // Workaround for weird cases, when there is no body attached to the method.
+        // This excludes the special case of static initializers which we still want to process.
         SootClass clazz = m.getDeclaringClass();
-        if (!m.isStaticInitializer() && m.isAbstract() && clazz != null && clazz.isInterface()) {
+        if (!m.isStaticInitializer() && m.isAbstract() && clazz != null) {
             return;
         }
 
