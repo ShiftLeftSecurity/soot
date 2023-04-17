@@ -1633,7 +1633,7 @@ final class AsmMethodSource implements MethodSource {
 			AbstractInsnNode insn = edge.insn;
 			stack = edge.stack;
 			edge.stack = null;
-			do {
+			while (insn != null) {
 				int type = insn.getType();
 				if (type == FIELD_INSN) {
 					convertFieldInsn((FieldInsnNode) insn);
@@ -1696,7 +1696,8 @@ final class AsmMethodSource implements MethodSource {
 				}
 				else
 					throw new RuntimeException("Unknown instruction type: " + type);
-			} while ((insn = insn.getNext()) != null);
+				insn = insn.getNext();
+			}
 		} while (!worklist.isEmpty());
 		conversionWorklist = null;
 		edges = null;
@@ -1992,33 +1993,29 @@ final class AsmMethodSource implements MethodSource {
 		/* convert instructions */
 		try {
 			convert();
-		} catch (Throwable t) {
-			throw new RuntimeException("Failed to convert " + m, t);
-		}
-		
-		/* build body (add units, locals, traps, etc.) */
-		emitLocals();
-		emitTraps();
-		emitUnits();
 
-		/* clean up */
-		locals = null;
-		labels = null;
-		units = null;
-		stack = null;
-		frames = null;
-		body = null;
-		
-		// Make sure to inline patterns of the form to enable proper variable
-		// splitting and type assignment:
-		// a = new A();
-		// goto l0;
-		// l0:
-		// 	b = (B) a;
-		// 	return b;
-		castAndReturnInliner.transform(jb);
-		
-		try {
+			/* build body (add units, locals, traps, etc.) */
+			emitLocals();
+			emitTraps();
+			emitUnits();
+
+			/* clean up */
+			locals = null;
+			labels = null;
+			units = null;
+			stack = null;
+			frames = null;
+			body = null;
+
+			// Make sure to inline patterns of the form to enable proper variable
+			// splitting and type assignment:
+			// a = new A();
+			// goto l0;
+			// l0:
+			// 	b = (B) a;
+			// 	return b;
+			castAndReturnInliner.transform(jb);
+
 	        PackManager.v().getPack("jb").apply(jb);
 		} catch (Throwable t) {
 			Body fakeBody = Jimple.v().newBody(m);
