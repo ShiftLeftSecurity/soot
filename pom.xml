@@ -178,9 +178,9 @@
 
   <repositories>
     <repository>
-      <id>shiftleft-libs-release</id>
-      <name>shiftleft-libs-release</name>
-      <url>https://shiftleft.jfrog.io/shiftleft/libs-release</url>
+      <id>HAR</id>
+      <name>Harness Artifact Registry</name>
+      <url>https://pkg.harness.io/pkg/Vkf0WQMOShC_kLnpgms3gg/libs-release-local/maven</url>
     </repository>
     <repository>
       <id>bedatadriven</id>
@@ -191,14 +191,14 @@
 
   <distributionManagement>
     <repository>
-      <id>shiftleft-artifactory</id>
-      <name>shiftleft releases</name>
-      <url>https://shiftleft.jfrog.io/shiftleft/libs-release-local</url>
+      <id>HAR</id>
+      <name>Harness Artifact Registry</name>
+      <url>https://pkg.harness.io/pkg/Vkf0WQMOShC_kLnpgms3gg/libs-release-local/maven</url>
     </repository>
     <snapshotRepository>
-      <id>shiftleft-artifactory</id>
-      <name>shiftleft releases</name>
-      <url>https://shiftleft.jfrog.io/shiftleft/libs-snapshot-local</url>
+      <id>HAR</id>
+      <name>Harness Artifact Registry</name>
+      <url>https://pkg.harness.io/pkg/Vkf0WQMOShC_kLnpgms3gg/libs-snapshot-local/maven</url>
     </snapshotRepository>
   </distributionManagement>
 
