@@ -23,7 +23,7 @@ node('ubuntu-ci') {
             "MAVEN_HOME=${ tool 'Maven-3.3.9' }",
             "PATH+MAVEN=${tool 'Gradle-2.12'}/bin:${env.JAVA_HOME}/bin:${tool 'Ant-1.10.0'}/bin:${tool 'Maven-3.3.9'}/bin",
             // publishing to HAR is extremely slow - trying to use a massive 60min timeout
-            "MAVEN_OPTS=-Dsun.net.client.defaultReadTimeout=3600000 -Dsun.net.client.defaultConnectTimeout=3600000"
+            "MAVEN_OPTS=-Dsun.net.client.defaultReadTimeout=3600000 -Dsun.net.client.defaultConnectTimeout=3600000 -Dwagon.http.connectionTimeout=3600000 -Dwagon.http.readTimeout=3600000"
           ]) {
          	    sh "mvn clean test deploy"
       		}     	    
