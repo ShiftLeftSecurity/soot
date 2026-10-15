@@ -18,7 +18,7 @@ node('ubuntu-ci') {
     	}
     	stage('runBuild-Soot') {
       		withEnv([
-            "JAVA_HOME=${ tool 'JDK8u121' }",
+            "JAVA_HOME=${ tool 'jdk8u504-b01' }",
             "ANT_HOME=${ tool 'Ant-1.10.0' }",
             "MAVEN_HOME=${ tool 'Maven-3.3.9' }",
             "PATH+MAVEN=${tool 'Gradle-2.12'}/bin:${env.JAVA_HOME}/bin:${tool 'Ant-1.10.0'}/bin:${tool 'Maven-3.3.9'}/bin",
